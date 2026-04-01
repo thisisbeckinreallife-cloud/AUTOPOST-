@@ -29,7 +29,7 @@ export async function GET(
       JSON.stringify({ businessSlug: params.slug, nonce: uuidv4() })
     ).toString("base64url");
 
-    const oauthUrl = buildOAuthUrl(state);
+    const oauthUrl = await buildOAuthUrl(state);
 
     return NextResponse.json({ data: { oauthUrl } });
   } catch (err) {
@@ -40,7 +40,7 @@ export async function GET(
       return NextResponse.json(
         {
           error:
-            "Meta App not configured. Set META_APP_ID and META_APP_SECRET in environment.",
+            "Meta App not configured. Go to Settings → Meta App to configure credentials.",
         },
         { status: 503 }
       );

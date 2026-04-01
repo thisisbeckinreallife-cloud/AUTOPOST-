@@ -9,12 +9,14 @@ import {
   FileText,
   LogOut,
   Instagram,
+  Settings,
 } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/businesses", label: "Businesses", icon: Building2 },
   { href: "/logs", label: "Logs", icon: FileText },
+  { href: "/settings", label: "Configuración", icon: Settings },
 ];
 
 export function Sidebar() {

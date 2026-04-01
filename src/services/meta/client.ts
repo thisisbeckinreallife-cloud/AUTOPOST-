@@ -89,11 +89,9 @@ export interface LongLivedTokenResult {
 export async function exchangeForLongLivedToken(
   shortLivedToken: string
 ): Promise<LongLivedTokenResult> {
-  const appId = process.env.META_APP_ID;
-  const appSecret = process.env.META_APP_SECRET;
-  if (!appId || !appSecret) {
-    throw new Error("META_APP_ID and META_APP_SECRET must be set");
-  }
+  const { appId, appSecret } = await import("@/lib/config").then((m) =>
+    m.getMetaAppConfig()
+  );
 
   const url = new URL(`${GRAPH_BASE}/oauth/access_token`);
   url.searchParams.set("grant_type", "fb_exchange_token");
@@ -143,9 +141,9 @@ export interface TokenDebugResult {
 export async function debugToken(
   tokenToInspect: string
 ): Promise<TokenDebugResult> {
-  const appId = process.env.META_APP_ID;
-  const appSecret = process.env.META_APP_SECRET;
-  if (!appId || !appSecret) throw new Error("META_APP_ID / META_APP_SECRET not set");
+  const { appId, appSecret } = await import("@/lib/config").then((m) =>
+    m.getMetaAppConfig()
+  );
 
   const appToken = `${appId}|${appSecret}`;
   const url = new URL(`${GRAPH_BASE}/debug_token`);
@@ -411,12 +409,10 @@ export async function postFirstComment(
 // OAUTH URL BUILDER
 // ─────────────────────────────────────────
 
-export function buildOAuthUrl(state: string): string {
-  const appId = process.env.META_APP_ID;
-  const redirectUri = process.env.META_REDIRECT_URI;
-  if (!appId || !redirectUri) {
-    throw new Error("META_APP_ID and META_REDIRECT_URI must be set");
-  }
+export async function buildOAuthUrl(state: string): Promise<string> {
+  const { appId, redirectUri } = await import("@/lib/config").then((m) =>
+    m.getMetaAppConfig()
+  );
 
   const scopes = [
     "instagram_basic",
@@ -443,12 +439,9 @@ export async function exchangeCodeForTokens(code: string): Promise<{
   accessToken: string;
   expiresAt: Date;
 }> {
-  const appId = process.env.META_APP_ID;
-  const appSecret = process.env.META_APP_SECRET;
-  const redirectUri = process.env.META_REDIRECT_URI;
-  if (!appId || !appSecret || !redirectUri) {
-    throw new Error("META_APP_ID, META_APP_SECRET, META_REDIRECT_URI must be set");
-  }
+  const { appId, appSecret, redirectUri } = await import("@/lib/config").then(
+    (m) => m.getMetaAppConfig()
+  );
 
   // Step 1: Short-lived token
   const tokenUrl = new URL(`${GRAPH_BASE}/oauth/access_token`);
