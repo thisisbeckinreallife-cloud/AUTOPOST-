@@ -7,7 +7,7 @@ import { Instagram, ExternalLink, AlertTriangle, Info } from "lucide-react";
 import { useParams } from "next/navigation";
 
 export default function ConnectPage() {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug } = useParams() as { slug: string };
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 

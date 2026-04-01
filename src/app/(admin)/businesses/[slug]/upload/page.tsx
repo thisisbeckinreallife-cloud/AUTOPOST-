@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, FileArchive, Info } from "lucide-react";
 
 export default function UploadPage() {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug } = useParams() as { slug: string };
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);

@@ -36,7 +36,7 @@ interface PostDraftPreview {
 }
 
 export default function BatchDetailPage() {
-  const { slug, batchId } = useParams<{ slug: string; batchId: string }>();
+  const { slug, batchId } = useParams() as { slug: string; batchId: string };
   const router = useRouter();
   const [batch, setBatch] = useState<BatchData | null>(null);
   const [loading, setLoading] = useState(true);
