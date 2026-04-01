@@ -1,0 +1,314 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// ADMIN USER
+// ─────────────────────────────────────────
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  auditLogs AuditLog[]
+
+  @@map("admin_users")
+}
+
+// ─────────────────────────────────────────
+// BUSINESS
+// ─────────────────────────────────────────
+model Business {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  timezone    String  @default("UTC") // e.g. "Europe/Madrid"
+  description String?
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  metaConnection MetaConnection?
+  uploadBatches  UploadBatch[]
+  postDrafts     PostDraft[]
+  auditLogs      AuditLog[]
+
+  @@map("businesses")
+}
+
+// ─────────────────────────────────────────
+// META CONNECTION
+// ─────────────────────────────────────────
+model MetaConnection {
+  id         String @id @default(cuid())
+  businessId String @unique
+
+  // Instagram-specific identifiers
+  igUserId      String  // Instagram user ID (numeric string)
+  igUsername    String
+  fbPageId      String? // Facebook Page ID linked to the IG account
+  fbPageName    String?
+
+  // Tokens — encrypted at rest using AES-256-GCM via lib/crypto.ts
+  // NEVER expose these fields to the frontend
+  accessTokenEnc  String  // Encrypted long-lived user access token
+  accessTokenIv   String  // IV for decryption
+  accessTokenTag  String  // Auth tag for AES-GCM
+
+  pageTokenEnc    String? // Encrypted page access token (for some API calls)
+  pageTokenIv     String?
+  pageTokenTag    String?
+
+  tokenExpiresAt  DateTime?
+  status          MetaConnectionStatus @default(ACTIVE)
+  lastCheckedAt   DateTime?
+  lastError       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("meta_connections")
+}
+
+enum MetaConnectionStatus {
+  PENDING
+  ACTIVE
+  TOKEN_EXPIRED
+  REVOKED
+  ERROR
+}
+
+// ─────────────────────────────────────────
+// UPLOAD BATCH
+// ─────────────────────────────────────────
+model UploadBatch {
+  id         String @id @default(cuid())
+  businessId String
+
+  originalFilename String
+  storagePath      String  // Path in S3/storage
+  fileSize         Int
+  fileHash         String  // SHA-256 of zip to prevent reprocessing
+  status           BatchStatus @default(UPLOADED)
+
+  parsedAt     DateTime?
+  confirmedAt  DateTime?
+  scheduledAt  DateTime?
+
+  parseErrors  Json?    // Array of ParseError
+  parseWarnings Json?   // Array of ParseWarning
+  totalPosts   Int?
+  validPosts   Int?
+  failedPosts  Int?
+
+  uploadedByIp String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business   Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  postDrafts PostDraft[]
+
+  @@map("upload_batches")
+}
+
+enum BatchStatus {
+  UPLOADED
+  PARSING
+  PARSED
+  VALIDATION_FAILED
+  READY
+  PARTIALLY_SCHEDULED
+  SCHEDULED
+  FAILED
+}
+
+// ─────────────────────────────────────────
+// POST DRAFT
+// ─────────────────────────────────────────
+model PostDraft {
+  id         String @id @default(cuid())
+  businessId String
+  batchId    String
+
+  // From meta.json
+  postType    PostType
+  publishAt   DateTime
+  timezone    String
+  firstComment String?
+  locationId  String?
+
+  // Content
+  caption      String
+  captionHash  String  // SHA-256 of caption
+
+  // Deduplication
+  contentHash  String  // SHA-256(caption + sorted asset hashes)
+  idempotencyKey String @unique @default(cuid())
+
+  // State
+  status       PostDraftStatus @default(DRAFT)
+  validationErrors Json?        // Array of ValidationError
+  scheduledJobId   String?      // BullMQ job ID
+
+  // Meta API results
+  metaContainerId   String?
+  metaPublicationId String?
+  metaPermalink     String?
+  lastMetaResponse  Json?
+  lastError         String?
+
+  publishedAt     DateTime?
+  failedAt        DateTime?
+  attemptCount    Int      @default(0)
+
+  // Source info
+  sourceFolderName String  // e.g. "2026-04-15_post-01"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  batch         UploadBatch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  mediaAssets   MediaAsset[]
+  publishJobs   PublishJob[]
+
+  @@unique([businessId, contentHash])
+  @@map("post_drafts")
+}
+
+enum PostDraftStatus {
+  DRAFT
+  VALIDATED
+  READY
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  CANCELLED
+}
+
+enum PostType {
+  IMAGE
+  CAROUSEL
+  REEL
+}
+
+// ─────────────────────────────────────────
+// MEDIA ASSET
+// ─────────────────────────────────────────
+model MediaAsset {
+  id          String @id @default(cuid())
+  postDraftId String
+
+  originalFilename String
+  storagePath      String
+  storageUrl       String  // Full URL (pre-signed or public)
+  mimeType         String
+  fileSize         Int
+  fileHash         String  // SHA-256
+
+  // For video/image metadata
+  width       Int?
+  height      Int?
+  durationSec Float?
+
+  sortOrder   Int    @default(0)
+
+  // Meta upload state
+  metaUploadHandle String?  // For resumable uploads
+  uploadedToMeta   Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  postDraft PostDraft @relation(fields: [postDraftId], references: [id], onDelete: Cascade)
+
+  @@map("media_assets")
+}
+
+// ─────────────────────────────────────────
+// PUBLISH JOB
+// ─────────────────────────────────────────
+model PublishJob {
+  id          String @id @default(cuid())
+  postDraftId String
+  businessId  String
+
+  bullmqJobId    String? @unique
+  status         JobStatus @default(PENDING)
+  scheduledFor   DateTime
+  lockedUntil    DateTime?  // Optimistic lock to prevent double execution
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  startedAt  DateTime?
+  finishedAt DateTime?
+
+  postDraft  PostDraft       @relation(fields: [postDraftId], references: [id], onDelete: Cascade)
+  attempts   PublishAttempt[]
+
+  @@map("publish_jobs")
+}
+
+enum JobStatus {
+  PENDING
+  ENQUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// ─────────────────────────────────────────
+// PUBLISH ATTEMPT
+// ─────────────────────────────────────────
+model PublishAttempt {
+  id           String @id @default(cuid())
+  publishJobId String
+
+  attemptNumber Int
+  startedAt     DateTime @default(now())
+  finishedAt    DateTime?
+
+  success       Boolean?
+  errorCode     String?
+  errorMessage  String?
+  metaResponse  Json?    // Summarized Meta API response
+
+  @@map("publish_attempts")
+
+  publishJob PublishJob @relation(fields: [publishJobId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────
+// AUDIT LOG
+// ─────────────────────────────────────────
+model AuditLog {
+  id          String @id @default(cuid())
+  businessId  String?
+  adminUserId String?
+
+  action      String  // e.g. "BATCH_UPLOADED", "POST_PUBLISHED", "TOKEN_REFRESHED"
+  entityType  String? // e.g. "PostDraft", "UploadBatch"
+  entityId    String?
+  detail      Json?
+  ipAddress   String?
+
+  createdAt   DateTime @default(now())
+
+  business   Business?   @relation(fields: [businessId], references: [id], onDelete: SetNull)
+  adminUser  AdminUser?  @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
