@@ -9,7 +9,7 @@ import { Instagram } from "lucide-react";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const from = searchParams.get("from") ?? "/dashboard";
+  const from = searchParams?.get("from") ?? "/dashboard";
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
