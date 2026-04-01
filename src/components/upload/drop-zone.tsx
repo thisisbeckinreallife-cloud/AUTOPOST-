@@ -1,7 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Upload, FileArchive, FolderOpen, Loader2, FolderInput } from "lucide-react";
+import { useRef, useState, useCallback } from "react";
+import {
+  Upload,
+  FileArchive,
+  FolderOpen,
+  Loader2,
+  FolderInput,
+  AlertCircle,
+} from "lucide-react";
 import JSZip from "jszip";
 
 interface DropZoneProps {
@@ -23,119 +30,81 @@ function shouldSkip(path: string): boolean {
   );
 }
 
-/**
- * Extract FileSystemEntry objects SYNCHRONOUSLY from the drop event.
- * This MUST happen in the same tick as the drop event — the browser
- * clears dataTransfer.items after the handler returns.
- */
-function extractEntries(items: DataTransferItemList): FileSystemEntry[] {
-  const entries: FileSystemEntry[] = [];
-  for (let i = 0; i < items.length; i++) {
-    const entry = items[i].webkitGetAsEntry?.();
-    if (entry) entries.push(entry);
-  }
-  return entries;
+// ─── File System Entries API helpers ────────────────────────────────────────
+
+function readDirectoryEntries(
+  reader: FileSystemDirectoryReader
+): Promise<FileSystemEntry[]> {
+  return new Promise((resolve, reject) => {
+    reader.readEntries(
+      (entries) => resolve(entries),
+      (err) => reject(err)
+    );
+  });
+}
+
+function fileEntryToFile(entry: FileSystemFileEntry): Promise<File> {
+  return new Promise((resolve, reject) => {
+    entry.file(
+      (f) => resolve(f),
+      (err) => reject(err)
+    );
+  });
 }
 
 /**
- * Read all files from already-extracted FileSystemEntry objects.
- * This can be called asynchronously since entries persist.
+ * Recursively read all files from a FileSystemDirectoryEntry.
+ * Returns files with a `_relativePath` property attached.
  */
-async function readEntriesAsFiles(
-  entries: FileSystemEntry[]
-): Promise<{ files: File[]; folderName: string } | null> {
-  // Single directory → treat as folder drop
-  if (entries.length === 1 && entries[0].isDirectory) {
-    const files = await readAllFiles(entries[0] as FileSystemDirectoryEntry, "");
-    return files.length > 0
-      ? { files, folderName: entries[0].name }
-      : null;
-  }
-
-  // Multiple entries with at least one directory
-  if (entries.some((e) => e.isDirectory)) {
-    const allFiles: File[] = [];
-    for (const entry of entries) {
-      if (entry.isDirectory) {
-        const files = await readAllFiles(
-          entry as FileSystemDirectoryEntry,
-          entry.name
-        );
-        allFiles.push(...files);
-      } else {
-        const file = await readFileEntry(entry as FileSystemFileEntry);
-        if (file) allFiles.push(file);
-      }
-    }
-    return allFiles.length > 0
-      ? { files: allFiles, folderName: entries[0].name }
-      : null;
-  }
-
-  return null; // Not a folder drop
-}
-
-async function readAllFiles(
+async function readDirectoryRecursive(
   dirEntry: FileSystemDirectoryEntry,
   basePath: string
 ): Promise<File[]> {
   const files: File[] = [];
   const reader = dirEntry.createReader();
 
-  // readEntries can return partial results, so we loop
-  let batch: FileSystemEntry[];
-  do {
-    batch = await new Promise<FileSystemEntry[]>((resolve, reject) => {
-      reader.readEntries(resolve, reject);
-    });
+  // readEntries may return partial results — call until empty
+  let hasMore = true;
+  while (hasMore) {
+    const batch = await readDirectoryEntries(reader);
+    if (batch.length === 0) {
+      hasMore = false;
+      break;
+    }
     for (const entry of batch) {
-      const relativePath = basePath ? `${basePath}/${entry.name}` : entry.name;
-      if (shouldSkip(relativePath)) continue;
+      const entryPath = basePath ? `${basePath}/${entry.name}` : entry.name;
+      if (shouldSkip(entryPath)) continue;
 
       if (entry.isFile) {
-        const file = await readFileEntry(entry as FileSystemFileEntry);
-        if (file) {
-          // Attach relative path for ZIP structure
-          Object.defineProperty(file, "relativePath", {
-            value: relativePath,
-            writable: false,
-          });
+        try {
+          const file = await fileEntryToFile(entry as FileSystemFileEntry);
+          // Attach relative path as a custom property
+          (file as File & { _relativePath: string })._relativePath = entryPath;
           files.push(file);
+        } catch {
+          // Skip files that can't be read
         }
       } else if (entry.isDirectory) {
-        const subFiles = await readAllFiles(
+        const subFiles = await readDirectoryRecursive(
           entry as FileSystemDirectoryEntry,
-          relativePath
+          entryPath
         );
         files.push(...subFiles);
       }
     }
-  } while (batch.length > 0);
+  }
 
   return files;
 }
 
-function readFileEntry(entry: FileSystemFileEntry): Promise<File | null> {
-  return new Promise((resolve) => {
-    entry.file(
-      (f) => resolve(f),
-      () => resolve(null)
-    );
-  });
-}
+// ─── ZIP compression ────────────────────────────────────────────────────────
 
-/**
- * Compress a list of files into a ZIP blob, preserving relative paths.
- */
-async function compressToZip(
-  files: File[],
-  folderName: string
-): Promise<File> {
+async function compressToZip(files: File[], folderName: string): Promise<File> {
   const zip = new JSZip();
 
   for (const file of files) {
     const relativePath =
-      (file as File & { relativePath?: string }).relativePath ?? file.name;
+      (file as File & { _relativePath?: string })._relativePath ?? file.name;
     if (shouldSkip(relativePath)) continue;
 
     const data = await file.arrayBuffer();
@@ -156,6 +125,8 @@ async function compressToZip(
   });
 }
 
+// ─── Component ──────────────────────────────────────────────────────────────
+
 export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
   const zipFileRef = useRef<HTMLInputElement>(null);
   const folderRef = useRef<HTMLInputElement>(null);
@@ -163,65 +134,173 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [compressing, setCompressing] = useState(false);
   const [compressInfo, setCompressInfo] = useState("");
+  const [error, setError] = useState("");
 
-  async function processFolder(files: File[], folderName: string) {
-    setCompressing(true);
-    setCompressInfo(
-      `Comprimiendo ${files.length} archivo${files.length !== 1 ? "s" : ""}...`
-    );
-    try {
-      const zipFile = await compressToZip(files, folderName);
-      setSelectedFile(zipFile);
-      setCompressing(false);
-      setCompressInfo("");
-      onFileSelected(zipFile);
-    } catch {
-      setCompressing(false);
-      setCompressInfo("Error al comprimir la carpeta. Intentalo de nuevo.");
-    }
-  }
-
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setDragging(false);
-    if (disabled || compressing) return;
-
-    // ── SYNC: extract entries & files before browser clears dataTransfer ──
-    const entries =
-      e.dataTransfer.items && e.dataTransfer.items.length > 0
-        ? extractEntries(e.dataTransfer.items)
-        : [];
-    const droppedFile = e.dataTransfer.files[0] ?? null;
-    const hasDirectoryEntry = entries.some((ent) => ent.isDirectory);
-
-    // ── ASYNC: now we can safely work with the captured entries ──
-    if (hasDirectoryEntry && entries.length > 0) {
-      // Folder was dropped — read its contents and compress
-      (async () => {
-        const result = await readEntriesAsFiles(entries);
-        if (result && result.files.length > 0) {
-          await processFolder(result.files, result.folderName);
-        }
-      })();
-      return;
-    }
-
-    // Fallback: check for a ZIP file
-    if (droppedFile) {
-      if (
-        droppedFile.name.endsWith(".zip") ||
-        droppedFile.type === "application/zip" ||
-        droppedFile.type === "application/x-zip-compressed"
-      ) {
-        setSelectedFile(droppedFile);
-        onFileSelected(droppedFile);
+  const processFolder = useCallback(
+    async (files: File[], folderName: string) => {
+      if (files.length === 0) {
+        setError("La carpeta esta vacia o no tiene archivos compatibles.");
+        return;
       }
-    }
-  }
+      setCompressing(true);
+      setError("");
+      setCompressInfo(
+        `Comprimiendo ${files.length} archivo${files.length !== 1 ? "s" : ""}...`
+      );
+      try {
+        const zipFile = await compressToZip(files, folderName);
+        setSelectedFile(zipFile);
+        setCompressing(false);
+        setCompressInfo("");
+        onFileSelected(zipFile);
+      } catch (err) {
+        console.error("Error compressing folder:", err);
+        setCompressing(false);
+        setCompressInfo("");
+        setError("Error al comprimir la carpeta. Intentalo de nuevo.");
+      }
+    },
+    [onFileSelected]
+  );
+
+  // ─── Drop handler ──────────────────────────────────────────────────────
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragging(false);
+      if (disabled || compressing) return;
+      setError("");
+
+      // ── STEP 1: Synchronously extract entries before browser clears them ──
+      let directoryEntry: FileSystemDirectoryEntry | null = null;
+      let zipFile: File | null = null;
+
+      if (e.dataTransfer.items) {
+        for (let i = 0; i < e.dataTransfer.items.length; i++) {
+          const item = e.dataTransfer.items[i];
+          if (item.kind !== "file") continue;
+
+          // Try webkitGetAsEntry (synchronous call, must happen NOW)
+          const entry = item.webkitGetAsEntry?.();
+
+          if (entry && entry.isDirectory) {
+            directoryEntry = entry as FileSystemDirectoryEntry;
+            break;
+          }
+
+          // Not a directory — check if it's a ZIP
+          if (!entry || entry.isFile) {
+            const file = item.getAsFile();
+            if (
+              file &&
+              (file.name.toLowerCase().endsWith(".zip") ||
+                file.type === "application/zip" ||
+                file.type === "application/x-zip-compressed")
+            ) {
+              zipFile = file;
+            }
+          }
+        }
+      }
+
+      // Also check dataTransfer.files as fallback for ZIP
+      if (!directoryEntry && !zipFile && e.dataTransfer.files.length > 0) {
+        const file = e.dataTransfer.files[0];
+        if (
+          file.name.toLowerCase().endsWith(".zip") ||
+          file.type === "application/zip" ||
+          file.type === "application/x-zip-compressed"
+        ) {
+          zipFile = file;
+        }
+      }
+
+      // ── STEP 2: Process what we found ──
+
+      if (directoryEntry) {
+        // We found a directory — read it async, compress, and proceed
+        const folderName = directoryEntry.name;
+        const dirEntryRef = directoryEntry; // capture for async
+
+        setCompressing(true);
+        setCompressInfo("Leyendo carpeta...");
+
+        readDirectoryRecursive(dirEntryRef, "")
+          .then((files) => {
+            if (files.length === 0) {
+              setCompressing(false);
+              setCompressInfo("");
+              setError(
+                "La carpeta no tiene archivos compatibles (fotos o videos)."
+              );
+              return;
+            }
+            return processFolder(files, folderName);
+          })
+          .catch((err) => {
+            console.error("Error reading dropped folder:", err);
+            setCompressing(false);
+            setCompressInfo("");
+            setError(
+              'No pudimos leer la carpeta. Usa el boton "Seleccionar carpeta" de abajo.'
+            );
+          });
+        return;
+      }
+
+      if (zipFile) {
+        setSelectedFile(zipFile);
+        onFileSelected(zipFile);
+        return;
+      }
+
+      // Nothing valid was dropped
+      // Check if user might have dropped a folder but webkitGetAsEntry
+      // wasn't available (e.g., older Safari)
+      if (e.dataTransfer.files.length > 0) {
+        const f = e.dataTransfer.files[0];
+        if (f.size === 0 && f.type === "") {
+          // Likely a folder that we couldn't read
+          setError(
+            'Tu navegador no soporta arrastrar carpetas. Usa el boton "Seleccionar carpeta" de abajo.'
+          );
+          return;
+        }
+      }
+
+      setError("Solo puedes subir archivos ZIP o carpetas con fotos/videos.");
+    },
+    [disabled, compressing, onFileSelected, processFolder]
+  );
+
+  // ─── Drag handlers ─────────────────────────────────────────────────────
+
+  const handleDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!disabled && !compressing) setDragging(true);
+    },
+    [disabled, compressing]
+  );
+
+  const handleDragLeave = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragging(false);
+    },
+    []
+  );
+
+  // ─── File input handlers ──────────────────────────────────────────────
 
   function handleZipFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (f) {
+      setError("");
       setSelectedFile(f);
       onFileSelected(f);
     }
@@ -230,40 +309,34 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
   async function handleFolderChange(e: React.ChangeEvent<HTMLInputElement>) {
     const fileList = e.target.files;
     if (!fileList || fileList.length === 0) return;
+    setError("");
 
     const files: File[] = [];
     for (let i = 0; i < fileList.length; i++) {
       const file = fileList[i];
-      // webkitRelativePath gives us the relative path within the selected folder
-      const relativePath =
-        (file as File & { webkitRelativePath?: string }).webkitRelativePath ??
-        file.name;
+      const relativePath = file.webkitRelativePath || file.name;
       if (shouldSkip(relativePath)) continue;
 
-      // Attach relative path (remove the root folder name prefix for cleaner ZIP)
+      // Remove root folder prefix for cleaner ZIP structure
       const pathParts = relativePath.split("/");
       const innerPath =
         pathParts.length > 1 ? pathParts.slice(1).join("/") : file.name;
-      Object.defineProperty(file, "relativePath", {
-        value: innerPath,
-        writable: false,
-        configurable: true,
-      });
+      (file as File & { _relativePath: string })._relativePath = innerPath;
       files.push(file);
     }
 
-    if (files.length === 0) return;
+    if (files.length === 0) {
+      setError("La carpeta esta vacia o no tiene archivos compatibles.");
+      return;
+    }
 
-    // Extract folder name from webkitRelativePath
-    const firstPath =
-      (fileList[0] as File & { webkitRelativePath?: string })
-        .webkitRelativePath ?? "";
-    const folderName = firstPath.split("/")[0] || "mis-posts";
+    const folderName =
+      (fileList[0].webkitRelativePath || "").split("/")[0] || "mis-posts";
 
     await processFolder(files, folderName);
   }
 
-  // ─── Compressing state ────────────────────────────────────────────────
+  // ─── Render: compressing ──────────────────────────────────────────────
 
   if (compressing) {
     return (
@@ -277,7 +350,7 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
     );
   }
 
-  // ─── File selected state ──────────────────────────────────────────────
+  // ─── Render: file selected ────────────────────────────────────────────
 
   if (selectedFile) {
     return (
@@ -309,11 +382,19 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
     );
   }
 
-  // ─── Default empty state ──────────────────────────────────────────────
+  // ─── Render: default ──────────────────────────────────────────────────
 
   return (
     <div className="space-y-4">
-      {/* Main drop zone */}
+      {/* Error message */}
+      {error && (
+        <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
+      )}
+
+      {/* Main drop zone — accepts ZIP files AND folders */}
       <div
         className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all cursor-pointer ${
           dragging
@@ -321,14 +402,11 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
             : "border-slate-200 hover:border-pink-300 bg-white hover:bg-slate-50"
         } ${disabled ? "opacity-50 pointer-events-none" : ""}`}
         onDrop={handleDrop}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
         onClick={() => zipFileRef.current?.click()}
       >
-        {/* Hidden inputs */}
+        {/* Hidden file inputs */}
         <input
           ref={zipFileRef}
           type="file"
@@ -343,7 +421,7 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
           className="hidden"
           onChange={handleFolderChange}
           disabled={disabled}
-          /* @ts-expect-error webkitdirectory is not in React types */
+          // @ts-expect-error webkitdirectory is a non-standard attribute
           webkitdirectory=""
           directory=""
           multiple
@@ -381,7 +459,7 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
         </div>
       </div>
 
-      {/* Folder selection button */}
+      {/* Folder selection button — always works reliably */}
       <button
         type="button"
         onClick={(e) => {
@@ -403,10 +481,6 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
           </p>
         </div>
       </button>
-
-      {compressInfo && (
-        <p className="text-xs text-red-500 text-center">{compressInfo}</p>
-      )}
     </div>
   );
 }
