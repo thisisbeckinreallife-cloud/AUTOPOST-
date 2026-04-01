@@ -83,46 +83,31 @@ export interface LongLivedTokenResult {
 }
 
 /**
- * Exchange short-lived token for long-lived token.
- * Tries Instagram token exchange first, falls back to Facebook token exchange.
+ * Exchange short-lived token for long-lived token via Instagram Graph API.
  */
 export async function exchangeForLongLivedToken(
   shortLivedToken: string
 ): Promise<LongLivedTokenResult> {
-  const { appId, appSecret } = await import("@/lib/config").then((m) =>
+  const { appSecret } = await import("@/lib/config").then((m) =>
     m.getMetaAppConfig()
   );
 
-  // Try Instagram long-lived token exchange first
-  try {
-    const igUrl = new URL("https://graph.instagram.com/access_token");
-    igUrl.searchParams.set("grant_type", "ig_exchange_token");
-    igUrl.searchParams.set("client_secret", appSecret);
-    igUrl.searchParams.set("access_token", shortLivedToken);
+  const igUrl = new URL("https://graph.instagram.com/access_token");
+  igUrl.searchParams.set("grant_type", "ig_exchange_token");
+  igUrl.searchParams.set("client_secret", appSecret);
+  igUrl.searchParams.set("access_token", shortLivedToken);
 
-    const igRes = await fetch(igUrl.toString());
-    const igJson = await igRes.json();
-
-    if (igRes.ok && !igJson.error && igJson.access_token) {
-      return igJson as LongLivedTokenResult;
-    }
-  } catch {
-    // Not an Instagram token, try Facebook exchange below
-  }
-
-  // Facebook long-lived token exchange
-  const url = new URL(`${GRAPH_BASE}/oauth/access_token`);
-  url.searchParams.set("grant_type", "fb_exchange_token");
-  url.searchParams.set("client_id", appId);
-  url.searchParams.set("client_secret", appSecret);
-  url.searchParams.set("fb_exchange_token", shortLivedToken);
-
-  const res = await fetch(url.toString());
+  const res = await fetch(igUrl.toString());
   const json = await res.json();
 
-  if (!res.ok || json.error) {
-    const err = json.error ?? { code: res.status, message: "Token exchange failed" };
-    throw new MetaApiError(err.code, err.message, err.type);
+  console.log("[Token Exchange] Long-lived response status:", res.status);
+  if (json.error) {
+    console.error("[Token Exchange] Long-lived error:", JSON.stringify(json.error));
+  }
+
+  if (!res.ok || json.error || !json.access_token) {
+    const err = json.error ?? { code: res.status, message: "Long-lived token exchange failed" };
+    throw new MetaApiError(err.code ?? res.status, err.message ?? "Long-lived token exchange failed", err.type);
   }
 
   return json as LongLivedTokenResult;
@@ -196,21 +181,18 @@ export async function getLinkedIgAccounts(
   userToken: string
 ): Promise<IgAccountInfo[]> {
   // Try Instagram Business Login flow first: token is for an IG user directly
+  // Instagram Login tokens use graph.instagram.com, not graph.facebook.com
   try {
-    const me = await graphRequest<{
-      id: string;
-      username?: string;
-      name?: string;
-      user_id?: string;
-    }>(
-      "GET",
-      "/me",
-      { fields: "id,username,name" },
-      userToken
-    );
+    const igMeUrl = new URL("https://graph.instagram.com/v21.0/me");
+    igMeUrl.searchParams.set("fields", "user_id,username,name");
+    igMeUrl.searchParams.set("access_token", userToken);
 
-    // If we get a username, this is an Instagram Login token
-    if (me.username) {
+    const igRes = await fetch(igMeUrl.toString());
+    const me = await igRes.json();
+
+    console.log("[IG Discovery] /me response:", JSON.stringify(me));
+
+    if (igRes.ok && me.username) {
       return [{
         igUserId: me.user_id ?? me.id,
         igUsername: me.username,
@@ -219,7 +201,8 @@ export async function getLinkedIgAccounts(
         pageToken: userToken,
       }];
     }
-  } catch {
+  } catch (err) {
+    console.error("[IG Discovery] Instagram /me failed:", err);
     // Not an Instagram Login token, try Facebook Login flow below
   }
 
@@ -507,6 +490,11 @@ export async function exchangeCodeForTokens(code: string): Promise<{
     body: body.toString(),
   });
   const shortJson = await shortRes.json();
+
+  console.log("[Token Exchange] Short-lived response status:", shortRes.status);
+  if (shortJson.error_type || shortJson.error) {
+    console.error("[Token Exchange] Short-lived error:", JSON.stringify(shortJson));
+  }
 
   if (!shortRes.ok || shortJson.error_type || shortJson.error) {
     throw new MetaApiError(
