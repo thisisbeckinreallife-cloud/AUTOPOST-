@@ -1,13 +1,20 @@
 /**
  * ZIP import parser.
- * Reads a ZIP buffer, extracts post folders, validates structure,
- * and returns parsed posts with their media, captions, and meta.json.
+ * Reads a ZIP buffer, extracts posts from various folder structures,
+ * validates media, and returns parsed posts with their media, captions, and metadata.
+ *
+ * Supported layouts:
+ *   1. Structured folders (YYYY-MM-DD_name/ with optional meta.json & caption.txt)
+ *   2. Named folders containing media (one folder = one post)
+ *   3. Flat images at root (each image = one post)
+ *   4. Mixed (some folders + some loose files)
  */
 import JSZip from "jszip";
 import { hashSHA256 } from "@/lib/crypto";
 import type { MetaJson, ParsedPost, ParsedMediaFile, ParseResult, ParseError } from "@/types";
 
-// Allowed media types
+// ─── Media helpers ───────────────────────────────────────────────────────────
+
 const ALLOWED_IMAGE_MIME: Record<string, string> = {
   jpg: "image/jpeg",
   jpeg: "image/jpeg",
@@ -21,6 +28,10 @@ const ALLOWED_VIDEO_MIME: Record<string, string> = {
 };
 
 const ALL_ALLOWED_MIME = { ...ALLOWED_IMAGE_MIME, ...ALLOWED_VIDEO_MIME };
+
+/** System / junk files to ignore everywhere. */
+const IGNORED_FILES = new Set([".ds_store", "thumbs.db"]);
+const IGNORED_PREFIXES = ["__macosx/"];
 
 function getExtension(filename: string): string {
   return filename.split(".").pop()?.toLowerCase() ?? "";
@@ -45,19 +56,69 @@ function isMediaFile(filename: string): boolean {
   return isImageFile(filename) || isVideoFile(filename);
 }
 
+function isIgnored(relativePath: string): boolean {
+  const lower = relativePath.toLowerCase();
+  if (IGNORED_PREFIXES.some((p) => lower.startsWith(p))) return true;
+  const basename = lower.split("/").pop() ?? "";
+  return IGNORED_FILES.has(basename) || basename.startsWith(".");
+}
+
+// ─── Date helpers ────────────────────────────────────────────────────────────
+
+const DATE_PREFIX_RE = /^(\d{4}-\d{2}-\d{2})_/;
+
+/** Try to extract a YYYY-MM-DD date from the start of a folder name. */
+function extractDateFromName(name: string): Date | null {
+  const m = DATE_PREFIX_RE.exec(name);
+  if (!m) return null;
+  const d = new Date(`${m[1]}T10:00:00`);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * Auto-detect the post type from the list of media files.
+ *   - 1 image  → "image"
+ *   - 1 video  → "reel"
+ *   - 2-10 images (or mix) → "carousel"
+ */
+function detectPostType(
+  mediaFiles: ParsedMediaFile[]
+): "image" | "carousel" | "reel" {
+  if (mediaFiles.length === 1) {
+    return isVideoFile(mediaFiles[0].filename) ? "reel" : "image";
+  }
+  return "carousel";
+}
+
 /**
  * Sanitize a folder name to prevent path traversal.
  * Returns null if the name is unsafe.
  */
 function sanitizeFolderName(name: string): string | null {
-  const clean = name.replace(/\.\./g, "").replace(/[^a-zA-Z0-9_\-]/g, "");
-  if (!clean || clean !== name.replace(/[^a-zA-Z0-9_\-]/g, "")) {
-    // Allow the original if it only has safe chars
-    const safeOriginal = /^[a-zA-Z0-9_\-]+$/.test(name);
-    return safeOriginal ? name : null;
-  }
-  return name;
+  if (/\.\./.test(name)) return null;
+  const safeOriginal = /^[a-zA-Z0-9_\-]+$/.test(name);
+  return safeOriginal ? name : null;
 }
+
+// ─── Core types ──────────────────────────────────────────────────────────────
+
+interface FolderParseResult {
+  post?: ParsedPost;
+  error?: string;
+  warnings?: string[];
+}
+
+/** Intermediate bucket before we build ParsedPost objects. */
+interface PostBucket {
+  /** Display name / sort key for this post. */
+  folderName: string;
+  /** Files keyed by lower-cased basename → JSZip entry. */
+  files: Map<string, JSZip.JSZipObject>;
+  /** Date extracted from the folder name, if any. */
+  extractedDate: Date | null;
+}
+
+// ─── Public API ──────────────────────────────────────────────────────────────
 
 export async function parseZip(zipBuffer: Buffer): Promise<ParseResult> {
   const errors: ParseError[] = [];
@@ -67,138 +128,177 @@ export async function parseZip(zipBuffer: Buffer): Promise<ParseResult> {
   let zip: JSZip;
   try {
     zip = await JSZip.loadAsync(zipBuffer);
-  } catch (err) {
+  } catch {
     return {
       posts: [],
-      errors: [{ folder: "__root__", message: "Invalid or corrupt ZIP file", severity: "error" }],
+      errors: [
+        {
+          folder: "__root__",
+          message: "Invalid or corrupt ZIP file",
+          severity: "error",
+        },
+      ],
       warnings: [],
     };
   }
 
-  // Find all top-level folders that look like YYYY-MM or YYYY-MM/YYYY-MM-DD_*
-  // Structure: optional YYYY-MM wrapper → YYYY-MM-DD_post-XX folders
-  const postFolders = discoverPostFolders(zip);
+  // ── 1. Discover post buckets ────────────────────────────────────────────
 
-  if (postFolders.length === 0) {
+  const buckets = discoverBuckets(zip);
+
+  if (buckets.length === 0) {
     errors.push({
       folder: "__root__",
-      message: "No post folders found. Expected folders named YYYY-MM-DD_<name>",
+      message: "No media files found in the ZIP",
       severity: "error",
     });
     return { posts, errors, warnings };
   }
 
-  for (const folderPath of postFolders) {
-    const folderName = folderPath.split("/").filter(Boolean).pop() ?? folderPath;
+  // ── 2. Sort buckets: date-prefixed first (by date), then alphabetical ──
 
-    // Validate folder name safety
-    if (!sanitizeFolderName(folderName)) {
+  buckets.sort((a, b) => {
+    // Both have dates → compare dates
+    if (a.extractedDate && b.extractedDate) {
+      return a.extractedDate.getTime() - b.extractedDate.getTime();
+    }
+    // Only one has a date → it goes first
+    if (a.extractedDate) return -1;
+    if (b.extractedDate) return 1;
+    // Neither has a date → alphabetical
+    return a.folderName.localeCompare(b.folderName);
+  });
+
+  // ── 3. Parse each bucket into a ParsedPost ─────────────────────────────
+
+  // We'll auto-schedule posts that lack a publish_at, starting tomorrow at 10 AM
+  let nextAutoDate = new Date();
+  nextAutoDate.setDate(nextAutoDate.getDate() + 1);
+  nextAutoDate.setHours(10, 0, 0, 0);
+
+  for (const bucket of buckets) {
+    const result = await parseBucket(bucket, nextAutoDate);
+
+    if (result.error) {
       errors.push({
-        folder: folderName,
-        message: `Unsafe folder name: "${folderName}"`,
+        folder: bucket.folderName,
+        message: result.error,
         severity: "error",
       });
       continue;
     }
 
-    const result = await parsePostFolder(zip, folderPath, folderName);
-    if (result.error) {
-      errors.push({ folder: folderName, message: result.error, severity: "error" });
-      continue;
-    }
     if (result.warnings) {
       for (const w of result.warnings) {
-        warnings.push({ folder: folderName, message: w, severity: "warning" });
+        warnings.push({
+          folder: bucket.folderName,
+          message: w,
+          severity: "warning",
+        });
       }
     }
+
     if (result.post) {
       posts.push(result.post);
+      // Advance auto-schedule clock by one day for the next post that needs it
+      nextAutoDate = new Date(nextAutoDate);
+      nextAutoDate.setDate(nextAutoDate.getDate() + 1);
     }
   }
 
   return { posts, errors, warnings };
 }
 
-function discoverPostFolders(zip: JSZip): string[] {
-  const folders = new Set<string>();
+// ─── Bucket discovery ────────────────────────────────────────────────────────
+
+/**
+ * Walk every entry in the ZIP and group them into PostBuckets.
+ *
+ * Rules:
+ *  - Files inside a top-level folder are grouped by that folder.
+ *  - Files at the root (no folder) become individual single-file buckets.
+ *  - We skip nested sub-sub-folders (only one level of grouping).
+ *  - Junk / system files are silently ignored.
+ */
+function discoverBuckets(zip: JSZip): PostBucket[] {
+  const folderBuckets = new Map<string, PostBucket>();
+  const rootFiles: Array<{ basename: string; entry: JSZip.JSZipObject }> = [];
 
   zip.forEach((relativePath, file) => {
     if (file.dir) return;
+    if (isIgnored(relativePath)) return;
 
-    // Split path and find post folder (YYYY-MM-DD_*)
     const parts = relativePath.split("/").filter(Boolean);
 
-    for (let i = 0; i < parts.length - 1; i++) {
-      const part = parts[i];
-      if (/^\d{4}-\d{2}-\d{2}_/.test(part)) {
-        // Build full path to this folder
-        const folderPath = parts.slice(0, i + 1).join("/") + "/";
-        folders.add(folderPath);
-        break;
+    if (parts.length === 1) {
+      // Root-level file
+      rootFiles.push({ basename: parts[0], entry: file });
+    } else if (parts.length >= 2) {
+      // File inside a folder – group by the first path component
+      const topFolder = parts[0];
+      const basename = parts[parts.length - 1];
+
+      // Skip if basename is junk
+      if (isIgnored(basename)) return;
+
+      if (!folderBuckets.has(topFolder)) {
+        folderBuckets.set(topFolder, {
+          folderName: topFolder,
+          files: new Map(),
+          extractedDate: extractDateFromName(topFolder),
+        });
       }
+      const bucket = folderBuckets.get(topFolder)!;
+      bucket.files.set(basename.toLowerCase(), file);
     }
   });
 
-  return Array.from(folders).sort();
+  const buckets: PostBucket[] = [];
+
+  // Folder-based buckets (only keep those that actually contain media)
+  for (const bucket of folderBuckets.values()) {
+    const hasMedia = Array.from(bucket.files.keys()).some((name) =>
+      isMediaFile(name)
+    );
+    if (hasMedia) {
+      buckets.push(bucket);
+    }
+  }
+
+  // Root-level loose media files → each becomes its own bucket
+  for (const { basename, entry } of rootFiles) {
+    if (!isMediaFile(basename)) continue;
+    const bucket: PostBucket = {
+      folderName: basename,
+      files: new Map([[basename.toLowerCase(), entry]]),
+      extractedDate: null,
+    };
+    buckets.push(bucket);
+  }
+
+  return buckets;
 }
 
-interface FolderParseResult {
-  post?: ParsedPost;
-  error?: string;
-  warnings?: string[];
-}
+// ─── Bucket → ParsedPost ────────────────────────────────────────────────────
 
-async function parsePostFolder(
-  zip: JSZip,
-  folderPath: string,
-  folderName: string
+async function parseBucket(
+  bucket: PostBucket,
+  fallbackDate: Date
 ): Promise<FolderParseResult> {
   const warnings: string[] = [];
+  const { folderName, files } = bucket;
 
-  // Get all files in this folder (non-recursive, direct children only)
-  const filesInFolder: Record<string, JSZip.JSZipObject> = {};
-  zip.forEach((relativePath, file) => {
-    if (file.dir) return;
-    if (relativePath.startsWith(folderPath)) {
-      const relative = relativePath.slice(folderPath.length);
-      // Only direct children (no sub-folders)
-      if (!relative.includes("/")) {
-        filesInFolder[relative.toLowerCase()] = file;
-      }
+  // Safety-check folder name (skip for root-level single files)
+  if (files.size > 1 || !isMediaFile(folderName)) {
+    const safeName = sanitizeFolderName(folderName);
+    if (!safeName) {
+      return { error: `Unsafe folder name: "${folderName}"` };
     }
-  });
-
-  // Validate required files
-  if (!filesInFolder["caption.txt"]) {
-    return { error: "Missing caption.txt" };
-  }
-  if (!filesInFolder["meta.json"]) {
-    return { error: "Missing meta.json" };
   }
 
-  // Parse caption
-  const captionRaw = await filesInFolder["caption.txt"].async("string");
-  const caption = captionRaw.trim();
-  if (!caption) {
-    return { error: "caption.txt is empty" };
-  }
+  // ── Collect media files ──────────────────────────────────────────────────
 
-  // Parse meta.json
-  let metaJson: MetaJson;
-  try {
-    const metaRaw = await filesInFolder["meta.json"].async("string");
-    metaJson = JSON.parse(metaRaw) as MetaJson;
-  } catch {
-    return { error: "meta.json is invalid JSON" };
-  }
-
-  // Validate meta.json fields
-  const metaError = validateMetaJson(metaJson);
-  if (metaError) return { error: metaError };
-
-  // Collect media files
-  const mediaFiles: ParsedMediaFile[] = [];
-  const mediaEntries = Object.entries(filesInFolder)
+  const mediaEntries = Array.from(files.entries())
     .filter(([name]) => isMediaFile(name))
     .sort(([a], [b]) => a.localeCompare(b));
 
@@ -206,6 +306,7 @@ async function parsePostFolder(
     return { error: "No media files found (expected .jpg, .png, .mp4, .mov, etc.)" };
   }
 
+  const mediaFiles: ParsedMediaFile[] = [];
   for (const [filename, zipEntry] of mediaEntries) {
     const mimeType = getMimeType(filename);
     if (!mimeType) {
@@ -216,50 +317,75 @@ async function parsePostFolder(
     const buffer = Buffer.from(await zipEntry.async("arraybuffer"));
     const fileHash = hashSHA256(buffer);
 
-    mediaFiles.push({
-      filename,
-      buffer,
-      mimeType,
-      fileHash,
-    });
+    mediaFiles.push({ filename, buffer, mimeType, fileHash });
   }
 
   if (mediaFiles.length === 0) {
     return { error: "No valid media files found after filtering" };
   }
 
-  // Type-specific validation
-  switch (metaJson.type) {
-    case "image":
-      if (mediaFiles.length !== 1) {
-        return {
-          error: `Image post must have exactly 1 image, found ${mediaFiles.length}`,
-        };
-      }
-      if (!isImageFile(mediaFiles[0].filename)) {
-        return { error: "Image post media must be an image file (.jpg, .png, .webp)" };
-      }
-      break;
+  // ── Parse optional caption.txt ───────────────────────────────────────────
 
-    case "carousel":
-      if (mediaFiles.length < 2) {
-        return { error: "Carousel post must have at least 2 media files" };
-      }
-      if (mediaFiles.length > 10) {
-        warnings.push("Carousel has more than 10 items; Meta API limit is 10");
-      }
-      break;
+  let caption = "";
+  const captionEntry = files.get("caption.txt");
+  if (captionEntry) {
+    caption = (await captionEntry.async("string")).trim();
+  } else {
+    warnings.push("No caption.txt found – caption left empty");
+  }
 
-    case "reel":
-      if (mediaFiles.length !== 1) {
-        return {
-          error: `Reel post must have exactly 1 video, found ${mediaFiles.length}`,
-        };
-      }
-      if (!isVideoFile(mediaFiles[0].filename)) {
-        return { error: "Reel post media must be a video file (.mp4, .mov)" };
-      }
-      break;
+  // ── Parse optional meta.json or generate defaults ────────────────────────
+
+  let metaJson: MetaJson;
+  const metaEntry = files.get("meta.json");
+
+  if (metaEntry) {
+    try {
+      const metaRaw = await metaEntry.async("string");
+      metaJson = JSON.parse(metaRaw) as MetaJson;
+    } catch {
+      return { error: "meta.json is invalid JSON" };
+    }
+
+    // Validate the fields that are present
+    const metaError = validateMetaJson(metaJson);
+    if (metaError) return { error: metaError };
+  } else {
+    // Auto-generate meta
+    const autoType = detectPostType(mediaFiles);
+    const publishDate = bucket.extractedDate ?? fallbackDate;
+
+    metaJson = {
+      publish_at: publishDate.toISOString(),
+      type: autoType,
+    };
+
+    const parts: string[] = [
+      `Auto-generated meta: type="${autoType}"`,
+      `publish_at="${metaJson.publish_at}"`,
+    ];
+    if (!bucket.extractedDate) {
+      parts.push("(date auto-scheduled)");
+    }
+    warnings.push(parts.join(", "));
+  }
+
+  // ── Type-specific validation ─────────────────────────────────────────────
+
+  const typeWarning = validateMediaForType(metaJson.type, mediaFiles);
+  if (typeWarning) {
+    // For auto-generated meta we can be lenient – adjust the type
+    if (!metaEntry) {
+      // Re-detect with the actual files
+      metaJson.type = detectPostType(mediaFiles);
+    } else {
+      return { error: typeWarning };
+    }
+  }
+
+  // Extra: warn if carousel exceeds Meta API limit
+  if (metaJson.type === "carousel" && mediaFiles.length > 10) {
+    warnings.push("Carousel has more than 10 items; Meta API limit is 10");
   }
 
   return {
@@ -273,19 +399,60 @@ async function parsePostFolder(
   };
 }
 
-function validateMetaJson(meta: Partial<MetaJson>): string | null {
-  if (!meta.publish_at) return "meta.json missing required field: publish_at";
-  if (!meta.type) return "meta.json missing required field: type";
-  if (!meta.business_slug) return "meta.json missing required field: business_slug";
+// ─── Validation helpers ──────────────────────────────────────────────────────
 
-  if (!["image", "carousel", "reel"].includes(meta.type)) {
+/**
+ * Validate a user-supplied meta.json. All fields are now optional except `type`
+ * and `publish_at` (when provided they must be valid).
+ */
+function validateMetaJson(meta: Partial<MetaJson>): string | null {
+  if (meta.type && !["image", "carousel", "reel"].includes(meta.type)) {
     return `meta.json type must be one of: image, carousel, reel (got: ${meta.type})`;
   }
 
-  // Validate date/time
-  const publishDate = new Date(meta.publish_at);
-  if (isNaN(publishDate.getTime())) {
-    return `meta.json publish_at is not a valid ISO 8601 date: ${meta.publish_at}`;
+  if (meta.publish_at) {
+    const publishDate = new Date(meta.publish_at);
+    if (isNaN(publishDate.getTime())) {
+      return `meta.json publish_at is not a valid ISO 8601 date: ${meta.publish_at}`;
+    }
+  }
+
+  // business_slug is optional – the batch processor fills it in
+  return null;
+}
+
+/**
+ * Check that the media files are compatible with the declared post type.
+ * Returns an error string if invalid, null if OK.
+ */
+function validateMediaForType(
+  type: MetaJson["type"],
+  mediaFiles: ParsedMediaFile[]
+): string | null {
+  switch (type) {
+    case "image":
+      if (mediaFiles.length !== 1) {
+        return `Image post must have exactly 1 image, found ${mediaFiles.length}`;
+      }
+      if (!isImageFile(mediaFiles[0].filename)) {
+        return "Image post media must be an image file (.jpg, .png, .webp)";
+      }
+      break;
+
+    case "carousel":
+      if (mediaFiles.length < 2) {
+        return "Carousel post must have at least 2 media files";
+      }
+      break;
+
+    case "reel":
+      if (mediaFiles.length !== 1) {
+        return `Reel post must have exactly 1 video, found ${mediaFiles.length}`;
+      }
+      if (!isVideoFile(mediaFiles[0].filename)) {
+        return "Reel post media must be a video file (.mp4, .mov)";
+      }
+      break;
   }
 
   return null;

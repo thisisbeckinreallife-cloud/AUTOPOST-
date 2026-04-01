@@ -22,7 +22,7 @@ export type {
 export interface MetaJson {
   publish_at: string;       // ISO 8601 with timezone
   type: "image" | "carousel" | "reel";
-  business_slug: string;
+  business_slug?: string;
   first_comment?: string;
   location_id?: string;
 }
