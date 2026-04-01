@@ -24,24 +24,35 @@ function shouldSkip(path: string): boolean {
 }
 
 /**
- * Read all files from a dropped folder via DataTransferItem.webkitGetAsEntry()
+ * Extract FileSystemEntry objects SYNCHRONOUSLY from the drop event.
+ * This MUST happen in the same tick as the drop event — the browser
+ * clears dataTransfer.items after the handler returns.
  */
-async function readDroppedFolder(
-  items: DataTransferItemList
-): Promise<File[] | null> {
+function extractEntries(items: DataTransferItemList): FileSystemEntry[] {
   const entries: FileSystemEntry[] = [];
-
   for (let i = 0; i < items.length; i++) {
     const entry = items[i].webkitGetAsEntry?.();
     if (entry) entries.push(entry);
   }
+  return entries;
+}
 
-  // If there's a single directory entry, treat it as a folder drop
+/**
+ * Read all files from already-extracted FileSystemEntry objects.
+ * This can be called asynchronously since entries persist.
+ */
+async function readEntriesAsFiles(
+  entries: FileSystemEntry[]
+): Promise<{ files: File[]; folderName: string } | null> {
+  // Single directory → treat as folder drop
   if (entries.length === 1 && entries[0].isDirectory) {
-    return readAllFiles(entries[0] as FileSystemDirectoryEntry, "");
+    const files = await readAllFiles(entries[0] as FileSystemDirectoryEntry, "");
+    return files.length > 0
+      ? { files, folderName: entries[0].name }
+      : null;
   }
 
-  // If multiple entries and at least one is a directory, read them all
+  // Multiple entries with at least one directory
   if (entries.some((e) => e.isDirectory)) {
     const allFiles: File[] = [];
     for (const entry of entries) {
@@ -56,7 +67,9 @@ async function readDroppedFolder(
         if (file) allFiles.push(file);
       }
     }
-    return allFiles.length > 0 ? allFiles : null;
+    return allFiles.length > 0
+      ? { files: allFiles, folderName: entries[0].name }
+      : null;
   }
 
   return null; // Not a folder drop
@@ -168,33 +181,40 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
     }
   }
 
-  async function handleDrop(e: React.DragEvent) {
+  function handleDrop(e: React.DragEvent) {
     e.preventDefault();
     setDragging(false);
     if (disabled || compressing) return;
 
-    // First, try to read as a dropped folder
-    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
-      const folderFiles = await readDroppedFolder(e.dataTransfer.items);
-      if (folderFiles && folderFiles.length > 0) {
-        // Get the folder name from the first entry
-        const firstEntry = e.dataTransfer.items[0].webkitGetAsEntry?.();
-        const folderName = firstEntry?.name ?? "mis-posts";
-        await processFolder(folderFiles, folderName);
-        return;
-      }
+    // ── SYNC: extract entries & files before browser clears dataTransfer ──
+    const entries =
+      e.dataTransfer.items && e.dataTransfer.items.length > 0
+        ? extractEntries(e.dataTransfer.items)
+        : [];
+    const droppedFile = e.dataTransfer.files[0] ?? null;
+    const hasDirectoryEntry = entries.some((ent) => ent.isDirectory);
+
+    // ── ASYNC: now we can safely work with the captured entries ──
+    if (hasDirectoryEntry && entries.length > 0) {
+      // Folder was dropped — read its contents and compress
+      (async () => {
+        const result = await readEntriesAsFiles(entries);
+        if (result && result.files.length > 0) {
+          await processFolder(result.files, result.folderName);
+        }
+      })();
+      return;
     }
 
     // Fallback: check for a ZIP file
-    const file = e.dataTransfer.files[0];
-    if (file) {
+    if (droppedFile) {
       if (
-        file.name.endsWith(".zip") ||
-        file.type === "application/zip" ||
-        file.type === "application/x-zip-compressed"
+        droppedFile.name.endsWith(".zip") ||
+        droppedFile.type === "application/zip" ||
+        droppedFile.type === "application/x-zip-compressed"
       ) {
-        setSelectedFile(file);
-        onFileSelected(file);
+        setSelectedFile(droppedFile);
+        onFileSelected(droppedFile);
       }
     }
   }
