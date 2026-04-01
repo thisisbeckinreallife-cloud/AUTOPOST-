@@ -23,6 +23,7 @@ export async function GET() {
     if (err instanceof Error && err.message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    console.error("[settings/meta GET]", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
@@ -69,7 +70,14 @@ export async function POST(request: NextRequest) {
     if (err instanceof Error && err.message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+    if (err instanceof Error && err.message.includes("ENCRYPTION_KEY")) {
+      return NextResponse.json(
+        { error: "La variable ENCRYPTION_KEY no está configurada correctamente en el servidor. Ve a Railway → Variables y añade ENCRYPTION_KEY con 64 caracteres hexadecimales." },
+        { status: 503 }
+      );
+    }
+    console.error("[settings/meta POST]", err);
+    return NextResponse.json({ error: `Error interno: ${err instanceof Error ? err.message : "desconocido"}` }, { status: 500 });
   }
 }
 

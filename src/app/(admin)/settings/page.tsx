@@ -79,9 +79,73 @@ function MockScreen({ children }: { children: React.ReactNode }) {
   );
 }
 
+// ─── Health check types ───────────────────────────────────────────────────────
+interface HealthCheck {
+  ok: boolean;
+  checks: {
+    encryption_key: { ok: boolean; detail: string };
+    database: { ok: boolean; detail: string };
+    meta_credentials: { ok: boolean; detail: string };
+  };
+}
+
+// ─── Health panel ────────────────────────────────────────────────────────────
+function HealthPanel({ health, onClose }: { health: HealthCheck; onClose: () => void }) {
+  if (health.ok) return null;
+  return (
+    <div className="bg-red-50 border border-red-200 rounded-2xl p-5 space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="font-semibold text-red-800 flex items-center gap-2">
+          <XCircle className="h-4 w-4" /> Diagnóstico del servidor
+        </p>
+        <button onClick={onClose} className="text-red-400 hover:text-red-600 text-xs">Ocultar</button>
+      </div>
+      <div className="space-y-2">
+        <HealthRow label="Clave de cifrado (ENCRYPTION_KEY)" check={health.checks.encryption_key} />
+        <HealthRow label="Base de datos (DATABASE_URL)" check={health.checks.database} />
+        <HealthRow label="Credenciales de Meta" check={health.checks.meta_credentials} />
+      </div>
+      {!health.checks.encryption_key.ok && (
+        <div className="bg-white border border-red-200 rounded-xl p-4 space-y-2">
+          <p className="text-xs font-bold text-red-700">Cómo arreglar ENCRYPTION_KEY en Railway:</p>
+          <ol className="text-xs text-red-600 space-y-1 list-decimal ml-4">
+            <li>Abre tu proyecto en Railway</li>
+            <li>Haz clic en tu servicio web → <strong>Variables</strong></li>
+            <li>Añade la variable: <code className="bg-red-100 px-1 rounded font-mono">ENCRYPTION_KEY</code></li>
+            <li>Como valor, copia exactamente esto (64 caracteres):</li>
+          </ol>
+          <div className="flex items-center gap-2 bg-red-100 rounded-lg px-3 py-2 mt-1">
+            <code className="flex-1 text-xs font-mono text-red-800 break-all">
+              {Array.from({ length: 32 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, "0")).join("")}
+            </code>
+            <CopyButton text={Array.from({ length: 32 }, (_, i) => ((i * 37 + 91) % 256).toString(16).padStart(2, "0")).join("")} />
+          </div>
+          <p className="text-xs text-red-500">⚠️ Usa tu propio valor generado con: <code className="bg-red-100 px-1 rounded font-mono">openssl rand -hex 32</code></p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HealthRow({ label, check }: { label: string; check: { ok: boolean; detail: string } }) {
+  return (
+    <div className="flex items-start gap-2.5">
+      {check.ok
+        ? <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+        : <XCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />}
+      <div>
+        <p className="text-xs font-semibold text-slate-700">{label}</p>
+        {!check.ok && <p className="text-xs text-red-600 mt-0.5">{check.detail}</p>}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   const [status, setStatus] = useState<ConfigStatus | null>(null);
+  const [health, setHealth] = useState<HealthCheck | null>(null);
+  const [showHealth, setShowHealth] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [editing, setEditing] = useState(false);
   const [redirectUri, setRedirectUri] = useState("");
@@ -101,6 +165,11 @@ export default function SettingsPage() {
     setRedirectUri(uri);
     setForm((f) => ({ ...f, META_REDIRECT_URI: uri }));
     loadStatus();
+    // Run health check automatically
+    fetch("/api/health").then(r => r.json()).then((data: HealthCheck) => {
+      setHealth(data);
+      if (!data.ok) setShowHealth(true);
+    }).catch(() => {});
   }, []);
 
   async function loadStatus() {
@@ -155,6 +224,8 @@ export default function SettingsPage() {
           <h1 className="text-2xl font-bold text-slate-900">Configuración</h1>
           <p className="text-slate-500 mt-1">Conexión con Meta</p>
         </div>
+
+        {health && showHealth && <HealthPanel health={health} onClose={() => setShowHealth(false)} />}
 
         <div className="bg-green-50 border border-green-200 rounded-2xl p-6 flex items-start gap-4">
           <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
@@ -224,6 +295,8 @@ export default function SettingsPage() {
         <h1 className="text-2xl font-bold text-slate-900">Configuración</h1>
         <p className="text-slate-500 mt-1">Vamos a conectar AutoPost con Meta</p>
       </div>
+
+      {health && showHealth && <HealthPanel health={health} onClose={() => setShowHealth(false)} />}
 
       <ProgressBar step={wizardStep} total={TOTAL_STEPS} />
 
