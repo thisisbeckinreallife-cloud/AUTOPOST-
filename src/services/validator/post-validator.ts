@@ -81,7 +81,7 @@ export async function validateParsedPost(
 
   // ─── Caption validation ───
   if (!post.caption || post.caption.trim().length === 0) {
-    errors.push({ field: "caption", message: "Caption is empty" });
+    warnings.push({ field: "caption", message: "Caption is empty — you can add one before confirming" });
   }
   if (post.caption.length > MAX_CAPTION_LENGTH) {
     errors.push({

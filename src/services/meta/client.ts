@@ -465,7 +465,7 @@ export async function buildOAuthUrl(state: string): Promise<string> {
 
 /**
  * Exchange OAuth code for a short-lived token, then for a long-lived one.
- * Supports both Facebook Login and Instagram Login token exchange.
+ * Uses the Instagram API token exchange endpoint (form-urlencoded POST).
  */
 export async function exchangeCodeForTokens(code: string): Promise<{
   accessToken: string;
@@ -496,6 +496,7 @@ export async function exchangeCodeForTokens(code: string): Promise<{
     console.error("[Token Exchange] Short-lived error:", JSON.stringify(shortJson));
   }
 
+
   if (!shortRes.ok || shortJson.error_type || shortJson.error) {
     throw new MetaApiError(
       shortJson.code ?? shortRes.status,
@@ -503,7 +504,7 @@ export async function exchangeCodeForTokens(code: string): Promise<{
     );
   }
 
-  // Step 2: Long-lived token
+  // Step 2: Exchange for long-lived token via Instagram Graph API
   const longLived = await exchangeForLongLivedToken(shortJson.access_token);
   const expiresAt = new Date(
     Date.now() + (longLived.expires_in - 300) * 1000 // 5 min buffer
