@@ -416,59 +416,127 @@ export default function SettingsPage() {
       {wizardStep === 4 && (
         <WizardCard
           icon={<span className="text-2xl">🔑</span>}
-          title="Copia el App ID y la contraseña"
-          subtitle='Ve a "Configuración de la aplicación → Información básica".'
+          title="Copia dos datos de tu app"
+          subtitle="Necesitamos el App ID y el App Secret. Te mostramos exactamente dónde encontrarlos."
         >
           <div className="space-y-4">
-            {/* Warning about wrong IDs */}
-            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-              <p className="text-xs font-bold text-amber-700 mb-1">⚠️ Importante: usa los datos correctos</p>
-              <p className="text-xs text-amber-700">
-                Meta muestra varios IDs en distintas páginas. Los que necesitas están en{" "}
-                <strong>"Configuración de la aplicación → Información básica"</strong>,{" "}
-                NO en "Casos de uso" ni en "API de Instagram".
+            {/* Big clear warning */}
+            <div className="bg-red-50 border-2 border-red-300 rounded-xl px-4 py-3">
+              <p className="text-sm font-bold text-red-700 mb-1">
+                CUIDADO: Ve a la página correcta
+              </p>
+              <p className="text-xs text-red-600 leading-relaxed">
+                Meta tiene muchas páginas con números parecidos. Solo hay <strong>UN lugar correcto</strong> para encontrar los datos que necesitas.
+                No vayas a "Casos de uso", ni a "API de Instagram", ni a "Productos".
+                Ve SOLO a donde te decimos abajo.
               </p>
             </div>
 
+            {/* Step-by-step with ultra-simple language */}
             <div className="space-y-3">
-              <Step n={1} text={<>En el menú izquierdo, busca <strong>"Configuración de la aplicación"</strong> → <strong>"Información básica"</strong></>} />
-              <Step n={2} text={<>Verás dos campos: <strong>"ID de la app"</strong> y <strong>"Clave secreta de la app"</strong>. Son los que necesitas.</>} />
-              <Step n={3} text={<>Haz clic en <strong>"Mostrar"</strong> junto a la clave secreta para verla, cópiala y pégala abajo.</>} />
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Sigue estos pasos:</p>
+              <Step n={1} text={
+                <>Mira la <strong>barra de la izquierda</strong> de tu app en Meta (el menú lateral).</>
+              } />
+              <Step n={2} text={
+                <>Busca la opción que dice <strong>"Configuración de la aplicación"</strong>. Tiene un icono de engranaje ⚙️. Haz clic ahí.</>
+              } />
+              <Step n={3} text={
+                <>Se abre un submenú. Haz clic en <strong>"Información básica"</strong>. Es la primera opción del submenú.</>
+              } />
+              <Step n={4} text={
+                <>Ahora verás una página con muchos campos. Busca el que dice <strong>"Identificador de la app"</strong> (un número largo). Cópialo y pégalo abajo.</>
+              } />
+              <Step n={5} text={
+                <>Más abajo verás <strong>"Clave secreta de la app"</strong>. Haz clic en el botón <strong>"Mostrar"</strong> para verla. Te pedirá tu contraseña de Facebook. Luego cópiala y pégala abajo.</>
+              } />
             </div>
 
+            {/* Detailed mockup: sidebar + content */}
             <MockScreen>
-              <div className="space-y-1 mb-3">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Configuración de la aplicación → Información básica</p>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-slate-500">ID de la app</p>
-                    <div className="mt-1 bg-green-50 border border-green-300 rounded px-2 py-1 text-xs font-mono text-green-800 font-bold">
-                      1234567890123456 ← este
+              <div className="flex gap-0 -m-4">
+                {/* Sidebar mock */}
+                <div className="w-[180px] bg-slate-50 border-r border-slate-200 p-3 space-y-1 shrink-0">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Menú de tu app</p>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-slate-400">Panel</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-slate-400">Casos de uso</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-slate-400">Productos</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-slate-400">Instagram</div>
+                  <div className="mt-2 border-t border-slate-200 pt-2">
+                    <div className="px-2 py-1.5 rounded text-[11px] font-bold text-pink-700 bg-pink-100 border border-pink-300 flex items-center gap-1">
+                      ⚙️ Config. de la app
+                      <span className="text-pink-500 ml-auto">▼</span>
+                    </div>
+                    <div className="ml-3 mt-1 space-y-0.5">
+                      <div className="px-2 py-1 rounded text-[11px] font-bold text-white bg-pink-500 flex items-center gap-1">
+                        → Info. básica
+                      </div>
+                      <div className="px-2 py-1 rounded text-[11px] text-slate-400">Avanzada</div>
                     </div>
                   </div>
                 </div>
-                <div>
-                  <p className="text-xs text-slate-500">Clave secreta de la app</p>
-                  <div className="mt-1 flex items-center gap-2">
-                    <div className="flex-1 bg-green-50 border border-green-300 rounded px-2 py-1 text-xs font-mono text-green-800">
-                      ••••••••••••••••
+                {/* Content area */}
+                <div className="flex-1 p-4 space-y-4">
+                  <p className="text-xs font-bold text-slate-700">Información básica</p>
+
+                  {/* App ID field */}
+                  <div className="relative">
+                    <p className="text-[10px] text-slate-500 mb-1">Identificador de la app</p>
+                    <div className="bg-green-50 border-2 border-green-400 rounded px-2 py-1.5 text-xs font-mono text-green-800 font-bold flex items-center justify-between">
+                      <span>1234567890123456</span>
                     </div>
-                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded font-semibold">Mostrar</span>
+                    <div className="absolute -right-1 top-3 flex items-center gap-1">
+                      <span className="text-green-600 text-lg font-bold animate-pulse">←</span>
+                      <span className="text-[10px] font-bold text-green-700 bg-green-100 px-1.5 py-0.5 rounded">COPIA ESTE</span>
+                    </div>
                   </div>
-                </div>
-                <div className="border-t border-slate-100 pt-2 opacity-40">
-                  <p className="text-xs text-red-400 italic">❌ No uses "Identificador de la aplicación de Instagram" — ese es diferente</p>
+
+                  {/* App Secret field */}
+                  <div className="relative">
+                    <p className="text-[10px] text-slate-500 mb-1">Clave secreta de la app</p>
+                    <div className="bg-green-50 border-2 border-green-400 rounded px-2 py-1.5 flex items-center gap-2">
+                      <span className="text-xs font-mono text-green-800">••••••••••••••••</span>
+                      <span className="text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded font-bold cursor-pointer">Mostrar</span>
+                    </div>
+                    <div className="absolute -right-1 top-3 flex items-center gap-1">
+                      <span className="text-green-600 text-lg font-bold animate-pulse">←</span>
+                      <span className="text-[10px] font-bold text-green-700 bg-green-100 px-1.5 py-0.5 rounded">Y ESTE</span>
+                    </div>
+                  </div>
+
+                  {/* Wrong fields */}
+                  <div className="border-t border-slate-100 pt-3 space-y-2">
+                    <p className="text-[10px] font-bold text-red-500">Estos NO son los que necesitas:</p>
+                    <div className="opacity-50">
+                      <div className="bg-red-50 border border-red-200 rounded px-2 py-1 text-[10px] text-red-400 line-through">
+                        Identificador de la aplicación de Instagram: 9876543...
+                      </div>
+                    </div>
+                    <div className="opacity-50">
+                      <div className="bg-red-50 border border-red-200 rounded px-2 py-1 text-[10px] text-red-400 line-through">
+                        ID de configuración de negocio: 5555555...
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </MockScreen>
 
-            {/* Fields */}
+            {/* Tip */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
+              <p className="text-xs text-blue-700">
+                <strong>Truco:</strong> El App ID es un número de unos 15-16 dígitos.
+                El App Secret es una mezcla de letras y números (como una contraseña larga).
+                Si lo que ves no se parece a eso, estás en la página equivocada.
+              </p>
+            </div>
+
+            {/* Input fields */}
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">
                   App ID <span className="text-pink-500">*</span>
+                  <span className="text-slate-400 font-normal ml-1">(el número largo)</span>
                 </label>
                 <input
                   type="text"
@@ -482,6 +550,7 @@ export default function SettingsPage() {
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">
                   App Secret <span className="text-pink-500">*</span>
+                  <span className="text-slate-400 font-normal ml-1">(la clave secreta)</span>
                 </label>
                 <div className="relative">
                   <input
@@ -516,43 +585,112 @@ export default function SettingsPage() {
       {wizardStep === 5 && (
         <WizardCard
           icon={<span className="text-2xl">🔗</span>}
-          title="Añade la URL de redirección"
-          subtitle="Último paso: copia esta URL y pégala en tu app de Meta."
+          title="Pega una dirección en tu app de Meta"
+          subtitle="Último paso: copia una URL y pégala en el lugar correcto de tu app."
         >
           <div className="space-y-4">
-            <div className="space-y-3">
-              <Step n={1} text={<>En tu app de Meta, ve al menú izquierdo: <strong>Instagram</strong> → <strong>Configuración de Instagram</strong></>} />
-              <Step n={2} text={<>Busca el campo <strong>"URIs de redireccionamiento de OAuth válidos"</strong></>} />
-              <Step n={3} text={<>Haz clic en <strong>"Añadir URI"</strong> y pega la URL de abajo</>} />
-              <Step n={4} text={<>Haz clic en <strong>"Guardar cambios"</strong> en Meta</>} />
-            </div>
-
-            <MockScreen>
-              <div className="space-y-2">
-                <p className="text-xs font-semibold text-slate-600">URIs de redireccionamiento de OAuth válidos</p>
-                <div className="border border-dashed border-pink-300 bg-pink-50 rounded px-2 py-1.5 text-xs font-mono text-pink-700 break-all">
-                  {redirectUri || "https://tu-app.railway.app/api/meta/oauth/callback"}
-                </div>
-                <div className="text-right">
-                  <span className="text-xs text-green-600 font-semibold">✓ Guardar cambios</span>
-                </div>
-              </div>
-            </MockScreen>
-
-            {/* URL to copy */}
+            {/* First: the URL to copy */}
             <div>
-              <p className="text-xs font-semibold text-slate-600 mb-2">Tu URL de redirección:</p>
-              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5">
-                <code className="flex-1 text-xs text-slate-700 break-all font-mono">
+              <p className="text-xs font-bold text-slate-600 mb-2">Primero, copia esta dirección (haz clic en "Copiar"):</p>
+              <div className="flex items-center gap-2 bg-pink-50 border-2 border-pink-300 rounded-xl px-3 py-3">
+                <code className="flex-1 text-xs text-pink-800 break-all font-mono font-bold">
                   {redirectUri || "Cargando..."}
                 </code>
                 {redirectUri && <CopyButton text={redirectUri} />}
               </div>
             </div>
 
+            {/* Where to paste it */}
+            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+              <p className="text-xs font-bold text-amber-700 mb-1">
+                IMPORTANTE: Ve al lugar correcto
+              </p>
+              <p className="text-xs text-amber-600">
+                La URL va en <strong>"Inicio de sesión con Facebook → Configuración"</strong>,
+                NO en "Instagram" ni en "Configuración de la aplicación".
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Ahora haz esto en Meta:</p>
+              <Step n={1} text={
+                <>Mira la <strong>barra de la izquierda</strong> de tu app en Meta.</>
+              } />
+              <Step n={2} text={
+                <>Busca <strong>"Inicio de sesión con Facebook"</strong> (tiene un icono de Facebook). Si no lo ves, quizá necesites añadir el producto "Inicio de sesión con Facebook" primero (como hiciste con Instagram en el paso 3).</>
+              } />
+              <Step n={3} text={
+                <>Haz clic en <strong>"Configuración"</strong> (debajo de "Inicio de sesión con Facebook").</>
+              } />
+              <Step n={4} text={
+                <>Busca el campo que dice <strong>"URIs de redireccionamiento de OAuth válidos"</strong>.</>
+              } />
+              <Step n={5} text={
+                <>Pega la URL que copiaste arriba en ese campo.</>
+              } />
+              <Step n={6} text={
+                <>Haz clic en el botón azul <strong>"Guardar cambios"</strong> que aparece abajo a la derecha.</>
+              } />
+            </div>
+
+            {/* Detailed mockup with sidebar */}
+            <MockScreen>
+              <div className="flex gap-0 -m-4">
+                {/* Sidebar mock */}
+                <div className="w-[180px] bg-slate-50 border-r border-slate-200 p-3 space-y-1 shrink-0">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Menú de tu app</p>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-slate-400">Panel</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-slate-400">Config. de la app</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-slate-400">Instagram</div>
+                  <div className="mt-2 border-t border-slate-200 pt-2">
+                    <div className="px-2 py-1.5 rounded text-[11px] font-bold text-pink-700 bg-pink-100 border border-pink-300 flex items-center gap-1">
+                      f Inicio sesión FB
+                      <span className="text-pink-500 ml-auto">▼</span>
+                    </div>
+                    <div className="ml-3 mt-1 space-y-0.5">
+                      <div className="px-2 py-1 rounded text-[11px] font-bold text-white bg-pink-500 flex items-center gap-1">
+                        → Configuración
+                      </div>
+                      <div className="px-2 py-1 rounded text-[11px] text-slate-400">Quickstart</div>
+                    </div>
+                  </div>
+                </div>
+                {/* Content area */}
+                <div className="flex-1 p-4 space-y-3">
+                  <p className="text-xs font-bold text-slate-700">Configuración de inicio de sesión con Facebook</p>
+                  <p className="text-[10px] text-slate-500">Configuración del cliente de OAuth</p>
+
+                  <div className="relative">
+                    <p className="text-[10px] text-slate-500 mb-1">URIs de redireccionamiento de OAuth válidos</p>
+                    <div className="bg-green-50 border-2 border-green-400 rounded px-2 py-2 text-[10px] font-mono text-green-800 font-bold break-all">
+                      {redirectUri || "https://tu-app.railway.app/api/meta/oauth/callback"}
+                    </div>
+                    <div className="absolute -right-1 top-3 flex items-center gap-1">
+                      <span className="text-green-600 text-lg font-bold animate-pulse">←</span>
+                      <span className="text-[10px] font-bold text-green-700 bg-green-100 px-1.5 py-0.5 rounded">PEGA AQUÍ</span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <div className="bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded">
+                      Guardar cambios
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </MockScreen>
+
+            {/* Common mistake */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+              <p className="text-xs text-slate-600">
+                <strong>No encuentras "Inicio de sesión con Facebook"?</strong> Ve al panel de tu app, busca "Agregar productos", y añade "Inicio de sesión con Facebook".
+                Después aparecerá en el menú de la izquierda.
+              </p>
+            </div>
+
             {saveError && (
               <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-                ⚠️ {saveError}
+                {saveError}
               </div>
             )}
           </div>
@@ -560,7 +698,7 @@ export default function SettingsPage() {
           <WizardNav
             onBack={() => setWizardStep(4)}
             onNext={handleSave}
-            nextLabel={saving ? "Guardando..." : "Guardar y terminar ✓"}
+            nextLabel={saving ? "Guardando..." : "Guardar y terminar"}
             loading={saving}
           />
         </WizardCard>
