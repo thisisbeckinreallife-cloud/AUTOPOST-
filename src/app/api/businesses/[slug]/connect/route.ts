@@ -36,15 +36,25 @@ export async function GET(
     if (err instanceof Error && err.message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    if (err instanceof Error && err.message.includes("META_APP_ID")) {
+    if (
+      err instanceof Error &&
+      (err.message.includes("META_APP_ID") ||
+        err.message.includes("META_APP_SECRET") ||
+        err.message.includes("META_REDIRECT_URI") ||
+        err.message.includes("not configured"))
+    ) {
       return NextResponse.json(
-        {
-          error:
-            "Meta App not configured. Go to Settings → Meta App to configure credentials.",
-        },
+        { error: "Faltan las credenciales de Meta. Ve a Configuración y guarda tu App ID, App Secret y URL de redirección." },
         { status: 503 }
       );
     }
+    if (err instanceof Error && err.message.includes("ENCRYPTION_KEY")) {
+      return NextResponse.json(
+        { error: "Error de configuración del servidor: ENCRYPTION_KEY no válida. Contacta al administrador." },
+        { status: 503 }
+      );
+    }
+    console.error("[connect] Unexpected error:", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
