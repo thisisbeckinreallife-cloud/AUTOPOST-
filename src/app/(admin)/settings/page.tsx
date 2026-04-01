@@ -373,26 +373,31 @@ export default function SettingsPage() {
         </WizardCard>
       )}
 
-      {/* ── Step 3: Activar Instagram ──────────────────────────────── */}
+      {/* ── Step 3: Activar Instagram y Facebook Login ────────────── */}
       {wizardStep === 3 && (
         <WizardCard
           icon={<span className="text-2xl">📱</span>}
-          title="Activa Instagram en tu app"
-          subtitle="Dentro de tu app recién creada, activa el producto de Instagram."
+          title="Activa dos productos en tu app"
+          subtitle="Necesitas añadir Instagram y Inicio de sesión con Facebook."
         >
           <div className="space-y-3">
-            <Step n={1} text={<>Estás dentro de tu nueva app. Busca la sección <strong>"Agregar productos a tu app"</strong></>} />
-            <Step n={2} text={<>Encuentra <strong>"Instagram"</strong> en la lista y haz clic en <strong>"Configurar"</strong></>} />
-            <Step n={3} text={<>En el menú izquierdo aparecerá <strong>"Instagram"</strong>. Haz clic en él.</>} />
-            <Step n={4} text="Ya está activado. Continúa al siguiente paso." />
+            <Step n={1} text={<>Estás dentro de tu nueva app. Busca la sección <strong>"Agregar productos a tu app"</strong> (puede aparecer en el panel principal).</>} />
+            <Step n={2} text={<>Encuentra <strong>"Instagram"</strong> y haz clic en <strong>"Configurar"</strong>.</>} />
+            <Step n={3} text={<>Ahora busca también <strong>"Inicio de sesión con Facebook"</strong> y haz clic en <strong>"Configurar"</strong>. Es necesario para conectar cuentas.</>} />
+            <Step n={4} text={<>Cuando los dos aparezcan en el menú de la izquierda, ya puedes continuar.</>} />
 
             <MockScreen>
               <div className="space-y-2">
                 <p className="text-xs font-bold text-slate-600">Agregar productos</p>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  <div className="border border-pink-300 bg-pink-50 rounded-lg p-2 text-center">
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  <div className="border-2 border-pink-400 bg-pink-50 rounded-lg p-2 text-center">
                     <div className="text-lg">📸</div>
                     <p className="text-xs font-semibold text-pink-600 mt-1">Instagram</p>
+                    <p className="text-xs text-blue-500 underline">Configurar</p>
+                  </div>
+                  <div className="border-2 border-pink-400 bg-pink-50 rounded-lg p-2 text-center">
+                    <div className="text-lg">🔑</div>
+                    <p className="text-xs font-semibold text-pink-600 mt-1">Inicio sesión FB</p>
                     <p className="text-xs text-blue-500 underline">Configurar</p>
                   </div>
                   <div className="border border-slate-200 rounded-lg p-2 text-center opacity-40">
@@ -403,11 +408,17 @@ export default function SettingsPage() {
                 </div>
               </div>
             </MockScreen>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
+              <p className="text-xs text-blue-700">
+                <strong>Necesitas los dos:</strong> "Instagram" para publicar fotos, y "Inicio de sesión con Facebook" para que tus usuarios puedan conectar sus cuentas.
+              </p>
+            </div>
           </div>
           <WizardNav
             onBack={() => setWizardStep(2)}
             onNext={() => setWizardStep(4)}
-            nextLabel="Ya lo hice →"
+            nextLabel="Ya los añadí →"
           />
         </WizardCard>
       )}

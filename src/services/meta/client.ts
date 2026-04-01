@@ -5,10 +5,10 @@
  * https://developers.facebook.com/docs/instagram-api
  *
  * IMPORTANT: This service requires:
- *   1. A Meta App with instagram_basic + instagram_content_publish permissions
- *   2. Meta App Review approval for instagram_content_publish (required for
- *      publishing to non-test accounts)
- *   3. A valid long-lived User Access Token or Page Token
+ *   1. A Meta App with Instagram Business permissions
+ *      (instagram_business_basic + instagram_business_content_publish)
+ *   2. Meta App Review approval for publishing (required for non-test accounts)
+ *   3. A valid long-lived User Access Token
  *
  * See README.md § "Meta App Setup" for full instructions.
  */
@@ -84,7 +84,7 @@ export interface LongLivedTokenResult {
 
 /**
  * Exchange short-lived token for long-lived token.
- * Short-lived tokens are obtained from the OAuth flow.
+ * Tries Instagram token exchange first, falls back to Facebook token exchange.
  */
 export async function exchangeForLongLivedToken(
   shortLivedToken: string
@@ -93,6 +93,24 @@ export async function exchangeForLongLivedToken(
     m.getMetaAppConfig()
   );
 
+  // Try Instagram long-lived token exchange first
+  try {
+    const igUrl = new URL(`${GRAPH_BASE}/access_token`);
+    igUrl.searchParams.set("grant_type", "ig_exchange_token");
+    igUrl.searchParams.set("client_secret", appSecret);
+    igUrl.searchParams.set("access_token", shortLivedToken);
+
+    const igRes = await fetch(igUrl.toString());
+    const igJson = await igRes.json();
+
+    if (igRes.ok && !igJson.error && igJson.access_token) {
+      return igJson as LongLivedTokenResult;
+    }
+  } catch {
+    // Not an Instagram token, try Facebook exchange below
+  }
+
+  // Facebook long-lived token exchange
   const url = new URL(`${GRAPH_BASE}/oauth/access_token`);
   url.searchParams.set("grant_type", "fb_exchange_token");
   url.searchParams.set("client_id", appId);
@@ -168,14 +186,44 @@ export interface IgAccountInfo {
 }
 
 /**
- * Given a user token, find the Instagram Professional account linked to
- * their Facebook Pages.
+ * Given a user token, find the Instagram Professional account.
  *
- * Flow: user token → Pages list → each page's instagram_business_account
+ * Tries two flows:
+ * 1. Instagram Business Login: /me → direct IG account info
+ * 2. Facebook Login (legacy): /me/accounts → Pages → instagram_business_account
  */
 export async function getLinkedIgAccounts(
   userToken: string
 ): Promise<IgAccountInfo[]> {
+  // Try Instagram Business Login flow first: token is for an IG user directly
+  try {
+    const me = await graphRequest<{
+      id: string;
+      username?: string;
+      name?: string;
+      user_id?: string;
+    }>(
+      "GET",
+      "/me",
+      { fields: "id,username,name" },
+      userToken
+    );
+
+    // If we get a username, this is an Instagram Login token
+    if (me.username) {
+      return [{
+        igUserId: me.user_id ?? me.id,
+        igUsername: me.username,
+        fbPageId: me.id,
+        fbPageName: me.name ?? me.username,
+        pageToken: userToken,
+      }];
+    }
+  } catch {
+    // Not an Instagram Login token, try Facebook Login flow below
+  }
+
+  // Facebook Login flow: discover IG accounts via Facebook Pages
   interface PageResult {
     id: string;
     name: string;
@@ -415,11 +463,9 @@ export async function buildOAuthUrl(state: string): Promise<string> {
   );
 
   const scopes = [
-    "instagram_basic",
-    "instagram_content_publish",
-    "pages_show_list",
-    "pages_read_engagement",
-    "business_management",
+    "instagram_business_basic",
+    "instagram_business_content_publish",
+    "instagram_business_manage_comments",
   ].join(",");
 
   const url = new URL("https://www.facebook.com/dialog/oauth");
@@ -434,6 +480,7 @@ export async function buildOAuthUrl(state: string): Promise<string> {
 
 /**
  * Exchange OAuth code for a short-lived token, then for a long-lived one.
+ * Supports both Facebook Login and Instagram Login token exchange.
  */
 export async function exchangeCodeForTokens(code: string): Promise<{
   accessToken: string;
@@ -443,7 +490,7 @@ export async function exchangeCodeForTokens(code: string): Promise<{
     (m) => m.getMetaAppConfig()
   );
 
-  // Step 1: Short-lived token
+  // Step 1: Exchange code for short-lived token via Graph API
   const tokenUrl = new URL(`${GRAPH_BASE}/oauth/access_token`);
   tokenUrl.searchParams.set("client_id", appId);
   tokenUrl.searchParams.set("client_secret", appSecret);
