@@ -7,7 +7,7 @@
  * 5. On confirm: create PublishJob + enqueue in BullMQ
  */
 import { db } from "@/lib/db";
-import { parseZip } from "@/services/parser/zip-parser";
+import { parseZip, type ScheduleOptions } from "@/services/parser/zip-parser";
 import {
   validateParsedPost,
   computeContentHash,
@@ -33,7 +33,8 @@ export async function processBatch(
   batchId: string,
   zipBuffer: Buffer,
   businessId: string,
-  businessSlug: string
+  businessSlug: string,
+  scheduleOpts?: ScheduleOptions
 ): Promise<void> {
   // Mark as parsing
   await db.uploadBatch.update({
@@ -43,7 +44,7 @@ export async function processBatch(
 
   try {
     // 1. Parse ZIP
-    const parseResult = await parseZip(zipBuffer);
+    const parseResult = await parseZip(zipBuffer, scheduleOpts);
 
     if (parseResult.errors.length > 0 && parseResult.posts.length === 0) {
       await db.uploadBatch.update({

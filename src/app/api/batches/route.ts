@@ -7,6 +7,7 @@ import { requireSession } from "@/lib/auth";
 import { uploadBuffer, batchStorageKey } from "@/lib/storage";
 import { hashSHA256 } from "@/lib/crypto";
 import { processBatch } from "@/services/scheduler/batch-processor";
+import type { ScheduleOptions } from "@/services/parser/zip-parser";
 import { v4 as uuidv4 } from "uuid";
 
 export async function POST(request: NextRequest) {
@@ -49,6 +50,17 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       );
     }
+
+    // Read schedule preferences from form data
+    const scheduleOpts: ScheduleOptions = {};
+    const sd = formData.get("startDate") as string | null;
+    const st = formData.get("startTime") as string | null;
+    const freq = formData.get("frequency") as string | null;
+    const ch = formData.get("customHours") as string | null;
+    if (sd) scheduleOpts.startDate = sd;
+    if (st) scheduleOpts.startTime = st;
+    if (freq === "daily" || freq === "custom") scheduleOpts.frequency = freq;
+    if (ch) scheduleOpts.customHours = parseInt(ch, 10) || undefined;
 
     const zipBuffer = Buffer.from(await file.arrayBuffer());
     const fileHash = hashSHA256(zipBuffer);
@@ -111,7 +123,7 @@ export async function POST(request: NextRequest) {
     // Process batch asynchronously (parse + validate + create drafts)
     // In production, this should be done in a background job.
     // Here we process inline but return the batch ID immediately.
-    processBatch(batch.id, zipBuffer, business.id, business.slug).catch(
+    processBatch(batch.id, zipBuffer, business.id, business.slug, scheduleOpts).catch(
       (err) => {
         console.error(`[Batch] Processing error for ${batch.id}:`, err);
       }

@@ -4,9 +4,9 @@ import { db } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 
 const updateSchema = z.object({
-  caption: z.string().min(1).max(2200).optional(),
-  publishAt: z.string().datetime({ offset: true }).optional(),
-  status: z.enum(["CANCELLED"]).optional(), // Only allow cancellation via this endpoint
+  caption: z.string().max(2200).optional(),
+  publishAt: z.string().optional(), // ISO 8601 or simple datetime
+  status: z.enum(["CANCELLED"]).optional(),
 });
 
 export async function GET(

@@ -118,9 +118,25 @@ interface PostBucket {
   extractedDate: Date | null;
 }
 
+// ─── Schedule options (passed from upload form) ─────────────────────────────
+
+export interface ScheduleOptions {
+  /** Start date in YYYY-MM-DD format */
+  startDate?: string;
+  /** Start time in HH:mm format */
+  startTime?: string;
+  /** "daily" or "custom" */
+  frequency?: "daily" | "custom";
+  /** Hours between posts (when frequency is "custom") */
+  customHours?: number;
+}
+
 // ─── Public API ──────────────────────────────────────────────────────────────
 
-export async function parseZip(zipBuffer: Buffer): Promise<ParseResult> {
+export async function parseZip(
+  zipBuffer: Buffer,
+  scheduleOpts?: ScheduleOptions
+): Promise<ParseResult> {
   const errors: ParseError[] = [];
   const warnings: ParseError[] = [];
   const posts: ParsedPost[] = [];
@@ -169,12 +185,34 @@ export async function parseZip(zipBuffer: Buffer): Promise<ParseResult> {
     return a.folderName.localeCompare(b.folderName);
   });
 
+  // ── 2.5. Read __schedule__.json if present (from image-drop uploads) ──
+  let inlineSchedule: ScheduleOptions | undefined;
+  const schedFile = zip.file("__schedule__.json");
+  if (schedFile) {
+    try {
+      inlineSchedule = JSON.parse(await schedFile.async("string"));
+    } catch { /* ignore bad JSON */ }
+  }
+  const sched = scheduleOpts ?? inlineSchedule;
+
   // ── 3. Parse each bucket into a ParsedPost ─────────────────────────────
 
-  // We'll auto-schedule posts that lack a publish_at, starting tomorrow at 10 AM
+  // Build start date from schedule options or default to tomorrow 10:00
   let nextAutoDate = new Date();
-  nextAutoDate.setDate(nextAutoDate.getDate() + 1);
-  nextAutoDate.setHours(10, 0, 0, 0);
+  if (sched?.startDate) {
+    const [y, m, d] = sched.startDate.split("-").map(Number);
+    nextAutoDate = new Date(y, m - 1, d);
+  } else {
+    nextAutoDate.setDate(nextAutoDate.getDate() + 1);
+  }
+  const [startH, startM] = (sched?.startTime ?? "10:00").split(":").map(Number);
+  nextAutoDate.setHours(startH || 10, startM || 0, 0, 0);
+
+  // Interval between posts
+  const intervalMs =
+    sched?.frequency === "custom" && sched.customHours
+      ? sched.customHours * 60 * 60 * 1000
+      : 24 * 60 * 60 * 1000; // default: 1 day
 
   for (const bucket of buckets) {
     const result = await parseBucket(bucket, nextAutoDate);
@@ -200,9 +238,8 @@ export async function parseZip(zipBuffer: Buffer): Promise<ParseResult> {
 
     if (result.post) {
       posts.push(result.post);
-      // Advance auto-schedule clock by one day for the next post that needs it
-      nextAutoDate = new Date(nextAutoDate);
-      nextAutoDate.setDate(nextAutoDate.getDate() + 1);
+      // Advance auto-schedule clock for the next post
+      nextAutoDate = new Date(nextAutoDate.getTime() + intervalMs);
     }
   }
 
