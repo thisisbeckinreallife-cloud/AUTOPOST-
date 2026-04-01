@@ -4,7 +4,7 @@
  * No dependency on Meta Business Suite scheduling.
  */
 import { Queue, QueueEvents } from "bullmq";
-import { createBullMQConnection } from "@/lib/redis";
+import { createBullMQConnection, isRedisAvailable } from "@/lib/redis";
 import type { PublishJobPayload } from "@/types";
 
 export const PUBLISH_QUEUE_NAME = "instagram-publish";
@@ -12,6 +12,9 @@ export const PUBLISH_QUEUE_NAME = "instagram-publish";
 let _publishQueue: Queue<PublishJobPayload> | null = null;
 
 export function getPublishQueue(): Queue<PublishJobPayload> {
+  if (!isRedisAvailable()) {
+    throw new Error("Redis is not configured. Background job scheduling requires REDIS_URL.");
+  }
   if (!_publishQueue) {
     _publishQueue = new Queue<PublishJobPayload>(PUBLISH_QUEUE_NAME, {
       connection: createBullMQConnection(),

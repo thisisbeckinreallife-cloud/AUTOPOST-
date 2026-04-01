@@ -58,7 +58,7 @@ interface Attempt {
 }
 
 export default function PostDetailPage() {
-  const { slug, postId } = useParams<{ slug: string; postId: string }>();
+  const { slug, postId } = useParams() as { slug: string; postId: string };
   const router = useRouter();
   const [post, setPost] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);

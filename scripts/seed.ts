@@ -2,7 +2,6 @@
  * Seed script — creates demo admin user and businesses.
  * Run: npm run db:seed
  */
-import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcryptjs";
 

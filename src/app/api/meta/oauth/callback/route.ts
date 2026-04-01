@@ -7,6 +7,8 @@
  * See README.md § "Meta App Setup".
  */
 import { NextRequest, NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import {

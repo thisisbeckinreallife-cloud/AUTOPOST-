@@ -5,9 +5,13 @@ declare global {
   var __redis: Redis | undefined;
 }
 
+export function isRedisAvailable(): boolean {
+  return !!process.env.REDIS_URL;
+}
+
 function createRedisClient() {
   const url = process.env.REDIS_URL;
-  if (!url) throw new Error("REDIS_URL is not set");
+  if (!url) throw new Error("REDIS_URL is not set. Background job queue is disabled.");
 
   const client = new Redis(url, {
     maxRetriesPerRequest: null, // Required by BullMQ
@@ -22,7 +26,8 @@ function createRedisClient() {
   return client;
 }
 
-export function getRedis(): Redis {
+export function getRedis(): Redis | null {
+  if (!process.env.REDIS_URL) return null;
   if (global.__redis) return global.__redis;
   const client = createRedisClient();
   if (process.env.NODE_ENV !== "production") global.__redis = client;
