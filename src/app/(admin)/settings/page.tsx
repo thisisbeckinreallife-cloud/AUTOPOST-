@@ -340,7 +340,10 @@ export default function SettingsPage() {
               rel="noopener noreferrer"
               className="flex items-center justify-between w-full bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl px-4 py-3 transition-colors group"
             >
-              <span className="text-sm font-semibold text-blue-700">Abrir developers.facebook.com</span>
+              <div>
+                <span className="text-sm font-semibold text-blue-700">Abrir developers.facebook.com</span>
+                <p className="text-xs text-blue-500 mt-0.5">Se abre en una nueva pestaña</p>
+              </div>
               <ExternalLink className="h-4 w-4 text-blue-500 group-hover:translate-x-0.5 transition-transform" />
             </a>
 
@@ -413,32 +416,50 @@ export default function SettingsPage() {
       {wizardStep === 4 && (
         <WizardCard
           icon={<span className="text-2xl">🔑</span>}
-          title="Copia tu App ID y contraseña"
-          subtitle="Ve a la configuración básica de tu app y copia los dos valores."
+          title="Copia el App ID y la contraseña"
+          subtitle='Ve a "Configuración de la aplicación → Información básica".'
         >
           <div className="space-y-4">
+            {/* Warning about wrong IDs */}
+            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+              <p className="text-xs font-bold text-amber-700 mb-1">⚠️ Importante: usa los datos correctos</p>
+              <p className="text-xs text-amber-700">
+                Meta muestra varios IDs en distintas páginas. Los que necesitas están en{" "}
+                <strong>"Configuración de la aplicación → Información básica"</strong>,{" "}
+                NO en "Casos de uso" ni en "API de Instagram".
+              </p>
+            </div>
+
             <div className="space-y-3">
-              <Step n={1} text={<>En el menú izquierdo de tu app, haz clic en <strong>"Configuración"</strong> → <strong>"Básica"</strong></>} />
-              <Step n={2} text={<>Copia el <strong>App ID</strong> (es un número largo) y pégalo abajo</>} />
-              <Step n={3} text={<>Haz clic en <strong>"Mostrar"</strong> junto al App Secret, cópialo y pégalo abajo</>} />
+              <Step n={1} text={<>En el menú izquierdo, busca <strong>"Configuración de la aplicación"</strong> → <strong>"Información básica"</strong></>} />
+              <Step n={2} text={<>Verás dos campos: <strong>"ID de la app"</strong> y <strong>"Clave secreta de la app"</strong>. Son los que necesitas.</>} />
+              <Step n={3} text={<>Haz clic en <strong>"Mostrar"</strong> junto a la clave secreta para verla, cópiala y pégala abajo.</>} />
             </div>
 
             <MockScreen>
+              <div className="space-y-1 mb-3">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Configuración de la aplicación → Información básica</p>
+              </div>
               <div className="space-y-3">
-                <div>
-                  <p className="text-xs text-slate-500">App ID</p>
-                  <div className="mt-1 bg-slate-100 rounded px-2 py-1 text-xs font-mono text-slate-700">
-                    1234567890123456
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-slate-500">ID de la app</p>
+                    <div className="mt-1 bg-green-50 border border-green-300 rounded px-2 py-1 text-xs font-mono text-green-800 font-bold">
+                      1234567890123456 ← este
+                    </div>
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">App Secret</p>
+                  <p className="text-xs text-slate-500">Clave secreta de la app</p>
                   <div className="mt-1 flex items-center gap-2">
-                    <div className="flex-1 bg-slate-100 rounded px-2 py-1 text-xs font-mono text-slate-700">
+                    <div className="flex-1 bg-green-50 border border-green-300 rounded px-2 py-1 text-xs font-mono text-green-800">
                       ••••••••••••••••
                     </div>
-                    <span className="text-xs text-blue-500 underline cursor-pointer">Mostrar</span>
+                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded font-semibold">Mostrar</span>
                   </div>
+                </div>
+                <div className="border-t border-slate-100 pt-2 opacity-40">
+                  <p className="text-xs text-red-400 italic">❌ No uses "Identificador de la aplicación de Instagram" — ese es diferente</p>
                 </div>
               </div>
             </MockScreen>
