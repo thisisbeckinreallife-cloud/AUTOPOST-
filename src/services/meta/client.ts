@@ -95,7 +95,7 @@ export async function exchangeForLongLivedToken(
 
   // Try Instagram long-lived token exchange first
   try {
-    const igUrl = new URL(`${GRAPH_BASE}/access_token`);
+    const igUrl = new URL("https://graph.instagram.com/access_token");
     igUrl.searchParams.set("grant_type", "ig_exchange_token");
     igUrl.searchParams.set("client_secret", appSecret);
     igUrl.searchParams.set("access_token", shortLivedToken);
@@ -468,12 +468,14 @@ export async function buildOAuthUrl(state: string): Promise<string> {
     "instagram_business_manage_comments",
   ].join(",");
 
-  const url = new URL("https://www.facebook.com/dialog/oauth");
+  // Instagram Business scopes require the Instagram OAuth endpoint
+  const url = new URL("https://www.instagram.com/oauth/authorize");
   url.searchParams.set("client_id", appId);
   url.searchParams.set("redirect_uri", redirectUri);
   url.searchParams.set("scope", scopes);
   url.searchParams.set("response_type", "code");
   url.searchParams.set("state", state);
+  url.searchParams.set("enable_fb_login", "0");
 
   return url.toString();
 }
@@ -490,20 +492,26 @@ export async function exchangeCodeForTokens(code: string): Promise<{
     (m) => m.getMetaAppConfig()
   );
 
-  // Step 1: Exchange code for short-lived token via Graph API
-  const tokenUrl = new URL(`${GRAPH_BASE}/oauth/access_token`);
-  tokenUrl.searchParams.set("client_id", appId);
-  tokenUrl.searchParams.set("client_secret", appSecret);
-  tokenUrl.searchParams.set("redirect_uri", redirectUri);
-  tokenUrl.searchParams.set("code", code);
+  // Step 1: Exchange code for short-lived token via Instagram API
+  const body = new URLSearchParams({
+    client_id: appId,
+    client_secret: appSecret,
+    grant_type: "authorization_code",
+    redirect_uri: redirectUri,
+    code,
+  });
 
-  const shortRes = await fetch(tokenUrl.toString());
+  const shortRes = await fetch("https://api.instagram.com/oauth/access_token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString(),
+  });
   const shortJson = await shortRes.json();
 
-  if (!shortRes.ok || shortJson.error) {
+  if (!shortRes.ok || shortJson.error_type || shortJson.error) {
     throw new MetaApiError(
-      shortJson.error?.code ?? shortRes.status,
-      shortJson.error?.message ?? "Token exchange failed"
+      shortJson.code ?? shortRes.status,
+      shortJson.error_message ?? shortJson.error?.message ?? "Token exchange failed"
     );
   }
 
