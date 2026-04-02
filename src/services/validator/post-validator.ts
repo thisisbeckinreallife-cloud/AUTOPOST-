@@ -8,7 +8,7 @@ import { parseISO, isBefore, addMinutes } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import type { ParsedPost, ValidationError, ValidationResult } from "@/types";
 
-const VALID_TIMEZONES = new Set(Intl.supportedValuesOf("timeZone"));
+const VALID_TIMEZONES = new Set([...Intl.supportedValuesOf("timeZone"), "UTC", "GMT"]);
 
 // Min minutes in the future for scheduling
 const MIN_FUTURE_MINUTES = 5;

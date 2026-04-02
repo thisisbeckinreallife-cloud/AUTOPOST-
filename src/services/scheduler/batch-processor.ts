@@ -188,13 +188,19 @@ async function createPostDraftFromParsed(
     where: {
       businessId,
       contentHash,
-      status: { notIn: ["CANCELLED"] },
     },
   });
 
   if (existing) {
-    // Skip silently — warning already recorded in validation
-    return;
+    // If the existing post is cancelled or failed, delete it so we can re-create
+    if (["CANCELLED", "FAILED"].includes(existing.status)) {
+      await db.publishJob.deleteMany({ where: { postDraftId: existing.id } });
+      await db.mediaAsset.deleteMany({ where: { postDraftId: existing.id } });
+      await db.postDraft.delete({ where: { id: existing.id } });
+    } else {
+      // Active duplicate — skip
+      return;
+    }
   }
 
   const publishAt = parseISO(post.metaJson.publish_at);
