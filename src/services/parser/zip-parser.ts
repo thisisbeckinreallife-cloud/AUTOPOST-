@@ -92,12 +92,18 @@ function detectPostType(
 
 /**
  * Sanitize a folder name to prevent path traversal.
- * Returns null if the name is unsafe.
+ * Replaces unsafe characters instead of rejecting the name.
+ * Returns null only for truly dangerous names (path traversal).
  */
 function sanitizeFolderName(name: string): string | null {
   if (/\.\./.test(name)) return null;
-  const safeOriginal = /^[a-zA-Z0-9_\-]+$/.test(name);
-  return safeOriginal ? name : null;
+  if (!name || name.trim().length === 0) return null;
+  // Replace spaces and special chars with underscores, keep alphanumeric, dash, underscore
+  const sanitized = name
+    .replace(/[^a-zA-Z0-9_\-]/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return sanitized.length > 0 ? sanitized : null;
 }
 
 // ─── Core types ──────────────────────────────────────────────────────────────
@@ -288,12 +294,14 @@ async function parseBucket(
   const warnings: string[] = [];
   const { folderName, files } = bucket;
 
-  // Safety-check folder name (skip for root-level single files)
+  // Safety-check and sanitize folder name (skip for root-level single files)
+  let safeFolderName = folderName;
   if (files.size > 1 || !isMediaFile(folderName)) {
-    const safeName = sanitizeFolderName(folderName);
-    if (!safeName) {
+    const sanitized = sanitizeFolderName(folderName);
+    if (!sanitized) {
       return { error: `Unsafe folder name: "${folderName}"` };
     }
+    safeFolderName = sanitized;
   }
 
   // ── Collect media files ──────────────────────────────────────────────────
@@ -390,7 +398,7 @@ async function parseBucket(
 
   return {
     post: {
-      folderName,
+      folderName: safeFolderName,
       metaJson,
       caption,
       mediaFiles,
