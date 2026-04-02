@@ -648,7 +648,11 @@ export async function repackZip(posts: DetectedPost[]): Promise<Blob> {
     folder.file("meta.json", JSON.stringify(meta, null, 2));
   }
 
-  return zip.generateAsync({ type: "blob" });
+  return zip.generateAsync({
+    type: "blob",
+    compression: "DEFLATE",
+    compressionOptions: { level: 6 },
+  });
 }
 
 // ─── Cleanup ────────────────────────────────────────────────────────────────

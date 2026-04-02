@@ -3,6 +3,9 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+
+// Allow up to 100MB uploads (Next.js App Router defaults to ~4.5MB)
+export const dynamic = "force-dynamic";
 import { requireSession } from "@/lib/auth";
 import { uploadBuffer, batchStorageKey } from "@/lib/storage";
 import { hashSHA256 } from "@/lib/crypto";
