@@ -8,6 +8,7 @@ import {
   Loader2,
   FolderInput,
   AlertCircle,
+  FileUp,
 } from "lucide-react";
 import JSZip from "jszip";
 
@@ -52,10 +53,6 @@ function fileEntryToFile(entry: FileSystemFileEntry): Promise<File> {
   });
 }
 
-/**
- * Recursively read all files from a FileSystemDirectoryEntry.
- * Returns files with a `_relativePath` property attached.
- */
 async function readDirectoryRecursive(
   dirEntry: FileSystemDirectoryEntry,
   basePath: string
@@ -63,7 +60,6 @@ async function readDirectoryRecursive(
   const files: File[] = [];
   const reader = dirEntry.createReader();
 
-  // readEntries may return partial results — call until empty
   let hasMore = true;
   while (hasMore) {
     const batch = await readDirectoryEntries(reader);
@@ -78,11 +74,10 @@ async function readDirectoryRecursive(
       if (entry.isFile) {
         try {
           const file = await fileEntryToFile(entry as FileSystemFileEntry);
-          // Attach relative path as a custom property
           (file as File & { _relativePath: string })._relativePath = entryPath;
           files.push(file);
         } catch {
-          // Skip files that can't be read
+          // Skip unreadable files
         }
       } else if (entry.isDirectory) {
         const subFiles = await readDirectoryRecursive(
@@ -136,10 +131,14 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
   const [compressInfo, setCompressInfo] = useState("");
   const [error, setError] = useState("");
 
+  // ─── Process folder into ZIP ──────────────────────────────────────────
+
   const processFolder = useCallback(
     async (files: File[], folderName: string) => {
       if (files.length === 0) {
         setError("La carpeta esta vacia o no tiene archivos compatibles.");
+        setCompressing(false);
+        setCompressInfo("");
         return;
       }
       setCompressing(true);
@@ -163,7 +162,7 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
     [onFileSelected]
   );
 
-  // ─── Drop handler ──────────────────────────────────────────────────────
+  // ─── Drop handler ─────────────────────────────────────────────────────
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -173,7 +172,7 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
       if (disabled || compressing) return;
       setError("");
 
-      // ── STEP 1: Synchronously extract entries before browser clears them ──
+      // SYNC: extract all entries and files immediately
       let directoryEntry: FileSystemDirectoryEntry | null = null;
       let zipFile: File | null = null;
 
@@ -182,7 +181,6 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
           const item = e.dataTransfer.items[i];
           if (item.kind !== "file") continue;
 
-          // Try webkitGetAsEntry (synchronous call, must happen NOW)
           const entry = item.webkitGetAsEntry?.();
 
           if (entry && entry.isDirectory) {
@@ -190,7 +188,6 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
             break;
           }
 
-          // Not a directory — check if it's a ZIP
           if (!entry || entry.isFile) {
             const file = item.getAsFile();
             if (
@@ -205,7 +202,6 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
         }
       }
 
-      // Also check dataTransfer.files as fallback for ZIP
       if (!directoryEntry && !zipFile && e.dataTransfer.files.length > 0) {
         const file = e.dataTransfer.files[0];
         if (
@@ -217,24 +213,20 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
         }
       }
 
-      // ── STEP 2: Process what we found ──
-
+      // ASYNC: process
       if (directoryEntry) {
-        // We found a directory — read it async, compress, and proceed
         const folderName = directoryEntry.name;
-        const dirEntryRef = directoryEntry; // capture for async
+        const dirRef = directoryEntry;
 
         setCompressing(true);
         setCompressInfo("Leyendo carpeta...");
 
-        readDirectoryRecursive(dirEntryRef, "")
+        readDirectoryRecursive(dirRef, "")
           .then((files) => {
             if (files.length === 0) {
               setCompressing(false);
               setCompressInfo("");
-              setError(
-                "La carpeta no tiene archivos compatibles (fotos o videos)."
-              );
+              setError("La carpeta no tiene archivos compatibles.");
               return;
             }
             return processFolder(files, folderName);
@@ -256,13 +248,10 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
         return;
       }
 
-      // Nothing valid was dropped
-      // Check if user might have dropped a folder but webkitGetAsEntry
-      // wasn't available (e.g., older Safari)
+      // Detect folder drop in unsupported browser
       if (e.dataTransfer.files.length > 0) {
         const f = e.dataTransfer.files[0];
         if (f.size === 0 && f.type === "") {
-          // Likely a folder that we couldn't read
           setError(
             'Tu navegador no soporta arrastrar carpetas. Usa el boton "Seleccionar carpeta" de abajo.'
           );
@@ -274,8 +263,6 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
     },
     [disabled, compressing, onFileSelected, processFolder]
   );
-
-  // ─── Drag handlers ─────────────────────────────────────────────────────
 
   const handleDragOver = useCallback(
     (e: React.DragEvent) => {
@@ -295,7 +282,7 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
     []
   );
 
-  // ─── File input handlers ──────────────────────────────────────────────
+  // ─── Input handlers ───────────────────────────────────────────────────
 
   function handleZipFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
@@ -317,7 +304,6 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
       const relativePath = file.webkitRelativePath || file.name;
       if (shouldSkip(relativePath)) continue;
 
-      // Remove root folder prefix for cleaner ZIP structure
       const pathParts = relativePath.split("/");
       const innerPath =
         pathParts.length > 1 ? pathParts.slice(1).join("/") : file.name;
@@ -332,21 +318,49 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
 
     const folderName =
       (fileList[0].webkitRelativePath || "").split("/")[0] || "mis-posts";
-
     await processFolder(files, folderName);
   }
+
+  // ─── Hidden inputs (always rendered) ──────────────────────────────────
+
+  const hiddenInputs = (
+    <>
+      <input
+        ref={zipFileRef}
+        type="file"
+        accept=".zip"
+        className="hidden"
+        onChange={handleZipFileChange}
+        disabled={disabled}
+      />
+      <input
+        ref={folderRef}
+        type="file"
+        className="hidden"
+        onChange={handleFolderChange}
+        disabled={disabled}
+        // @ts-expect-error webkitdirectory is a non-standard attribute
+        webkitdirectory=""
+        directory=""
+        multiple
+      />
+    </>
+  );
 
   // ─── Render: compressing ──────────────────────────────────────────────
 
   if (compressing) {
     return (
-      <div className="border-2 border-purple-300 bg-purple-50 rounded-2xl p-12 text-center">
-        <Loader2 className="h-14 w-14 text-purple-500 mx-auto mb-4 animate-spin" />
-        <p className="text-lg font-semibold text-slate-800">{compressInfo}</p>
-        <p className="text-sm text-slate-400 mt-1">
-          Esto solo tarda unos segundos.
-        </p>
-      </div>
+      <>
+        {hiddenInputs}
+        <div className="border-2 border-purple-300 bg-purple-50 rounded-2xl p-12 text-center">
+          <Loader2 className="h-14 w-14 text-purple-500 mx-auto mb-4 animate-spin" />
+          <p className="text-lg font-semibold text-slate-800">{compressInfo}</p>
+          <p className="text-sm text-slate-400 mt-1">
+            Esto solo tarda unos segundos.
+          </p>
+        </div>
+      </>
     );
   }
 
@@ -354,19 +368,12 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
 
   if (selectedFile) {
     return (
-      <div className="relative">
+      <>
+        {hiddenInputs}
         <div
           className="border-2 border-pink-400 bg-pink-50 rounded-2xl p-8 text-center cursor-pointer transition-all hover:bg-pink-100"
-          onClick={() => !disabled && zipFileRef.current?.click()}
+          onClick={() => !disabled && folderRef.current?.click()}
         >
-          <input
-            ref={zipFileRef}
-            type="file"
-            accept=".zip"
-            className="hidden"
-            onChange={handleZipFileChange}
-            disabled={disabled}
-          />
           <FileArchive className="h-14 w-14 text-pink-500 mx-auto mb-4" />
           <p className="text-lg font-semibold text-slate-800">
             {selectedFile.name}
@@ -375,112 +382,110 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
             {(selectedFile.size / 1024 / 1024).toFixed(1)} MB
           </p>
           <p className="text-xs text-pink-500 mt-3 font-medium">
-            Toca para cambiar el archivo
+            Toca para cambiar
           </p>
         </div>
-      </div>
+      </>
     );
   }
 
-  // ─── Render: default ──────────────────────────────────────────────────
+  // ─── Render: default (empty) ──────────────────────────────────────────
 
   return (
-    <div className="space-y-4">
-      {/* Error message */}
-      {error && (
-        <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-          <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-          <p className="text-sm text-red-700">{error}</p>
+    <>
+      {hiddenInputs}
+      <div className="space-y-4">
+        {/* Error */}
+        {error && (
+          <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
+
+        {/* Drag & drop zone — NO onClick, only for dragging */}
+        <div
+          className={`border-2 border-dashed rounded-2xl p-10 text-center transition-all ${
+            dragging
+              ? "border-pink-400 bg-pink-50 scale-[1.02]"
+              : "border-slate-200 bg-white"
+          } ${disabled ? "opacity-50 pointer-events-none" : ""}`}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+        >
+          <div className="max-w-sm mx-auto">
+            {dragging ? (
+              <>
+                <FolderOpen className="h-16 w-16 text-pink-400 mx-auto mb-4 animate-bounce" />
+                <p className="text-xl font-semibold text-pink-600">
+                  Suelta aqui tu carpeta o ZIP
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mx-auto mb-4">
+                  <Upload className="h-8 w-8 text-pink-500" />
+                </div>
+                <p className="text-lg font-semibold text-slate-800">
+                  Arrastra aqui tu carpeta o ZIP
+                </p>
+                <p className="text-sm text-slate-400 mt-1">
+                  No importa como lo tengas organizado. Nosotros lo ordenamos
+                  por ti.
+                </p>
+              </>
+            )}
+          </div>
         </div>
-      )}
 
-      {/* Main drop zone — accepts ZIP files AND folders */}
-      <div
-        className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all cursor-pointer ${
-          dragging
-            ? "border-pink-400 bg-pink-50 scale-[1.02]"
-            : "border-slate-200 hover:border-pink-300 bg-white hover:bg-slate-50"
-        } ${disabled ? "opacity-50 pointer-events-none" : ""}`}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onClick={() => zipFileRef.current?.click()}
-      >
-        {/* Hidden file inputs */}
-        <input
-          ref={zipFileRef}
-          type="file"
-          accept=".zip"
-          className="hidden"
-          onChange={handleZipFileChange}
-          disabled={disabled}
-        />
-        <input
-          ref={folderRef}
-          type="file"
-          className="hidden"
-          onChange={handleFolderChange}
-          disabled={disabled}
-          // @ts-expect-error webkitdirectory is a non-standard attribute
-          webkitdirectory=""
-          directory=""
-          multiple
-        />
+        {/* ── Two clear action buttons ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Folder button — PRIMARY action */}
+          <button
+            type="button"
+            onClick={() => folderRef.current?.click()}
+            disabled={disabled}
+            className="flex items-center gap-3 border-2 border-purple-300 hover:border-purple-500 bg-purple-50 hover:bg-purple-100 rounded-xl p-4 transition-all text-left group disabled:opacity-50 disabled:pointer-events-none"
+          >
+            <div className="w-11 h-11 rounded-full bg-purple-200 group-hover:bg-purple-300 flex items-center justify-center shrink-0 transition-colors">
+              <FolderInput className="h-5 w-5 text-purple-700" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-purple-800">
+                Seleccionar carpeta
+              </p>
+              <p className="text-xs text-purple-600/70 mt-0.5">
+                La comprimimos por ti
+              </p>
+            </div>
+          </button>
 
-        <div className="max-w-sm mx-auto">
-          {dragging ? (
-            <>
-              <FolderOpen className="h-16 w-16 text-pink-400 mx-auto mb-4 animate-bounce" />
-              <p className="text-xl font-semibold text-pink-600">
-                Suelta aqui tu carpeta o ZIP
-              </p>
-            </>
-          ) : (
-            <>
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mx-auto mb-5">
-                <Upload className="h-10 w-10 text-pink-500" />
-              </div>
-              <p className="text-xl font-semibold text-slate-800">
-                Arrastra aqui tu carpeta o ZIP con tus posts
-              </p>
-              <p className="text-slate-400 mt-2">
-                No importa como lo tengas organizado. Nosotros lo ordenamos por
-                ti.
-              </p>
-              <div className="mt-5 inline-flex items-center gap-2 text-sm text-pink-500 font-medium bg-pink-50 px-4 py-2 rounded-full">
-                <Upload className="h-4 w-4" />
+          {/* ZIP button — secondary */}
+          <button
+            type="button"
+            onClick={() => zipFileRef.current?.click()}
+            disabled={disabled}
+            className="flex items-center gap-3 border-2 border-slate-200 hover:border-pink-400 bg-white hover:bg-pink-50 rounded-xl p-4 transition-all text-left group disabled:opacity-50 disabled:pointer-events-none"
+          >
+            <div className="w-11 h-11 rounded-full bg-slate-100 group-hover:bg-pink-100 flex items-center justify-center shrink-0 transition-colors">
+              <FileUp className="h-5 w-5 text-slate-500 group-hover:text-pink-600" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-slate-700 group-hover:text-pink-700">
                 Seleccionar ZIP
-              </div>
-              <p className="text-xs text-slate-300 mt-4">
-                Formato: .zip o carpeta &middot; Maximo 100MB
               </p>
-            </>
-          )}
+              <p className="text-xs text-slate-400 mt-0.5">
+                Si ya tienes un .zip listo
+              </p>
+            </div>
+          </button>
         </div>
-      </div>
 
-      {/* Folder selection button — always works reliably */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          folderRef.current?.click();
-        }}
-        disabled={disabled}
-        className="w-full flex items-center justify-center gap-3 border-2 border-dashed border-purple-200 hover:border-purple-400 bg-purple-50/50 hover:bg-purple-50 rounded-2xl p-5 transition-all group disabled:opacity-50 disabled:pointer-events-none"
-      >
-        <div className="w-10 h-10 rounded-full bg-purple-100 group-hover:bg-purple-200 flex items-center justify-center transition-colors">
-          <FolderInput className="h-5 w-5 text-purple-500" />
-        </div>
-        <div className="text-left">
-          <p className="text-sm font-semibold text-slate-700">
-            Seleccionar una carpeta del ordenador
-          </p>
-          <p className="text-xs text-slate-400">
-            La comprimimos automaticamente por ti. Sin necesidad de crear un ZIP.
-          </p>
-        </div>
-      </button>
-    </div>
+        <p className="text-xs text-slate-300 text-center">
+          Fotos: JPG, PNG, WEBP &middot; Videos: MP4, MOV &middot; Maximo 100MB
+        </p>
+      </div>
+    </>
   );
 }
