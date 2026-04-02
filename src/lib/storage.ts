@@ -81,6 +81,20 @@ export async function uploadBuffer(
   );
 }
 
+export async function getSignedUploadUrl(
+  key: string,
+  contentType: string,
+  expiresInSeconds = 3600
+): Promise<string> {
+  const client = getS3Client();
+  const command = new PutObjectCommand({
+    Bucket: BUCKET(),
+    Key: key,
+    ContentType: contentType,
+  });
+  return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
+}
+
 export async function getSignedDownloadUrl(
   key: string,
   expiresInSeconds = 3600
@@ -93,6 +107,19 @@ export async function getSignedDownloadUrl(
 export function getPublicUrl(key: string): string {
   const base = process.env.STORAGE_PUBLIC_URL ?? "";
   return `${base.replace(/\/$/, "")}/${key}`;
+}
+
+export async function downloadBuffer(key: string): Promise<Buffer> {
+  const client = getS3Client();
+  const result = await client.send(
+    new GetObjectCommand({ Bucket: BUCKET(), Key: key })
+  );
+  const stream = result.Body as Readable;
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
 }
 
 export async function deleteFile(key: string): Promise<void> {

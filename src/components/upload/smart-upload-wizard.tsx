@@ -168,7 +168,6 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
     setError("");
 
     try {
-      setUploadProgress("Preparando datos...");
       const validPosts = posts.filter((p) => p.status !== "error");
 
       if (validPosts.length === 0) {
@@ -177,8 +176,7 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
         return;
       }
 
-      // Build schedule overrides JSON (small — just dates, captions, types)
-      // This avoids repacking the entire ZIP which can be too large for upload
+      // Build schedule overrides (small JSON)
       const scheduleOverrides = validPosts.map((post, idx) => ({
         index: idx,
         publishAt: post.publishAt
@@ -188,34 +186,73 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
         postType: post.postType,
       }));
 
-      setUploadProgress("Subiendo a AutoPost...");
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("businessSlug", businessSlug);
-      fd.append("schedule", JSON.stringify(scheduleOverrides));
+      // Step 1: Get presigned URL from server (small JSON request)
+      setUploadProgress("Obteniendo permiso de subida...");
+      const presignRes = await fetch("/api/batches/presign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          businessSlug,
+          fileName: file.name,
+          fileSize: file.size,
+        }),
+      });
 
-      const res = await fetch("/api/batches", { method: "POST", body: fd });
-
-      // Handle non-JSON responses (e.g., 413 from proxy, HTML error pages)
-      const contentType = res.headers.get("content-type") ?? "";
-      let data: { error?: string; data?: { batchId: string } };
-      if (contentType.includes("application/json")) {
-        data = await res.json();
-      } else {
-        const text = await res.text();
-        data = { error: `Error del servidor (${res.status}): ${text.substring(0, 100)}` };
+      if (!presignRes.ok) {
+        const presignData = await presignRes.json().catch(() => ({ error: "Error del servidor" }));
+        setError(presignData.error ?? `Error obteniendo URL de subida (${presignRes.status})`);
+        setStep("calendar");
+        return;
       }
 
-      if (!res.ok) {
-        // Special handling for common errors
-        if (res.status === 409) {
+      const { data: presignData } = await presignRes.json();
+      const { uploadUrl, storageKey, batchId, businessId } = presignData;
+
+      // Step 2: Upload file directly to R2 (bypasses Railway/Next.js limits)
+      setUploadProgress("Subiendo archivo a la nube...");
+      const uploadRes = await fetch(uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": "application/zip",
+        },
+      });
+
+      if (!uploadRes.ok) {
+        setError(`Error subiendo a almacenamiento (${uploadRes.status}). Intentalo de nuevo.`);
+        setStep("calendar");
+        return;
+      }
+
+      // Step 3: Tell server to process the uploaded file (small JSON request)
+      setUploadProgress("Procesando tus posts...");
+      const processRes = await fetch("/api/batches", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          batchId,
+          businessId,
+          storageKey,
+          fileName: file.name,
+          fileSize: file.size,
+          schedule: scheduleOverrides,
+        }),
+      });
+
+      const contentType = processRes.headers.get("content-type") ?? "";
+      let processData: { error?: string; data?: { batchId: string } };
+      if (contentType.includes("application/json")) {
+        processData = await processRes.json();
+      } else {
+        const text = await processRes.text();
+        processData = { error: `Error del servidor (${processRes.status}): ${text.substring(0, 200)}` };
+      }
+
+      if (!processRes.ok) {
+        if (processRes.status === 409) {
           setError("Este contenido ya fue subido anteriormente. Revisa tus batches.");
-        } else if (res.status === 413) {
-          setError("El archivo es demasiado grande. Reduce el numero de fotos o su tamaño.");
-        } else if (res.status === 503) {
-          setError(data.error ?? "El servicio de almacenamiento no esta configurado. Contacta al administrador.");
         } else {
-          setError(data.error ?? `Error al subir (${res.status}). Intentalo de nuevo.`);
+          setError(processData.error ?? `Error procesando (${processRes.status}). Intentalo de nuevo.`);
         }
         setStep("calendar");
         return;
@@ -223,11 +260,11 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
 
       setUploadProgress("Listo! Redirigiendo...");
       cleanupPreviews(posts);
-      router.push(`/businesses/${businessSlug}/batches/${data.data!.batchId}`);
+      router.push(`/businesses/${businessSlug}/batches/${processData.data!.batchId}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error("Upload error:", msg, err);
-      setError(`Error de red: ${msg}. Comprueba tu conexion e intentalo de nuevo.`);
+      setError(`Error: ${msg}. Comprueba tu conexion e intentalo de nuevo.`);
       setStep("calendar");
     }
   }

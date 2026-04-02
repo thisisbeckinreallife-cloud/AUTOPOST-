@@ -1,20 +1,18 @@
 /**
- * POST /api/batches — upload a ZIP file for a business
+ * POST /api/batches — process a ZIP that was already uploaded to R2 via presigned URL.
+ * Accepts JSON body (small) instead of multipart file upload (large).
  */
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-// Allow up to 100MB uploads (Next.js App Router defaults to ~4.5MB)
 export const dynamic = "force-dynamic";
 import { requireSession } from "@/lib/auth";
-import { uploadBuffer, batchStorageKey, checkStorageConfig } from "@/lib/storage";
+import { downloadBuffer, checkStorageConfig } from "@/lib/storage";
 import { hashSHA256 } from "@/lib/crypto";
 import { processBatch, type ScheduleOverride } from "@/services/scheduler/batch-processor";
-import { v4 as uuidv4 } from "uuid";
 
 export async function POST(request: NextRequest) {
   try {
-    // Pre-flight: check storage is configured before doing any work
     const storageError = checkStorageConfig();
     if (storageError) {
       return NextResponse.json({ error: storageError }, { status: 503 });
@@ -22,46 +20,33 @@ export async function POST(request: NextRequest) {
 
     const session = await requireSession();
 
-    const formData = await request.formData();
-    const file = formData.get("file") as File | null;
-    const businessSlug = formData.get("businessSlug") as string | null;
-    const scheduleRaw = formData.get("schedule") as string | null;
+    const body = await request.json();
+    const {
+      batchId,
+      businessId,
+      storageKey,
+      fileName,
+      fileSize,
+      schedule,
+    } = body as {
+      batchId: string;
+      businessId: string;
+      storageKey: string;
+      fileName: string;
+      fileSize: number;
+      schedule?: ScheduleOverride[];
+    };
 
-    if (!file || !businessSlug) {
+    if (!batchId || !businessId || !storageKey || !fileName) {
       return NextResponse.json(
-        { error: "Missing file or businessSlug" },
+        { error: "Faltan datos requeridos (batchId, businessId, storageKey, fileName)" },
         { status: 400 }
       );
     }
 
-    // Parse optional schedule overrides from wizard
-    let scheduleOverrides: ScheduleOverride[] | undefined;
-    if (scheduleRaw) {
-      try {
-        scheduleOverrides = JSON.parse(scheduleRaw) as ScheduleOverride[];
-      } catch {
-        // Ignore invalid JSON — backend will use default schedule
-      }
-    }
-
-    // Validate file type
-    if (!file.name.endsWith(".zip") && file.type !== "application/zip") {
-      return NextResponse.json(
-        { error: "File must be a ZIP archive" },
-        { status: 400 }
-      );
-    }
-
-    // Max 100MB
-    if (file.size > 100 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: "ZIP file exceeds maximum size of 100MB" },
-        { status: 413 }
-      );
-    }
-
+    // Verify business exists
     const business = await db.business.findUnique({
-      where: { slug: businessSlug, isActive: true },
+      where: { id: businessId, isActive: true },
     });
     if (!business) {
       return NextResponse.json(
@@ -70,15 +55,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Download ZIP from R2
     let zipBuffer: Buffer;
     try {
-      const arrayBuf = await file.arrayBuffer();
-      zipBuffer = Buffer.from(arrayBuf);
-    } catch (bufErr) {
-      console.error("[Batches] Failed to read file buffer:", bufErr);
+      zipBuffer = await downloadBuffer(storageKey);
+    } catch (dlErr) {
+      const msg = dlErr instanceof Error ? dlErr.message : String(dlErr);
+      console.error("[Batches] Failed to download from R2:", msg);
       return NextResponse.json(
-        { error: `Error leyendo el archivo (${file.size} bytes). Puede ser demasiado grande.` },
-        { status: 400 }
+        { error: `Error descargando archivo de almacenamiento: ${msg}` },
+        { status: 502 }
       );
     }
 
@@ -98,25 +84,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const batchId = uuidv4();
-
-    // Sanitize filename
-    const safeFilename = file.name
+    const safeFilename = fileName
       .replace(/\.\./g, "")
       .replace(/[^a-zA-Z0-9._\-]/g, "_");
-    const storageKey = batchStorageKey(business.slug, batchId, safeFilename);
-
-    // Upload ZIP to storage
-    try {
-      await uploadBuffer(storageKey, zipBuffer, "application/zip");
-    } catch (s3Err) {
-      const msg = s3Err instanceof Error ? s3Err.message : String(s3Err);
-      console.error("[Batches] S3 upload failed:", msg, s3Err);
-      return NextResponse.json(
-        { error: `Error subiendo al almacenamiento: ${msg}` },
-        { status: 502 }
-      );
-    }
 
     // Create batch record
     let batch;
@@ -128,7 +98,7 @@ export async function POST(request: NextRequest) {
             businessId: business.id,
             originalFilename: safeFilename,
             storagePath: storageKey,
-            fileSize: file.size,
+            fileSize: fileSize || zipBuffer.length,
             fileHash,
             status: "UPLOADED",
             uploadedByIp:
@@ -144,7 +114,7 @@ export async function POST(request: NextRequest) {
             action: "BATCH_UPLOADED",
             entityType: "UploadBatch",
             entityId: b.id,
-            detail: { filename: safeFilename, fileSize: file.size },
+            detail: { filename: safeFilename, fileSize: fileSize || zipBuffer.length },
           },
         });
         return b;
@@ -158,8 +128,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Process batch asynchronously (parse + validate + create drafts)
-    processBatch(batch.id, zipBuffer, business.id, business.slug, scheduleOverrides).catch(
+    // Process batch asynchronously
+    processBatch(batch.id, zipBuffer, business.id, business.slug, schedule).catch(
       (err) => {
         console.error(`[Batch] Processing error for ${batch.id}:`, err);
       }
