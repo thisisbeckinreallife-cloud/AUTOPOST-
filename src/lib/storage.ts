@@ -83,14 +83,14 @@ export async function uploadBuffer(
 
 export async function getSignedUploadUrl(
   key: string,
-  contentType: string,
+  _contentType: string,
   expiresInSeconds = 3600
 ): Promise<string> {
   const client = getS3Client();
+  // Don't include ContentType in the signature — allows any content type from client
   const command = new PutObjectCommand({
     Bucket: BUCKET(),
     Key: key,
-    ContentType: contentType,
   });
   return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
 }

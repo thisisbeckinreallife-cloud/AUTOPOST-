@@ -213,13 +213,13 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
       const uploadRes = await fetch(uploadUrl, {
         method: "PUT",
         body: file,
-        headers: {
-          "Content-Type": "application/zip",
-        },
       });
 
       if (!uploadRes.ok) {
-        setError(`Error subiendo a almacenamiento (${uploadRes.status}). Intentalo de nuevo.`);
+        let detail = "";
+        try { detail = await uploadRes.text(); } catch {}
+        console.error("R2 upload error:", uploadRes.status, detail);
+        setError(`Error subiendo a almacenamiento (${uploadRes.status}): ${detail.substring(0, 200)}`);
         setStep("calendar");
         return;
       }
