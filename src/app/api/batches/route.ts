@@ -3,6 +3,9 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+
+// Allow up to 100MB uploads (Next.js App Router defaults to ~4.5MB)
+export const dynamic = "force-dynamic";
 import { requireSession } from "@/lib/auth";
 import { uploadBuffer, batchStorageKey } from "@/lib/storage";
 import { hashSHA256 } from "@/lib/crypto";
@@ -125,7 +128,11 @@ export async function POST(request: NextRequest) {
     if (err instanceof Error && err.message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    console.error("[Batches] POST error:", err);
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error("[Batches] POST error:", errorMessage, err);
+    return NextResponse.json(
+      { error: `Error procesando el archivo: ${errorMessage}` },
+      { status: 500 }
+    );
   }
 }

@@ -171,29 +171,62 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
     try {
       // Repack ZIP with user's edits and schedule
       setUploadProgress("Empaquetando tu contenido...");
-      const repackedBlob = await repackZip(posts.filter((p) => p.status !== "error"));
-      const repackedFile = new File([repackedBlob], file.name, { type: "application/zip" });
+      const validPosts = posts.filter((p) => p.status !== "error");
+
+      if (validPosts.length === 0) {
+        setError("No hay posts validos para subir.");
+        setStep("calendar");
+        return;
+      }
+
+      let uploadFile: File;
+      try {
+        const repackedBlob = await repackZip(validPosts);
+        // Ensure filename always ends in .zip
+        const fileName = file.name.endsWith(".zip") ? file.name : `${file.name}.zip`;
+        uploadFile = new File([repackedBlob], fileName, { type: "application/zip" });
+      } catch (repackErr) {
+        // If repack fails, fall back to the original file
+        console.error("Repack failed, using original file:", repackErr);
+        uploadFile = file;
+      }
 
       setUploadProgress("Subiendo a AutoPost...");
       const fd = new FormData();
-      fd.append("file", repackedFile);
+      fd.append("file", uploadFile);
       fd.append("businessSlug", businessSlug);
 
       const res = await fetch("/api/batches", { method: "POST", body: fd });
-      const data = await res.json();
+
+      // Handle non-JSON responses (e.g., 413 from proxy, HTML error pages)
+      const contentType = res.headers.get("content-type") ?? "";
+      let data: { error?: string; data?: { batchId: string } };
+      if (contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        data = { error: `Error del servidor (${res.status}): ${text.substring(0, 100)}` };
+      }
 
       if (!res.ok) {
-        setError(data.error ?? "No se pudo subir el archivo. Intentalo de nuevo.");
+        // Special handling for common errors
+        if (res.status === 409) {
+          setError("Este contenido ya fue subido anteriormente. Revisa tus batches.");
+        } else if (res.status === 413) {
+          setError("El archivo es demasiado grande. Reduce el numero de fotos o su tamaño.");
+        } else {
+          setError(data.error ?? `Error al subir (${res.status}). Intentalo de nuevo.`);
+        }
         setStep("calendar");
         return;
       }
 
       setUploadProgress("Listo! Redirigiendo...");
-      // Cleanup
       cleanupPreviews(posts);
-      router.push(`/businesses/${businessSlug}/batches/${data.data.batchId}`);
-    } catch {
-      setError("Error de red. Comprueba tu conexion.");
+      router.push(`/businesses/${businessSlug}/batches/${data.data!.batchId}`);
+    } catch (err) {
+      console.error("Upload error:", err);
+      setError("Error de red. Comprueba tu conexion e intentalo de nuevo.");
       setStep("calendar");
     }
   }

@@ -2,6 +2,10 @@
 const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ["bullmq", "ioredis", "jszip", "sharp"],
+    // Allow large request bodies for ZIP uploads (default is ~4.5MB)
+    serverActions: {
+      bodySizeLimit: "100mb",
+    },
   },
   images: {
     remotePatterns: [

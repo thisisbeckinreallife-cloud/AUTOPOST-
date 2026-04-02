@@ -612,19 +612,28 @@ export async function repackZip(posts: DetectedPost[]): Promise<Blob> {
     const post = posts[i];
     if (post.status === "error") continue;
 
-    // Build folder name
-    let folderName: string;
+    // Determine publish date — always required by backend.
+    // Add 10-minute buffer so it's never "too soon" for the validator.
+    let publishDate: Date;
     if (post.publishAt) {
-      const d = post.publishAt;
-      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-      const safeName = post.sourceName
-        .replace(/\.[^.]+$/, "")
-        .replace(/[^a-zA-Z0-9_\-]/g, "_")
-        .substring(0, 30);
-      folderName = `${dateStr}_${safeName || `post${i + 1}`}`;
+      publishDate = new Date(post.publishAt);
+      const minTime = new Date(Date.now() + 10 * 60 * 1000); // 10 min from now
+      if (publishDate < minTime) {
+        publishDate = minTime;
+      }
     } else {
-      folderName = `post${String(i + 1).padStart(3, "0")}`;
+      // Fallback: schedule 24h from now + index offset
+      publishDate = new Date(Date.now() + (24 + i) * 60 * 60 * 1000);
     }
+
+    // Build folder name
+    const d = publishDate;
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const safeName = post.sourceName
+      .replace(/\.[^.]+$/, "")
+      .replace(/[^a-zA-Z0-9_\-]/g, "_")
+      .substring(0, 30);
+    const folderName = `${dateStr}_${safeName || `post${i + 1}`}`;
 
     const folder = zip.folder(folderName)!;
 
@@ -638,17 +647,19 @@ export async function repackZip(posts: DetectedPost[]): Promise<Blob> {
       folder.file("caption.txt", post.caption);
     }
 
-    // Add meta.json
+    // Add meta.json — publish_at is ALWAYS required by the backend
     const meta: Record<string, unknown> = {
       type: post.postType,
+      publish_at: publishDate.toISOString(),
     };
-    if (post.publishAt) {
-      meta.publish_at = post.publishAt.toISOString();
-    }
     folder.file("meta.json", JSON.stringify(meta, null, 2));
   }
 
-  return zip.generateAsync({ type: "blob" });
+  return zip.generateAsync({
+    type: "blob",
+    compression: "DEFLATE",
+    compressionOptions: { level: 6 },
+  });
 }
 
 // ─── Cleanup ────────────────────────────────────────────────────────────────
