@@ -43,7 +43,8 @@ export async function POST(
     if (err instanceof Error && err.message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    console.error("[Batch Confirm] Error:", err);
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[Batch Confirm] Error:", msg, err);
+    return NextResponse.json({ error: `Error programando publicaciones: ${msg}` }, { status: 500 });
   }
 }
