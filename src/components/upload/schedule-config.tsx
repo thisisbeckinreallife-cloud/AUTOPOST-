@@ -85,8 +85,9 @@ export function calculatePublishDates(
       const publishDate = new Date(current);
       publishDate.setHours(hours, minutes, 0, 0);
 
-      // Skip if the date+time is in the past
-      if (publishDate.getTime() > now.getTime()) {
+      // Skip if the date+time is in the past or too close to now (need 10min buffer for backend)
+      const minTime = now.getTime() + 10 * 60 * 1000;
+      if (publishDate.getTime() > minTime) {
         dates.push(publishDate);
       }
 

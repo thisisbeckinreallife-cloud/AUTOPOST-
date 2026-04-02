@@ -128,7 +128,11 @@ export async function POST(request: NextRequest) {
     if (err instanceof Error && err.message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    console.error("[Batches] POST error:", err);
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error("[Batches] POST error:", errorMessage, err);
+    return NextResponse.json(
+      { error: `Error procesando el archivo: ${errorMessage}` },
+      { status: 500 }
+    );
   }
 }
