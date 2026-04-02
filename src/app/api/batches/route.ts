@@ -59,7 +59,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const zipBuffer = Buffer.from(await file.arrayBuffer());
+    let zipBuffer: Buffer;
+    try {
+      const arrayBuf = await file.arrayBuffer();
+      zipBuffer = Buffer.from(arrayBuf);
+    } catch (bufErr) {
+      console.error("[Batches] Failed to read file buffer:", bufErr);
+      return NextResponse.json(
+        { error: `Error leyendo el archivo (${file.size} bytes). Puede ser demasiado grande.` },
+        { status: 400 }
+      );
+    }
+
     const fileHash = hashSHA256(zipBuffer);
 
     // Prevent reprocessing the same ZIP
@@ -69,7 +80,7 @@ export async function POST(request: NextRequest) {
     if (existingBatch) {
       return NextResponse.json(
         {
-          error: "This ZIP has already been uploaded",
+          error: "Este ZIP ya fue subido anteriormente.",
           data: { batchId: existingBatch.id, status: existingBatch.status },
         },
         { status: 409 }
@@ -85,41 +96,58 @@ export async function POST(request: NextRequest) {
     const storageKey = batchStorageKey(business.slug, batchId, safeFilename);
 
     // Upload ZIP to storage
-    await uploadBuffer(storageKey, zipBuffer, "application/zip");
+    try {
+      await uploadBuffer(storageKey, zipBuffer, "application/zip");
+    } catch (s3Err) {
+      const msg = s3Err instanceof Error ? s3Err.message : String(s3Err);
+      console.error("[Batches] S3 upload failed:", msg, s3Err);
+      return NextResponse.json(
+        { error: `Error subiendo al almacenamiento: ${msg}` },
+        { status: 502 }
+      );
+    }
 
     // Create batch record
-    const batch = await db.$transaction(async (tx) => {
-      const b = await tx.uploadBatch.create({
-        data: {
-          id: batchId,
-          businessId: business.id,
-          originalFilename: safeFilename,
-          storagePath: storageKey,
-          fileSize: file.size,
-          fileHash,
-          status: "UPLOADED",
-          uploadedByIp:
-            request.headers.get("x-forwarded-for") ??
-            request.headers.get("x-real-ip") ??
-            null,
-        },
+    let batch;
+    try {
+      batch = await db.$transaction(async (tx) => {
+        const b = await tx.uploadBatch.create({
+          data: {
+            id: batchId,
+            businessId: business.id,
+            originalFilename: safeFilename,
+            storagePath: storageKey,
+            fileSize: file.size,
+            fileHash,
+            status: "UPLOADED",
+            uploadedByIp:
+              request.headers.get("x-forwarded-for") ??
+              request.headers.get("x-real-ip") ??
+              null,
+          },
+        });
+        await tx.auditLog.create({
+          data: {
+            businessId: business.id,
+            adminUserId: session.adminUserId,
+            action: "BATCH_UPLOADED",
+            entityType: "UploadBatch",
+            entityId: b.id,
+            detail: { filename: safeFilename, fileSize: file.size },
+          },
+        });
+        return b;
       });
-      await tx.auditLog.create({
-        data: {
-          businessId: business.id,
-          adminUserId: session.adminUserId,
-          action: "BATCH_UPLOADED",
-          entityType: "UploadBatch",
-          entityId: b.id,
-          detail: { filename: safeFilename, fileSize: file.size },
-        },
-      });
-      return b;
-    });
+    } catch (dbErr) {
+      const msg = dbErr instanceof Error ? dbErr.message : String(dbErr);
+      console.error("[Batches] DB transaction failed:", msg, dbErr);
+      return NextResponse.json(
+        { error: `Error guardando en base de datos: ${msg}` },
+        { status: 500 }
+      );
+    }
 
     // Process batch asynchronously (parse + validate + create drafts)
-    // In production, this should be done in a background job.
-    // Here we process inline but return the batch ID immediately.
     processBatch(batch.id, zipBuffer, business.id, business.slug).catch(
       (err) => {
         console.error(`[Batch] Processing error for ${batch.id}:`, err);

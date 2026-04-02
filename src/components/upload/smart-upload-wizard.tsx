@@ -227,8 +227,9 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
       cleanupPreviews(posts);
       router.push(`/businesses/${businessSlug}/batches/${data.data!.batchId}`);
     } catch (err) {
-      console.error("Upload error:", err);
-      setError("Error de red. Comprueba tu conexion e intentalo de nuevo.");
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("Upload error:", msg, err);
+      setError(`Error de red: ${msg}. Comprueba tu conexion e intentalo de nuevo.`);
       setStep("calendar");
     }
   }
