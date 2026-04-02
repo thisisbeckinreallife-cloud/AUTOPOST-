@@ -15,8 +15,11 @@ import { Readable } from "stream";
 
 function getS3Client(): S3Client {
   const endpoint = process.env.STORAGE_ENDPOINT;
+  // R2 requires lowercase "auto" as region
+  const rawRegion = process.env.STORAGE_REGION ?? "auto";
+  const region = rawRegion.toLowerCase();
   return new S3Client({
-    region: process.env.STORAGE_REGION ?? "us-east-1",
+    region,
     credentials: {
       accessKeyId: process.env.STORAGE_ACCESS_KEY_ID ?? "",
       secretAccessKey: process.env.STORAGE_SECRET_ACCESS_KEY ?? "",
