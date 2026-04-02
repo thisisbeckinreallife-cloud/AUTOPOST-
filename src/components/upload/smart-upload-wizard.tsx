@@ -102,9 +102,41 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
   }, []);
 
   function handleUpdatePost(id: string, updates: Partial<DetectedPost>) {
-    setPosts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...updates } : p))
-    );
+    setPosts((prev) => {
+      const post = prev.find((p) => p.id === id);
+      if (!post) return prev;
+
+      // If user switches a multi-image post to "image" (individual posts),
+      // split it into separate posts, one per media file.
+      if (
+        updates.postType === "image" &&
+        post.postType === "carousel" &&
+        post.mediaFiles.length >= 2
+      ) {
+        const newPosts: DetectedPost[] = [];
+        for (const p of prev) {
+          if (p.id !== id) {
+            newPosts.push(p);
+            continue;
+          }
+          for (const media of p.mediaFiles) {
+            newPosts.push({
+              ...p,
+              id: Math.random().toString(36).substring(2, 10),
+              mediaFiles: [media],
+              postType: media.type === "video" ? "reel" : "image",
+              sourceName: media.filename,
+              statusMessage: p.caption ? "Listo para publicar" : "Sin texto. Puedes agregarlo ahora.",
+            });
+          }
+        }
+        return newPosts;
+      }
+
+      // If user switches individual images to carousel, we just update the type.
+      // (Merging would require selecting which posts to combine — complex UI.)
+      return prev.map((p) => (p.id === id ? { ...p, ...updates } : p));
+    });
   }
 
   function handleRemovePost(id: string) {
