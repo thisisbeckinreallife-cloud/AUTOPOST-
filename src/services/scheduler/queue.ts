@@ -47,7 +47,7 @@ export async function schedulePublishJob(
   const now = Date.now();
   const delay = Math.max(0, publishAt.getTime() - now);
 
-  const jobId = `publish:${publishJobId}`;
+  const jobId = `publish-${publishJobId}`;
 
   const payload: PublishJobPayload = {
     postDraftId,
@@ -80,7 +80,7 @@ export async function cancelPublishJob(bullmqJobId: string): Promise<void> {
  */
 export async function retryPublishJobNow(publishJobId: string): Promise<string> {
   const queue = getPublishQueue();
-  const jobId = `publish:${publishJobId}`;
+  const jobId = `publish-${publishJobId}`;
 
   const job = await queue.getJob(jobId);
   if (job) {

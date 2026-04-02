@@ -61,6 +61,8 @@ export async function POST(
     if (err instanceof Error && err.message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[Post Retry] Error:", msg, err);
+    return NextResponse.json({ error: `Error reintentando publicación: ${msg}` }, { status: 500 });
   }
 }
