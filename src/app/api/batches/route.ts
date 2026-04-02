@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 import { requireSession } from "@/lib/auth";
 import { uploadBuffer, batchStorageKey, checkStorageConfig } from "@/lib/storage";
 import { hashSHA256 } from "@/lib/crypto";
-import { processBatch } from "@/services/scheduler/batch-processor";
+import { processBatch, type ScheduleOverride } from "@/services/scheduler/batch-processor";
 import { v4 as uuidv4 } from "uuid";
 
 export async function POST(request: NextRequest) {
@@ -25,12 +25,23 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const businessSlug = formData.get("businessSlug") as string | null;
+    const scheduleRaw = formData.get("schedule") as string | null;
 
     if (!file || !businessSlug) {
       return NextResponse.json(
         { error: "Missing file or businessSlug" },
         { status: 400 }
       );
+    }
+
+    // Parse optional schedule overrides from wizard
+    let scheduleOverrides: ScheduleOverride[] | undefined;
+    if (scheduleRaw) {
+      try {
+        scheduleOverrides = JSON.parse(scheduleRaw) as ScheduleOverride[];
+      } catch {
+        // Ignore invalid JSON — backend will use default schedule
+      }
     }
 
     // Validate file type
@@ -148,7 +159,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Process batch asynchronously (parse + validate + create drafts)
-    processBatch(batch.id, zipBuffer, business.id, business.slug).catch(
+    processBatch(batch.id, zipBuffer, business.id, business.slug, scheduleOverrides).catch(
       (err) => {
         console.error(`[Batch] Processing error for ${batch.id}:`, err);
       }

@@ -29,11 +29,21 @@ import { v4 as uuidv4 } from "uuid";
 // PARSE + VALIDATE BATCH
 // ─────────────────────────────────────────
 
+/** Schedule overrides sent from the client wizard */
+export interface ScheduleOverride {
+  /** Index-based or sourceName-based matching */
+  index: number;
+  publishAt: string; // ISO 8601
+  caption?: string;
+  postType?: "image" | "carousel" | "reel";
+}
+
 export async function processBatch(
   batchId: string,
   zipBuffer: Buffer,
   businessId: string,
-  businessSlug: string
+  businessSlug: string,
+  scheduleOverrides?: ScheduleOverride[]
 ): Promise<void> {
   // Mark as parsing
   await db.uploadBatch.update({
@@ -59,6 +69,24 @@ export async function processBatch(
         },
       });
       return;
+    }
+
+    // 1b. Apply schedule overrides from client wizard
+    if (scheduleOverrides && scheduleOverrides.length > 0) {
+      for (const override of scheduleOverrides) {
+        const post = parseResult.posts[override.index];
+        if (!post) continue;
+
+        if (override.publishAt) {
+          post.metaJson.publish_at = override.publishAt;
+        }
+        if (override.caption !== undefined) {
+          post.caption = override.caption;
+        }
+        if (override.postType) {
+          post.metaJson.type = override.postType;
+        }
+      }
     }
 
     // 2. Validate + create drafts

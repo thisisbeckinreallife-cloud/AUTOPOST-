@@ -23,7 +23,6 @@ import { CalendarPreview } from "./calendar-preview";
 import { TutorialPanel } from "./tutorial-panel";
 import {
   analyzeZip,
-  repackZip,
   cleanupPreviews,
   type DetectedPost,
   type AnalysisResult,
@@ -169,8 +168,7 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
     setError("");
 
     try {
-      // Repack ZIP with user's edits and schedule
-      setUploadProgress("Empaquetando tu contenido...");
+      setUploadProgress("Preparando datos...");
       const validPosts = posts.filter((p) => p.status !== "error");
 
       if (validPosts.length === 0) {
@@ -179,22 +177,22 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
         return;
       }
 
-      let uploadFile: File;
-      try {
-        const repackedBlob = await repackZip(validPosts);
-        // Ensure filename always ends in .zip
-        const fileName = file.name.endsWith(".zip") ? file.name : `${file.name}.zip`;
-        uploadFile = new File([repackedBlob], fileName, { type: "application/zip" });
-      } catch (repackErr) {
-        // If repack fails, fall back to the original file
-        console.error("Repack failed, using original file:", repackErr);
-        uploadFile = file;
-      }
+      // Build schedule overrides JSON (small — just dates, captions, types)
+      // This avoids repacking the entire ZIP which can be too large for upload
+      const scheduleOverrides = validPosts.map((post, idx) => ({
+        index: idx,
+        publishAt: post.publishAt
+          ? new Date(Math.max(post.publishAt.getTime(), Date.now() + 10 * 60 * 1000)).toISOString()
+          : new Date(Date.now() + (24 + idx) * 60 * 60 * 1000).toISOString(),
+        caption: post.caption || undefined,
+        postType: post.postType,
+      }));
 
       setUploadProgress("Subiendo a AutoPost...");
       const fd = new FormData();
-      fd.append("file", uploadFile);
+      fd.append("file", file);
       fd.append("businessSlug", businessSlug);
+      fd.append("schedule", JSON.stringify(scheduleOverrides));
 
       const res = await fetch("/api/batches", { method: "POST", body: fd });
 
