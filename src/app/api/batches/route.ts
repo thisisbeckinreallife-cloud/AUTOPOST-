@@ -7,13 +7,19 @@ import { db } from "@/lib/db";
 // Allow up to 100MB uploads (Next.js App Router defaults to ~4.5MB)
 export const dynamic = "force-dynamic";
 import { requireSession } from "@/lib/auth";
-import { uploadBuffer, batchStorageKey } from "@/lib/storage";
+import { uploadBuffer, batchStorageKey, checkStorageConfig } from "@/lib/storage";
 import { hashSHA256 } from "@/lib/crypto";
 import { processBatch } from "@/services/scheduler/batch-processor";
 import { v4 as uuidv4 } from "uuid";
 
 export async function POST(request: NextRequest) {
   try {
+    // Pre-flight: check storage is configured before doing any work
+    const storageError = checkStorageConfig();
+    if (storageError) {
+      return NextResponse.json({ error: storageError }, { status: 503 });
+    }
+
     const session = await requireSession();
 
     const formData = await request.formData();

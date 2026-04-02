@@ -35,20 +35,41 @@ async function checkMetaConfig(): Promise<{ ok: boolean; detail: string }> {
   }
 }
 
+function checkStorage(): { ok: boolean; detail: string } {
+  const missing: string[] = [];
+  if (!process.env.STORAGE_BUCKET) missing.push("STORAGE_BUCKET");
+  if (!process.env.STORAGE_ACCESS_KEY_ID) missing.push("STORAGE_ACCESS_KEY_ID");
+  if (!process.env.STORAGE_SECRET_ACCESS_KEY) missing.push("STORAGE_SECRET_ACCESS_KEY");
+  if (missing.length > 0) {
+    return { ok: false, detail: `Faltan: ${missing.join(", ")}` };
+  }
+  return { ok: true, detail: `Bucket: ${process.env.STORAGE_BUCKET}` };
+}
+
+function checkRedis(): { ok: boolean; detail: string } {
+  const url = process.env.REDIS_URL;
+  if (!url) return { ok: false, detail: "REDIS_URL no configurada" };
+  return { ok: true, detail: "OK" };
+}
+
 export async function GET() {
   const [encKey, db, meta] = await Promise.all([
     Promise.resolve(checkEncryptionKey()),
     checkDatabase(),
     checkMetaConfig(),
   ]);
+  const storage = checkStorage();
+  const redis = checkRedis();
 
-  const allOk = encKey.ok && db.ok && meta.ok;
+  const allOk = encKey.ok && db.ok && meta.ok && storage.ok && redis.ok;
 
   return NextResponse.json({
     ok: allOk,
     checks: {
       encryption_key: encKey,
       database: db,
+      storage,
+      redis,
       meta_credentials: meta,
     },
   }, { status: allOk ? 200 : 500 });

@@ -31,6 +31,21 @@ const BUCKET = () => {
   return b;
 };
 
+/**
+ * Check if storage is properly configured.
+ * Returns null if OK, or an error message describing what's missing.
+ */
+export function checkStorageConfig(): string | null {
+  const missing: string[] = [];
+  if (!process.env.STORAGE_BUCKET) missing.push("STORAGE_BUCKET");
+  if (!process.env.STORAGE_ACCESS_KEY_ID) missing.push("STORAGE_ACCESS_KEY_ID");
+  if (!process.env.STORAGE_SECRET_ACCESS_KEY) missing.push("STORAGE_SECRET_ACCESS_KEY");
+
+  if (missing.length === 0) return null;
+
+  return `Almacenamiento no configurado. Faltan variables de entorno: ${missing.join(", ")}. Configuralas en Railway → Variables.`;
+}
+
 export async function uploadFile(
   key: string,
   body: Buffer | Readable,

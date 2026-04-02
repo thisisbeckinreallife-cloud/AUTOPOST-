@@ -214,6 +214,8 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
           setError("Este contenido ya fue subido anteriormente. Revisa tus batches.");
         } else if (res.status === 413) {
           setError("El archivo es demasiado grande. Reduce el numero de fotos o su tamaño.");
+        } else if (res.status === 503) {
+          setError(data.error ?? "El servicio de almacenamiento no esta configurado. Contacta al administrador.");
         } else {
           setError(data.error ?? `Error al subir (${res.status}). Intentalo de nuevo.`);
         }
