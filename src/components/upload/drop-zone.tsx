@@ -298,15 +298,35 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
     if (!fileList || fileList.length === 0) return;
     setError("");
 
+    // Determine if the selected folder contains subfolders.
+    // If it does, strip the root name (it's just a container).
+    // If it only has direct files, KEEP the folder name so the analyzer
+    // groups them as one post (e.g., a carousel).
+    let hasSubfolders = false;
+    for (let i = 0; i < fileList.length; i++) {
+      const rp = fileList[i].webkitRelativePath || "";
+      if (rp.split("/").length > 2) {
+        hasSubfolders = true;
+        break;
+      }
+    }
+
     const files: File[] = [];
     for (let i = 0; i < fileList.length; i++) {
       const file = fileList[i];
       const relativePath = file.webkitRelativePath || file.name;
       if (shouldSkip(relativePath)) continue;
 
-      const pathParts = relativePath.split("/");
-      const innerPath =
-        pathParts.length > 1 ? pathParts.slice(1).join("/") : file.name;
+      let innerPath: string;
+      if (hasSubfolders) {
+        // Strip root folder — it's just a container for subfolders
+        const pathParts = relativePath.split("/");
+        innerPath = pathParts.length > 1 ? pathParts.slice(1).join("/") : file.name;
+      } else {
+        // Keep full path — the folder itself IS the post (carousel, etc.)
+        innerPath = relativePath;
+      }
+
       (file as File & { _relativePath: string })._relativePath = innerPath;
       files.push(file);
     }

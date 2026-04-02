@@ -281,6 +281,50 @@ function PostCard({
             ))}
           </div>
 
+          {/* Post type selector */}
+          {post.mediaFiles.length >= 2 && (
+            <div>
+              <label className="text-xs font-medium text-slate-600 mb-1.5 block">
+                Tipo de publicacion
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onUpdate({ postType: "carousel" });
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    post.postType === "carousel"
+                      ? "bg-blue-100 text-blue-700 ring-1 ring-blue-300"
+                      : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                  }`}
+                >
+                  <Layers className="h-3.5 w-3.5" />
+                  Carrusel ({post.mediaFiles.length} fotos)
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onUpdate({ postType: "image" });
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    post.postType === "image"
+                      ? "bg-green-100 text-green-700 ring-1 ring-green-300"
+                      : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                  }`}
+                >
+                  <Image className="h-3.5 w-3.5" />
+                  Posts separados
+                </button>
+              </div>
+              {post.postType === "image" && post.mediaFiles.length >= 2 && (
+                <p className="text-[11px] text-amber-600 mt-1.5">
+                  Cada foto se publicara como un post individual.
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Source info */}
           <div className="text-xs text-slate-400">
             Origen: <span className="font-mono">{post.sourceName}</span>

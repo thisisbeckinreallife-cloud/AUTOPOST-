@@ -35,34 +35,44 @@ function getDefaultTimezone(): string {
   }
 }
 
-function getTomorrowDate(): string {
-  const d = new Date();
-  d.setDate(d.getDate() + 1);
-  return d.toISOString().split("T")[0];
+function getTodayDate(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
+function getCurrentHourCeil(): string {
+  const now = new Date();
+  // Round up to next hour + 1 for safety margin
+  now.setHours(now.getHours() + 1, 0, 0, 0);
+  return `${String(now.getHours()).padStart(2, "0")}:00`;
 }
 
 export function getDefaultScheduleSettings(): ScheduleSettings {
   return {
-    time: "10:00",
+    time: getCurrentHourCeil(),
     days: [true, true, true, true, true, true, true],
     spacing: "daily",
     timezone: getDefaultTimezone(),
-    startDate: getTomorrowDate(),
+    startDate: getTodayDate(),
   };
 }
 
-/** Calculate publish dates based on settings */
+/** Calculate publish dates based on settings, skipping past times */
 export function calculatePublishDates(
   postCount: number,
   settings: ScheduleSettings
 ): Date[] {
   const dates: Date[] = [];
   const [hours, minutes] = settings.time.split(":").map(Number);
+  const now = new Date();
   let current = new Date(`${settings.startDate}T00:00:00`);
 
-  while (dates.length < postCount) {
+  // Safety: limit iterations to prevent infinite loops
+  let iterations = 0;
+  const maxIterations = postCount * 30;
+
+  while (dates.length < postCount && iterations < maxIterations) {
+    iterations++;
     const dayOfWeek = current.getDay(); // 0=Sun, 1=Mon...
-    // Convert to our index (0=Mon, 1=Tue...)
     const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
     let shouldPublish = settings.days[dayIndex];
@@ -74,9 +84,12 @@ export function calculatePublishDates(
     if (shouldPublish) {
       const publishDate = new Date(current);
       publishDate.setHours(hours, minutes, 0, 0);
-      dates.push(publishDate);
 
-      // Skip days based on spacing
+      // Skip if the date+time is in the past
+      if (publishDate.getTime() > now.getTime()) {
+        dates.push(publishDate);
+      }
+
       if (settings.spacing === "every2") {
         current.setDate(current.getDate() + 2);
         continue;
@@ -108,6 +121,12 @@ export function ScheduleConfig({ postCount, initialSettings, onChange }: Schedul
     ? lastDate.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })
     : "";
 
+  // Check if start date is today and selected time is in the past
+  const isToday = settings.startDate === getTodayDate();
+  const now = new Date();
+  const [selH, selM] = settings.time.split(":").map(Number);
+  const timeInPast = isToday && (selH < now.getHours() || (selH === now.getHours() && selM <= now.getMinutes()));
+
   return (
     <div className="space-y-6">
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5">
@@ -126,10 +145,15 @@ export function ScheduleConfig({ postCount, initialSettings, onChange }: Schedul
         <input
           type="date"
           value={settings.startDate}
-          min={getTomorrowDate()}
+          min={getTodayDate()}
           onChange={(e) => update({ startDate: e.target.value })}
           className="border border-slate-300 rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none"
         />
+        {isToday && (
+          <p className="text-xs text-blue-600 mt-2">
+            Publicando hoy — solo se programaran posts con hora futura.
+          </p>
+        )}
       </div>
 
       {/* Time */}
@@ -146,9 +170,15 @@ export function ScheduleConfig({ postCount, initialSettings, onChange }: Schedul
           onChange={(e) => update({ time: e.target.value })}
           className="border border-slate-300 rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none"
         />
-        <p className="text-xs text-slate-400 mt-2">
-          Todos tus posts se publicaran a esta hora.
-        </p>
+        {timeInPast ? (
+          <p className="text-xs text-amber-600 mt-2">
+            Esta hora ya paso hoy. El primer post se programara para manana a esta hora.
+          </p>
+        ) : (
+          <p className="text-xs text-slate-400 mt-2">
+            Todos tus posts se publicaran a esta hora.
+          </p>
+        )}
       </div>
 
       {/* Spacing */}
