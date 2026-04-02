@@ -10,7 +10,6 @@
  *  5. Record result in DB
  *  6. Release lock
  */
-import "dotenv/config";
 import { Worker, Job } from "bullmq";
 import { createBullMQConnection } from "@/lib/redis";
 import { db } from "@/lib/db";
@@ -253,15 +252,20 @@ console.log(
   `[Worker] Started. Queue: ${PUBLISH_QUEUE_NAME} | Concurrency: ${CONCURRENCY}`
 );
 
-// Graceful shutdown
-process.on("SIGTERM", async () => {
-  console.log("[Worker] SIGTERM received, closing worker...");
-  await worker.close();
-  process.exit(0);
-});
+// Graceful shutdown — only register if running standalone (not inside Next.js)
+const isStandalone = !process.env.NEXT_RUNTIME;
+if (isStandalone) {
+  process.on("SIGTERM", async () => {
+    console.log("[Worker] SIGTERM received, closing worker...");
+    await worker.close();
+    process.exit(0);
+  });
 
-process.on("SIGINT", async () => {
-  console.log("[Worker] SIGINT received, closing worker...");
-  await worker.close();
-  process.exit(0);
-});
+  process.on("SIGINT", async () => {
+    console.log("[Worker] SIGINT received, closing worker...");
+    await worker.close();
+    process.exit(0);
+  });
+}
+
+export { worker };

@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  instrumentationHook: true,
   experimental: {
     serverComponentsExternalPackages: ["bullmq", "ioredis", "jszip", "sharp"],
     // Allow large request bodies for ZIP uploads (default is ~4.5MB)
