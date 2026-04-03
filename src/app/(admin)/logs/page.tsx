@@ -48,39 +48,43 @@ export default async function LogsPage({
       </div>
 
       {/* Filter */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por accion">
         <Link href="/logs">
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${
+          <button
+            type="button"
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
               !actionFilter
                 ? "bg-brand-500 text-white"
                 : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
             }`}
+            aria-pressed={!actionFilter}
           >
-            All
-          </span>
+            Todos
+          </button>
         </Link>
         {allActions.map(({ action }) => (
           <Link key={action} href={`/logs?action=${action}`}>
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-mono cursor-pointer transition-colors ${
+            <button
+              type="button"
+              className={`px-3 py-1.5 rounded-full text-xs font-mono transition-colors ${
                 actionFilter === action
                   ? "bg-brand-500 text-white"
                   : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
               }`}
+              aria-pressed={actionFilter === action}
             >
               {action}
-            </span>
+            </button>
           </Link>
         ))}
       </div>
 
       <Card>
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           {logs.length === 0 ? (
-            <div className="py-12 text-center text-slate-500">No logs found.</div>
+            <div className="py-12 text-center text-slate-500">No se encontraron registros.</div>
           ) : (
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[600px]">
               <thead>
                 <tr className="border-b border-slate-800">
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">
@@ -147,14 +151,15 @@ export default async function LogsPage({
 
       {/* Pagination */}
       {pages > 1 && (
-        <div className="flex items-center gap-2 justify-center">
+        <nav aria-label="Paginacion" className="flex items-center gap-2 justify-center">
           {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
             <Link
               key={p}
               href={`/logs?page=${p}${actionFilter ? `&action=${actionFilter}` : ""}`}
+              aria-current={p === page ? "page" : undefined}
             >
               <span
-                className={`px-3 py-1 rounded text-sm transition-colors ${
+                className={`px-3 py-1.5 rounded text-sm transition-colors ${
                   p === page
                     ? "bg-brand-500 text-white"
                     : "bg-slate-800 text-slate-400 hover:bg-slate-700"
@@ -164,7 +169,7 @@ export default async function LogsPage({
               </span>
             </Link>
           ))}
-        </div>
+        </nav>
       )}
     </div>
   );

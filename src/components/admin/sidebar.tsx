@@ -13,7 +13,9 @@ import {
   Zap,
   Menu,
   X,
+  Globe,
 } from "lucide-react";
+import { useLocale } from "@/lib/i18n";
 
 const navItems = [
   { href: "/dashboard", label: "Inicio", icon: LayoutDashboard },
@@ -25,6 +27,13 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const locale = useLocale();
+
+  function toggleLocale() {
+    const next = locale === "es" ? "en" : "es";
+    localStorage.setItem("autopost-locale", next);
+    window.location.reload();
+  }
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -32,8 +41,16 @@ export function Sidebar() {
     router.refresh();
   }
 
+  // Close mobile menu on Escape
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Escape" && mobileOpen) setMobileOpen(false);
+  }
+
   const sidebar = (
-    <aside className="fixed left-0 top-0 h-full w-60 bg-gradient-to-b from-surface-secondary to-surface-primary text-white flex flex-col z-40 border-r border-slate-800/50">
+    <aside
+      className="fixed left-0 top-0 h-full w-60 bg-gradient-to-b from-surface-secondary to-surface-primary text-white flex flex-col z-40 border-r border-slate-800/50"
+      onKeyDown={handleKeyDown}
+    >
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-6 py-5">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500/10">
@@ -45,7 +62,7 @@ export function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
+      <nav aria-label="Navegacion principal" className="flex-1 px-3 py-4 space-y-0.5">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname?.startsWith(href);
           return (
@@ -69,6 +86,14 @@ export function Sidebar() {
 
       {/* Bottom */}
       <div className="px-3 py-3 border-t border-slate-800/50 space-y-0.5">
+        <button
+          onClick={toggleLocale}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-800/60 hover:text-slate-300 transition-all duration-150"
+          title={locale === "es" ? "Switch to English" : "Cambiar a Espanol"}
+        >
+          <Globe className="h-[18px] w-[18px]" />
+          {locale === "es" ? "EN" : "ES"}
+        </button>
         <a
           href="https://help.instagram.com"
           target="_blank"
@@ -76,14 +101,14 @@ export function Sidebar() {
           className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-800/60 hover:text-slate-300 transition-all duration-150"
         >
           <HelpCircle className="h-[18px] w-[18px]" />
-          Ayuda
+          {locale === "es" ? "Ayuda" : "Help"}
         </a>
         <button
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-800/60 hover:text-slate-300 transition-all duration-150"
         >
           <LogOut className="h-[18px] w-[18px]" />
-          Cerrar sesión
+          {locale === "es" ? "Cerrar sesion" : "Log out"}
         </button>
       </div>
     </aside>
@@ -94,8 +119,10 @@ export function Sidebar() {
       {/* Mobile hamburger */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="fixed top-4 left-4 z-50 md:hidden flex h-10 w-10 items-center justify-center rounded-lg bg-surface-card border border-slate-800 text-slate-300 hover:text-white transition-colors"
-        aria-label="Toggle menu"
+        className="fixed top-4 left-4 z-50 md:hidden flex h-11 w-11 items-center justify-center rounded-lg bg-surface-card border border-slate-800 text-slate-300 hover:text-white transition-colors"
+        aria-label={mobileOpen ? "Cerrar menu" : "Abrir menu"}
+        aria-expanded={mobileOpen}
+        aria-controls="mobile-sidebar"
       >
         {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
@@ -110,7 +137,7 @@ export function Sidebar() {
             className="fixed inset-0 bg-black/60 z-30 md:hidden"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="md:hidden animate-slide-up">{sidebar}</div>
+          <div id="mobile-sidebar" className="md:hidden animate-slide-up">{sidebar}</div>
         </>
       )}
     </>

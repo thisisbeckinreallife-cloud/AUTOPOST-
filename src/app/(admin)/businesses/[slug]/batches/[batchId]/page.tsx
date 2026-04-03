@@ -7,6 +7,9 @@ import { Card } from "@/components/ui/card";
 import { formatDateInTz } from "@/lib/utils";
 import { AlertTriangle, CheckCircle, Clock, Image, Film, Layers, ChevronRight } from "lucide-react";
 import type { ParseError } from "@/types";
+import { BatchDetailSkeleton } from "@/components/ui/skeleton";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { useToast } from "@/components/ui/toast";
 
 interface BatchData {
   id: string;
@@ -50,6 +53,7 @@ export default function BatchDetailPage() {
   const [confirming, setConfirming] = useState(false);
   const [confirmResult, setConfirmResult] = useState<{ scheduled: number; failed: number } | null>(null);
   const [error, setError] = useState("");
+  const { toast } = useToast();
 
   async function fetchBatch() {
     try {
@@ -72,8 +76,9 @@ export default function BatchDetailPage() {
     try {
       const res = await fetch(`/api/batches/${batchId}/confirm`, { method: "POST" });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "No se pudo programar. Intentalo de nuevo."); return; }
+      if (!res.ok) { setError(data.error ?? "No se pudo programar. Intentalo de nuevo."); toast(data.error ?? "No se pudo programar", "error"); return; }
       setConfirmResult(data.data);
+      toast(`${data.data.scheduled} publicaciones programadas`, "success");
       await fetchBatch();
     } catch {
       setError("Error de red. Comprueba tu conexion.");
@@ -81,7 +86,7 @@ export default function BatchDetailPage() {
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center h-48 text-slate-500 text-sm">Cargando...</div>;
+    return <BatchDetailSkeleton />;
   }
   if (!batch) {
     return <div className="text-slate-500">No se encontro este contenido.</div>;
@@ -94,6 +99,12 @@ export default function BatchDetailPage() {
 
   return (
     <div className="space-y-6 max-w-2xl">
+      <Breadcrumb items={[
+        { label: "Inicio", href: "/dashboard" },
+        { label: batch.business.name, href: `/businesses/${slug}` },
+        { label: "Subidas", href: `/businesses/${slug}/batches` },
+        { label: batch.originalFilename },
+      ]} />
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-slate-100 truncate">{batch.originalFilename}</h1>

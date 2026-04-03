@@ -7,6 +7,9 @@ import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { AlertTriangle, RefreshCw, XCircle, ExternalLink } from "lucide-react";
+import { PostDetailSkeleton } from "@/components/ui/skeleton";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { useToast } from "@/components/ui/toast";
 
 interface PostDetail {
   id: string;
@@ -64,6 +67,7 @@ export default function PostDetailPage() {
   const [retrying, setRetrying] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState("");
+  const { toast } = useToast();
 
   async function fetchPost() {
     try {
@@ -89,8 +93,10 @@ export default function PostDetailPage() {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Failed to retry");
+        toast(data.error ?? "No se pudo reintentar", "error");
         return;
       }
+      toast("Reintento programado", "success");
       await fetchPost();
     } catch {
       setError("Network error");
@@ -111,8 +117,10 @@ export default function PostDetailPage() {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Failed to cancel");
+        toast(data.error ?? "No se pudo cancelar", "error");
         return;
       }
+      toast("Publicacion cancelada", "info");
       await fetchPost();
     } catch {
       setError("Network error");
@@ -122,7 +130,7 @@ export default function PostDetailPage() {
   }
 
   if (loading) {
-    return <div className="text-slate-500 py-12 text-center">Cargando...</div>;
+    return <PostDetailSkeleton />;
   }
 
   if (!post) {
@@ -131,6 +139,12 @@ export default function PostDetailPage() {
 
   return (
     <div className="space-y-6 max-w-3xl">
+      <Breadcrumb items={[
+        { label: "Inicio", href: "/dashboard" },
+        { label: post.business.name, href: `/businesses/${slug}` },
+        { label: "Posts", href: `/businesses/${slug}/posts` },
+        { label: post.sourceFolderName },
+      ]} />
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>

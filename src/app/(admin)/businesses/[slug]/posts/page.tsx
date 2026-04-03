@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import Link from "next/link";
 import { formatDateInTz } from "@/lib/utils";
 import { Image, Film, Layers } from "lucide-react";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,11 @@ export default async function PostsPage({
 
   return (
     <div className="space-y-6">
+      <Breadcrumb items={[
+        { label: "Inicio", href: "/dashboard" },
+        { label: business.name, href: `/businesses/${params.slug}` },
+        { label: "Posts" },
+      ]} />
       <div>
         <h1 className="text-2xl font-bold text-slate-100">
           {business.name} — Posts
@@ -70,29 +76,33 @@ export default async function PostsPage({
       </div>
 
       {/* Status filter */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por estado">
         <Link href={`/businesses/${params.slug}/posts`}>
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${
+          <button
+            type="button"
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
               !statusFilter
                 ? "bg-brand-500 text-white"
                 : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
             }`}
+            aria-pressed={!statusFilter}
           >
-            All
-          </span>
+            Todos
+          </button>
         </Link>
         {STATUS_OPTIONS.map((s) => (
           <Link key={s} href={`/businesses/${params.slug}/posts?status=${s}`}>
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${
+            <button
+              type="button"
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                 statusFilter === s
                   ? "bg-brand-500 text-white"
                   : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
               }`}
+              aria-pressed={statusFilter === s}
             >
               {s}
-            </span>
+            </button>
           </Link>
         ))}
       </div>
@@ -146,16 +156,17 @@ export default async function PostsPage({
 
       {/* Pagination */}
       {pages > 1 && (
-        <div className="flex items-center gap-2 justify-center">
+        <nav aria-label="Paginacion" className="flex items-center gap-2 justify-center">
           {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
             <Link
               key={p}
               href={`/businesses/${params.slug}/posts?page=${p}${
                 statusFilter ? `&status=${statusFilter}` : ""
               }`}
+              aria-current={p === page ? "page" : undefined}
             >
               <span
-                className={`px-3 py-1 rounded text-sm transition-colors ${
+                className={`px-3 py-1.5 rounded text-sm transition-colors ${
                   p === page
                     ? "bg-brand-500 text-white"
                     : "bg-slate-800 text-slate-400 hover:bg-slate-700"
@@ -165,7 +176,7 @@ export default async function PostsPage({
               </span>
             </Link>
           ))}
-        </div>
+        </nav>
       )}
     </div>
   );

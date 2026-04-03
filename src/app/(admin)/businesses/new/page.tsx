@@ -4,7 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { slugify } from "@/lib/utils";
+import { useToast } from "@/components/ui/toast";
 
 const COMMON_TIMEZONES = [
   "UTC",
@@ -33,6 +35,7 @@ export default function NewBusinessPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { toast } = useToast();
 
   function handleNameChange(name: string) {
     setForm((f) => ({
@@ -58,9 +61,11 @@ export default function NewBusinessPage() {
 
       if (!res.ok) {
         setError(data.error ?? "Failed to create business");
+        toast(data.error ?? "Error al crear la cuenta", "error");
         return;
       }
 
+      toast("Cuenta creada correctamente", "success");
       router.push(`/businesses/${data.data.slug}`);
       router.refresh();
     } catch {
@@ -84,12 +89,11 @@ export default function NewBusinessPage() {
               <label className="block text-sm font-medium text-slate-300 mb-1">
                 Nombre *
               </label>
-              <input
+              <Input
                 type="text"
                 required
                 value={form.name}
                 onChange={(e) => handleNameChange(e.target.value)}
-                className="w-full rounded-lg border border-slate-700 bg-surface-primary px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
                 placeholder="Mi Marca"
               />
             </div>
@@ -100,7 +104,7 @@ export default function NewBusinessPage() {
               </label>
               <div className="flex items-center gap-2">
                 <span className="text-slate-500 text-sm">/</span>
-                <input
+                <Input
                   type="text"
                   required
                   value={form.slug}
@@ -109,7 +113,7 @@ export default function NewBusinessPage() {
                   }
                   pattern="[a-z0-9-]+"
                   title="Lowercase letters, numbers, and hyphens only"
-                  className="flex-1 rounded-lg border border-slate-700 bg-surface-primary px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+                  className="flex-1"
                   placeholder="mi-marca"
                 />
               </div>

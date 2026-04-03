@@ -5,6 +5,7 @@ import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { Instagram, Upload, CheckCircle, AlertCircle, Clock, ChevronRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +46,10 @@ export default async function BusinessPage({
 
   return (
     <div className="space-y-6 max-w-2xl">
+      <Breadcrumb items={[
+        { label: "Inicio", href: "/dashboard" },
+        { label: business.name },
+      ]} />
       {/* Header */}
       <div className="flex items-center gap-4">
         <div className="h-14 w-14 rounded-full bg-brand-500/10 flex items-center justify-center shrink-0">
@@ -113,7 +118,7 @@ export default async function BusinessPage({
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Link href={`/businesses/${params.slug}/posts?status=SCHEDULED`}>
-          <Card className="p-4 hover:border-slate-700 transition-colors">
+          <Card className="p-4 hover:border-slate-700 hover:-translate-y-0.5 hover:shadow-glow transition-all duration-200">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 mb-2">
               <Clock className="h-4 w-4 text-blue-400" />
             </div>
@@ -122,7 +127,7 @@ export default async function BusinessPage({
           </Card>
         </Link>
         <Link href={`/businesses/${params.slug}/posts?status=PUBLISHED`}>
-          <Card className="p-4 hover:border-slate-700 transition-colors">
+          <Card className="p-4 hover:border-slate-700 hover:-translate-y-0.5 hover:shadow-glow transition-all duration-200">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500/10 mb-2">
               <CheckCircle className="h-4 w-4 text-green-400" />
             </div>
@@ -131,7 +136,7 @@ export default async function BusinessPage({
           </Card>
         </Link>
         <Link href={`/businesses/${params.slug}/posts?status=FAILED`}>
-          <Card className={`p-4 hover:border-slate-700 transition-colors ${failedCount > 0 ? "border-red-500/20" : ""}`}>
+          <Card className={`p-4 hover:border-slate-700 hover:-translate-y-0.5 hover:shadow-glow transition-all duration-200 ${failedCount > 0 ? "border-red-500/20" : ""}`}>
             <div className={`flex h-8 w-8 items-center justify-center rounded-lg mb-2 ${failedCount > 0 ? "bg-red-500/10" : "bg-slate-500/10"}`}>
               <AlertCircle className={`h-4 w-4 ${failedCount > 0 ? "text-red-400" : "text-slate-500"}`} />
             </div>

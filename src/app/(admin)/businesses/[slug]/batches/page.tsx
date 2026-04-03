@@ -7,6 +7,7 @@ import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,11 @@ export default async function BatchesPage({
 
   return (
     <div className="space-y-6">
+      <Breadcrumb items={[
+        { label: "Inicio", href: "/dashboard" },
+        { label: business.name, href: `/businesses/${params.slug}` },
+        { label: "Subidas" },
+      ]} />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-100">
@@ -48,11 +54,20 @@ export default async function BatchesPage({
       </div>
 
       {batches.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center text-slate-500">
-            No hay subidas todavia.
-          </CardContent>
-        </Card>
+        <div className="text-center py-20 border border-dashed border-slate-800 bg-surface-card/50 rounded-2xl animate-fade-in">
+          <div className="w-16 h-16 rounded-full bg-brand-500/10 flex items-center justify-center mx-auto mb-4">
+            <Plus className="h-8 w-8 text-brand-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-200 mb-1">Aun no has subido contenido</h3>
+          <p className="text-slate-500 text-sm mb-6 max-w-xs mx-auto">Sube un archivo ZIP con tus posts organizados por carpetas</p>
+          <Link
+            href={`/businesses/${params.slug}/upload`}
+            className="inline-flex items-center gap-2 bg-brand-500 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-400 hover:shadow-glow transition-all"
+          >
+            <Plus className="h-4 w-4" />
+            Subir ZIP
+          </Link>
+        </div>
       ) : (
         <div className="space-y-3">
           {batches.map((batch) => (

@@ -164,14 +164,16 @@ export default async function DashboardPage() {
 
       {/* Empty state */}
       {hasConnected && !hasContent && (
-        <div className="text-center py-16 rounded-xl border border-dashed border-slate-800 bg-surface-card/50">
-          <Upload className="h-10 w-10 text-slate-600 mx-auto mb-3" />
-          <h3 className="font-semibold text-slate-300 mb-1">No tienes posts aun</h3>
-          <p className="text-slate-500 text-sm mb-4">Empieza subiendo tu contenido del mes</p>
+        <div className="text-center py-20 rounded-2xl border border-dashed border-slate-800 bg-surface-card/50 animate-fade-in">
+          <div className="w-16 h-16 rounded-full bg-brand-500/10 flex items-center justify-center mx-auto mb-4">
+            <Upload className="h-8 w-8 text-brand-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-200 mb-1">Tu calendario esta vacio</h3>
+          <p className="text-slate-500 text-sm mb-6 max-w-xs mx-auto">Sube el contenido del mes y AutoPost se encarga de publicar por ti</p>
           {businesses[0] && (
             <Link
               href={`/businesses/${businesses[0].slug}/upload`}
-              className="inline-flex items-center gap-2 bg-brand-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-400 hover:shadow-glow transition-all"
+              className="inline-flex items-center gap-2 bg-brand-500 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-400 hover:shadow-glow transition-all"
             >
               <Plus className="h-4 w-4" />
               Subir contenido
