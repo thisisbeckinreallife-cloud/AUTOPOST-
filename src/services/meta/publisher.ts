@@ -73,16 +73,25 @@ export async function publishPost(
     }
 
     case "CAROUSEL": {
-      // 1. Create item containers
+      // 1. Create item containers (with delay to avoid rate limiting)
       const childIds: string[] = [];
-      for (const asset of mediaWithUrls) {
+      for (let i = 0; i < mediaWithUrls.length; i++) {
+        const asset = mediaWithUrls[i];
         const mediaType = asset.mimeType.startsWith("video/") ? "VIDEO" : "IMAGE";
+
+        // Add delay between requests to avoid Meta rate limiting
+        if (i > 0) {
+          await sleep(2000);
+        }
+
         const childId = await createCarouselItemContainer(
           connection.igUserId,
           asset.signedUrl,
           mediaType,
           accessToken
         );
+        console.log(`[Publisher] Carousel item ${i + 1}/${mediaWithUrls.length} created: ${childId}`);
+
         // Videos in carousels also need processing time
         if (mediaType === "VIDEO") {
           await waitForVideoProcessing(childId, accessToken);
@@ -91,6 +100,7 @@ export async function publishPost(
       }
 
       // 2. Create carousel parent
+      await sleep(3000); // Wait before creating parent container
       containerId = await createCarouselContainer(
         connection.igUserId,
         childIds,
@@ -98,6 +108,10 @@ export async function publishPost(
         accessToken,
         draft.locationId ?? undefined
       );
+      console.log(`[Publisher] Carousel parent created: ${containerId}`);
+
+      // 3. Wait for carousel to be ready before publishing
+      await waitForContainerReady(containerId, accessToken);
       break;
     }
 
@@ -121,7 +135,8 @@ export async function publishPost(
       throw new Error(`Unsupported post type: ${draft.postType}`);
   }
 
-  // Publish the container
+  // Publish the container (wait a moment for Meta to process)
+  console.log(`[Publisher] Publishing container ${containerId}...`);
   const mediaId = await publishContainer(
     connection.igUserId,
     containerId,
@@ -173,6 +188,44 @@ async function waitForVideoProcessing(
       (VIDEO_POLL_MAX_ATTEMPTS * VIDEO_POLL_INTERVAL_MS) / 1000
     }s`
   );
+}
+
+/**
+ * Wait for a container (carousel/image) to be ready for publishing.
+ * Meta needs time to process uploaded media before it can be published.
+ */
+async function waitForContainerReady(
+  containerId: string,
+  accessToken: string
+): Promise<void> {
+  const maxAttempts = 30; // 30 * 3s = 90s max
+  const pollInterval = 3000;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const status = await getContainerStatus(containerId, accessToken);
+      console.log(`[Publisher] Container ${containerId} status: ${status.status_code} (check ${attempt + 1}/${maxAttempts})`);
+
+      if (status.status_code === "FINISHED") return;
+      if (status.status_code === "ERROR") {
+        throw new MetaApiError(
+          0,
+          `Container processing failed: ${status.error_message ?? "unknown error"}`
+        );
+      }
+      if (status.status_code === "EXPIRED") {
+        throw new MetaApiError(0, "Media container expired before publishing");
+      }
+    } catch (err) {
+      // Status check may fail transiently — only throw on final attempt
+      if (attempt === maxAttempts - 1) throw err;
+      console.warn(`[Publisher] Status check failed (attempt ${attempt + 1}), retrying...`);
+    }
+
+    await sleep(pollInterval);
+  }
+
+  throw new Error(`Container processing timed out after ${(maxAttempts * pollInterval) / 1000}s`);
 }
 
 function sleep(ms: number): Promise<void> {
