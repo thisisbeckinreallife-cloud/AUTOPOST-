@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node scripts/start.js",
     "worker": "tsx --watch src/workers/publish.worker.ts",
     "worker:once": "tsx src/workers/publish.worker.ts",
     "db:migrate": "prisma migrate deploy",
@@ -39,6 +39,7 @@
     "react-dom": "^18",
     "sharp": "^0.33.3",
     "tailwind-merge": "^2.2.2",
+    "tsx": "^4.7.2",
     "uuid": "^9.0.1",
     "zod": "^3.22.4"
   },
@@ -53,7 +54,6 @@
     "postcss": "^8",
     "prisma": "^5.11.0",
     "tailwindcss": "^3.3.0",
-    "tsx": "^4.7.2",
     "typescript": "^5"
   }
 }
