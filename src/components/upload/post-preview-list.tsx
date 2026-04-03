@@ -231,7 +231,7 @@ function PostCard({
               Post {index + 1}
             </p>
             {post.matchConfidence === "low" && (
-              <span className="text-xs bg-blue-500/100/20 text-blue-400 px-1.5 py-0.5 rounded-full">
+              <span className="text-xs bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full">
                 Revisar
               </span>
             )}
@@ -295,7 +295,7 @@ function PostCard({
                   }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     post.postType === "carousel"
-                      ? "bg-blue-500/100/20 text-blue-400 ring-1 ring-blue-500"
+                      ? "bg-blue-500/20 text-blue-400 ring-1 ring-blue-500"
                       : "bg-slate-800 text-slate-400 hover:bg-slate-800"
                   }`}
                 >
