@@ -8,9 +8,9 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-surface-primary">
+    <div className="min-h-screen bg-surface-primary bg-dots">
       <Sidebar />
-      <main className="md:ml-60 p-6 md:p-8 pt-16 md:pt-8">
+      <main className="md:ml-64 p-6 md:p-10 pt-16 md:pt-10 min-h-screen">
         <div className="max-w-5xl mx-auto animate-fade-in">{children}</div>
       </main>
     </div>

@@ -1,8 +1,8 @@
 import { db } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
-import { Card, CardContent } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
+import { FileText } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -42,20 +42,27 @@ export default async function LogsPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-100">Audit Logs</h1>
-        <p className="text-slate-500 mt-1">{total} entries</p>
+      <div className="animate-stagger-in delay-0">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/10">
+            <FileText className="h-5 w-5 text-brand-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-100">Registro de actividad</h1>
+            <p className="text-slate-500 mt-0.5">{total} registros</p>
+          </div>
+        </div>
       </div>
 
       {/* Filter */}
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por accion">
+      <div className="flex flex-wrap gap-2 animate-stagger-in delay-1" role="group" aria-label="Filtrar por accion">
         <Link href="/logs">
           <button
             type="button"
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
               !actionFilter
-                ? "bg-brand-500 text-white"
-                : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+                ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-glow"
+                : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200"
             }`}
             aria-pressed={!actionFilter}
           >
@@ -66,10 +73,10 @@ export default async function LogsPage({
           <Link key={action} href={`/logs?action=${action}`}>
             <button
               type="button"
-              className={`px-3 py-1.5 rounded-full text-xs font-mono transition-colors ${
+              className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all duration-300 ${
                 actionFilter === action
-                  ? "bg-brand-500 text-white"
-                  : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+                  ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-glow"
+                  : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200"
               }`}
               aria-pressed={actionFilter === action}
             >
@@ -79,25 +86,28 @@ export default async function LogsPage({
         ))}
       </div>
 
-      <Card>
-        <CardContent className="p-0 overflow-x-auto">
-          {logs.length === 0 ? (
-            <div className="py-12 text-center text-slate-500">No se encontraron registros.</div>
-          ) : (
+      <div className="rounded-2xl border border-slate-800/80 bg-surface-card overflow-hidden animate-card-appear delay-2">
+        {logs.length === 0 ? (
+          <div className="py-16 text-center text-slate-500">
+            <FileText className="h-8 w-8 mx-auto mb-3 text-slate-600" />
+            No se encontraron registros.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[600px]">
               <thead>
                 <tr className="border-b border-slate-800">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">
-                    Time
+                  <th className="px-5 py-3.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    Hora
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">
-                    Action
+                  <th className="px-5 py-3.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    Accion
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">
-                    Business
+                  <th className="px-5 py-3.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    Cuenta
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">
-                    Entity
+                  <th className="px-5 py-3.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    Entidad
                   </th>
                 </tr>
               </thead>
@@ -105,23 +115,21 @@ export default async function LogsPage({
                 {logs.map((log, i) => (
                   <tr
                     key={log.id}
-                    className={`border-b border-slate-800/50 last:border-0 ${
-                      i % 2 === 0 ? "" : "bg-surface-primary/50"
-                    }`}
+                    className={`border-b border-slate-800/30 last:border-0 hover:bg-white/[0.02] transition-colors animate-stagger-in delay-${Math.min(i, 8)}`}
                   >
-                    <td className="px-4 py-2.5 text-slate-500 whitespace-nowrap text-xs">
+                    <td className="px-5 py-3 text-slate-500 whitespace-nowrap text-xs">
                       {formatDate(log.createdAt)}
                     </td>
-                    <td className="px-4 py-2.5">
-                      <span className="font-mono text-xs bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded">
+                    <td className="px-5 py-3">
+                      <span className="font-mono text-xs bg-white/5 text-slate-300 px-2 py-1 rounded-lg font-bold">
                         {log.action}
                       </span>
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td className="px-5 py-3">
                       {log.business ? (
                         <Link
                           href={`/businesses/${log.business.slug}`}
-                          className="text-brand-400 hover:underline"
+                          className="text-brand-400 hover:text-brand-300 font-medium transition-colors"
                         >
                           {log.business.name}
                         </Link>
@@ -129,12 +137,12 @@ export default async function LogsPage({
                         <span className="text-slate-600">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-2.5 text-slate-500 text-xs">
+                    <td className="px-5 py-3 text-slate-500 text-xs">
                       {log.entityType && (
                         <>
                           {log.entityType}{" "}
                           {log.entityId && (
-                            <span className="font-mono">
+                            <span className="font-mono text-slate-600">
                               {log.entityId.slice(0, 8)}
                             </span>
                           )}
@@ -145,13 +153,13 @@ export default async function LogsPage({
                 ))}
               </tbody>
             </table>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </div>
 
       {/* Pagination */}
       {pages > 1 && (
-        <nav aria-label="Paginacion" className="flex items-center gap-2 justify-center">
+        <nav aria-label="Paginacion" className="flex items-center gap-2 justify-center pt-2">
           {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
             <Link
               key={p}
@@ -159,10 +167,10 @@ export default async function LogsPage({
               aria-current={p === page ? "page" : undefined}
             >
               <span
-                className={`px-3 py-1.5 rounded text-sm transition-colors ${
+                className={`px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
                   p === page
-                    ? "bg-brand-500 text-white"
-                    : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                    ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-glow"
+                    : "bg-white/5 text-slate-400 hover:bg-white/10"
                 }`}
               >
                 {p}

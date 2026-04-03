@@ -56,7 +56,10 @@ a, button, input, textarea, select {
   transition: all 0.15s ease-out;
 }
 
-/* ─── Animations ─── */
+/* ══════════════════════════════════════════════════════════════════════════════
+   ANIMATIONS — staggered, dramatic, impactful
+   ══════════════════════════════════════════════════════════════════════════════ */
+
 @keyframes progress {
   0% { width: 0%; }
   50% { width: 80%; }
@@ -68,7 +71,136 @@ a, button, input, textarea, select {
   100% { background-position: 200% 0; }
 }
 
-/* ─── Utility classes ─── */
+/* Staggered fade-up for lists */
+@keyframes stagger-in {
+  0% { opacity: 0; transform: translateY(16px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Dramatic scale-in for cards */
+@keyframes card-appear {
+  0% { opacity: 0; transform: scale(0.92) translateY(12px); }
+  60% { opacity: 1; transform: scale(1.01) translateY(-2px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Pulse glow on borders */
+@keyframes border-pulse {
+  0%, 100% { border-color: rgba(59, 130, 246, 0.15); }
+  50% { border-color: rgba(59, 130, 246, 0.4); }
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Gradient background shift */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Slide-in from left */
+@keyframes slide-in-left {
+  0% { opacity: 0; transform: translateX(-24px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Slide-in from right */
+@keyframes slide-in-right {
+  0% { opacity: 0; transform: translateX(24px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Number count up fade */
+@keyframes number-pop {
+  0% { opacity: 0; transform: scale(0.5); }
+  60% { transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Spin-in for icons */
+@keyframes spin-in {
+  0% { opacity: 0; transform: rotate(-180deg) scale(0.5); }
+  100% { opacity: 1; transform: rotate(0deg) scale(1); }
+}
+
+/* Glow ping */
+@keyframes glow-ping {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3); }
+  70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+/* Gradient text shimmer */
+@keyframes text-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ─── Animation utility classes ─── */
+
+.animate-stagger-in {
+  animation: stagger-in 0.5s ease-out both;
+}
+
+.animate-card-appear {
+  animation: card-appear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+.animate-slide-left {
+  animation: slide-in-left 0.5s ease-out both;
+}
+
+.animate-slide-right {
+  animation: slide-in-right 0.5s ease-out both;
+}
+
+.animate-number-pop {
+  animation: number-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-spin-in {
+  animation: spin-in 0.5s ease-out both;
+}
+
+.animate-glow-ping {
+  animation: glow-ping 2s ease-in-out infinite;
+}
+
+.animate-text-shimmer {
+  background-size: 200% auto;
+  animation: text-shimmer 3s linear infinite;
+}
+
+.animate-border-pulse {
+  animation: border-pulse 2s ease-in-out infinite;
+}
+
+/* Stagger delays (use on children) */
+.delay-0 { animation-delay: 0ms; }
+.delay-1 { animation-delay: 80ms; }
+.delay-2 { animation-delay: 160ms; }
+.delay-3 { animation-delay: 240ms; }
+.delay-4 { animation-delay: 320ms; }
+.delay-5 { animation-delay: 400ms; }
+.delay-6 { animation-delay: 480ms; }
+.delay-7 { animation-delay: 560ms; }
+.delay-8 { animation-delay: 640ms; }
+
+/* ─── Glass effect ─── */
 .glass {
   background: rgba(22, 27, 46, 0.7);
   backdrop-filter: blur(12px);
@@ -76,6 +208,14 @@ a, button, input, textarea, select {
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.glass-strong {
+  background: rgba(22, 27, 46, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Skeleton loading ─── */
 .skeleton {
   background: linear-gradient(
     90deg,
@@ -88,11 +228,56 @@ a, button, input, textarea, select {
   border-radius: 6px;
 }
 
+/* ─── Text gradient ─── */
 .text-gradient {
-  background: linear-gradient(135deg, #3B82F6, #60A5FA);
+  background: linear-gradient(135deg, #3B82F6, #60A5FA, #93C5FD);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.text-gradient-shimmer {
+  background: linear-gradient(90deg, #3B82F6, #60A5FA, #93C5FD, #60A5FA, #3B82F6);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: text-shimmer 4s linear infinite;
+}
+
+/* ─── Card hover lift ─── */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+/* ─── Glow effects ─── */
+.glow-border {
+  position: relative;
+}
+.glow-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), transparent 60%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ─── Animated background dots ─── */
+.bg-dots {
+  background-image: radial-gradient(rgba(59, 130, 246, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 /* ─── Input dark theme ─── */
@@ -110,4 +295,30 @@ input:focus, textarea:focus, select:focus {
   border-color: #3B82F6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
   outline: none;
+}
+
+/* ─── Stat card number animation ─── */
+.stat-number {
+  animation: number-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  display: inline-block;
+}
+
+/* ─── Animated gradient background ─── */
+.animated-bg {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.03) 0%,
+    rgba(59, 130, 246, 0.08) 25%,
+    rgba(96, 165, 250, 0.05) 50%,
+    rgba(59, 130, 246, 0.03) 75%,
+    rgba(59, 130, 246, 0.08) 100%
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+/* ─── Progress bar with glow ─── */
+.progress-glow {
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4),
+              0 0 16px rgba(59, 130, 246, 0.2);
 }

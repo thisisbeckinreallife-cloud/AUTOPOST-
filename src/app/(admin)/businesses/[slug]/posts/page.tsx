@@ -1,11 +1,10 @@
 import { db } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
 import Link from "next/link";
 import { formatDateInTz } from "@/lib/utils";
-import { Image, Film, Layers } from "lucide-react";
+import { Image, Film, Layers, Search } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export const dynamic = "force-dynamic";
@@ -66,24 +65,25 @@ export default async function PostsPage({
         { label: business.name, href: `/businesses/${params.slug}` },
         { label: "Posts" },
       ]} />
-      <div>
-        <h1 className="text-2xl font-bold text-slate-100">
+
+      <div className="animate-stagger-in delay-0">
+        <h1 className="text-2xl font-black text-slate-100">
           {business.name} — Posts
         </h1>
         <p className="text-slate-500 mt-1">
-          {total} post{total !== 1 ? "s" : ""}
+          <span className="text-slate-300 font-bold">{total}</span> post{total !== 1 ? "s" : ""}
         </p>
       </div>
 
       {/* Status filter */}
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por estado">
+      <div className="flex flex-wrap gap-2 animate-stagger-in delay-1" role="group" aria-label="Filtrar por estado">
         <Link href={`/businesses/${params.slug}/posts`}>
           <button
             type="button"
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
               !statusFilter
-                ? "bg-brand-500 text-white"
-                : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+                ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-glow"
+                : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200"
             }`}
             aria-pressed={!statusFilter}
           >
@@ -94,10 +94,10 @@ export default async function PostsPage({
           <Link key={s} href={`/businesses/${params.slug}/posts?status=${s}`}>
             <button
               type="button"
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
                 statusFilter === s
-                  ? "bg-brand-500 text-white"
-                  : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+                  ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-glow"
+                  : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200"
               }`}
               aria-pressed={statusFilter === s}
             >
@@ -108,47 +108,48 @@ export default async function PostsPage({
       </div>
 
       {posts.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center text-slate-500">
-            No se encontraron posts.
-          </CardContent>
-        </Card>
+        <div className="relative text-center py-20 rounded-2xl border border-dashed border-slate-700 bg-surface-card/50 animate-card-appear overflow-hidden bg-dots">
+          <div className="absolute inset-0 bg-gradient-to-t from-surface-primary/80 to-transparent pointer-events-none" />
+          <div className="relative">
+            <div className="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto mb-4 animate-float">
+              <Search className="h-8 w-8 text-slate-500" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-200 mb-1">No se encontraron posts</h3>
+            <p className="text-slate-500 text-sm">Prueba cambiando los filtros</p>
+          </div>
+        </div>
       ) : (
         <div className="space-y-2">
-          {posts.map((post) => (
+          {posts.map((post, i) => (
             <Link
               key={post.id}
               href={`/businesses/${params.slug}/posts/${post.id}`}
             >
-              <Card className="hover:border-slate-700 transition-all cursor-pointer">
-                <CardContent className="py-3">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-3 min-w-0">
-                      <div className="mt-0.5">
-                        {POST_TYPE_ICON[post.postType]}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-slate-200 truncate">
-                          {post.sourceFolderName}
-                        </p>
-                        <p className="text-xs text-slate-500 truncate mt-0.5">
-                          {post.caption.slice(0, 120)}
-                          {post.caption.length > 120 ? "..." : ""}
-                        </p>
-                        <p className="text-xs text-brand-400 mt-1">
-                          {formatDateInTz(post.publishAt, business.timezone)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs text-slate-500">
-                        {post._count.mediaAssets} media
-                      </span>
-                      <StatusBadge status={post.status} />
-                    </div>
+              <div className={`group flex items-start justify-between gap-4 rounded-xl border border-slate-800/80 bg-surface-card px-5 py-4 card-hover animate-stagger-in delay-${Math.min(i + 2, 8)}`}>
+                <div className="flex items-start gap-3 min-w-0">
+                  <div className="mt-1 h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+                    {POST_TYPE_ICON[post.postType]}
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-slate-200 truncate group-hover:text-white transition-colors">
+                      {post.sourceFolderName}
+                    </p>
+                    <p className="text-xs text-slate-500 truncate mt-0.5">
+                      {post.caption.slice(0, 120)}
+                      {post.caption.length > 120 ? "..." : ""}
+                    </p>
+                    <p className="text-xs text-brand-400 mt-1 font-medium">
+                      {formatDateInTz(post.publishAt, business.timezone)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="text-xs text-slate-600 bg-white/5 px-2 py-0.5 rounded font-medium">
+                    {post._count.mediaAssets} media
+                  </span>
+                  <StatusBadge status={post.status} />
+                </div>
+              </div>
             </Link>
           ))}
         </div>
@@ -156,7 +157,7 @@ export default async function PostsPage({
 
       {/* Pagination */}
       {pages > 1 && (
-        <nav aria-label="Paginacion" className="flex items-center gap-2 justify-center">
+        <nav aria-label="Paginacion" className="flex items-center gap-2 justify-center pt-4">
           {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
             <Link
               key={p}
@@ -166,10 +167,10 @@ export default async function PostsPage({
               aria-current={p === page ? "page" : undefined}
             >
               <span
-                className={`px-3 py-1.5 rounded text-sm transition-colors ${
+                className={`px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
                   p === page
-                    ? "bg-brand-500 text-white"
-                    : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                    ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-glow"
+                    : "bg-white/5 text-slate-400 hover:bg-white/10"
                 }`}
               >
                 {p}
