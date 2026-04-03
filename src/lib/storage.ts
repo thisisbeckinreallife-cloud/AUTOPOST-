@@ -102,6 +102,12 @@ export async function getSignedDownloadUrl(
   key: string,
   expiresInSeconds = 3600
 ): Promise<string> {
+  // For R2 with public URL configured, use that directly (more reliable for Meta API)
+  const publicUrl = process.env.STORAGE_PUBLIC_URL;
+  if (publicUrl) {
+    return `${publicUrl.replace(/\/$/, "")}/${key}`;
+  }
+  // Fallback to signed URL
   const client = getS3Client();
   const command = new GetObjectCommand({ Bucket: BUCKET(), Key: key });
   return getSignedUrl(client, command, { expiresIn: expiresInSeconds });

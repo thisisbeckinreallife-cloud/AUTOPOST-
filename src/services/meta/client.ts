@@ -56,11 +56,17 @@ async function graphRequest<T>(
     };
   }
 
-  const res = await fetch(url.toString(), init);
+  const fetchUrl = url.toString();
+  // Log API call (mask the access token)
+  const safeUrl = fetchUrl.replace(/access_token=[^&]+/, "access_token=***");
+  console.log(`[Meta API] ${method} ${safeUrl}`);
+
+  const res = await fetch(fetchUrl, init);
   const json = await res.json();
 
   if (!res.ok || json.error) {
     const err = json.error ?? { code: res.status, message: "Unknown error" };
+    console.error(`[Meta API] Error ${err.code}: ${err.message} (type: ${err.type}, fbtrace: ${err.fbtrace_id})`);
     throw new MetaApiError(
       err.code ?? res.status,
       err.message ?? "Unknown error",
@@ -68,6 +74,7 @@ async function graphRequest<T>(
       err.fbtrace_id
     );
   }
+  console.log(`[Meta API] OK ${method} ${path}`);
 
   return json as T;
 }

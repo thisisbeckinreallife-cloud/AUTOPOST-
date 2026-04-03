@@ -40,7 +40,7 @@ export async function publishPost(
     tag: connection.accessTokenTag,
   });
 
-  // Generate signed URLs for media (required by Meta — must be public)
+  // Generate public/signed URLs for media (required by Meta — must be publicly accessible)
   const mediaWithUrls = await Promise.all(
     draft.mediaAssets
       .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -49,6 +49,11 @@ export async function publishPost(
         signedUrl: await getSignedDownloadUrl(asset.storagePath, 3600),
       }))
   );
+
+  console.log(`[Publisher] Post ${draft.id} type=${draft.postType} assets=${mediaWithUrls.length}`);
+  for (const m of mediaWithUrls) {
+    console.log(`[Publisher]   Asset: ${m.originalFilename} → ${m.signedUrl.substring(0, 100)}...`);
+  }
 
   let containerId: string;
 
@@ -77,6 +82,10 @@ export async function publishPost(
           mediaType,
           accessToken
         );
+        // Videos in carousels also need processing time
+        if (mediaType === "VIDEO") {
+          await waitForVideoProcessing(childId, accessToken);
+        }
         childIds.push(childId);
       }
 

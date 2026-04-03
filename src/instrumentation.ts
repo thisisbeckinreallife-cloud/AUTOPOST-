@@ -6,16 +6,24 @@
 export async function register() {
   // Only start the worker on the server side (not during build or edge runtime)
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    const { isRedisAvailable } = await import("@/lib/redis");
+    console.log("[Instrumentation] register() called, runtime=nodejs");
 
-    if (isRedisAvailable()) {
-      // Dynamically import the worker — this starts it as a side effect
-      await import("@/workers/publish.worker");
-      console.log("[Instrumentation] BullMQ publish worker started");
-    } else {
-      console.warn(
-        "[Instrumentation] Redis not configured — publish worker NOT started. Set REDIS_URL to enable."
-      );
+    try {
+      const { isRedisAvailable } = await import("@/lib/redis");
+
+      if (isRedisAvailable()) {
+        // Dynamically import the worker — this starts it as a side effect
+        await import("@/workers/publish.worker");
+        console.log("[Instrumentation] BullMQ publish worker started successfully");
+      } else {
+        console.warn(
+          "[Instrumentation] REDIS_URL not set — publish worker NOT started. Posts will not be published."
+        );
+      }
+    } catch (err) {
+      console.error("[Instrumentation] Failed to start worker:", err);
     }
+  } else {
+    console.log(`[Instrumentation] register() called, runtime=${process.env.NEXT_RUNTIME ?? "unknown"} — skipping worker`);
   }
 }

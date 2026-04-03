@@ -66,8 +66,7 @@ async function processPublishJob(job: Job<PublishJobPayload>): Promise<void> {
   });
 
   if (locked.count === 0) {
-    console.warn(`[Worker] Job ${publishJobId} is locked by another process, skipping`);
-    return;
+    throw new Error(`Job ${publishJobId} is locked by another process — will retry`);
   }
 
   // ─── 4. Create attempt record ───
@@ -241,7 +240,7 @@ worker.on("completed", (job) => {
 });
 
 worker.on("failed", (job, err) => {
-  console.error(`[Worker] Job ${job?.id} failed:`, err.message);
+  console.error(`[Worker] Job ${job?.id} failed:`, err.message, err.stack);
 });
 
 worker.on("error", (err) => {
