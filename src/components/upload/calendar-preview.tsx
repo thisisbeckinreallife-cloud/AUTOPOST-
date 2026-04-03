@@ -79,24 +79,24 @@ export function CalendarPreview({ posts }: CalendarPreviewProps) {
 
   return (
     <div className="space-y-4">
-      <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-2xl p-5">
-        <p className="font-semibold text-slate-800">Vista previa del calendario</p>
-        <p className="text-sm text-slate-500 mt-1">
+      <div className="bg-gradient-to-r from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 rounded-2xl p-5">
+        <p className="font-semibold text-slate-100">Vista previa del calendario</p>
+        <p className="text-sm text-slate-400 mt-1">
           Asi quedaran distribuidos tus {posts.length} posts.
         </p>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+      <div className="bg-surface-card border border-slate-800 rounded-xl overflow-hidden">
         {/* Month header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-200">
+        <div className="flex items-center justify-between px-4 py-3 bg-surface-primary border-b border-slate-800">
           <button
             onClick={prevMonth}
-            className="p-1 rounded-lg hover:bg-slate-200 transition-colors"
+            className="p-1 rounded-lg hover:bg-slate-800 transition-colors"
           >
-            <ChevronLeft className="h-5 w-5 text-slate-600" />
+            <ChevronLeft className="h-5 w-5 text-slate-400" />
           </button>
           <div className="text-center">
-            <h3 className="font-semibold text-slate-800">
+            <h3 className="font-semibold text-slate-100">
               {MONTH_NAMES[currentMonth]} {currentYear}
             </h3>
             <p className="text-xs text-slate-400">
@@ -105,14 +105,14 @@ export function CalendarPreview({ posts }: CalendarPreviewProps) {
           </div>
           <button
             onClick={nextMonth}
-            className="p-1 rounded-lg hover:bg-slate-200 transition-colors"
+            className="p-1 rounded-lg hover:bg-slate-800 transition-colors"
           >
-            <ChevronRight className="h-5 w-5 text-slate-600" />
+            <ChevronRight className="h-5 w-5 text-slate-400" />
           </button>
         </div>
 
         {/* Day headers */}
-        <div className="grid grid-cols-7 border-b border-slate-100">
+        <div className="grid grid-cols-7 border-b border-slate-800">
           {DAY_HEADERS.map((day) => (
             <div
               key={day}
@@ -127,7 +127,7 @@ export function CalendarPreview({ posts }: CalendarPreviewProps) {
         <div className="grid grid-cols-7">
           {/* Empty cells for offset */}
           {Array.from({ length: firstDay }).map((_, i) => (
-            <div key={`empty-${i}`} className="h-20 border-b border-r border-slate-50" />
+            <div key={`empty-${i}`} className="h-20 border-b border-r border-slate-800" />
           ))}
 
           {/* Day cells */}
@@ -142,17 +142,17 @@ export function CalendarPreview({ posts }: CalendarPreviewProps) {
             return (
               <div
                 key={day}
-                className={`h-20 border-b border-r border-slate-50 p-1 transition-colors ${
-                  isToday ? "bg-blue-50" : isPast ? "bg-slate-50/50" : ""
+                className={`h-20 border-b border-r border-slate-800 p-1 transition-colors ${
+                  isToday ? "bg-blue-500/10" : isPast ? "bg-surface-primary/50" : ""
                 }`}
               >
                 <span
                   className={`text-xs font-medium ${
                     isToday
-                      ? "bg-pink-500 text-white w-5 h-5 rounded-full flex items-center justify-center"
+                      ? "bg-brand-500 text-white w-5 h-5 rounded-full flex items-center justify-center"
                       : isPast
-                        ? "text-slate-300"
-                        : "text-slate-600"
+                        ? "text-slate-200"
+                        : "text-slate-400"
                   }`}
                 >
                   {day}
@@ -165,10 +165,10 @@ export function CalendarPreview({ posts }: CalendarPreviewProps) {
                       key={pi}
                       className={`flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] leading-tight truncate ${
                         post.status === "complete"
-                          ? "bg-green-100 text-green-700"
+                          ? "bg-green-500/20 text-green-400"
                           : post.status === "incomplete"
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-red-100 text-red-700"
+                            ? "bg-amber-500/20 text-amber-400"
+                            : "bg-red-500/20 text-red-400"
                       }`}
                     >
                       {post.postType === "reel" ? (

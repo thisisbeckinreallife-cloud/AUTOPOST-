@@ -130,38 +130,38 @@ export function ScheduleConfig({ postCount, initialSettings, onChange }: Schedul
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5">
-        <p className="font-semibold text-slate-800">Configura como quieres publicar</p>
-        <p className="text-sm text-slate-500 mt-1">
+      <div className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 rounded-2xl p-5">
+        <p className="font-semibold text-slate-100">Configura como quieres publicar</p>
+        <p className="text-sm text-slate-400 mt-1">
           {postCount} posts seran programados automaticamente segun tu configuracion.
         </p>
       </div>
 
       {/* Start date */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4">
+      <div className="bg-surface-card border border-slate-800 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Calendar className="h-4 w-4 text-slate-500" />
-          <label className="text-sm font-medium text-slate-700">Empezar a publicar desde</label>
+          <Calendar className="h-4 w-4 text-slate-400" />
+          <label className="text-sm font-medium text-slate-200">Empezar a publicar desde</label>
         </div>
         <input
           type="date"
           value={settings.startDate}
           min={getTodayDate()}
           onChange={(e) => update({ startDate: e.target.value })}
-          className="border border-slate-300 rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none"
+          className="border border-slate-700 rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-brand-500 focus:border-brand-500/30 outline-none"
         />
         {isToday && (
-          <p className="text-xs text-blue-600 mt-2">
+          <p className="text-xs text-blue-400 mt-2">
             Publicando hoy — solo se programaran posts con hora futura.
           </p>
         )}
       </div>
 
       {/* Time */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4">
+      <div className="bg-surface-card border border-slate-800 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Clock className="h-4 w-4 text-slate-500" />
-          <label className="text-sm font-medium text-slate-700">
+          <Clock className="h-4 w-4 text-slate-400" />
+          <label className="text-sm font-medium text-slate-200">
             Hora de publicacion
           </label>
         </div>
@@ -169,10 +169,10 @@ export function ScheduleConfig({ postCount, initialSettings, onChange }: Schedul
           type="time"
           value={settings.time}
           onChange={(e) => update({ time: e.target.value })}
-          className="border border-slate-300 rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none"
+          className="border border-slate-700 rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-brand-500 focus:border-brand-500/30 outline-none"
         />
         {timeInPast ? (
-          <p className="text-xs text-amber-600 mt-2">
+          <p className="text-xs text-amber-400 mt-2">
             Esta hora ya paso hoy. El primer post se programara para manana a esta hora.
           </p>
         ) : (
@@ -183,8 +183,8 @@ export function ScheduleConfig({ postCount, initialSettings, onChange }: Schedul
       </div>
 
       {/* Spacing */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4">
-        <label className="text-sm font-medium text-slate-700 mb-3 block">
+      <div className="bg-surface-card border border-slate-800 rounded-xl p-4">
+        <label className="text-sm font-medium text-slate-200 mb-3 block">
           Frecuencia de publicacion
         </label>
         <div className="grid grid-cols-2 gap-2">
@@ -194,11 +194,11 @@ export function ScheduleConfig({ postCount, initialSettings, onChange }: Schedul
               onClick={() => update({ spacing: option.value })}
               className={`text-left border rounded-xl p-3 transition-all ${
                 settings.spacing === option.value
-                  ? "border-pink-400 bg-pink-50 ring-1 ring-pink-300"
-                  : "border-slate-200 hover:border-slate-300"
+                  ? "border-brand-500 bg-brand-500/5 ring-1 ring-brand-500"
+                  : "border-slate-800 hover:border-slate-700"
               }`}
             >
-              <p className="text-sm font-medium text-slate-800">{option.label}</p>
+              <p className="text-sm font-medium text-slate-100">{option.label}</p>
               <p className="text-xs text-slate-400 mt-0.5">{option.desc}</p>
             </button>
           ))}
@@ -207,8 +207,8 @@ export function ScheduleConfig({ postCount, initialSettings, onChange }: Schedul
 
       {/* Days of the week (when spacing is daily) */}
       {settings.spacing === "daily" && (
-        <div className="bg-white border border-slate-200 rounded-xl p-4">
-          <label className="text-sm font-medium text-slate-700 mb-3 block">
+        <div className="bg-surface-card border border-slate-800 rounded-xl p-4">
+          <label className="text-sm font-medium text-slate-200 mb-3 block">
             Dias de publicacion
           </label>
           <div className="flex gap-2">
@@ -225,8 +225,8 @@ export function ScheduleConfig({ postCount, initialSettings, onChange }: Schedul
                 }}
                 className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all ${
                   settings.days[i]
-                    ? "bg-pink-500 text-white shadow-sm"
-                    : "bg-slate-100 text-slate-400 hover:bg-slate-200"
+                    ? "bg-brand-500/50 text-white shadow-sm"
+                    : "bg-slate-800 text-slate-400 hover:bg-slate-800"
                 }`}
                 title={DAY_LABELS_FULL[i]}
               >
@@ -238,22 +238,22 @@ export function ScheduleConfig({ postCount, initialSettings, onChange }: Schedul
       )}
 
       {/* Timezone */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4">
+      <div className="bg-surface-card border border-slate-800 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Globe className="h-4 w-4 text-slate-500" />
-          <label className="text-sm font-medium text-slate-700">Zona horaria</label>
+          <Globe className="h-4 w-4 text-slate-400" />
+          <label className="text-sm font-medium text-slate-200">Zona horaria</label>
         </div>
-        <div className="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2 text-sm text-slate-600">
+        <div className="flex items-center gap-2 bg-surface-primary rounded-lg px-3 py-2 text-sm text-slate-400">
           <span>{settings.timezone}</span>
           <span className="text-xs text-slate-400">(detectada automaticamente)</span>
         </div>
       </div>
 
       {/* Summary */}
-      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-        <p className="text-sm text-slate-600">
+      <div className="bg-surface-primary border border-slate-800 rounded-xl p-4">
+        <p className="text-sm text-slate-400">
           Tu ultimo post se publicaria el{" "}
-          <span className="font-semibold text-slate-800">{lastDateStr}</span>
+          <span className="font-semibold text-slate-100">{lastDateStr}</span>
         </p>
       </div>
     </div>

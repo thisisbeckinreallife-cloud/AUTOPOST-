@@ -3,35 +3,111 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0B0F1A;
+  --foreground: #F1F5F9;
+  --surface-card: #161B2E;
+  --surface-secondary: #111827;
+  --border-primary: #1E293B;
+  --border-subtle: #334155;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --brand-500: #3B82F6;
+  --brand-600: #2563EB;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar styling */
+/* ─── Scrollbar (dark theme) ─── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #334155;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #475569;
 }
 
-/* Progress bar animation for upload wizard */
+/* ─── Selection ─── */
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: #F1F5F9;
+}
+
+/* ─── Focus styles ─── */
+*:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+}
+
+/* ─── Smooth transitions globally ─── */
+a, button, input, textarea, select {
+  transition: all 0.15s ease-out;
+}
+
+/* ─── Animations ─── */
 @keyframes progress {
   0% { width: 0%; }
   50% { width: 80%; }
   100% { width: 100%; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ─── Utility classes ─── */
+.glass {
+  background: rgba(22, 27, 46, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #1E293B 25%,
+    #334155 50%,
+    #1E293B 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: 6px;
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #3B82F6, #60A5FA);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Input dark theme ─── */
+input, textarea, select {
+  background: #111827;
+  border: 1px solid #1E293B;
+  color: #F1F5F9;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+input::placeholder, textarea::placeholder {
+  color: #64748B;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  outline: none;
 }

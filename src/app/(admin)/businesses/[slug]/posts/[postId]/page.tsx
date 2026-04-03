@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -59,7 +59,6 @@ interface Attempt {
 
 export default function PostDetailPage() {
   const { slug, postId } = useParams() as { slug: string; postId: string };
-  const router = useRouter();
   const [post, setPost] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [retrying, setRetrying] = useState(false);
@@ -123,11 +122,11 @@ export default function PostDetailPage() {
   }
 
   if (loading) {
-    return <div className="text-slate-400 py-12 text-center">Loading...</div>;
+    return <div className="text-slate-500 py-12 text-center">Cargando...</div>;
   }
 
   if (!post) {
-    return <div className="text-slate-500">Post not found.</div>;
+    return <div className="text-slate-500">Post no encontrado.</div>;
   }
 
   return (
@@ -135,7 +134,7 @@ export default function PostDetailPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold text-slate-100">
             {post.sourceFolderName}
           </h1>
           <p className="text-slate-500 text-sm mt-1">
@@ -147,7 +146,7 @@ export default function PostDetailPage() {
           {post.status === "FAILED" && (
             <Button size="sm" onClick={handleRetry} loading={retrying}>
               <RefreshCw className="h-4 w-4 mr-1" />
-              Retry
+              Reintentar
             </Button>
           )}
           {["DRAFT", "VALIDATED", "READY", "SCHEDULED"].includes(post.status) && (
@@ -158,58 +157,58 @@ export default function PostDetailPage() {
               loading={cancelling}
             >
               <XCircle className="h-4 w-4 mr-1" />
-              Cancel
+              Cancelar
             </Button>
           )}
         </div>
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
           {error}
         </div>
       )}
 
       {/* Published link */}
       {post.metaPermalink && (
-        <div className="rounded-md bg-green-50 border border-green-200 px-4 py-3 flex items-center gap-2">
-          <span className="text-green-700 text-sm">Published on Instagram</span>
+        <div className="rounded-lg bg-green-500/10 border border-green-500/20 px-4 py-3 flex items-center gap-2">
+          <span className="text-green-400 text-sm">Publicado en Instagram</span>
           <a
             href={post.metaPermalink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-green-700 text-sm font-medium hover:underline"
+            className="inline-flex items-center gap-1 text-green-400 text-sm font-medium hover:underline"
           >
-            View post <ExternalLink className="h-3 w-3" />
+            Ver post <ExternalLink className="h-3 w-3" />
           </a>
         </div>
       )}
 
       {/* Last error */}
       {post.lastError && (
-        <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 flex items-start gap-2">
-          <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-          <p className="text-sm text-red-700">{post.lastError}</p>
+        <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 flex items-start gap-2">
+          <AlertTriangle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
+          <p className="text-sm text-red-400">{post.lastError}</p>
         </div>
       )}
 
       {/* Details */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Post Details</CardTitle>
+          <CardTitle className="text-base">Detalles del post</CardTitle>
         </CardHeader>
         <CardContent>
           <dl className="space-y-3 text-sm">
-            <Row label="Scheduled for">
+            <Row label="Programado para">
               {formatDate(post.publishAt)} ({post.business.timezone})
             </Row>
-            <Row label="Type">{post.postType}</Row>
+            <Row label="Tipo">{post.postType}</Row>
             <Row label="Media">
-              {post.mediaAssets.length} file{post.mediaAssets.length !== 1 ? "s" : ""}
+              {post.mediaAssets.length} archivo{post.mediaAssets.length !== 1 ? "s" : ""}
             </Row>
-            <Row label="Attempts">{post.attemptCount}</Row>
+            <Row label="Intentos">{post.attemptCount}</Row>
             {post.publishedAt && (
-              <Row label="Published at">{formatDate(post.publishedAt)}</Row>
+              <Row label="Publicado">{formatDate(post.publishedAt)}</Row>
             )}
             {post.metaPublicationId && (
               <Row label="Meta Media ID">{post.metaPublicationId}</Row>
@@ -217,7 +216,7 @@ export default function PostDetailPage() {
             <Row label="Batch">
               <a
                 href={`/businesses/${slug}/batches/${post.batch.id}`}
-                className="text-brand-600 hover:underline"
+                className="text-brand-400 hover:underline"
               >
                 {post.batch.originalFilename}
               </a>
@@ -232,7 +231,7 @@ export default function PostDetailPage() {
           <CardTitle className="text-base">Caption</CardTitle>
         </CardHeader>
         <CardContent>
-          <pre className="whitespace-pre-wrap text-sm text-slate-700 font-sans">
+          <pre className="whitespace-pre-wrap text-sm text-slate-300 font-sans">
             {post.caption}
           </pre>
         </CardContent>
@@ -241,18 +240,18 @@ export default function PostDetailPage() {
       {/* Media assets */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Media Assets</CardTitle>
+          <CardTitle className="text-base">Archivos multimedia</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             {post.mediaAssets.map((asset) => (
               <div key={asset.id} className="flex items-center gap-3 text-sm">
-                <span className="text-slate-400 text-xs">{asset.sortOrder + 1}.</span>
-                <span className="font-medium text-slate-700">
+                <span className="text-slate-500 text-xs">{asset.sortOrder + 1}.</span>
+                <span className="font-medium text-slate-200">
                   {asset.originalFilename}
                 </span>
-                <span className="text-slate-400 text-xs">{asset.mimeType}</span>
-                <span className="text-slate-400 text-xs">
+                <span className="text-slate-500 text-xs">{asset.mimeType}</span>
+                <span className="text-slate-500 text-xs">
                   {(asset.fileSize / 1024).toFixed(0)} KB
                 </span>
               </div>
@@ -265,40 +264,40 @@ export default function PostDetailPage() {
       {post.publishJobs.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Publish History</CardTitle>
+            <CardTitle className="text-base">Historial de publicacion</CardTitle>
           </CardHeader>
           <CardContent>
             {post.publishJobs.map((job) => (
               <div key={job.id} className="mb-4">
                 <div className="flex items-center gap-2 mb-2">
                   <StatusBadge status={job.status} />
-                  <span className="text-xs text-slate-400">
-                    Job {job.id.slice(0, 8)} &middot; Scheduled {formatDate(job.scheduledFor)}
+                  <span className="text-xs text-slate-500">
+                    Job {job.id.slice(0, 8)} &middot; Programado {formatDate(job.scheduledFor)}
                   </span>
                 </div>
                 {job.attempts.map((attempt) => (
                   <div
                     key={attempt.id}
-                    className="ml-4 pl-4 border-l border-slate-200 py-1"
+                    className="ml-4 pl-4 border-l border-slate-800 py-1"
                   >
                     <div className="flex items-center gap-2 text-xs">
                       <span
                         className={
                           attempt.success === true
-                            ? "text-green-600"
+                            ? "text-green-400"
                             : attempt.success === false
-                            ? "text-red-600"
-                            : "text-slate-400"
+                            ? "text-red-400"
+                            : "text-slate-500"
                         }
                       >
-                        Attempt #{attempt.attemptNumber}
+                        Intento #{attempt.attemptNumber}
                       </span>
-                      <span className="text-slate-400">
+                      <span className="text-slate-500">
                         {formatDate(attempt.startedAt)}
                       </span>
                     </div>
                     {attempt.errorMessage && (
-                      <p className="text-xs text-red-600 mt-1">
+                      <p className="text-xs text-red-400 mt-1">
                         {attempt.errorCode && (
                           <span className="font-mono mr-1">[{attempt.errorCode}]</span>
                         )}
@@ -326,7 +325,7 @@ function Row({
   return (
     <div className="flex gap-4">
       <dt className="w-36 text-slate-500 shrink-0">{label}</dt>
-      <dd className="text-slate-800">{children}</dd>
+      <dd className="text-slate-200">{children}</dd>
     </div>
   );
 }

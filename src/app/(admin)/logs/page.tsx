@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 
@@ -34,7 +34,6 @@ export default async function LogsPage({
 
   const pages = Math.ceil(total / limit);
 
-  // Unique actions for filter
   const allActions = await db.auditLog.findMany({
     select: { action: true },
     distinct: ["action"],
@@ -44,7 +43,7 @@ export default async function LogsPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Audit Logs</h1>
+        <h1 className="text-2xl font-bold text-slate-100">Audit Logs</h1>
         <p className="text-slate-500 mt-1">{total} entries</p>
       </div>
 
@@ -52,10 +51,10 @@ export default async function LogsPage({
       <div className="flex flex-wrap gap-2">
         <Link href="/logs">
           <span
-            className={`px-3 py-1 rounded-full text-xs font-medium cursor-pointer ${
+            className={`px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${
               !actionFilter
-                ? "bg-slate-800 text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                ? "bg-brand-500 text-white"
+                : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
             }`}
           >
             All
@@ -64,10 +63,10 @@ export default async function LogsPage({
         {allActions.map(({ action }) => (
           <Link key={action} href={`/logs?action=${action}`}>
             <span
-              className={`px-3 py-1 rounded-full text-xs font-mono cursor-pointer ${
+              className={`px-3 py-1 rounded-full text-xs font-mono cursor-pointer transition-colors ${
                 actionFilter === action
-                  ? "bg-slate-800 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  ? "bg-brand-500 text-white"
+                  : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
               }`}
             >
               {action}
@@ -79,11 +78,11 @@ export default async function LogsPage({
       <Card>
         <CardContent className="p-0">
           {logs.length === 0 ? (
-            <div className="py-12 text-center text-slate-400">No logs found.</div>
+            <div className="py-12 text-center text-slate-500">No logs found.</div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200">
+                <tr className="border-b border-slate-800">
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">
                     Time
                   </th>
@@ -102,15 +101,15 @@ export default async function LogsPage({
                 {logs.map((log, i) => (
                   <tr
                     key={log.id}
-                    className={`border-b border-slate-100 last:border-0 ${
-                      i % 2 === 0 ? "bg-white" : "bg-slate-50/50"
+                    className={`border-b border-slate-800/50 last:border-0 ${
+                      i % 2 === 0 ? "" : "bg-surface-primary/50"
                     }`}
                   >
-                    <td className="px-4 py-2.5 text-slate-400 whitespace-nowrap text-xs">
+                    <td className="px-4 py-2.5 text-slate-500 whitespace-nowrap text-xs">
                       {formatDate(log.createdAt)}
                     </td>
                     <td className="px-4 py-2.5">
-                      <span className="font-mono text-xs bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded">
+                      <span className="font-mono text-xs bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded">
                         {log.action}
                       </span>
                     </td>
@@ -118,12 +117,12 @@ export default async function LogsPage({
                       {log.business ? (
                         <Link
                           href={`/businesses/${log.business.slug}`}
-                          className="text-brand-600 hover:underline"
+                          className="text-brand-400 hover:underline"
                         >
                           {log.business.name}
                         </Link>
                       ) : (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-slate-600">—</span>
                       )}
                     </td>
                     <td className="px-4 py-2.5 text-slate-500 text-xs">
@@ -155,10 +154,10 @@ export default async function LogsPage({
               href={`/logs?page=${p}${actionFilter ? `&action=${actionFilter}` : ""}`}
             >
               <span
-                className={`px-3 py-1 rounded text-sm ${
+                className={`px-3 py-1 rounded text-sm transition-colors ${
                   p === page
                     ? "bg-brand-500 text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    : "bg-slate-800 text-slate-400 hover:bg-slate-700"
                 }`}
               >
                 {p}

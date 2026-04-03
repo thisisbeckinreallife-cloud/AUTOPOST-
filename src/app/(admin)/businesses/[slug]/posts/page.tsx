@@ -10,9 +10,9 @@ import { Image, Film, Layers } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 const POST_TYPE_ICON: Record<string, React.ReactNode> = {
-  IMAGE: <Image className="h-4 w-4 text-green-500" />,
-  CAROUSEL: <Layers className="h-4 w-4 text-blue-500" />,
-  REEL: <Film className="h-4 w-4 text-purple-500" />,
+  IMAGE: <Image className="h-4 w-4 text-green-400" />,
+  CAROUSEL: <Layers className="h-4 w-4 text-blue-400" />,
+  REEL: <Film className="h-4 w-4 text-purple-400" />,
 };
 
 export default async function PostsPage({
@@ -61,7 +61,7 @@ export default async function PostsPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">
+        <h1 className="text-2xl font-bold text-slate-100">
           {business.name} — Posts
         </h1>
         <p className="text-slate-500 mt-1">
@@ -75,8 +75,8 @@ export default async function PostsPage({
           <span
             className={`px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${
               !statusFilter
-                ? "bg-slate-800 text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                ? "bg-brand-500 text-white"
+                : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
             }`}
           >
             All
@@ -87,8 +87,8 @@ export default async function PostsPage({
             <span
               className={`px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${
                 statusFilter === s
-                  ? "bg-slate-800 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  ? "bg-brand-500 text-white"
+                  : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
               }`}
             >
               {s}
@@ -99,8 +99,8 @@ export default async function PostsPage({
 
       {posts.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center text-slate-400">
-            No posts found.
+          <CardContent className="py-12 text-center text-slate-500">
+            No se encontraron posts.
           </CardContent>
         </Card>
       ) : (
@@ -110,7 +110,7 @@ export default async function PostsPage({
               key={post.id}
               href={`/businesses/${params.slug}/posts/${post.id}`}
             >
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <Card className="hover:border-slate-700 transition-all cursor-pointer">
                 <CardContent className="py-3">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3 min-w-0">
@@ -118,20 +118,20 @@ export default async function PostsPage({
                         {POST_TYPE_ICON[post.postType]}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-slate-800 truncate">
+                        <p className="text-sm font-medium text-slate-200 truncate">
                           {post.sourceFolderName}
                         </p>
                         <p className="text-xs text-slate-500 truncate mt-0.5">
                           {post.caption.slice(0, 120)}
                           {post.caption.length > 120 ? "..." : ""}
                         </p>
-                        <p className="text-xs text-blue-600 mt-1">
+                        <p className="text-xs text-brand-400 mt-1">
                           {formatDateInTz(post.publishAt, business.timezone)}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-slate-500">
                         {post._count.mediaAssets} media
                       </span>
                       <StatusBadge status={post.status} />
@@ -155,10 +155,10 @@ export default async function PostsPage({
               }`}
             >
               <span
-                className={`px-3 py-1 rounded text-sm ${
+                className={`px-3 py-1 rounded text-sm transition-colors ${
                   p === page
                     ? "bg-brand-500 text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    : "bg-slate-800 text-slate-400 hover:bg-slate-700"
                 }`}
               >
                 {p}

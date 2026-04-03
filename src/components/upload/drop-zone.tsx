@@ -373,9 +373,9 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
     return (
       <>
         {hiddenInputs}
-        <div className="border-2 border-purple-300 bg-purple-50 rounded-2xl p-12 text-center">
+        <div className="border-2 border-purple-500/30 bg-purple-500/10 rounded-2xl p-12 text-center">
           <Loader2 className="h-14 w-14 text-purple-500 mx-auto mb-4 animate-spin" />
-          <p className="text-lg font-semibold text-slate-800">{compressInfo}</p>
+          <p className="text-lg font-semibold text-slate-100">{compressInfo}</p>
           <p className="text-sm text-slate-400 mt-1">
             Esto solo tarda unos segundos.
           </p>
@@ -391,17 +391,17 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
       <>
         {hiddenInputs}
         <div
-          className="border-2 border-pink-400 bg-pink-50 rounded-2xl p-8 text-center cursor-pointer transition-all hover:bg-pink-100"
+          className="border-2 border-brand-500 bg-brand-500/5 rounded-2xl p-8 text-center cursor-pointer transition-all hover:bg-brand-500/10"
           onClick={() => !disabled && folderRef.current?.click()}
         >
-          <FileArchive className="h-14 w-14 text-pink-500 mx-auto mb-4" />
-          <p className="text-lg font-semibold text-slate-800">
+          <FileArchive className="h-14 w-14 text-brand-400 mx-auto mb-4" />
+          <p className="text-lg font-semibold text-slate-100">
             {selectedFile.name}
           </p>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-400 mt-1">
             {(selectedFile.size / 1024 / 1024).toFixed(1)} MB
           </p>
-          <p className="text-xs text-pink-500 mt-3 font-medium">
+          <p className="text-xs text-brand-400 mt-3 font-medium">
             Toca para cambiar
           </p>
         </div>
@@ -417,9 +417,9 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
       <div className="space-y-4">
         {/* Error */}
         {error && (
-          <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
             <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-            <p className="text-sm text-red-700">{error}</p>
+            <p className="text-sm text-red-400">{error}</p>
           </div>
         )}
 
@@ -427,8 +427,8 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
         <div
           className={`border-2 border-dashed rounded-2xl p-10 text-center transition-all ${
             dragging
-              ? "border-pink-400 bg-pink-50 scale-[1.02]"
-              : "border-slate-200 bg-white"
+              ? "border-brand-500 bg-brand-500/5 scale-[1.02]"
+              : "border-slate-800 bg-surface-card"
           } ${disabled ? "opacity-50 pointer-events-none" : ""}`}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -437,17 +437,17 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
           <div className="max-w-sm mx-auto">
             {dragging ? (
               <>
-                <FolderOpen className="h-16 w-16 text-pink-400 mx-auto mb-4 animate-bounce" />
-                <p className="text-xl font-semibold text-pink-600">
+                <FolderOpen className="h-16 w-16 text-brand-400 mx-auto mb-4 animate-bounce" />
+                <p className="text-xl font-semibold text-brand-400">
                   Suelta aqui tu carpeta o ZIP
                 </p>
               </>
             ) : (
               <>
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mx-auto mb-4">
-                  <Upload className="h-8 w-8 text-pink-500" />
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-500/20 to-purple-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Upload className="h-8 w-8 text-brand-400" />
                 </div>
-                <p className="text-lg font-semibold text-slate-800">
+                <p className="text-lg font-semibold text-slate-100">
                   Arrastra aqui tu carpeta o ZIP
                 </p>
                 <p className="text-sm text-slate-400 mt-1">
@@ -466,16 +466,16 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
             type="button"
             onClick={() => folderRef.current?.click()}
             disabled={disabled}
-            className="flex items-center gap-3 border-2 border-purple-300 hover:border-purple-500 bg-purple-50 hover:bg-purple-100 rounded-xl p-4 transition-all text-left group disabled:opacity-50 disabled:pointer-events-none"
+            className="flex items-center gap-3 border-2 border-purple-500/30 hover:border-purple-500 bg-purple-500/10 hover:bg-purple-500/20 rounded-xl p-4 transition-all text-left group disabled:opacity-50 disabled:pointer-events-none"
           >
-            <div className="w-11 h-11 rounded-full bg-purple-200 group-hover:bg-purple-300 flex items-center justify-center shrink-0 transition-colors">
-              <FolderInput className="h-5 w-5 text-purple-700" />
+            <div className="w-11 h-11 rounded-full bg-purple-500/20 group-hover:bg-purple-500/30 flex items-center justify-center shrink-0 transition-colors">
+              <FolderInput className="h-5 w-5 text-purple-400" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-purple-800">
+              <p className="text-sm font-bold text-purple-300">
                 Seleccionar carpeta
               </p>
-              <p className="text-xs text-purple-600/70 mt-0.5">
+              <p className="text-xs text-purple-400/70 mt-0.5">
                 La comprimimos por ti
               </p>
             </div>
@@ -486,13 +486,13 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
             type="button"
             onClick={() => zipFileRef.current?.click()}
             disabled={disabled}
-            className="flex items-center gap-3 border-2 border-slate-200 hover:border-pink-400 bg-white hover:bg-pink-50 rounded-xl p-4 transition-all text-left group disabled:opacity-50 disabled:pointer-events-none"
+            className="flex items-center gap-3 border-2 border-slate-800 hover:border-brand-500 bg-surface-card hover:bg-brand-500/5 rounded-xl p-4 transition-all text-left group disabled:opacity-50 disabled:pointer-events-none"
           >
-            <div className="w-11 h-11 rounded-full bg-slate-100 group-hover:bg-pink-100 flex items-center justify-center shrink-0 transition-colors">
-              <FileUp className="h-5 w-5 text-slate-500 group-hover:text-pink-600" />
+            <div className="w-11 h-11 rounded-full bg-slate-800 group-hover:bg-brand-500/10 flex items-center justify-center shrink-0 transition-colors">
+              <FileUp className="h-5 w-5 text-slate-400 group-hover:text-brand-400" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-slate-700 group-hover:text-pink-700">
+              <p className="text-sm font-bold text-slate-200 group-hover:text-brand-300">
                 Seleccionar ZIP
               </p>
               <p className="text-xs text-slate-400 mt-0.5">
@@ -502,7 +502,7 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
           </button>
         </div>
 
-        <p className="text-xs text-slate-300 text-center">
+        <p className="text-xs text-slate-200 text-center">
           Fotos: JPG, PNG, WEBP &middot; Videos: MP4, MOV &middot; Maximo 100MB
         </p>
       </div>
