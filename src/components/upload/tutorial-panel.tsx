@@ -11,7 +11,7 @@ interface TutorialPanelProps {
 const TIPS: Record<string, { icon: React.ReactNode; title: string; content: string }[]> = {
   drop: [
     {
-      icon: <FolderOpen className="h-4 w-4 text-pink-500" />,
+      icon: <FolderOpen className="h-4 w-4 text-brand-400" />,
       title: "Como preparar tu contenido",
       content:
         "Mete todas tus fotos y videos en una carpeta y comprimela como ZIP. No importa como la organices, nosotros la entendemos.",
@@ -45,7 +45,7 @@ const TIPS: Record<string, { icon: React.ReactNode; title: string; content: stri
   ],
   schedule: [
     {
-      icon: <Zap className="h-4 w-4 text-pink-500" />,
+      icon: <Zap className="h-4 w-4 text-brand-400" />,
       title: "Mejor hora para publicar",
       content:
         "En general, las mejores horas son entre las 9 AM y 11 AM o entre las 6 PM y 8 PM de tu zona horaria.",
@@ -76,10 +76,10 @@ export function TutorialPanel({ currentStep }: TutorialPanelProps) {
   if (tips.length === 0) return null;
 
   return (
-    <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+    <div className="bg-surface-primary border border-slate-800 rounded-xl overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-slate-200 hover:bg-slate-800 transition-colors"
       >
         <span className="flex items-center gap-2">
           <BookOpen className="h-4 w-4 text-slate-400" />
@@ -93,12 +93,12 @@ export function TutorialPanel({ currentStep }: TutorialPanelProps) {
       </button>
 
       {expanded && (
-        <div className="px-4 pb-4 space-y-3 border-t border-slate-200 pt-3">
+        <div className="px-4 pb-4 space-y-3 border-t border-slate-800 pt-3">
           {tips.map((tip, i) => (
             <div key={i} className="flex items-start gap-3">
               <div className="mt-0.5 shrink-0">{tip.icon}</div>
               <div>
-                <p className="text-sm font-medium text-slate-700">{tip.title}</p>
+                <p className="text-sm font-medium text-slate-200">{tip.title}</p>
                 <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
                   {tip.content}
                 </p>

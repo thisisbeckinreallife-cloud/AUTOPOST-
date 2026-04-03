@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { slugify } from "@/lib/utils";
 
@@ -73,33 +73,33 @@ export default function NewBusinessPage() {
   return (
     <div className="max-w-lg">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">New Business</h1>
-        <p className="text-slate-500 mt-1">Create a new business account</p>
+        <h1 className="text-2xl font-bold text-slate-100">Nueva cuenta</h1>
+        <p className="text-slate-500 mt-1">Anade una nueva cuenta de Instagram</p>
       </div>
 
       <Card>
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Business Name *
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                Nombre *
               </label>
               <input
                 type="text"
                 required
                 value={form.name}
                 onChange={(e) => handleNameChange(e.target.value)}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-                placeholder="My Brand"
+                className="w-full rounded-lg border border-slate-700 bg-surface-primary px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+                placeholder="Mi Marca"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-300 mb-1">
                 Slug *
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-slate-400 text-sm">/</span>
+                <span className="text-slate-500 text-sm">/</span>
                 <input
                   type="text"
                   required
@@ -109,18 +109,18 @@ export default function NewBusinessPage() {
                   }
                   pattern="[a-z0-9-]+"
                   title="Lowercase letters, numbers, and hyphens only"
-                  className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-                  placeholder="my-brand"
+                  className="flex-1 rounded-lg border border-slate-700 bg-surface-primary px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+                  placeholder="mi-marca"
                 />
               </div>
-              <p className="text-xs text-slate-400 mt-1">
-                Lowercase, alphanumeric, hyphens only
+              <p className="text-xs text-slate-500 mt-1">
+                Minusculas, alfanumerico y guiones
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Timezone *
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                Zona horaria *
               </label>
               <select
                 required
@@ -128,7 +128,7 @@ export default function NewBusinessPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, timezone: e.target.value }))
                 }
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                className="w-full rounded-lg border border-slate-700 bg-surface-primary px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
               >
                 {COMMON_TIMEZONES.map((tz) => (
                   <option key={tz} value={tz}>
@@ -139,8 +139,8 @@ export default function NewBusinessPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Description
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                Descripcion
               </label>
               <textarea
                 value={form.description}
@@ -148,27 +148,27 @@ export default function NewBusinessPage() {
                   setForm((f) => ({ ...f, description: e.target.value }))
                 }
                 rows={3}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-                placeholder="Optional description"
+                className="w-full rounded-lg border border-slate-700 bg-surface-primary px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+                placeholder="Descripcion opcional"
               />
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
                 {error}
               </div>
             )}
 
             <div className="flex gap-3 pt-2">
               <Button type="submit" loading={loading}>
-                Create Business
+                Crear cuenta
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => router.back()}
               >
-                Cancel
+                Cancelar
               </Button>
             </div>
           </form>

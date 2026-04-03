@@ -34,23 +34,23 @@ export default async function BatchesPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            {business.name} — Import Batches
+          <h1 className="text-2xl font-bold text-slate-100">
+            {business.name} — Subidas
           </h1>
           <p className="text-slate-500 mt-1">{batches.length} batches</p>
         </div>
         <Link href={`/businesses/${params.slug}/upload`}>
           <Button size="sm">
             <Plus className="h-4 w-4 mr-2" />
-            Upload ZIP
+            Subir ZIP
           </Button>
         </Link>
       </div>
 
       {batches.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center text-slate-400">
-            No batches yet.
+          <CardContent className="py-12 text-center text-slate-500">
+            No hay subidas todavia.
           </CardContent>
         </Card>
       ) : (
@@ -60,11 +60,11 @@ export default async function BatchesPage({
               key={batch.id}
               href={`/businesses/${params.slug}/batches/${batch.id}`}
             >
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <Card className="hover:border-slate-700 transition-all cursor-pointer">
                 <CardContent className="py-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-slate-800">
+                      <p className="font-medium text-slate-200">
                         {batch.originalFilename}
                       </p>
                       <p className="text-sm text-slate-500">
@@ -73,8 +73,8 @@ export default async function BatchesPage({
                         {batch._count.postDrafts} posts
                       </p>
                       {batch.validPosts !== null && (
-                        <p className="text-xs text-slate-400">
-                          {batch.validPosts} valid / {batch.failedPosts ?? 0} errors
+                        <p className="text-xs text-slate-500">
+                          {batch.validPosts} validos / {batch.failedPosts ?? 0} errores
                         </p>
                       )}
                     </div>

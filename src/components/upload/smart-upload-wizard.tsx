@@ -323,7 +323,7 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
     <div className="max-w-3xl space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">{STEP_TITLES[step]}</h1>
+        <h1 className="text-2xl font-bold text-slate-100">{STEP_TITLES[step]}</h1>
         {step === "drop" && (
           <p className="text-slate-400 mt-1">
             Sube una carpeta con tus fotos y textos. Nosotros hacemos el resto.
@@ -343,17 +343,17 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
                 {i > 0 && (
                   <div
                     className={`w-8 h-0.5 ${
-                      isActive ? "bg-pink-400" : "bg-slate-200"
+                      isActive ? "bg-brand-400" : "bg-slate-800"
                     }`}
                   />
                 )}
                 <div
                   className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-all ${
                     isCurrent
-                      ? "bg-pink-500 text-white shadow-sm"
+                      ? "bg-brand-500 text-white shadow-sm"
                       : isActive
-                        ? "bg-pink-100 text-pink-600"
-                        : "bg-slate-100 text-slate-400"
+                        ? "bg-brand-500/20 text-brand-400"
+                        : "bg-slate-800 text-slate-500"
                   }`}
                 >
                   <span>{i + 1}</span>
@@ -367,7 +367,7 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
 
       {/* Error banner */}
       {error && (
-        <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
           {error}
         </div>
       )}
@@ -380,19 +380,19 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
           {step === "analyzing" && (
             <div className="flex flex-col items-center justify-center py-16 space-y-4">
               <div className="relative">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
-                  <Sparkles className="h-10 w-10 text-pink-500 animate-pulse" />
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-brand-500/20 to-brand-600/20 flex items-center justify-center">
+                  <Sparkles className="h-10 w-10 text-brand-400 animate-pulse" />
                 </div>
-                <Loader2 className="absolute -top-1 -right-1 h-6 w-6 text-pink-400 animate-spin" />
+                <Loader2 className="absolute -top-1 -right-1 h-6 w-6 text-brand-400 animate-spin" />
               </div>
               <div className="text-center">
-                <p className="font-semibold text-slate-800">Analizando tu contenido...</p>
+                <p className="font-semibold text-slate-200">Analizando tu contenido...</p>
                 <p className="text-sm text-slate-400 mt-1">
                   Detectando fotos, videos y textos. Esto tarda unos segundos.
                 </p>
               </div>
               {/* Animated progress bar */}
-              <div className="w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+              <div className="w-48 h-1.5 bg-slate-800 rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-pink-400 to-purple-400 rounded-full animate-[progress_2s_ease-in-out_infinite]" />
               </div>
             </div>
@@ -419,16 +419,16 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
 
           {step === "uploading" && (
             <div className="flex flex-col items-center justify-center py-16 space-y-4">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
                 <Upload className="h-10 w-10 text-green-500 animate-bounce" />
               </div>
               <div className="text-center">
-                <p className="font-semibold text-slate-800">{uploadProgress}</p>
+                <p className="font-semibold text-slate-200">{uploadProgress}</p>
                 <p className="text-sm text-slate-400 mt-1">
                   No cierres esta pagina.
                 </p>
               </div>
-              <div className="w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+              <div className="w-48 h-1.5 bg-slate-800 rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-green-400 to-emerald-400 rounded-full animate-[progress_1.5s_ease-in-out_infinite]" />
               </div>
             </div>
@@ -443,14 +443,14 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
 
               {/* Quick stats in sidebar during review */}
               {step === "review" && posts.length > 0 && (
-                <div className="mt-4 bg-white border border-slate-200 rounded-xl p-4 space-y-3">
+                <div className="mt-4 bg-surface-card border border-slate-800 rounded-xl p-4 space-y-3">
                   <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
                     Resumen
                   </p>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-600">Posts totales</span>
-                      <span className="font-medium text-slate-800">{posts.length}</span>
+                      <span className="text-slate-400">Posts totales</span>
+                      <span className="font-medium text-slate-200">{posts.length}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-green-600 flex items-center gap-1">
@@ -491,7 +491,7 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
 
       {/* Navigation buttons */}
       {navigableSteps.includes(step) && (
-        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+        <div className="flex items-center justify-between pt-2 border-t border-slate-800">
           <Button variant="ghost" onClick={goBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             {step === "review" ? "Cambiar archivo" : "Atras"}
