@@ -39,6 +39,7 @@ export async function publishPost(
     iv: connection.accessTokenIv,
     tag: connection.accessTokenTag,
   });
+  console.log(`[Publisher] Token decrypted, length=${accessToken.length}, starts=${accessToken.substring(0, 10)}...`);
 
   // Generate public/signed URLs for media (required by Meta — must be publicly accessible)
   const mediaWithUrls = await Promise.all(

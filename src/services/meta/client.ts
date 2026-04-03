@@ -14,7 +14,8 @@
  */
 
 const GRAPH_VERSION = "v21.0";
-const GRAPH_BASE = `https://graph.facebook.com/${GRAPH_VERSION}`;
+const GRAPH_BASE_FB = `https://graph.facebook.com/${GRAPH_VERSION}`;
+const GRAPH_BASE_IG = `https://graph.instagram.com/${GRAPH_VERSION}`;
 
 export class MetaApiError extends Error {
   constructor(
@@ -36,9 +37,10 @@ async function graphRequest<T>(
   method: "GET" | "POST",
   path: string,
   params: Record<string, string> = {},
-  accessToken: string
+  accessToken: string,
+  base: string = GRAPH_BASE_IG
 ): Promise<T> {
-  const url = new URL(`${GRAPH_BASE}${path}`);
+  const url = new URL(`${base}${path}`);
   url.searchParams.set("access_token", accessToken);
 
   let init: RequestInit;
@@ -132,7 +134,8 @@ export async function getPageAccessToken(
     "GET",
     `/${pageId}`,
     { fields: "access_token" },
-    userToken
+    userToken,
+    GRAPH_BASE_FB
   );
   return result.access_token;
 }
@@ -156,7 +159,7 @@ export async function debugToken(
   );
 
   const appToken = `${appId}|${appSecret}`;
-  const url = new URL(`${GRAPH_BASE}/debug_token`);
+  const url = new URL(`${GRAPH_BASE_FB}/debug_token`);
   url.searchParams.set("input_token", tokenToInspect);
   url.searchParams.set("access_token", appToken);
 
@@ -228,7 +231,8 @@ export async function getLinkedIgAccounts(
     "GET",
     "/me/accounts",
     { fields: "id,name,access_token,instagram_business_account{id,username}" },
-    userToken
+    userToken,
+    GRAPH_BASE_FB
   );
 
   const results: IgAccountInfo[] = [];
