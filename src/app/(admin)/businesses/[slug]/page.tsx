@@ -5,6 +5,7 @@ import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { Instagram, Upload, CheckCircle, AlertCircle, Clock, ChevronRight, Zap, BarChart3 } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { DeleteBusinessButton } from "@/components/delete-business-button";
 
 export const dynamic = "force-dynamic";
 
@@ -215,6 +216,17 @@ export default async function BusinessPage({
           </div>
         </div>
       )}
+
+      {/* Danger zone */}
+      <div className="animate-stagger-in delay-8 pt-4 border-t border-slate-800/50">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-bold text-slate-400">Zona peligrosa</p>
+            <p className="text-xs text-slate-600 mt-0.5">Eliminar esta cuenta y todos sus datos</p>
+          </div>
+          <DeleteBusinessButton slug={params.slug} name={business.name} />
+        </div>
+      </div>
     </div>
   );
 }

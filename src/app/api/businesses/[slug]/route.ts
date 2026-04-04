@@ -111,3 +111,39 @@ export async function PATCH(
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: { slug: string } }
+) {
+  try {
+    const session = await requireSession();
+
+    const business = await db.business.findUnique({
+      where: { slug: params.slug },
+    });
+    if (!business) {
+      return NextResponse.json({ error: "Business not found" }, { status: 404 });
+    }
+
+    await db.$transaction(async (tx) => {
+      await tx.auditLog.create({
+        data: {
+          adminUserId: session.adminUserId,
+          action: "BUSINESS_DELETED",
+          entityType: "Business",
+          entityId: business.id,
+          detail: { name: business.name, slug: business.slug },
+        },
+      });
+      await tx.business.delete({ where: { id: business.id } });
+    });
+
+    return NextResponse.json({ data: { deleted: true } });
+  } catch (err) {
+    if (err instanceof Error && err.message === "UNAUTHORIZED") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
