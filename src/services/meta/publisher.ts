@@ -51,7 +51,11 @@ export async function publishPost(
       }))
   );
 
-  console.log(`[Publisher] Post ${draft.id} type=${draft.postType} assets=${mediaWithUrls.length}`);
+  const collaborators = Array.isArray(draft.collaborators)
+    ? (draft.collaborators as string[])
+    : undefined;
+
+  console.log(`[Publisher] Post ${draft.id} type=${draft.postType} assets=${mediaWithUrls.length} collaborators=${collaborators?.join(",") ?? "none"}`);
   for (const m of mediaWithUrls) {
     console.log(`[Publisher]   Asset: ${m.originalFilename} → ${m.signedUrl.substring(0, 100)}...`);
   }
@@ -67,7 +71,8 @@ export async function publishPost(
         asset.signedUrl,
         draft.caption,
         accessToken,
-        draft.locationId ?? undefined
+        draft.locationId ?? undefined,
+        collaborators
       );
       break;
     }
@@ -106,7 +111,8 @@ export async function publishPost(
         childIds,
         draft.caption,
         accessToken,
-        draft.locationId ?? undefined
+        draft.locationId ?? undefined,
+        collaborators
       );
       console.log(`[Publisher] Carousel parent created: ${containerId}`);
 
@@ -123,7 +129,8 @@ export async function publishPost(
         asset.signedUrl,
         draft.caption,
         accessToken,
-        draft.locationId ?? undefined
+        draft.locationId ?? undefined,
+        collaborators
       );
 
       // Wait for video processing

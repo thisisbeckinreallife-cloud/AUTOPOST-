@@ -25,6 +25,7 @@ export interface MetaJson {
   business_slug?: string;
   first_comment?: string;
   location_id?: string;
+  collaborators?: string[];
 }
 
 export interface ParsedPost {

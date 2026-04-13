@@ -36,6 +36,7 @@ export interface ScheduleOverride {
   publishAt: string; // ISO 8601
   caption?: string;
   postType?: "image" | "carousel" | "reel";
+  collaborators?: string[];
 }
 
 export async function processBatch(
@@ -85,6 +86,9 @@ export async function processBatch(
         }
         if (override.postType) {
           post.metaJson.type = override.postType;
+        }
+        if (override.collaborators) {
+          post.metaJson.collaborators = override.collaborators;
         }
       }
     }
@@ -247,6 +251,7 @@ async function createPostDraftFromParsed(
       timezone: post.metaJson.publish_at.match(/([+-]\d{2}:\d{2}|Z)$/)?.[0] ?? "UTC",
       firstComment: post.metaJson.first_comment ?? null,
       locationId: post.metaJson.location_id ?? null,
+      collaborators: post.metaJson.collaborators ?? undefined,
       caption: post.caption,
       captionHash,
       contentHash,

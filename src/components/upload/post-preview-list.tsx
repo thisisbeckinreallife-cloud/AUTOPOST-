@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   Clock,
   Trash2,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { DetectedPost, AnalysisResult } from "./post-analyzer";
@@ -149,6 +150,7 @@ function PostCard({
   const [expanded, setExpanded] = useState(false);
   const [editingCaption, setEditingCaption] = useState(false);
   const [captionDraft, setCaptionDraft] = useState(post.caption);
+  const [collabInput, setCollabInput] = useState("");
 
   const statusIcon =
     post.status === "complete" ? (
@@ -348,6 +350,91 @@ function PostCard({
             ) : (
               <div className="bg-surface-secondary rounded-lg border border-white/[0.04] px-3 py-2 text-sm text-zinc-400 min-h-[40px]">
                 {post.caption || <span className="text-zinc-600 italic">Sin texto</span>}
+              </div>
+            )}
+          </div>
+
+          {/* Collaborators */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-medium text-zinc-500">
+                Colaboradores ({post.collaborators?.length ?? 0}/3)
+              </label>
+            </div>
+
+            {/* Existing collaborators as chips */}
+            {post.collaborators && post.collaborators.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {post.collaborators.map((username) => (
+                  <span
+                    key={username}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-400 text-xs font-medium"
+                  >
+                    @{username}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onUpdate({
+                          collaborators: post.collaborators.filter((u) => u !== username),
+                        });
+                      }}
+                      className="hover:text-red-400 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Add collaborator input */}
+            {(post.collaborators?.length ?? 0) < 3 && (
+              <div className="flex gap-2">
+                <div className="flex-1 flex items-center bg-surface-secondary rounded-lg border border-white/[0.04] px-3">
+                  <span className="text-zinc-500 text-sm">@</span>
+                  <input
+                    type="text"
+                    value={collabInput}
+                    onChange={(e) => setCollabInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const username = collabInput.replace(/^@/, "").trim();
+                        if (
+                          username &&
+                          !(post.collaborators ?? []).includes(username)
+                        ) {
+                          onUpdate({
+                            collaborators: [...(post.collaborators ?? []), username],
+                          });
+                          setCollabInput("");
+                        }
+                      }
+                    }}
+                    placeholder="username"
+                    className="flex-1 bg-transparent border-none outline-none text-sm text-zinc-300 placeholder:text-zinc-600 py-1.5 pl-0.5"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const username = collabInput.replace(/^@/, "").trim();
+                    if (
+                      username &&
+                      !(post.collaborators ?? []).includes(username)
+                    ) {
+                      onUpdate({
+                        collaborators: [...(post.collaborators ?? []), username],
+                      });
+                      setCollabInput("");
+                    }
+                  }}
+                >
+                  <UserPlus className="h-3 w-3 mr-1" /> Agregar
+                </Button>
               </div>
             )}
           </div>

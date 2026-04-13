@@ -425,6 +425,18 @@ function validateMetaJson(meta: Partial<MetaJson>): string | null {
     }
   }
 
+  if (meta.collaborators !== undefined) {
+    if (!Array.isArray(meta.collaborators)) {
+      return "meta.json collaborators must be an array of Instagram usernames";
+    }
+    if (meta.collaborators.length > 3) {
+      return "meta.json collaborators cannot have more than 3 usernames";
+    }
+    if (meta.collaborators.some((u: unknown) => typeof u !== "string" || !u.trim())) {
+      return "meta.json collaborators must be non-empty strings";
+    }
+  }
+
   // business_slug is optional – the batch processor fills it in
   return null;
 }

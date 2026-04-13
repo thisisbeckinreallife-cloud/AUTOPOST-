@@ -266,7 +266,8 @@ export async function createImageContainer(
   imageUrl: string,
   caption: string,
   accessToken: string,
-  locationId?: string
+  locationId?: string,
+  collaborators?: string[]
 ): Promise<string> {
   const params: Record<string, string> = {
     image_url: imageUrl,
@@ -274,6 +275,7 @@ export async function createImageContainer(
     media_type: "IMAGE",
   };
   if (locationId) params.location_id = locationId;
+  if (collaborators?.length) params.collaborators = JSON.stringify(collaborators);
 
   const result = await graphRequest<{ id: string }>(
     "POST",
@@ -321,7 +323,8 @@ export async function createCarouselContainer(
   childrenIds: string[],
   caption: string,
   accessToken: string,
-  locationId?: string
+  locationId?: string,
+  collaborators?: string[]
 ): Promise<string> {
   const params: Record<string, string> = {
     media_type: "CAROUSEL",
@@ -329,6 +332,7 @@ export async function createCarouselContainer(
     caption,
   };
   if (locationId) params.location_id = locationId;
+  if (collaborators?.length) params.collaborators = JSON.stringify(collaborators);
 
   const result = await graphRequest<{ id: string }>(
     "POST",
@@ -352,7 +356,8 @@ export async function createReelContainer(
   videoUrl: string,
   caption: string,
   accessToken: string,
-  locationId?: string
+  locationId?: string,
+  collaborators?: string[]
 ): Promise<string> {
   const params: Record<string, string> = {
     media_type: "REELS",
@@ -361,6 +366,7 @@ export async function createReelContainer(
     share_to_feed: "true",
   };
   if (locationId) params.location_id = locationId;
+  if (collaborators?.length) params.collaborators = JSON.stringify(collaborators);
 
   const result = await graphRequest<{ id: string }>(
     "POST",

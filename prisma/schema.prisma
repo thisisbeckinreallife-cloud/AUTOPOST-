@@ -147,6 +147,7 @@ model PostDraft {
   timezone    String
   firstComment String?
   locationId  String?
+  collaborators Json?    // JSON array of Instagram usernames, max 3
 
   // Content
   caption      String

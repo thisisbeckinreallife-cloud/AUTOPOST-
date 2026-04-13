@@ -7,6 +7,7 @@ const updateSchema = z.object({
   caption: z.string().min(1).max(2200).optional(),
   publishAt: z.string().datetime({ offset: true }).optional(),
   status: z.enum(["CANCELLED"]).optional(), // Only allow cancellation via this endpoint
+  collaborators: z.array(z.string().min(1).max(30)).max(3).optional(),
 });
 
 export async function GET(
@@ -104,6 +105,9 @@ export async function PATCH(
       updates.caption = parsed.data.caption;
       const { hashSHA256 } = await import("@/lib/crypto");
       updates.captionHash = hashSHA256(parsed.data.caption);
+    }
+    if (parsed.data.collaborators !== undefined) {
+      updates.collaborators = parsed.data.collaborators;
     }
     if (parsed.data.publishAt) {
       const publishAt = new Date(parsed.data.publishAt);

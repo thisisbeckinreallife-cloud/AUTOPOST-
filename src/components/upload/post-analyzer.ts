@@ -38,6 +38,8 @@ export interface DetectedPost {
   publishAt: Date | null;
   /** Post type auto-detected */
   postType: "image" | "carousel" | "reel";
+  /** Instagram collaborators (usernames) — post appears on both feeds */
+  collaborators: string[];
 }
 
 export interface AnalysisResult {
@@ -340,6 +342,7 @@ async function parsePerfectStructure(
       extractedDate,
       publishAt: extractedDate,
       postType,
+      collaborators: [] as string[],
     };
 
     const { status, statusMessage } = getStatusInfo(partial);
@@ -361,6 +364,7 @@ async function parsePerfectStructure(
       extractedDate,
       publishAt: extractedDate,
       postType: detectPostType([mediaItem]),
+      collaborators: [] as string[],
     };
     const { status, statusMessage } = getStatusInfo(partial);
     posts.push({ ...partial, status, statusMessage });
@@ -419,6 +423,7 @@ async function parseSeparatedStructure(
       extractedDate,
       publishAt: extractedDate,
       postType: detectPostType([mediaItem]),
+      collaborators: [] as string[],
     };
     const { status, statusMessage } = getStatusInfo(partial);
     posts.push({ ...partial, status, statusMessage });
@@ -483,6 +488,7 @@ async function parseNameMatchedStructure(
       extractedDate,
       publishAt: extractedDate,
       postType: detectPostType([mediaItem]),
+      collaborators: [] as string[],
     };
     const { status, statusMessage } = getStatusInfo(partial);
     posts.push({ ...partial, status, statusMessage });
@@ -511,6 +517,7 @@ async function parseFlatImages(
       extractedDate,
       publishAt: extractedDate,
       postType: detectPostType([mediaItem]),
+      collaborators: [] as string[],
     };
     const { status, statusMessage } = getStatusInfo(partial);
     posts.push({ ...partial, status, statusMessage });
@@ -566,6 +573,7 @@ async function parseMixedStructure(
           extractedDate,
           publishAt: extractedDate,
           postType: detectPostType([mediaItem]),
+          collaborators: [] as string[],
         };
         const { status, statusMessage } = getStatusInfo(partial);
         posts.push({ ...partial, status, statusMessage });
@@ -590,6 +598,7 @@ async function parseMixedStructure(
         extractedDate,
         publishAt: extractedDate,
         postType: detectPostType(mediaItems),
+        collaborators: [] as string[],
       };
       const { status, statusMessage } = getStatusInfo(partial);
       posts.push({ ...partial, status, statusMessage });
@@ -652,6 +661,9 @@ export async function repackZip(posts: DetectedPost[]): Promise<Blob> {
       type: post.postType,
       publish_at: publishDate.toISOString(),
     };
+    if (post.collaborators && post.collaborators.length > 0) {
+      meta.collaborators = post.collaborators;
+    }
     folder.file("meta.json", JSON.stringify(meta, null, 2));
   }
 
