@@ -46,7 +46,7 @@ export default async function BatchesPage({
         </div>
         <Link
           href={`/businesses/${params.slug}/upload`}
-          className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+          className="inline-flex items-center gap-2 bg-gradient-brand-vivid hover:shadow-glow text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:-translate-y-px"
         >
           <Plus className="h-4 w-4" />
           Subir ZIP
@@ -54,15 +54,15 @@ export default async function BatchesPage({
       </div>
 
       {batches.length === 0 ? (
-        <div className="text-center py-20 border border-dashed border-white/[0.08] bg-surface-card rounded-2xl">
-          <div className="w-16 h-16 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center mx-auto mb-5">
+        <div className="text-center py-20 border border-dashed border-white/[0.06] bg-surface-card rounded-2xl animate-fade-up">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500/12 to-accent-violet/8 border border-brand-500/20 flex items-center justify-center mx-auto mb-5">
             <Upload className="h-8 w-8 text-brand-400" />
           </div>
           <h3 className="text-lg font-semibold text-zinc-100 mb-2">Aun no has subido contenido</h3>
           <p className="text-zinc-500 text-sm mb-6 max-w-xs mx-auto">Sube un archivo ZIP con tus posts organizados por carpetas</p>
           <Link
             href={`/businesses/${params.slug}/upload`}
-            className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-colors"
+            className="inline-flex items-center gap-2 bg-gradient-brand-vivid hover:shadow-glow text-white px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:-translate-y-px"
           >
             <Plus className="h-4 w-4" />
             Subir ZIP

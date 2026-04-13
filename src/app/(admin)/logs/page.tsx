@@ -42,9 +42,9 @@ export default async function LogsPage({
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="animate-fade-up">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500/10">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500/15 to-accent-violet/10">
             <FileText className="h-5 w-5 text-brand-400" />
           </div>
           <div>

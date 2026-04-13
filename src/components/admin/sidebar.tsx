@@ -49,19 +49,17 @@ export function Sidebar() {
 
   const sidebar = (
     <aside
-      className="fixed left-0 top-0 h-full w-64 bg-surface-card border-r border-white/[0.04] text-white flex flex-col z-40"
+      className="fixed left-0 top-0 h-full w-64 bg-surface-card/90 backdrop-blur-xl border-r border-white/[0.04] text-white flex flex-col z-40"
       onKeyDown={handleKeyDown}
     >
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 h-16 border-b border-white/[0.04]">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500/12 border border-brand-500/15">
+        <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/20">
           <Zap className="h-4 w-4 text-brand-400" />
         </div>
-        <div>
-          <span className="font-display font-bold text-base tracking-tight text-white">
-            Auto<span className="text-gradient">Post</span>
-          </span>
-        </div>
+        <span className="font-display font-bold text-base tracking-tight text-white">
+          Auto<span className="text-gradient">Post</span>
+        </span>
       </div>
 
       {/* Nav */}
@@ -76,8 +74,8 @@ export function Sidebar() {
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
                 isActive
-                  ? "bg-brand-500/10 text-brand-400"
-                  : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300"
+                  ? "bg-gradient-to-r from-brand-500/12 to-accent-violet/6 text-brand-300 border border-brand-500/10"
+                  : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300 border border-transparent"
               )}
             >
               <Icon className={cn(
@@ -86,7 +84,7 @@ export function Sidebar() {
               )} />
               {label}
               {isActive && (
-                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-brand-400" />
+                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-brand-400 shadow-glow-sm" />
               )}
             </Link>
           );

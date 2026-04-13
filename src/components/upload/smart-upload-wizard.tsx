@@ -335,7 +335,7 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
                 <div
                   className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-all ${
                     isCurrent
-                      ? "bg-brand-500 text-white"
+                      ? "bg-gradient-brand-vivid text-white shadow-glow-sm"
                       : isActive
                         ? "bg-brand-500/15 text-brand-400"
                         : "bg-zinc-800/60 text-zinc-600"
@@ -363,9 +363,9 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
           {step === "drop" && <DropZone onFileSelected={handleFileSelected} />}
 
           {step === "analyzing" && (
-            <div className="flex flex-col items-center justify-center py-16 space-y-5">
+            <div className="flex flex-col items-center justify-center py-16 space-y-5 animate-fade-up">
               <div className="relative">
-                <div className="w-16 h-16 rounded-2xl bg-brand-500/10 border border-brand-500/15 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/15 flex items-center justify-center">
                   <Sparkles className="h-8 w-8 text-brand-400 animate-pulse-subtle" />
                 </div>
                 <Loader2 className="absolute -top-1 -right-1 h-5 w-5 text-brand-400 animate-spin" />
@@ -402,8 +402,8 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
           {step === "calendar" && <CalendarPreview posts={posts} />}
 
           {step === "uploading" && (
-            <div className="flex flex-col items-center justify-center py-16 space-y-5">
-              <div className="w-16 h-16 rounded-2xl bg-green-500/10 border border-green-500/15 flex items-center justify-center">
+            <div className="flex flex-col items-center justify-center py-16 space-y-5 animate-fade-up">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500/12 to-emerald-500/8 border border-green-500/15 flex items-center justify-center">
                 <Upload className="h-8 w-8 text-green-400 animate-pulse-subtle" />
               </div>
               <div className="text-center">

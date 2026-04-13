@@ -50,7 +50,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8 max-w-3xl">
       {/* Header */}
-      <div className="">
+      <div className="animate-fade-up">
         <h1 className="font-display text-2xl font-bold text-white tracking-tight">
           Inicio
         </h1>
@@ -59,9 +59,9 @@ export default async function DashboardPage() {
 
       {/* Onboarding steps */}
       {(!hasBusinesses || !hasConnected || !hasContent) && (
-        <div className="rounded-2xl border border-white/[0.06] bg-surface-card p-6">
+        <div className="rounded-2xl border border-white/[0.06] bg-surface-card p-6 accent-border animate-fade-up stagger-1">
           <div className="flex items-center gap-3 mb-5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500/10 border border-brand-500/15">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/15">
               <Zap className="h-4 w-4 text-brand-400" />
             </div>
             <div>
@@ -111,24 +111,24 @@ export default async function DashboardPage() {
 
       {/* Stats */}
       {hasContent && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fade-up stagger-2">
           <StatCard
-            icon={<Clock className="h-4 w-4 text-blue-400" />}
+            icon={<Clock className="h-4 w-4 text-cyan-400" />}
             value={upcomingPosts.length}
             label="Proximas"
-            accent="blue"
+            glowColor="cyan"
           />
           <StatCard
-            icon={<CheckCircle className="h-4 w-4 text-green-400" />}
+            icon={<CheckCircle className="h-4 w-4 text-emerald-400" />}
             value={todayPublished}
             label="Publicados hoy"
-            accent="green"
+            glowColor="emerald"
           />
           <StatCard
             icon={<AlertCircle className="h-4 w-4 text-red-400" />}
             value={failedPosts}
             label="Con errores"
-            accent={failedPosts > 0 ? "red" : "zinc"}
+            glowColor={failedPosts > 0 ? "red" : "zinc"}
           />
         </div>
       )}
@@ -137,9 +137,9 @@ export default async function DashboardPage() {
       {hasConnected && businesses[0] && (
         <Link
           href={`/businesses/${businesses[0].slug}/upload`}
-          className="group flex items-center gap-4 rounded-xl border border-white/[0.06] bg-surface-card p-5 hover:border-brand-500/20 hover:shadow-glow-sm transition-all"
+          className="group flex items-center gap-4 rounded-xl border border-white/[0.06] bg-surface-card p-5 hover:border-brand-500/25 hover:shadow-glow-sm card-interactive animate-fade-up stagger-3"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-500/10 border border-brand-500/15 group-hover:bg-brand-500/15 transition-colors">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/15 group-hover:from-brand-500/25 group-hover:to-accent-violet/15 transition-all">
             <Upload className="h-5 w-5 text-brand-400" />
           </div>
           <div className="flex-1">
@@ -183,8 +183,8 @@ export default async function DashboardPage() {
 
       {/* Empty state */}
       {hasConnected && !hasContent && (
-        <div className="text-center py-16 rounded-2xl border border-dashed border-zinc-800 bg-surface-card/50">
-          <div className="w-14 h-14 rounded-xl bg-brand-500/8 border border-brand-500/10 flex items-center justify-center mx-auto mb-4">
+        <div className="text-center py-16 rounded-2xl border border-dashed border-white/[0.06] bg-surface-card/50 animate-fade-up">
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500/12 to-accent-violet/8 border border-brand-500/10 flex items-center justify-center mx-auto mb-4">
             <Upload className="h-7 w-7 text-brand-400" />
           </div>
           <h3 className="font-display text-lg font-bold text-white mb-1.5">Tu calendario esta vacio</h3>
@@ -206,11 +206,17 @@ export default async function DashboardPage() {
   );
 }
 
-function StatCard({ icon, value, label, accent }: {
-  icon: React.ReactNode; value: number; label: string; accent: string;
+function StatCard({ icon, value, label, glowColor }: {
+  icon: React.ReactNode; value: number; label: string; glowColor: string;
 }) {
+  const glowMap: Record<string, string> = {
+    cyan: "hover:border-cyan-500/20 hover:shadow-[0_0_20px_rgba(34,211,238,0.06)]",
+    emerald: "hover:border-emerald-500/20 hover:shadow-[0_0_20px_rgba(52,211,153,0.06)]",
+    red: "hover:border-red-500/20 hover:shadow-[0_0_20px_rgba(239,68,68,0.06)]",
+    zinc: "hover:border-white/[0.1]",
+  };
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-surface-card p-4">
+    <div className={`rounded-xl border border-white/[0.06] bg-surface-card p-4 transition-all duration-300 ${glowMap[glowColor] ?? ""}`}>
       <div className="flex items-center gap-2.5 mb-2">
         {icon}
         <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{label}</span>

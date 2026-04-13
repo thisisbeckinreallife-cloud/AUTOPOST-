@@ -52,8 +52,8 @@ export default async function BusinessPage({
       ]} />
 
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <div className="h-14 w-14 rounded-xl bg-brand-500/10 border border-brand-500/10 flex items-center justify-center shrink-0">
+      <div className="flex items-center gap-4 animate-fade-up">
+        <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/10 flex items-center justify-center shrink-0">
           <span className="text-brand-400 font-display font-bold text-xl uppercase">{business.name[0]}</span>
         </div>
         <div>
@@ -121,20 +121,20 @@ export default async function BusinessPage({
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fade-up stagger-2">
         <Link href={`/businesses/${params.slug}/posts?status=SCHEDULED`}>
-          <div className="group rounded-xl border border-white/[0.06] bg-surface-card p-4 hover:border-white/[0.1] transition-all">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/8 mb-3">
-              <Clock className="h-4 w-4 text-blue-400" />
+          <div className="group rounded-xl border border-white/[0.06] bg-surface-card p-4 hover:border-cyan-500/20 hover:shadow-[0_0_20px_rgba(34,211,238,0.06)] transition-all duration-300">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/8 mb-3">
+              <Clock className="h-4 w-4 text-cyan-400" />
             </div>
             <p className="text-2xl font-display font-bold text-white tabular-nums">{upcomingCount}</p>
             <p className="text-xs text-zinc-500 mt-0.5 font-medium uppercase tracking-wider">Programados</p>
           </div>
         </Link>
         <Link href={`/businesses/${params.slug}/posts?status=PUBLISHED`}>
-          <div className="group rounded-xl border border-white/[0.06] bg-surface-card p-4 hover:border-white/[0.1] transition-all">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500/8 mb-3">
-              <CheckCircle className="h-4 w-4 text-green-400" />
+          <div className="group rounded-xl border border-white/[0.06] bg-surface-card p-4 hover:border-emerald-500/20 hover:shadow-[0_0_20px_rgba(52,211,153,0.06)] transition-all duration-300">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/8 mb-3">
+              <CheckCircle className="h-4 w-4 text-emerald-400" />
             </div>
             <p className="text-2xl font-display font-bold text-white tabular-nums">{publishedCount}</p>
             <p className="text-xs text-zinc-500 mt-0.5 font-medium uppercase tracking-wider">Publicados</p>
@@ -156,10 +156,10 @@ export default async function BusinessPage({
       </div>
 
       {/* Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 animate-fade-up stagger-3">
         <Link
           href={`/businesses/${params.slug}/upload`}
-          className="group flex items-center gap-4 bg-brand-500 hover:bg-brand-400 text-white rounded-xl px-5 py-4 transition-all"
+          className="group flex items-center gap-4 bg-gradient-brand-vivid hover:shadow-glow text-white rounded-xl px-5 py-4 transition-all hover:-translate-y-px"
         >
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15">
             <Upload className="h-4 w-4" />

@@ -18,14 +18,14 @@ export default async function BusinessesPage() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-fade-up">
         <div>
           <h1 className="font-display text-2xl font-bold text-white tracking-tight">Mis cuentas</h1>
           <p className="text-zinc-500 mt-1 text-sm">Las cuentas de Instagram que gestionas</p>
         </div>
         <Link
           href="/businesses/new"
-          className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all"
+          className="inline-flex items-center gap-2 bg-gradient-brand-vivid hover:shadow-glow text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:-translate-y-px"
         >
           <Plus className="h-4 w-4" />
           Anadir cuenta
@@ -33,8 +33,8 @@ export default async function BusinessesPage() {
       </div>
 
       {businesses.length === 0 ? (
-        <div className="text-center py-20 border border-dashed border-zinc-800 bg-surface-card/50 rounded-2xl">
-          <div className="w-14 h-14 rounded-xl bg-brand-500/8 border border-brand-500/10 flex items-center justify-center mx-auto mb-4">
+        <div className="text-center py-20 border border-dashed border-white/[0.06] bg-surface-card/50 rounded-2xl animate-fade-up stagger-1">
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500/12 to-accent-violet/8 border border-brand-500/10 flex items-center justify-center mx-auto mb-4">
             <Instagram className="h-7 w-7 text-brand-400" />
           </div>
           <h3 className="font-display text-lg font-bold text-white mb-1.5">Tu lista de cuentas esta vacia</h3>
@@ -53,9 +53,9 @@ export default async function BusinessesPage() {
             const connected = biz.metaConnection?.status === "ACTIVE";
             return (
               <Link key={biz.id} href={`/businesses/${biz.slug}`}>
-                <div className={`group flex items-center gap-4 bg-surface-card border border-white/[0.06] rounded-xl px-5 py-4 hover:border-white/[0.1] transition-all`}>
+                <div className={`group flex items-center gap-4 bg-surface-card border border-white/[0.06] rounded-xl px-5 py-4 hover:border-brand-500/20 hover:shadow-glow-sm card-interactive animate-fade-up`} style={{ animationDelay: `${i * 0.08}s` }}>
                   {/* Avatar */}
-                  <div className="h-10 w-10 rounded-lg bg-brand-500/10 border border-brand-500/10 flex items-center justify-center shrink-0">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/10 flex items-center justify-center shrink-0">
                     <span className="text-brand-400 font-display font-bold text-base uppercase">{biz.name[0]}</span>
                   </div>
 

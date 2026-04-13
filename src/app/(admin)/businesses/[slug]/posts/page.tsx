@@ -66,7 +66,7 @@ export default async function PostsPage({
         { label: "Posts" },
       ]} />
 
-      <div>
+      <div className="animate-fade-up">
         <h1 className="font-display text-xl font-bold text-white">
           {business.name} — Posts
         </h1>
@@ -108,8 +108,8 @@ export default async function PostsPage({
       </div>
 
       {posts.length === 0 ? (
-        <div className="text-center py-20 rounded-2xl border border-dashed border-white/[0.08] bg-surface-card">
-          <div className="w-14 h-14 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto mb-4">
+        <div className="text-center py-20 rounded-2xl border border-dashed border-white/[0.06] bg-surface-card animate-fade-up">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-800/60 flex items-center justify-center mx-auto mb-4">
             <Search className="h-7 w-7 text-zinc-500" />
           </div>
           <h3 className="text-base font-semibold text-zinc-200 mb-1">No se encontraron posts</h3>
