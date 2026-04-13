@@ -15,15 +15,15 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        <meta name="theme-color" content="#0B0F1A" />
+        <meta name="theme-color" content="#09090B" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="font-sans">
+      <body className="font-sans antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

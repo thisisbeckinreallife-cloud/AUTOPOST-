@@ -42,27 +42,27 @@ export default async function LogsPage({
 
   return (
     <div className="space-y-6">
-      <div className="animate-stagger-in delay-0">
+      <div>
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/10">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500/10">
             <FileText className="h-5 w-5 text-brand-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-slate-100">Registro de actividad</h1>
-            <p className="text-slate-500 mt-0.5">{total} registros</p>
+            <h1 className="font-display text-xl font-bold text-white">Registro de actividad</h1>
+            <p className="text-zinc-500 mt-0.5">{total} registros</p>
           </div>
         </div>
       </div>
 
       {/* Filter */}
-      <div className="flex flex-wrap gap-2 animate-stagger-in delay-1" role="group" aria-label="Filtrar por accion">
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por accion">
         <Link href="/logs">
           <button
             type="button"
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all ${
               !actionFilter
-                ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-glow"
-                : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200"
+                ? "bg-brand-500 text-white"
+                : "bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08] hover:text-zinc-200"
             }`}
             aria-pressed={!actionFilter}
           >
@@ -73,10 +73,10 @@ export default async function LogsPage({
           <Link key={action} href={`/logs?action=${action}`}>
             <button
               type="button"
-              className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all duration-300 ${
+              className={`px-3.5 py-2 rounded-lg text-xs font-mono font-semibold transition-all ${
                 actionFilter === action
-                  ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-glow"
-                  : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200"
+                  ? "bg-brand-500 text-white"
+                  : "bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08] hover:text-zinc-200"
               }`}
               aria-pressed={actionFilter === action}
             >
@@ -86,42 +86,42 @@ export default async function LogsPage({
         ))}
       </div>
 
-      <div className="rounded-2xl border border-slate-800/80 bg-surface-card overflow-hidden animate-card-appear delay-2">
+      <div className="rounded-xl border border-white/[0.06] bg-surface-card overflow-hidden">
         {logs.length === 0 ? (
-          <div className="py-16 text-center text-slate-500">
-            <FileText className="h-8 w-8 mx-auto mb-3 text-slate-600" />
+          <div className="py-16 text-center text-zinc-500">
+            <FileText className="h-8 w-8 mx-auto mb-3 text-zinc-600" />
             No se encontraron registros.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[600px]">
               <thead>
-                <tr className="border-b border-slate-800">
-                  <th className="px-5 py-3.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                <tr className="border-b border-white/[0.06]">
+                  <th className="px-5 py-3.5 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
                     Hora
                   </th>
-                  <th className="px-5 py-3.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="px-5 py-3.5 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
                     Accion
                   </th>
-                  <th className="px-5 py-3.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="px-5 py-3.5 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
                     Cuenta
                   </th>
-                  <th className="px-5 py-3.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="px-5 py-3.5 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
                     Entidad
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {logs.map((log, i) => (
+                {logs.map((log) => (
                   <tr
                     key={log.id}
-                    className={`border-b border-slate-800/30 last:border-0 hover:bg-white/[0.02] transition-colors animate-stagger-in delay-${Math.min(i, 8)}`}
+                    className="border-b border-white/[0.03] last:border-0 hover:bg-white/[0.02] transition-colors"
                   >
-                    <td className="px-5 py-3 text-slate-500 whitespace-nowrap text-xs">
+                    <td className="px-5 py-3 text-zinc-500 whitespace-nowrap text-xs">
                       {formatDate(log.createdAt)}
                     </td>
                     <td className="px-5 py-3">
-                      <span className="font-mono text-xs bg-white/5 text-slate-300 px-2 py-1 rounded-lg font-bold">
+                      <span className="font-mono text-xs bg-white/[0.04] text-zinc-300 px-2 py-1 rounded-lg font-medium">
                         {log.action}
                       </span>
                     </td>
@@ -134,15 +134,15 @@ export default async function LogsPage({
                           {log.business.name}
                         </Link>
                       ) : (
-                        <span className="text-slate-600">—</span>
+                        <span className="text-zinc-700">—</span>
                       )}
                     </td>
-                    <td className="px-5 py-3 text-slate-500 text-xs">
+                    <td className="px-5 py-3 text-zinc-500 text-xs">
                       {log.entityType && (
                         <>
                           {log.entityType}{" "}
                           {log.entityId && (
-                            <span className="font-mono text-slate-600">
+                            <span className="font-mono text-zinc-600">
                               {log.entityId.slice(0, 8)}
                             </span>
                           )}
@@ -167,10 +167,10 @@ export default async function LogsPage({
               aria-current={p === page ? "page" : undefined}
             >
               <span
-                className={`px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
+                className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
                   p === page
-                    ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-glow"
-                    : "bg-white/5 text-slate-400 hover:bg-white/10"
+                    ? "bg-brand-500 text-white"
+                    : "bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08]"
                 }`}
               >
                 {p}

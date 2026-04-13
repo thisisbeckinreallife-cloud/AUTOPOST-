@@ -3,7 +3,7 @@ import { requireSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
-import { Instagram, Upload, CheckCircle, AlertCircle, Clock, ChevronRight, Zap, BarChart3 } from "lucide-react";
+import { Instagram, Upload, CheckCircle, AlertCircle, Clock, ChevronRight, BarChart3, Shield } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { DeleteBusinessButton } from "@/components/delete-business-button";
 
@@ -51,59 +51,56 @@ export default async function BusinessPage({
         { label: business.name },
       ]} />
 
-      {/* Header with gradient */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-500/10 via-surface-card to-surface-card border border-brand-500/10 p-6 animate-card-appear">
-        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-radial from-brand-500/8 to-transparent rounded-full -translate-y-1/3 translate-x-1/4" />
-        <div className="relative flex items-center gap-4">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-brand-500/20 to-brand-600/20 border border-brand-500/15 flex items-center justify-center shrink-0 animate-spin-in">
-            <span className="text-brand-400 font-black text-2xl uppercase">{business.name[0]}</span>
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-slate-100">{business.name}</h1>
-            {business.metaConnection?.igUsername && (
-              <p className="text-slate-500 text-sm flex items-center gap-1.5 mt-0.5">
-                <Instagram className="h-3.5 w-3.5" />
-                @{business.metaConnection.igUsername}
-              </p>
-            )}
-          </div>
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <div className="h-14 w-14 rounded-xl bg-brand-500/10 border border-brand-500/10 flex items-center justify-center shrink-0">
+          <span className="text-brand-400 font-display font-bold text-xl uppercase">{business.name[0]}</span>
+        </div>
+        <div>
+          <h1 className="font-display text-2xl font-bold text-white tracking-tight">{business.name}</h1>
+          {business.metaConnection?.igUsername && (
+            <p className="text-zinc-500 text-sm flex items-center gap-1.5 mt-0.5">
+              <Instagram className="h-3.5 w-3.5" />
+              @{business.metaConnection.igUsername}
+            </p>
+          )}
         </div>
       </div>
 
       {/* Alerts */}
       {searchParams.connected === "1" && (
-        <div className="rounded-xl bg-green-500/10 border border-green-500/20 px-5 py-3.5 text-sm text-green-400 flex items-center gap-2 animate-bounce-in">
+        <div className="rounded-xl bg-green-500/8 border border-green-500/15 px-4 py-3 text-sm text-green-400 flex items-center gap-2 animate-fade-in">
           <CheckCircle className="h-4 w-4" />
           Tu cuenta de Instagram se ha conectado correctamente!
         </div>
       )}
       {searchParams.error && (
-        <div className="rounded-xl bg-red-500/10 border border-red-500/20 px-5 py-3.5 text-sm text-red-400 animate-bounce-in">
+        <div className="rounded-xl bg-red-500/8 border border-red-500/15 px-4 py-3 text-sm text-red-400 animate-fade-in">
           {decodeURIComponent(searchParams.error)}
         </div>
       )}
 
       {/* Connection status */}
-      <div className={`group rounded-2xl border bg-surface-card p-5 card-hover animate-stagger-in delay-1 ${connected ? "border-green-500/15" : "border-amber-500/15 animate-border-pulse"}`}>
+      <div className={`rounded-xl border bg-surface-card p-5 ${connected ? "border-green-500/10" : "border-amber-500/15"}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {connected ? (
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-500/10 border border-green-500/15">
-                <CheckCircle className="h-6 w-6 text-green-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/8 border border-green-500/10">
+                <Shield className="h-5 w-5 text-green-400" />
               </div>
             ) : (
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/15 animate-float">
-                <AlertCircle className="h-6 w-6 text-amber-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/8 border border-amber-500/10">
+                <AlertCircle className="h-5 w-5 text-amber-400" />
               </div>
             )}
             <div>
-              <p className="font-bold text-slate-200">
+              <p className="font-semibold text-zinc-200">
                 {connected ? "Instagram conectado" : "Instagram no conectado"}
               </p>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-zinc-500">
                 {connected
                   ? `@${business.metaConnection?.igUsername} · ${business.metaConnection?.fbPageName ?? ""}`
-                  : "Conecta tu cuenta para empezar a publicar automaticamente"}
+                  : "Conecta tu cuenta para publicar automaticamente"}
               </p>
               {business.metaConnection?.lastError && (
                 <p className="text-xs text-red-400 mt-1">{business.metaConnection.lastError}</p>
@@ -112,10 +109,10 @@ export default async function BusinessPage({
           </div>
           <Link
             href={`/businesses/${params.slug}/connect`}
-            className={`text-sm font-bold px-4 py-2 rounded-lg transition-all duration-300 ${
+            className={`text-sm font-semibold px-4 py-2 rounded-lg transition-all ${
               connected
-                ? "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-                : "bg-gradient-to-r from-brand-500 to-brand-600 text-white hover:shadow-glow hover:scale-105"
+                ? "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                : "bg-brand-500 hover:bg-brand-400 text-white"
             }`}
           >
             {connected ? "Reconectar" : "Conectar"}
@@ -126,91 +123,88 @@ export default async function BusinessPage({
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Link href={`/businesses/${params.slug}/posts?status=SCHEDULED`}>
-          <div className="group rounded-2xl border border-blue-500/10 bg-gradient-to-br from-blue-500/8 to-transparent p-5 card-hover animate-stagger-in delay-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 mb-3 group-hover:scale-110 transition-transform duration-300">
-              <Clock className="h-5 w-5 text-blue-400" />
+          <div className="group rounded-xl border border-white/[0.06] bg-surface-card p-4 hover:border-white/[0.1] transition-all">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/8 mb-3">
+              <Clock className="h-4 w-4 text-blue-400" />
             </div>
-            <p className="text-3xl font-black text-slate-100 stat-number">{upcomingCount}</p>
-            <p className="text-xs text-slate-500 mt-1 font-medium uppercase tracking-wider">Programados</p>
+            <p className="text-2xl font-display font-bold text-white tabular-nums">{upcomingCount}</p>
+            <p className="text-xs text-zinc-500 mt-0.5 font-medium uppercase tracking-wider">Programados</p>
           </div>
         </Link>
         <Link href={`/businesses/${params.slug}/posts?status=PUBLISHED`}>
-          <div className="group rounded-2xl border border-green-500/10 bg-gradient-to-br from-green-500/8 to-transparent p-5 card-hover animate-stagger-in delay-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10 mb-3 group-hover:scale-110 transition-transform duration-300">
-              <CheckCircle className="h-5 w-5 text-green-400" />
+          <div className="group rounded-xl border border-white/[0.06] bg-surface-card p-4 hover:border-white/[0.1] transition-all">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500/8 mb-3">
+              <CheckCircle className="h-4 w-4 text-green-400" />
             </div>
-            <p className="text-3xl font-black text-slate-100 stat-number">{publishedCount}</p>
-            <p className="text-xs text-slate-500 mt-1 font-medium uppercase tracking-wider">Publicados</p>
+            <p className="text-2xl font-display font-bold text-white tabular-nums">{publishedCount}</p>
+            <p className="text-xs text-zinc-500 mt-0.5 font-medium uppercase tracking-wider">Publicados</p>
           </div>
         </Link>
         <Link href={`/businesses/${params.slug}/posts?status=FAILED`}>
-          <div className={`group rounded-2xl border bg-gradient-to-br p-5 card-hover animate-stagger-in delay-4 ${
-            failedCount > 0
-              ? "border-red-500/15 from-red-500/8 to-transparent"
-              : "border-slate-800 from-slate-500/5 to-transparent"
+          <div className={`group rounded-xl border bg-surface-card p-4 hover:border-white/[0.1] transition-all ${
+            failedCount > 0 ? "border-red-500/10" : "border-white/[0.06]"
           }`}>
-            <div className={`flex h-10 w-10 items-center justify-center rounded-xl mb-3 group-hover:scale-110 transition-transform duration-300 ${
-              failedCount > 0 ? "bg-red-500/10" : "bg-slate-500/10"
+            <div className={`flex h-8 w-8 items-center justify-center rounded-lg mb-3 ${
+              failedCount > 0 ? "bg-red-500/8" : "bg-zinc-800"
             }`}>
-              <AlertCircle className={`h-5 w-5 ${failedCount > 0 ? "text-red-400" : "text-slate-500"}`} />
+              <AlertCircle className={`h-4 w-4 ${failedCount > 0 ? "text-red-400" : "text-zinc-600"}`} />
             </div>
-            <p className="text-3xl font-black text-slate-100 stat-number">{failedCount}</p>
-            <p className="text-xs text-slate-500 mt-1 font-medium uppercase tracking-wider">Con errores</p>
+            <p className="text-2xl font-display font-bold text-white tabular-nums">{failedCount}</p>
+            <p className="text-xs text-zinc-500 mt-0.5 font-medium uppercase tracking-wider">Con errores</p>
           </div>
         </Link>
       </div>
 
-      {/* Main actions */}
+      {/* Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Link
           href={`/businesses/${params.slug}/upload`}
-          className="group relative flex items-center gap-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-2xl px-6 py-5 hover:shadow-glow-lg hover:scale-[1.02] transition-all duration-300 overflow-hidden animate-stagger-in delay-5"
+          className="group flex items-center gap-4 bg-brand-500 hover:bg-brand-400 text-white rounded-xl px-5 py-4 transition-all"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-white/0 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
-            <Upload className="h-5 w-5" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15">
+            <Upload className="h-4 w-4" />
           </div>
-          <div className="relative">
-            <p className="font-bold text-sm">Subir contenido</p>
-            <p className="text-xs text-brand-200">Sube el ZIP del mes</p>
+          <div>
+            <p className="font-semibold text-sm">Subir contenido</p>
+            <p className="text-xs text-brand-100/70">Sube el ZIP del mes</p>
           </div>
         </Link>
         <Link
           href={`/businesses/${params.slug}/posts`}
-          className="group flex items-center gap-4 bg-surface-card border border-slate-800 rounded-2xl px-6 py-5 card-hover animate-stagger-in delay-6"
+          className="group flex items-center gap-4 bg-surface-card border border-white/[0.06] rounded-xl px-5 py-4 hover:border-white/[0.1] transition-all"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800 group-hover:bg-brand-500/10 transition-colors duration-300">
-            <BarChart3 className="h-5 w-5 text-slate-400 group-hover:text-brand-400 transition-colors duration-300" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-800 group-hover:bg-zinc-700 transition-colors">
+            <BarChart3 className="h-4 w-4 text-zinc-400" />
           </div>
           <div>
-            <p className="font-bold text-sm text-slate-200 group-hover:text-white transition-colors">Ver publicaciones</p>
-            <p className="text-xs text-slate-500">Gestiona tus posts</p>
+            <p className="font-semibold text-sm text-zinc-200 group-hover:text-white transition-colors">Ver publicaciones</p>
+            <p className="text-xs text-zinc-500">Gestiona tus posts</p>
           </div>
         </Link>
       </div>
 
       {/* Recent uploads */}
       {business.uploadBatches.length > 0 && (
-        <div className="animate-stagger-in delay-7">
+        <div className="">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Subidas recientes</h2>
+            <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">Subidas recientes</h2>
             <Link href={`/businesses/${params.slug}/batches`} className="text-xs text-brand-400 hover:text-brand-300 font-medium transition-colors">
               Ver todo →
             </Link>
           </div>
-          <div className="space-y-2">
-            {business.uploadBatches.map((batch, i) => (
+          <div className="space-y-1.5">
+            {business.uploadBatches.map((batch) => (
               <Link
                 key={batch.id}
                 href={`/businesses/${params.slug}/batches/${batch.id}`}
-                className={`group flex items-center gap-3 bg-surface-card border border-slate-800/80 rounded-xl px-5 py-3.5 card-hover animate-stagger-in delay-${Math.min(i + 7, 8)}`}
+                className="group flex items-center gap-3 bg-surface-card border border-white/[0.04] rounded-lg px-4 py-3 hover:border-white/[0.08] transition-all"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-200 truncate group-hover:text-white transition-colors">{batch.originalFilename}</p>
-                  <p className="text-xs text-slate-500">{formatDate(batch.createdAt)} · {batch.validPosts ?? 0} posts validos</p>
+                  <p className="text-sm font-medium text-zinc-200 truncate group-hover:text-white transition-colors">{batch.originalFilename}</p>
+                  <p className="text-xs text-zinc-600">{formatDate(batch.createdAt)} · {batch.validPosts ?? 0} posts</p>
                 </div>
                 <BatchStatusPill status={batch.status} />
-                <ChevronRight className="h-4 w-4 text-slate-600 group-hover:text-brand-400 group-hover:translate-x-0.5 transition-all duration-300" />
+                <ChevronRight className="h-4 w-4 text-zinc-700 group-hover:text-zinc-400 transition-all" />
               </Link>
             ))}
           </div>
@@ -218,11 +212,11 @@ export default async function BusinessPage({
       )}
 
       {/* Danger zone */}
-      <div className="animate-stagger-in delay-8 pt-4 border-t border-slate-800/50">
+      <div className="pt-4 border-t border-white/[0.04]">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-bold text-slate-400">Zona peligrosa</p>
-            <p className="text-xs text-slate-600 mt-0.5">Eliminar esta cuenta y todos sus datos</p>
+            <p className="text-sm font-semibold text-zinc-500">Zona peligrosa</p>
+            <p className="text-xs text-zinc-700 mt-0.5">Eliminar esta cuenta y todos sus datos</p>
           </div>
           <DeleteBusinessButton slug={params.slug} name={business.name} />
         </div>
@@ -233,11 +227,11 @@ export default async function BusinessPage({
 
 function BatchStatusPill({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
-    PARSED:            { label: "Listo", cls: "bg-green-500/20 text-green-400 border-green-500/20" },
-    VALIDATION_FAILED: { label: "Con errores", cls: "bg-red-500/20 text-red-400 border-red-500/20" },
-    PARSING:           { label: "Procesando...", cls: "bg-blue-500/20 text-blue-400 border-blue-500/20" },
-    CONFIRMED:         { label: "Programado", cls: "bg-green-500/20 text-green-400 border-green-500/20" },
+    PARSED:            { label: "Listo", cls: "bg-green-500/10 text-green-400 border-green-500/15" },
+    VALIDATION_FAILED: { label: "Con errores", cls: "bg-red-500/10 text-red-400 border-red-500/15" },
+    PARSING:           { label: "Procesando...", cls: "bg-blue-500/10 text-blue-400 border-blue-500/15" },
+    CONFIRMED:         { label: "Programado", cls: "bg-green-500/10 text-green-400 border-green-500/15" },
   };
-  const s = map[status] ?? { label: status, cls: "bg-slate-500/20 text-slate-400 border-slate-500/20" };
-  return <span className={`text-xs px-2.5 py-1 rounded-full font-bold border ${s.cls}`}>{s.label}</span>;
+  const s = map[status] ?? { label: status, cls: "bg-zinc-500/10 text-zinc-400 border-zinc-500/15" };
+  return <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${s.cls}`}>{s.label}</span>;
 }

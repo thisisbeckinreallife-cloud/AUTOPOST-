@@ -41,7 +41,6 @@ function getTodayDate(): string {
 
 function getCurrentHourCeil(): string {
   const now = new Date();
-  // Round up to next hour + 1 for safety margin
   now.setHours(now.getHours() + 1, 0, 0, 0);
   return `${String(now.getHours()).padStart(2, "0")}:00`;
 }
@@ -56,7 +55,6 @@ export function getDefaultScheduleSettings(): ScheduleSettings {
   };
 }
 
-/** Calculate publish dates based on settings, skipping past times */
 export function calculatePublishDates(
   postCount: number,
   settings: ScheduleSettings
@@ -66,13 +64,12 @@ export function calculatePublishDates(
   const now = new Date();
   let current = new Date(`${settings.startDate}T00:00:00`);
 
-  // Safety: limit iterations to prevent infinite loops
   let iterations = 0;
   const maxIterations = postCount * 30;
 
   while (dates.length < postCount && iterations < maxIterations) {
     iterations++;
-    const dayOfWeek = current.getDay(); // 0=Sun, 1=Mon...
+    const dayOfWeek = current.getDay();
     const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
     let shouldPublish = settings.days[dayIndex];
@@ -85,7 +82,6 @@ export function calculatePublishDates(
       const publishDate = new Date(current);
       publishDate.setHours(hours, minutes, 0, 0);
 
-      // Skip if the date+time is in the past or too close to now (need 10min buffer for backend)
       const minTime = now.getTime() + 10 * 60 * 1000;
       if (publishDate.getTime() > minTime) {
         dates.push(publishDate);
@@ -122,33 +118,32 @@ export function ScheduleConfig({ postCount, initialSettings, onChange }: Schedul
     ? lastDate.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })
     : "";
 
-  // Check if start date is today and selected time is in the past
   const isToday = settings.startDate === getTodayDate();
   const now = new Date();
   const [selH, selM] = settings.time.split(":").map(Number);
   const timeInPast = isToday && (selH < now.getHours() || (selH === now.getHours() && selM <= now.getMinutes()));
 
   return (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 rounded-2xl p-5">
-        <p className="font-semibold text-slate-100">Configura como quieres publicar</p>
-        <p className="text-sm text-slate-400 mt-1">
+    <div className="space-y-5">
+      <div className="rounded-xl border border-white/[0.06] bg-surface-card p-5">
+        <p className="font-semibold text-white">Configura como quieres publicar</p>
+        <p className="text-sm text-zinc-500 mt-1">
           {postCount} posts seran programados automaticamente segun tu configuracion.
         </p>
       </div>
 
       {/* Start date */}
-      <div className="bg-surface-card border border-slate-800 rounded-xl p-4">
+      <div className="rounded-xl border border-white/[0.06] bg-surface-card p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Calendar className="h-4 w-4 text-slate-400" />
-          <label className="text-sm font-medium text-slate-200">Empezar a publicar desde</label>
+          <Calendar className="h-4 w-4 text-zinc-500" />
+          <label className="text-sm font-medium text-zinc-300">Empezar a publicar desde</label>
         </div>
         <input
           type="date"
           value={settings.startDate}
           min={getTodayDate()}
           onChange={(e) => update({ startDate: e.target.value })}
-          className="border border-slate-700 rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-brand-500 focus:border-brand-500/30 outline-none"
+          className="w-full"
         />
         {isToday && (
           <p className="text-xs text-blue-400 mt-2">
@@ -158,75 +153,68 @@ export function ScheduleConfig({ postCount, initialSettings, onChange }: Schedul
       </div>
 
       {/* Time */}
-      <div className="bg-surface-card border border-slate-800 rounded-xl p-4">
+      <div className="rounded-xl border border-white/[0.06] bg-surface-card p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Clock className="h-4 w-4 text-slate-400" />
-          <label className="text-sm font-medium text-slate-200">
-            Hora de publicacion
-          </label>
+          <Clock className="h-4 w-4 text-zinc-500" />
+          <label className="text-sm font-medium text-zinc-300">Hora de publicacion</label>
         </div>
         <input
           type="time"
           value={settings.time}
           onChange={(e) => update({ time: e.target.value })}
-          className="border border-slate-700 rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-brand-500 focus:border-brand-500/30 outline-none"
+          className="w-full"
         />
         {timeInPast ? (
           <p className="text-xs text-amber-400 mt-2">
-            Esta hora ya paso hoy. El primer post se programara para manana a esta hora.
+            Esta hora ya paso hoy. El primer post se programara para manana.
           </p>
         ) : (
-          <p className="text-xs text-slate-400 mt-2">
+          <p className="text-xs text-zinc-600 mt-2">
             Todos tus posts se publicaran a esta hora.
           </p>
         )}
       </div>
 
       {/* Spacing */}
-      <div className="bg-surface-card border border-slate-800 rounded-xl p-4">
-        <label className="text-sm font-medium text-slate-200 mb-3 block">
-          Frecuencia de publicacion
-        </label>
+      <div className="rounded-xl border border-white/[0.06] bg-surface-card p-4">
+        <label className="text-sm font-medium text-zinc-300 mb-3 block">Frecuencia</label>
         <div className="grid grid-cols-2 gap-2">
           {SPACING_OPTIONS.map((option) => (
             <button
               key={option.value}
               onClick={() => update({ spacing: option.value })}
-              className={`text-left border rounded-xl p-3 transition-all ${
+              className={`text-left border rounded-lg p-3 transition-all ${
                 settings.spacing === option.value
-                  ? "border-brand-500 bg-brand-500/5 ring-1 ring-brand-500"
-                  : "border-slate-800 hover:border-slate-700"
+                  ? "border-brand-500/40 bg-brand-500/[0.06] ring-1 ring-brand-500/30"
+                  : "border-white/[0.06] hover:border-white/[0.1]"
               }`}
             >
-              <p className="text-sm font-medium text-slate-100">{option.label}</p>
-              <p className="text-xs text-slate-400 mt-0.5">{option.desc}</p>
+              <p className="text-sm font-medium text-zinc-200">{option.label}</p>
+              <p className="text-xs text-zinc-500 mt-0.5">{option.desc}</p>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Days of the week (when spacing is daily) */}
+      {/* Days */}
       {settings.spacing === "daily" && (
-        <div className="bg-surface-card border border-slate-800 rounded-xl p-4">
-          <label className="text-sm font-medium text-slate-200 mb-3 block">
-            Dias de publicacion
-          </label>
-          <div className="flex gap-2">
+        <div className="rounded-xl border border-white/[0.06] bg-surface-card p-4">
+          <label className="text-sm font-medium text-zinc-300 mb-3 block">Dias de publicacion</label>
+          <div className="flex gap-1.5">
             {DAY_LABELS.map((day, i) => (
               <button
                 key={i}
                 onClick={() => {
                   const newDays = [...settings.days];
                   newDays[i] = !newDays[i];
-                  // Ensure at least one day is selected
                   if (newDays.some(Boolean)) {
                     update({ days: newDays });
                   }
                 }}
                 className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all ${
                   settings.days[i]
-                    ? "bg-brand-500/50 text-white shadow-sm"
-                    : "bg-slate-800 text-slate-400 hover:bg-slate-800"
+                    ? "bg-brand-500/20 text-brand-300"
+                    : "bg-zinc-800/60 text-zinc-600 hover:text-zinc-400"
                 }`}
                 title={DAY_LABELS_FULL[i]}
               >
@@ -238,24 +226,26 @@ export function ScheduleConfig({ postCount, initialSettings, onChange }: Schedul
       )}
 
       {/* Timezone */}
-      <div className="bg-surface-card border border-slate-800 rounded-xl p-4">
+      <div className="rounded-xl border border-white/[0.06] bg-surface-card p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Globe className="h-4 w-4 text-slate-400" />
-          <label className="text-sm font-medium text-slate-200">Zona horaria</label>
+          <Globe className="h-4 w-4 text-zinc-500" />
+          <label className="text-sm font-medium text-zinc-300">Zona horaria</label>
         </div>
-        <div className="flex items-center gap-2 bg-surface-primary rounded-lg px-3 py-2 text-sm text-slate-400">
+        <div className="flex items-center gap-2 bg-surface-secondary rounded-lg px-3 py-2 text-sm text-zinc-400">
           <span>{settings.timezone}</span>
-          <span className="text-xs text-slate-400">(detectada automaticamente)</span>
+          <span className="text-xs text-zinc-600">(detectada automaticamente)</span>
         </div>
       </div>
 
       {/* Summary */}
-      <div className="bg-surface-primary border border-slate-800 rounded-xl p-4">
-        <p className="text-sm text-slate-400">
-          Tu ultimo post se publicaria el{" "}
-          <span className="font-semibold text-slate-100">{lastDateStr}</span>
-        </p>
-      </div>
+      {lastDateStr && (
+        <div className="rounded-xl border border-white/[0.04] bg-white/[0.02] p-4">
+          <p className="text-sm text-zinc-400">
+            Tu ultimo post se publicaria el{" "}
+            <span className="font-semibold text-zinc-200">{lastDateStr}</span>
+          </p>
+        </div>
+      )}
     </div>
   );
 }

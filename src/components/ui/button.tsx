@@ -3,22 +3,22 @@ import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary disabled:pointer-events-none disabled:opacity-40",
+  "inline-flex items-center justify-center rounded-lg text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary disabled:pointer-events-none disabled:opacity-40",
   {
     variants: {
       variant: {
         default:
-          "bg-brand-500 text-white hover:bg-brand-400 hover:shadow-glow active:bg-brand-600",
+          "bg-brand-500 text-white hover:bg-brand-400 shadow-glow-sm hover:shadow-glow active:bg-brand-600",
         destructive:
           "bg-red-600 text-white hover:bg-red-500 active:bg-red-700",
         outline:
-          "border border-slate-700 bg-transparent text-slate-200 hover:border-brand-500 hover:text-white hover:bg-slate-800/50",
+          "border border-white/[0.1] bg-transparent text-zinc-300 hover:border-white/[0.15] hover:text-white hover:bg-white/[0.04]",
         ghost:
-          "text-slate-400 hover:bg-slate-800 hover:text-slate-200",
+          "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200",
         link:
           "text-brand-400 underline-offset-4 hover:underline hover:text-brand-300",
         secondary:
-          "bg-slate-800 text-slate-200 hover:bg-slate-700",
+          "bg-zinc-800 text-zinc-200 hover:bg-zinc-700",
       },
       size: {
         default: "h-9 px-4 py-2",

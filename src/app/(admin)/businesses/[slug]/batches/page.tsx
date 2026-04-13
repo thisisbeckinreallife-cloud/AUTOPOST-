@@ -37,16 +37,16 @@ export default async function BatchesPage({
         { label: "Subidas" },
       ]} />
 
-      <div className="flex items-center justify-between animate-stagger-in delay-0">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-slate-100">
+          <h1 className="font-display text-xl font-bold text-white">
             {business.name} — Subidas
           </h1>
-          <p className="text-slate-500 mt-1"><span className="text-slate-300 font-bold">{batches.length}</span> subidas</p>
+          <p className="text-zinc-500 mt-1"><span className="text-zinc-300 font-semibold">{batches.length}</span> subidas</p>
         </div>
         <Link
           href={`/businesses/${params.slug}/upload`}
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-brand-500 to-brand-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:shadow-glow-lg hover:scale-105 transition-all duration-300"
+          className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
         >
           <Plus className="h-4 w-4" />
           Subir ZIP
@@ -54,44 +54,41 @@ export default async function BatchesPage({
       </div>
 
       {batches.length === 0 ? (
-        <div className="relative text-center py-24 border border-dashed border-slate-700 bg-surface-card/50 rounded-2xl animate-card-appear overflow-hidden bg-dots">
-          <div className="absolute inset-0 bg-gradient-to-t from-surface-primary/80 to-transparent pointer-events-none" />
-          <div className="relative">
-            <div className="w-20 h-20 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center mx-auto mb-5 animate-float">
-              <Upload className="h-10 w-10 text-brand-400" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-100 mb-2">Aun no has subido contenido</h3>
-            <p className="text-slate-500 text-sm mb-6 max-w-xs mx-auto">Sube un archivo ZIP con tus posts organizados por carpetas</p>
-            <Link
-              href={`/businesses/${params.slug}/upload`}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-brand-500 to-brand-600 text-white px-6 py-3 rounded-xl text-sm font-bold hover:shadow-glow-lg hover:scale-105 transition-all duration-300"
-            >
-              <Plus className="h-4 w-4" />
-              Subir ZIP
-            </Link>
+        <div className="text-center py-20 border border-dashed border-white/[0.08] bg-surface-card rounded-2xl">
+          <div className="w-16 h-16 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center mx-auto mb-5">
+            <Upload className="h-8 w-8 text-brand-400" />
           </div>
+          <h3 className="text-lg font-semibold text-zinc-100 mb-2">Aun no has subido contenido</h3>
+          <p className="text-zinc-500 text-sm mb-6 max-w-xs mx-auto">Sube un archivo ZIP con tus posts organizados por carpetas</p>
+          <Link
+            href={`/businesses/${params.slug}/upload`}
+            className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Subir ZIP
+          </Link>
         </div>
       ) : (
-        <div className="space-y-2">
-          {batches.map((batch, i) => (
+        <div className="space-y-1.5">
+          {batches.map((batch) => (
             <Link
               key={batch.id}
               href={`/businesses/${params.slug}/batches/${batch.id}`}
             >
-              <div className={`group flex items-center justify-between gap-4 rounded-xl border border-slate-800/80 bg-surface-card px-5 py-4 card-hover animate-stagger-in delay-${Math.min(i + 1, 8)}`}>
+              <div className="group flex items-center justify-between gap-4 rounded-xl border border-white/[0.04] bg-surface-card px-4 py-3.5 hover:border-white/[0.08] transition-all">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-brand-500/10 group-hover:scale-110 transition-all duration-300">
-                    <Package className="h-5 w-5 text-slate-400 group-hover:text-brand-400 transition-colors duration-300" />
+                  <div className="h-9 w-9 rounded-xl bg-white/[0.04] flex items-center justify-center shrink-0 group-hover:bg-brand-500/10 transition-colors">
+                    <Package className="h-5 w-5 text-zinc-400 group-hover:text-brand-400 transition-colors" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-slate-200 truncate group-hover:text-white transition-colors">
+                    <p className="font-medium text-zinc-200 truncate group-hover:text-white transition-colors">
                       {batch.originalFilename}
                     </p>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-zinc-500">
                       {formatDate(batch.createdAt)} · {(batch.fileSize / 1024 / 1024).toFixed(1)} MB · {batch._count.postDrafts} posts
                     </p>
                     {batch.validPosts !== null && (
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-zinc-500">
                         <span className="text-green-400">{batch.validPosts} validos</span> / <span className="text-red-400">{batch.failedPosts ?? 0} errores</span>
                       </p>
                     )}
@@ -99,7 +96,7 @@ export default async function BatchesPage({
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <StatusBadge status={batch.status} />
-                  <ChevronRight className="h-4 w-4 text-slate-600 group-hover:text-brand-400 group-hover:translate-x-0.5 transition-all duration-300" />
+                  <ChevronRight className="h-4 w-4 text-zinc-700 group-hover:text-brand-400 transition-colors" />
                 </div>
               </div>
             </Link>

@@ -134,7 +134,7 @@ export default function PostDetailPage() {
   }
 
   if (!post) {
-    return <div className="text-slate-500">Post no encontrado.</div>;
+    return <div className="text-zinc-500">Post no encontrado.</div>;
   }
 
   return (
@@ -148,10 +148,10 @@ export default function PostDetailPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">
+          <h1 className="font-display text-xl font-bold text-white">
             {post.sourceFolderName}
           </h1>
-          <p className="text-slate-500 text-sm mt-1">
+          <p className="text-zinc-500 text-sm mt-1">
             {post.business.name} &middot; {post.postType}
           </p>
         </div>
@@ -178,14 +178,14 @@ export default function PostDetailPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+        <div className="rounded-xl bg-red-500/8 border border-red-500/15 px-4 py-3 text-sm text-red-400">
           {error}
         </div>
       )}
 
       {/* Published link */}
       {post.metaPermalink && (
-        <div className="rounded-lg bg-green-500/10 border border-green-500/20 px-4 py-3 flex items-center gap-2">
+        <div className="rounded-xl bg-green-500/8 border border-green-500/15 px-4 py-3 flex items-center gap-2">
           <span className="text-green-400 text-sm">Publicado en Instagram</span>
           <a
             href={post.metaPermalink}
@@ -200,7 +200,7 @@ export default function PostDetailPage() {
 
       {/* Last error */}
       {post.lastError && (
-        <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 flex items-start gap-2">
+        <div className="rounded-xl bg-red-500/8 border border-red-500/15 px-4 py-3 flex items-start gap-2">
           <AlertTriangle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
           <p className="text-sm text-red-400">{post.lastError}</p>
         </div>
@@ -245,7 +245,7 @@ export default function PostDetailPage() {
           <CardTitle className="text-base">Caption</CardTitle>
         </CardHeader>
         <CardContent>
-          <pre className="whitespace-pre-wrap text-sm text-slate-300 font-sans">
+          <pre className="whitespace-pre-wrap text-sm text-zinc-300 font-sans">
             {post.caption}
           </pre>
         </CardContent>
@@ -260,12 +260,12 @@ export default function PostDetailPage() {
           <div className="space-y-2">
             {post.mediaAssets.map((asset) => (
               <div key={asset.id} className="flex items-center gap-3 text-sm">
-                <span className="text-slate-500 text-xs">{asset.sortOrder + 1}.</span>
-                <span className="font-medium text-slate-200">
+                <span className="text-zinc-500 text-xs">{asset.sortOrder + 1}.</span>
+                <span className="font-medium text-zinc-200">
                   {asset.originalFilename}
                 </span>
-                <span className="text-slate-500 text-xs">{asset.mimeType}</span>
-                <span className="text-slate-500 text-xs">
+                <span className="text-zinc-500 text-xs">{asset.mimeType}</span>
+                <span className="text-zinc-500 text-xs">
                   {(asset.fileSize / 1024).toFixed(0)} KB
                 </span>
               </div>
@@ -285,14 +285,14 @@ export default function PostDetailPage() {
               <div key={job.id} className="mb-4">
                 <div className="flex items-center gap-2 mb-2">
                   <StatusBadge status={job.status} />
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-zinc-500">
                     Job {job.id.slice(0, 8)} &middot; Programado {formatDate(job.scheduledFor)}
                   </span>
                 </div>
                 {job.attempts.map((attempt) => (
                   <div
                     key={attempt.id}
-                    className="ml-4 pl-4 border-l border-slate-800 py-1"
+                    className="ml-4 pl-4 border-l border-white/[0.06] py-1"
                   >
                     <div className="flex items-center gap-2 text-xs">
                       <span
@@ -301,12 +301,12 @@ export default function PostDetailPage() {
                             ? "text-green-400"
                             : attempt.success === false
                             ? "text-red-400"
-                            : "text-slate-500"
+                            : "text-zinc-500"
                         }
                       >
                         Intento #{attempt.attemptNumber}
                       </span>
-                      <span className="text-slate-500">
+                      <span className="text-zinc-500">
                         {formatDate(attempt.startedAt)}
                       </span>
                     </div>
@@ -338,8 +338,8 @@ function Row({
 }) {
   return (
     <div className="flex gap-4">
-      <dt className="w-36 text-slate-500 shrink-0">{label}</dt>
-      <dd className="text-slate-200">{children}</dd>
+      <dt className="w-36 text-zinc-500 shrink-0">{label}</dt>
+      <dd className="text-zinc-200">{children}</dd>
     </div>
   );
 }

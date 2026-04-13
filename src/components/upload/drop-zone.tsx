@@ -131,8 +131,6 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
   const [compressInfo, setCompressInfo] = useState("");
   const [error, setError] = useState("");
 
-  // ─── Process folder into ZIP ──────────────────────────────────────────
-
   const processFolder = useCallback(
     async (files: File[], folderName: string) => {
       if (files.length === 0) {
@@ -162,8 +160,6 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
     [onFileSelected]
   );
 
-  // ─── Drop handler ─────────────────────────────────────────────────────
-
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
@@ -172,7 +168,6 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
       if (disabled || compressing) return;
       setError("");
 
-      // SYNC: extract all entries and files immediately
       let directoryEntry: FileSystemDirectoryEntry | null = null;
       let zipFile: File | null = null;
 
@@ -213,7 +208,6 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
         }
       }
 
-      // ASYNC: process
       if (directoryEntry) {
         const folderName = directoryEntry.name;
         const dirRef = directoryEntry;
@@ -248,7 +242,6 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
         return;
       }
 
-      // Detect folder drop in unsupported browser
       if (e.dataTransfer.files.length > 0) {
         const f = e.dataTransfer.files[0];
         if (f.size === 0 && f.type === "") {
@@ -282,8 +275,6 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
     []
   );
 
-  // ─── Input handlers ───────────────────────────────────────────────────
-
   function handleZipFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (f) {
@@ -298,10 +289,6 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
     if (!fileList || fileList.length === 0) return;
     setError("");
 
-    // Determine if the selected folder contains subfolders.
-    // If it does, strip the root name (it's just a container).
-    // If it only has direct files, KEEP the folder name so the analyzer
-    // groups them as one post (e.g., a carousel).
     let hasSubfolders = false;
     for (let i = 0; i < fileList.length; i++) {
       const rp = fileList[i].webkitRelativePath || "";
@@ -319,11 +306,9 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
 
       let innerPath: string;
       if (hasSubfolders) {
-        // Strip root folder — it's just a container for subfolders
         const pathParts = relativePath.split("/");
         innerPath = pathParts.length > 1 ? pathParts.slice(1).join("/") : file.name;
       } else {
-        // Keep full path — the folder itself IS the post (carousel, etc.)
         innerPath = relativePath;
       }
 
@@ -340,8 +325,6 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
       (fileList[0].webkitRelativePath || "").split("/")[0] || "mis-posts";
     await processFolder(files, folderName);
   }
-
-  // ─── Hidden inputs (always rendered) ──────────────────────────────────
 
   const hiddenInputs = (
     <>
@@ -367,68 +350,56 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
     </>
   );
 
-  // ─── Render: compressing ──────────────────────────────────────────────
-
+  // Compressing state
   if (compressing) {
     return (
       <>
         {hiddenInputs}
-        <div className="border-2 border-purple-500/30 bg-purple-500/10 rounded-2xl p-12 text-center">
-          <Loader2 className="h-14 w-14 text-purple-500 mx-auto mb-4 animate-spin" />
-          <p className="text-lg font-semibold text-slate-100">{compressInfo}</p>
-          <p className="text-sm text-slate-400 mt-1">
-            Esto solo tarda unos segundos.
-          </p>
+        <div className="border border-brand-500/20 bg-brand-500/[0.04] rounded-2xl p-12 text-center">
+          <Loader2 className="h-10 w-10 text-brand-400 mx-auto mb-4 animate-spin" />
+          <p className="text-base font-semibold text-zinc-200">{compressInfo}</p>
+          <p className="text-sm text-zinc-500 mt-1">Esto solo tarda unos segundos.</p>
         </div>
       </>
     );
   }
 
-  // ─── Render: file selected ────────────────────────────────────────────
-
+  // File selected state
   if (selectedFile) {
     return (
       <>
         {hiddenInputs}
         <div
-          className="border-2 border-brand-500 bg-brand-500/5 rounded-2xl p-8 text-center cursor-pointer transition-all hover:bg-brand-500/10"
+          className="border border-brand-500/20 bg-brand-500/[0.04] rounded-2xl p-8 text-center cursor-pointer transition-all hover:bg-brand-500/[0.06]"
           onClick={() => !disabled && folderRef.current?.click()}
         >
-          <FileArchive className="h-14 w-14 text-brand-400 mx-auto mb-4" />
-          <p className="text-lg font-semibold text-slate-100">
-            {selectedFile.name}
-          </p>
-          <p className="text-sm text-slate-400 mt-1">
-            {(selectedFile.size / 1024 / 1024).toFixed(1)} MB
-          </p>
-          <p className="text-xs text-brand-400 mt-3 font-medium">
-            Toca para cambiar
-          </p>
+          <FileArchive className="h-10 w-10 text-brand-400 mx-auto mb-3" />
+          <p className="text-base font-semibold text-zinc-200">{selectedFile.name}</p>
+          <p className="text-sm text-zinc-500 mt-1">{(selectedFile.size / 1024 / 1024).toFixed(1)} MB</p>
+          <p className="text-xs text-brand-400 mt-3 font-medium">Toca para cambiar</p>
         </div>
       </>
     );
   }
 
-  // ─── Render: default (empty) ──────────────────────────────────────────
-
+  // Default empty state
   return (
     <>
       {hiddenInputs}
       <div className="space-y-4">
-        {/* Error */}
         {error && (
-          <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
-            <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+          <div className="flex items-start gap-2 bg-red-500/8 border border-red-500/15 rounded-xl px-4 py-3">
+            <AlertCircle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
             <p className="text-sm text-red-400">{error}</p>
           </div>
         )}
 
-        {/* Drag & drop zone — NO onClick, only for dragging */}
+        {/* Drop zone */}
         <div
           className={`border-2 border-dashed rounded-2xl p-10 text-center transition-all ${
             dragging
-              ? "border-brand-500 bg-brand-500/5 scale-[1.02]"
-              : "border-slate-800 bg-surface-card"
+              ? "border-brand-500/40 bg-brand-500/[0.04] scale-[1.01]"
+              : "border-white/[0.08] bg-surface-card"
           } ${disabled ? "opacity-50 pointer-events-none" : ""}`}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -437,72 +408,61 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
           <div className="max-w-sm mx-auto">
             {dragging ? (
               <>
-                <FolderOpen className="h-16 w-16 text-brand-400 mx-auto mb-4 animate-bounce" />
-                <p className="text-xl font-semibold text-brand-400">
+                <FolderOpen className="h-12 w-12 text-brand-400 mx-auto mb-4" />
+                <p className="text-lg font-semibold text-brand-400">
                   Suelta aqui tu carpeta o ZIP
                 </p>
               </>
             ) : (
               <>
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-500/20 to-purple-500/20 flex items-center justify-center mx-auto mb-4">
-                  <Upload className="h-8 w-8 text-brand-400" />
+                <div className="w-14 h-14 rounded-xl bg-brand-500/8 border border-brand-500/10 flex items-center justify-center mx-auto mb-4">
+                  <Upload className="h-7 w-7 text-brand-400" />
                 </div>
-                <p className="text-lg font-semibold text-slate-100">
+                <p className="text-base font-semibold text-zinc-200">
                   Arrastra aqui tu carpeta o ZIP
                 </p>
-                <p className="text-sm text-slate-400 mt-1">
-                  No importa como lo tengas organizado. Nosotros lo ordenamos
-                  por ti.
+                <p className="text-sm text-zinc-500 mt-1">
+                  No importa como lo tengas organizado. Nosotros lo ordenamos por ti.
                 </p>
               </>
             )}
           </div>
         </div>
 
-        {/* ── Two clear action buttons ── */}
+        {/* Action buttons */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* Folder button — PRIMARY action */}
           <button
             type="button"
             onClick={() => folderRef.current?.click()}
             disabled={disabled}
-            className="flex items-center gap-3 border-2 border-purple-500/30 hover:border-purple-500 bg-purple-500/10 hover:bg-purple-500/20 rounded-xl p-4 transition-all text-left group disabled:opacity-50 disabled:pointer-events-none"
+            className="flex items-center gap-3 border border-brand-500/20 hover:border-brand-500/40 bg-brand-500/[0.04] hover:bg-brand-500/[0.06] rounded-xl p-4 transition-all text-left group disabled:opacity-50 disabled:pointer-events-none"
           >
-            <div className="w-11 h-11 rounded-full bg-purple-500/20 group-hover:bg-purple-500/30 flex items-center justify-center shrink-0 transition-colors">
-              <FolderInput className="h-5 w-5 text-purple-400" />
+            <div className="w-10 h-10 rounded-lg bg-brand-500/10 group-hover:bg-brand-500/15 flex items-center justify-center shrink-0 transition-colors">
+              <FolderInput className="h-5 w-5 text-brand-400" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-purple-300">
-                Seleccionar carpeta
-              </p>
-              <p className="text-xs text-purple-400/70 mt-0.5">
-                La comprimimos por ti
-              </p>
+              <p className="text-sm font-semibold text-brand-300">Seleccionar carpeta</p>
+              <p className="text-xs text-brand-400/60 mt-0.5">La comprimimos por ti</p>
             </div>
           </button>
 
-          {/* ZIP button — secondary */}
           <button
             type="button"
             onClick={() => zipFileRef.current?.click()}
             disabled={disabled}
-            className="flex items-center gap-3 border-2 border-slate-800 hover:border-brand-500 bg-surface-card hover:bg-brand-500/5 rounded-xl p-4 transition-all text-left group disabled:opacity-50 disabled:pointer-events-none"
+            className="flex items-center gap-3 border border-white/[0.06] hover:border-white/[0.1] bg-surface-card hover:bg-surface-hover rounded-xl p-4 transition-all text-left group disabled:opacity-50 disabled:pointer-events-none"
           >
-            <div className="w-11 h-11 rounded-full bg-slate-800 group-hover:bg-brand-500/10 flex items-center justify-center shrink-0 transition-colors">
-              <FileUp className="h-5 w-5 text-slate-400 group-hover:text-brand-400" />
+            <div className="w-10 h-10 rounded-lg bg-zinc-800 group-hover:bg-zinc-700 flex items-center justify-center shrink-0 transition-colors">
+              <FileUp className="h-5 w-5 text-zinc-400" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-slate-200 group-hover:text-brand-300">
-                Seleccionar ZIP
-              </p>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Si ya tienes un .zip listo
-              </p>
+              <p className="text-sm font-semibold text-zinc-300">Seleccionar ZIP</p>
+              <p className="text-xs text-zinc-500 mt-0.5">Si ya tienes un .zip listo</p>
             </div>
           </button>
         </div>
 
-        <p className="text-xs text-slate-200 text-center">
+        <p className="text-xs text-zinc-500 text-center">
           Fotos: JPG, PNG, WEBP &middot; Videos: MP4, MOV &middot; Maximo 100MB
         </p>
       </div>

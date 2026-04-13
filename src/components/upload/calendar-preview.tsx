@@ -14,7 +14,7 @@ function getDaysInMonth(year: number, month: number): number {
 
 function getFirstDayOfWeek(year: number, month: number): number {
   const day = new Date(year, month, 1).getDay();
-  return day === 0 ? 6 : day - 1; // Convert to Monday-first
+  return day === 0 ? 6 : day - 1;
 }
 
 const MONTH_NAMES = [
@@ -25,7 +25,6 @@ const MONTH_NAMES = [
 const DAY_HEADERS = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
 
 export function CalendarPreview({ posts }: CalendarPreviewProps) {
-  // Find the month range from posts
   const postsWithDates = posts.filter((p) => p.publishAt);
   const firstDate = postsWithDates.length > 0
     ? new Date(Math.min(...postsWithDates.map((p) => p.publishAt!.getTime())))
@@ -34,7 +33,6 @@ export function CalendarPreview({ posts }: CalendarPreviewProps) {
   const [currentMonth, setCurrentMonth] = useState(firstDate.getMonth());
   const [currentYear, setCurrentYear] = useState(firstDate.getFullYear());
 
-  // Group posts by date
   const postsByDate = useMemo(() => {
     const map = new Map<string, DetectedPost[]>();
     for (const post of postsWithDates) {
@@ -69,7 +67,6 @@ export function CalendarPreview({ posts }: CalendarPreviewProps) {
     }
   }
 
-  // Calculate total posts this month
   const postsThisMonth = Array.from(postsByDate.entries())
     .filter(([key]) => {
       const parts = key.split("-").map(Number);
@@ -79,45 +76,42 @@ export function CalendarPreview({ posts }: CalendarPreviewProps) {
 
   return (
     <div className="space-y-4">
-      <div className="bg-gradient-to-r from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 rounded-2xl p-5">
-        <p className="font-semibold text-slate-100">Vista previa del calendario</p>
-        <p className="text-sm text-slate-400 mt-1">
+      <div className="rounded-xl border border-white/[0.06] bg-surface-card p-5">
+        <p className="font-semibold text-white">Vista previa del calendario</p>
+        <p className="text-sm text-zinc-500 mt-1">
           Asi quedaran distribuidos tus {posts.length} posts.
         </p>
       </div>
 
-      <div className="bg-surface-card border border-slate-800 rounded-xl overflow-hidden">
+      <div className="rounded-xl border border-white/[0.06] bg-surface-card overflow-hidden">
         {/* Month header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-surface-primary border-b border-slate-800">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04]">
           <button
             onClick={prevMonth}
-            className="p-1 rounded-lg hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-white/[0.04] transition-colors"
           >
-            <ChevronLeft className="h-5 w-5 text-slate-400" />
+            <ChevronLeft className="h-4 w-4 text-zinc-500" />
           </button>
           <div className="text-center">
-            <h3 className="font-semibold text-slate-100">
+            <h3 className="font-display font-bold text-white text-sm">
               {MONTH_NAMES[currentMonth]} {currentYear}
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-zinc-600">
               {postsThisMonth} post{postsThisMonth !== 1 ? "s" : ""} este mes
             </p>
           </div>
           <button
             onClick={nextMonth}
-            className="p-1 rounded-lg hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-white/[0.04] transition-colors"
           >
-            <ChevronRight className="h-5 w-5 text-slate-400" />
+            <ChevronRight className="h-4 w-4 text-zinc-500" />
           </button>
         </div>
 
         {/* Day headers */}
-        <div className="grid grid-cols-7 border-b border-slate-800">
+        <div className="grid grid-cols-7 border-b border-white/[0.04]">
           {DAY_HEADERS.map((day) => (
-            <div
-              key={day}
-              className="text-center text-xs font-medium text-slate-400 py-2"
-            >
+            <div key={day} className="text-center text-[11px] font-medium text-zinc-600 py-2">
               {day}
             </div>
           ))}
@@ -125,12 +119,10 @@ export function CalendarPreview({ posts }: CalendarPreviewProps) {
 
         {/* Calendar grid */}
         <div className="grid grid-cols-7">
-          {/* Empty cells for offset */}
           {Array.from({ length: firstDay }).map((_, i) => (
-            <div key={`empty-${i}`} className="h-20 border-b border-r border-slate-800" />
+            <div key={`empty-${i}`} className="h-18 border-b border-r border-white/[0.03]" />
           ))}
 
-          {/* Day cells */}
           {Array.from({ length: daysInMonth }).map((_, i) => {
             const day = i + 1;
             const key = `${currentYear}-${currentMonth}-${day}`;
@@ -142,33 +134,30 @@ export function CalendarPreview({ posts }: CalendarPreviewProps) {
             return (
               <div
                 key={day}
-                className={`h-20 border-b border-r border-slate-800 p-1 transition-colors ${
-                  isToday ? "bg-blue-500/10" : isPast ? "bg-surface-primary/50" : ""
+                className={`h-18 border-b border-r border-white/[0.03] p-1 transition-colors ${
+                  isToday ? "bg-brand-500/[0.06]" : isPast ? "opacity-40" : ""
                 }`}
               >
                 <span
-                  className={`text-xs font-medium ${
+                  className={`text-[11px] font-medium ${
                     isToday
                       ? "bg-brand-500 text-white w-5 h-5 rounded-full flex items-center justify-center"
-                      : isPast
-                        ? "text-slate-200"
-                        : "text-slate-400"
+                      : "text-zinc-500"
                   }`}
                 >
                   {day}
                 </span>
 
-                {/* Post indicators */}
                 <div className="mt-0.5 space-y-0.5">
                   {dayPosts.slice(0, 2).map((post, pi) => (
                     <div
                       key={pi}
                       className={`flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] leading-tight truncate ${
                         post.status === "complete"
-                          ? "bg-green-500/20 text-green-400"
+                          ? "bg-green-500/15 text-green-400"
                           : post.status === "incomplete"
-                            ? "bg-amber-500/20 text-amber-400"
-                            : "bg-red-500/20 text-red-400"
+                            ? "bg-amber-500/15 text-amber-400"
+                            : "bg-red-500/15 text-red-400"
                       }`}
                     >
                       {post.postType === "reel" ? (
@@ -184,7 +173,7 @@ export function CalendarPreview({ posts }: CalendarPreviewProps) {
                     </div>
                   ))}
                   {dayPosts.length > 2 && (
-                    <span className="text-[10px] text-slate-400 px-1">
+                    <span className="text-[10px] text-zinc-600 px-1">
                       +{dayPosts.length - 2} mas
                     </span>
                   )}

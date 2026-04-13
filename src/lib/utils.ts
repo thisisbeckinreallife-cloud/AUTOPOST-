@@ -43,14 +43,14 @@ export function statusColor(status: string): string {
     PUBLISHING: "bg-yellow-100 text-yellow-800",
     VALIDATED: "bg-teal-100 text-teal-800",
     READY: "bg-cyan-100 text-cyan-800",
-    DRAFT: "bg-slate-100 text-slate-700",
+    DRAFT: "bg-zinc-100 text-zinc-700",
     FAILED: "bg-red-100 text-red-800",
-    CANCELLED: "bg-slate-100 text-slate-500",
+    CANCELLED: "bg-zinc-100 text-zinc-500",
     ACTIVE: "bg-green-100 text-green-800",
     TOKEN_EXPIRED: "bg-amber-100 text-amber-800",
     REVOKED: "bg-red-100 text-red-800",
     ERROR: "bg-red-100 text-red-800",
-    PENDING: "bg-slate-100 text-slate-700",
+    PENDING: "bg-zinc-100 text-zinc-700",
   };
-  return map[status] ?? "bg-slate-100 text-slate-600";
+  return map[status] ?? "bg-zinc-100 text-zinc-600";
 }

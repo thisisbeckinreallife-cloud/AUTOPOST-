@@ -42,7 +42,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast: addToast }}>
       {children}
-      {/* Toast container */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
         {toasts.map((t) => (
           <ToastItem key={t.id} toast={t} onDismiss={() => removeToast(t.id)} />
@@ -59,24 +58,24 @@ const iconMap: Record<ToastVariant, React.ReactNode> = {
 };
 
 const borderMap: Record<ToastVariant, string> = {
-  success: "border-green-500/20",
-  error: "border-red-500/20",
-  info: "border-blue-500/20",
+  success: "border-green-500/15",
+  error: "border-red-500/15",
+  info: "border-blue-500/15",
 };
 
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
   return (
     <div
       className={cn(
-        "pointer-events-auto max-w-sm bg-surface-card/95 backdrop-blur-sm border rounded-xl px-4 py-3 shadow-dark-lg flex items-start gap-3 animate-slide-up",
+        "pointer-events-auto max-w-sm bg-surface-card/95 backdrop-blur-sm border rounded-xl px-4 py-3 shadow-elevated flex items-start gap-3 animate-slide-up",
         borderMap[toast.variant]
       )}
     >
       <div className="mt-0.5">{iconMap[toast.variant]}</div>
-      <p className="text-sm text-slate-200 flex-1">{toast.message}</p>
+      <p className="text-sm text-zinc-200 flex-1">{toast.message}</p>
       <button
         onClick={onDismiss}
-        className="text-slate-500 hover:text-slate-300 transition-colors shrink-0"
+        className="text-zinc-600 hover:text-zinc-400 transition-colors shrink-0"
       >
         <X className="h-3.5 w-3.5" />
       </button>

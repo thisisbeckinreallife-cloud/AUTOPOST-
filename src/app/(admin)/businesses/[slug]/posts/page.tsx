@@ -66,24 +66,24 @@ export default async function PostsPage({
         { label: "Posts" },
       ]} />
 
-      <div className="animate-stagger-in delay-0">
-        <h1 className="text-2xl font-black text-slate-100">
+      <div>
+        <h1 className="font-display text-xl font-bold text-white">
           {business.name} — Posts
         </h1>
-        <p className="text-slate-500 mt-1">
-          <span className="text-slate-300 font-bold">{total}</span> post{total !== 1 ? "s" : ""}
+        <p className="text-zinc-500 mt-1">
+          <span className="text-zinc-300 font-semibold">{total}</span> post{total !== 1 ? "s" : ""}
         </p>
       </div>
 
       {/* Status filter */}
-      <div className="flex flex-wrap gap-2 animate-stagger-in delay-1" role="group" aria-label="Filtrar por estado">
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por estado">
         <Link href={`/businesses/${params.slug}/posts`}>
           <button
             type="button"
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all ${
               !statusFilter
-                ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-glow"
-                : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200"
+                ? "bg-brand-500 text-white"
+                : "bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08] hover:text-zinc-200"
             }`}
             aria-pressed={!statusFilter}
           >
@@ -94,10 +94,10 @@ export default async function PostsPage({
           <Link key={s} href={`/businesses/${params.slug}/posts?status=${s}`}>
             <button
               type="button"
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
+              className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all ${
                 statusFilter === s
-                  ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-glow"
-                  : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200"
+                  ? "bg-brand-500 text-white"
+                  : "bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08] hover:text-zinc-200"
               }`}
               aria-pressed={statusFilter === s}
             >
@@ -108,33 +108,30 @@ export default async function PostsPage({
       </div>
 
       {posts.length === 0 ? (
-        <div className="relative text-center py-20 rounded-2xl border border-dashed border-slate-700 bg-surface-card/50 animate-card-appear overflow-hidden bg-dots">
-          <div className="absolute inset-0 bg-gradient-to-t from-surface-primary/80 to-transparent pointer-events-none" />
-          <div className="relative">
-            <div className="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto mb-4 animate-float">
-              <Search className="h-8 w-8 text-slate-500" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-200 mb-1">No se encontraron posts</h3>
-            <p className="text-slate-500 text-sm">Prueba cambiando los filtros</p>
+        <div className="text-center py-20 rounded-2xl border border-dashed border-white/[0.08] bg-surface-card">
+          <div className="w-14 h-14 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto mb-4">
+            <Search className="h-7 w-7 text-zinc-500" />
           </div>
+          <h3 className="text-base font-semibold text-zinc-200 mb-1">No se encontraron posts</h3>
+          <p className="text-zinc-500 text-sm">Prueba cambiando los filtros</p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {posts.map((post, i) => (
+        <div className="space-y-1.5">
+          {posts.map((post) => (
             <Link
               key={post.id}
               href={`/businesses/${params.slug}/posts/${post.id}`}
             >
-              <div className={`group flex items-start justify-between gap-4 rounded-xl border border-slate-800/80 bg-surface-card px-5 py-4 card-hover animate-stagger-in delay-${Math.min(i + 2, 8)}`}>
+              <div className="group flex items-start justify-between gap-4 rounded-xl border border-white/[0.04] bg-surface-card px-4 py-3.5 hover:border-white/[0.08] transition-all">
                 <div className="flex items-start gap-3 min-w-0">
-                  <div className="mt-1 h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+                  <div className="mt-0.5 h-8 w-8 rounded-lg bg-white/[0.04] flex items-center justify-center shrink-0">
                     {POST_TYPE_ICON[post.postType]}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-200 truncate group-hover:text-white transition-colors">
+                    <p className="text-sm font-medium text-zinc-200 truncate group-hover:text-white transition-colors">
                       {post.sourceFolderName}
                     </p>
-                    <p className="text-xs text-slate-500 truncate mt-0.5">
+                    <p className="text-xs text-zinc-600 truncate mt-0.5">
                       {post.caption.slice(0, 120)}
                       {post.caption.length > 120 ? "..." : ""}
                     </p>
@@ -144,7 +141,7 @@ export default async function PostsPage({
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-xs text-slate-600 bg-white/5 px-2 py-0.5 rounded font-medium">
+                  <span className="text-xs text-zinc-600 bg-white/[0.04] px-2 py-0.5 rounded font-medium">
                     {post._count.mediaAssets} media
                   </span>
                   <StatusBadge status={post.status} />
@@ -167,10 +164,10 @@ export default async function PostsPage({
               aria-current={p === page ? "page" : undefined}
             >
               <span
-                className={`px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
+                className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
                   p === page
-                    ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-glow"
-                    : "bg-white/5 text-slate-400 hover:bg-white/10"
+                    ? "bg-brand-500 text-white"
+                    : "bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08]"
                 }`}
               >
                 {p}
