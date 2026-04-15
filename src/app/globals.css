@@ -7,13 +7,13 @@
    ══════════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  --background: #0D0D14;
+  --background: #111120;
   --foreground: #F1F5F9;
-  --surface-card: #161624;
-  --surface-secondary: #13131E;
-  --border-primary: rgba(255,255,255,0.06);
-  --border-subtle: rgba(255,255,255,0.04);
-  --border-hover: rgba(255,255,255,0.12);
+  --surface-card: #1C1C2E;
+  --surface-secondary: #16162A;
+  --border-primary: rgba(255,255,255,0.09);
+  --border-subtle: rgba(255,255,255,0.05);
+  --border-hover: rgba(255,255,255,0.15);
   --text-primary: #F1F5F9;
   --text-secondary: #94A3B8;
   --text-muted: #64748B;
@@ -124,29 +124,29 @@ a, button, input, textarea, select {
 }
 
 .surface-elevated {
-  background: #1E1E2E;
-  border: 1px solid rgba(255,255,255,0.06);
+  background: #23233A;
+  border: 1px solid rgba(255,255,255,0.09);
   border-radius: var(--radius);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.07);
 }
 
 .glass {
-  background: rgba(12, 12, 18, 0.75);
+  background: rgba(17, 17, 32, 0.78);
   backdrop-filter: blur(20px) saturate(1.5);
   -webkit-backdrop-filter: blur(20px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.09);
 }
 
 .glass-strong {
-  background: rgba(12, 12, 18, 0.9);
+  background: rgba(17, 17, 32, 0.92);
   backdrop-filter: blur(32px) saturate(1.4);
   -webkit-backdrop-filter: blur(32px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.11);
 }
 
 /* ─── Skeleton loading ─── */
 .skeleton {
-  background: linear-gradient(90deg, #18182A 25%, #232338 50%, #18182A 75%);
+  background: linear-gradient(90deg, #1C1C30 25%, #2A2A48 50%, #1C1C30 75%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite linear;
   border-radius: 6px;
@@ -239,7 +239,7 @@ a, button, input, textarea, select {
 
 /* ─── Dot grid (subtle) ─── */
 .bg-dots {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -261,8 +261,8 @@ a, button, input, textarea, select {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 input, textarea, select {
-  background: #0C0C12;
-  border: 1px solid rgba(255,255,255,0.08);
+  background: #161628;
+  border: 1px solid rgba(255,255,255,0.10);
   color: #F4F4F5;
   border-radius: 0.5rem;
   padding: 0.5rem 0.75rem;

@@ -49,7 +49,7 @@ export function ROICalculator() {
               onChange={(e) => setPosts(Number(e.target.value))}
               className="w-full h-2 rounded-full appearance-none cursor-pointer"
               style={{
-                background: `linear-gradient(to right, #7C3AED ${((posts - 5) / (120 - 5)) * 100}%, #232338 ${((posts - 5) / (120 - 5)) * 100}%)`,
+                background: `linear-gradient(to right, #7C3AED ${((posts - 5) / (120 - 5)) * 100}%, #2A2A48 ${((posts - 5) / (120 - 5)) * 100}%)`,
               }}
             />
             <div className="flex justify-between mt-2 text-xs text-zinc-600">
