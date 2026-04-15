@@ -15,25 +15,26 @@ const config: Config = {
       },
       colors: {
         brand: {
-          50:  "#FFFBEB",
-          100: "#FEF3C7",
-          200: "#FDE68A",
-          300: "#FCD34D",
-          400: "#FBBF24",
-          500: "#F59E0B",  // Primary — electric amber
-          600: "#D97706",
-          700: "#B45309",
-          800: "#92400E",
-          900: "#78350F",
-          950: "#451A03",
+          50:  "#FFF9E6",
+          100: "#FFF0BF",
+          200: "#FFE080",
+          300: "#FFD040",
+          400: "#FFC300",
+          500: "#FFB800",  // Primary — electric gold
+          600: "#E5A500",
+          700: "#CC9200",
+          800: "#997000",
+          900: "#664B00",
+          950: "#332600",
         },
         accent: {
           orange:  "#FB923C",  // warm orange
+          violet:  "#7C3AED",  // deep violet (magic/automation)
           blue:    "#3B82F6",  // electric blue (trust)
-          cyan:    "#06B6D4",  // cyan (info)
+          cyan:    "#06D6A0",  // cyan-green (fresh/differentiator)
           emerald: "#10B981",  // emerald (success)
           red:     "#EF4444",  // red (error/danger)
-          slate:   "#64748B",  // muted text
+          slate:   "#7C8DB5",  // muted text (WCAG compliant)
         },
         surface: {
           primary:   "#0B1120",  // deepest navy
@@ -52,18 +53,20 @@ const config: Config = {
         DEFAULT: "rgba(255,255,255,0.09)",
       },
       boxShadow: {
-        "card":        "0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",
-        "card-hover":  "0 8px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.09)",
-        "elevated":    "0 12px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)",
-        "glow-sm":     "0 0 15px rgba(245,158,11,0.15), 0 0 5px rgba(245,158,11,0.08)",
-        "glow":        "0 0 25px rgba(245,158,11,0.20), 0 0 10px rgba(245,158,11,0.12)",
-        "glow-md":     "0 0 40px rgba(245,158,11,0.25), 0 0 15px rgba(245,158,11,0.15)",
-        "glow-lg":     "0 0 60px rgba(245,158,11,0.30), 0 0 20px rgba(245,158,11,0.18)",
-        "glow-amber":  "0 0 30px rgba(245,158,11,0.20), 0 0 10px rgba(245,158,11,0.12)",
-        "glow-blue":   "0 0 30px rgba(59,130,246,0.15), 0 0 10px rgba(59,130,246,0.10)",
-        "glow-orange": "0 0 20px rgba(251,146,60,0.25), 0 0 10px rgba(251,146,60,0.12)",
-        "inner-light": "inset 0 1px 0 rgba(255,255,255,0.05)",
-        "inner-glow":  "inset 0 0 20px rgba(245,158,11,0.05)",
+        "card":         "0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",
+        "card-hover":   "0 8px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.09)",
+        "elevated":     "0 12px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)",
+        "glow-sm":      "0 0 15px rgba(255,184,0,0.15), 0 0 5px rgba(255,184,0,0.08)",
+        "glow":         "0 0 25px rgba(255,184,0,0.20), 0 0 10px rgba(255,184,0,0.12)",
+        "glow-md":      "0 0 40px rgba(255,184,0,0.25), 0 0 15px rgba(255,184,0,0.15)",
+        "glow-lg":      "0 0 60px rgba(255,184,0,0.30), 0 0 20px rgba(255,184,0,0.18)",
+        "glow-amber":   "0 0 30px rgba(255,184,0,0.20), 0 0 10px rgba(255,184,0,0.12)",
+        "glow-blue":    "0 0 30px rgba(59,130,246,0.15), 0 0 10px rgba(59,130,246,0.10)",
+        "glow-orange":  "0 0 20px rgba(251,146,60,0.25), 0 0 10px rgba(251,146,60,0.12)",
+        "glow-violet":  "0 0 30px rgba(124,58,237,0.20), 0 0 10px rgba(124,58,237,0.12)",
+        "glow-cyan":    "0 0 20px rgba(6,214,160,0.20), 0 0 10px rgba(6,214,160,0.10)",
+        "inner-light":  "inset 0 1px 0 rgba(255,255,255,0.05)",
+        "inner-glow":   "inset 0 0 20px rgba(255,184,0,0.05)",
       },
       borderRadius: {
         "2xl": "1rem",
