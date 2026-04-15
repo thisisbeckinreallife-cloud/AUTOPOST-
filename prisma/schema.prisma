@@ -162,6 +162,12 @@ model PostDraft {
   validationErrors Json?        // Array of ValidationError
   scheduledJobId   String?      // BullMQ job ID
 
+  // Approval workflow (optional — enabled via SystemConfig key "approval_required")
+  approvalStatus  ApprovalStatus @default(APPROVED)
+  approvedAt      DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+
   // Meta API results
   metaContainerId   String?
   metaPublicationId String?
@@ -203,6 +209,12 @@ enum PostType {
   IMAGE
   CAROUSEL
   REEL
+}
+
+enum ApprovalStatus {
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
 }
 
 // ─────────────────────────────────────────

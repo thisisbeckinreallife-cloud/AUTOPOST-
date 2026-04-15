@@ -17,6 +17,7 @@ import { publishPost } from "@/services/meta/publisher";
 import { PUBLISH_QUEUE_NAME } from "@/services/scheduler/queue";
 import type { PublishJobPayload } from "@/types";
 import { MetaApiError } from "@/services/meta/client";
+import { sendEmail, publishedEmailHtml, failedEmailHtml } from "@/lib/email";
 
 const CONCURRENCY = parseInt(process.env.WORKER_CONCURRENCY ?? "3", 10);
 const LOCK_DURATION_MS = 5 * 60 * 1000; // 5 minutes
@@ -157,6 +158,22 @@ async function processPublishJob(job: Job<PublishJobPayload>): Promise<void> {
     console.log(
       `[Worker] Published post ${postDraftId} → mediaId=${result.mediaId}`
     );
+
+    // Fire-and-forget email notification
+    const notifyEmail = process.env.NOTIFY_EMAIL;
+    if (notifyEmail) {
+      const business = await db.business.findUnique({ where: { id: businessId }, select: { name: true } });
+      sendEmail(
+        notifyEmail,
+        `✅ Post publicado — ${business?.name ?? businessId}`,
+        publishedEmailHtml({
+          businessName: business?.name ?? businessId,
+          captionExcerpt: draft.caption.slice(0, 120) + (draft.caption.length > 120 ? "…" : ""),
+          permalink: result.permalink,
+          publishedAt: finishedAt.toLocaleString("es-ES"),
+        })
+      ).catch(() => {}); // explicitly fire-and-forget
+    }
   } catch (error) {
     const err = error as Error;
     const finishedAt = new Date();
@@ -215,6 +232,24 @@ async function processPublishJob(job: Job<PublishJobPayload>): Promise<void> {
     console.error(
       `[Worker] Publish failed for ${postDraftId} (attempt ${attemptNumber}/${job.opts.attempts ?? 3}): ${errorMessage}`
     );
+
+    // Fire-and-forget email on final failure only
+    if (isLastAttempt) {
+      const notifyEmail = process.env.NOTIFY_EMAIL;
+      if (notifyEmail) {
+        const business = await db.business.findUnique({ where: { id: businessId }, select: { name: true } });
+        sendEmail(
+          notifyEmail,
+          `❌ Fallo al publicar — ${business?.name ?? businessId}`,
+          failedEmailHtml({
+            businessName: business?.name ?? businessId,
+            captionExcerpt: draft.caption.slice(0, 120) + (draft.caption.length > 120 ? "…" : ""),
+            errorMessage,
+            scheduledFor: draft.publishAt.toLocaleString("es-ES"),
+          })
+        ).catch(() => {}); // fire-and-forget
+      }
+    }
 
     // Re-throw so BullMQ handles retry logic
     throw error;

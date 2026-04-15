@@ -5,11 +5,12 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatDateInTz } from "@/lib/utils";
-import { AlertTriangle, CheckCircle, Clock, Image, Film, Layers, ChevronRight } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, Image, Film, Layers, ChevronRight, LayoutGrid, List } from "lucide-react";
 import type { ParseError } from "@/types";
 import { BatchDetailSkeleton } from "@/components/ui/skeleton";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { useToast } from "@/components/ui/toast";
+import { FeedPreview } from "@/components/upload/feed-preview";
 
 interface BatchData {
   id: string;
@@ -32,6 +33,7 @@ interface PostDraftPreview {
   publishAt: string;
   timezone: string;
   status: string;
+  approvalStatus: string;
   sourceFolderName: string;
   validationErrors: unknown[] | null;
   mediaAssets: { id: string; originalFilename: string; mimeType: string; sortOrder: number }[];
@@ -53,6 +55,7 @@ export default function BatchDetailPage() {
   const [confirming, setConfirming] = useState(false);
   const [confirmResult, setConfirmResult] = useState<{ scheduled: number; failed: number } | null>(null);
   const [error, setError] = useState("");
+  const [view, setView] = useState<"list" | "grid">("list");
   const { toast } = useToast();
 
   async function fetchBatch() {
@@ -208,9 +211,45 @@ export default function BatchDetailPage() {
       {/* Posts */}
       {batch.postDrafts.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold text-zinc-300 mb-3">
-            Tus posts ({batch.postDrafts.length})
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-zinc-300">
+              Tus posts ({batch.postDrafts.length})
+            </h2>
+            <div className="flex items-center gap-1 bg-surface-card border border-white/[0.06] rounded-lg p-0.5">
+              <button
+                type="button"
+                onClick={() => setView("list")}
+                className={`p-1.5 rounded-md transition-colors ${view === "list" ? "bg-brand-500/20 text-brand-400" : "text-zinc-600 hover:text-zinc-400"}`}
+                title="Vista lista"
+              >
+                <List className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setView("grid")}
+                className={`p-1.5 rounded-md transition-colors ${view === "grid" ? "bg-brand-500/20 text-brand-400" : "text-zinc-600 hover:text-zinc-400"}`}
+                title="Vista del feed"
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {view === "grid" && (
+            <FeedPreview
+              posts={batch.postDrafts.map((p) => ({
+                id: p.id,
+                imageUrl: p.mediaAssets.length > 0
+                  ? `/api/media/${[...p.mediaAssets].sort((a, b) => a.sortOrder - b.sortOrder)[0].id}`
+                  : "",
+                caption: p.caption,
+                publishAt: p.publishAt,
+                postType: p.postType,
+              }))}
+            />
+          )}
+
+          {view === "list" && (
           <div className="space-y-1.5">
             {batch.postDrafts.map((post) => (
               <a
@@ -232,10 +271,12 @@ export default function BatchDetailPage() {
                   {formatDateInTz(post.publishAt, batch.business.timezone)}
                 </div>
                 <PostStatusPill status={post.status} />
+                <ApprovalPill approvalStatus={post.approvalStatus} postId={post.id} onUpdate={fetchBatch} />
                 <ChevronRight className="h-4 w-4 text-zinc-700 shrink-0" />
               </a>
             ))}
           </div>
+          )}
         </div>
       )}
     </div>
@@ -254,4 +295,61 @@ function PostStatusPill({ status }: { status: string }) {
   };
   const s = map[status] ?? { label: status, cls: "bg-zinc-500/10 text-zinc-500" };
   return <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${s.cls}`}>{s.label}</span>;
+}
+
+function ApprovalPill({
+  approvalStatus,
+  postId,
+  onUpdate,
+}: {
+  approvalStatus: string;
+  postId: string;
+  onUpdate: () => void;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  async function act(action: "approve" | "reject") {
+    setLoading(true);
+    try {
+      await fetch(`/api/posts/${postId}/${action}`, { method: "POST" });
+      onUpdate();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (approvalStatus === "APPROVED") {
+    return (
+      <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-400 font-medium shrink-0 border border-brand-500/10">
+        Aprobado
+      </span>
+    );
+  }
+  if (approvalStatus === "REJECTED") {
+    return (
+      <button
+        type="button"
+        onClick={(e) => { e.preventDefault(); act("approve"); }}
+        disabled={loading}
+        className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 font-medium shrink-0 border border-red-500/10 hover:bg-brand-500/10 hover:text-brand-400 hover:border-brand-500/10 transition-colors"
+        title="Rechazado — clic para aprobar"
+      >
+        Rechazado
+      </button>
+    );
+  }
+  // PENDING_APPROVAL
+  return (
+    <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.preventDefault()}>
+      <button
+        type="button"
+        onClick={() => act("approve")}
+        disabled={loading}
+        className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/10 hover:bg-brand-500/10 hover:text-brand-400 hover:border-brand-500/10 font-medium transition-colors"
+        title="Aprobar"
+      >
+        ✓ Aprobar
+      </button>
+    </div>
+  );
 }

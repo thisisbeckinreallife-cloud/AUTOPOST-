@@ -15,12 +15,14 @@ import {
   X,
   Globe,
   FileText,
+  BarChart2,
 } from "lucide-react";
 import { useLocale } from "@/lib/i18n";
 
 const navItems = [
   { href: "/dashboard", label: "Inicio", icon: LayoutDashboard },
   { href: "/businesses", label: "Mis cuentas", icon: Building2 },
+  { href: "/metrics", label: "Métricas", icon: BarChart2 },
   { href: "/logs", label: "Actividad", icon: FileText },
   { href: "/settings", label: "Configuracion", icon: Settings },
 ];

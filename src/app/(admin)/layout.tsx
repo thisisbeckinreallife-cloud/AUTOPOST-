@@ -1,4 +1,5 @@
 import { Sidebar } from "@/components/admin/sidebar";
+import { OnboardingTour } from "@/components/admin/onboarding-tour";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,7 @@ export default function AdminLayout({
       <main className="md:ml-64 p-5 md:p-8 pt-16 md:pt-8 min-h-screen relative">
         <div className="max-w-4xl mx-auto animate-fade-in">{children}</div>
       </main>
+      <OnboardingTour />
     </div>
   );
 }
