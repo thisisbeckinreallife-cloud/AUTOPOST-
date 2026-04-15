@@ -61,7 +61,7 @@ export default async function DashboardPage() {
       {(!hasBusinesses || !hasConnected || !hasContent) && (
         <div className="rounded-2xl border border-white/[0.06] bg-surface-card p-6 accent-border animate-fade-up stagger-1">
           <div className="flex items-center gap-3 mb-5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/15">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/15 to-accent-orange/10 border border-brand-500/15">
               <Zap className="h-4 w-4 text-brand-400" />
             </div>
             <div>
@@ -139,7 +139,7 @@ export default async function DashboardPage() {
           href={`/businesses/${businesses[0].slug}/upload`}
           className="group flex items-center gap-4 rounded-xl border border-white/[0.06] bg-surface-card p-5 hover:border-brand-500/25 hover:shadow-glow-sm card-interactive animate-fade-up stagger-3"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/15 group-hover:from-brand-500/25 group-hover:to-accent-violet/15 transition-all">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/15 to-accent-orange/10 border border-brand-500/15 group-hover:from-brand-500/25 group-hover:to-accent-orange/15 transition-all">
             <Upload className="h-5 w-5 text-brand-400" />
           </div>
           <div className="flex-1">
@@ -184,13 +184,19 @@ export default async function DashboardPage() {
       {/* Empty state */}
       {hasConnected && !hasContent && (
         <div className="text-center py-16 rounded-2xl border border-dashed border-white/[0.06] bg-surface-card/50 animate-fade-up">
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500/12 to-accent-violet/8 border border-brand-500/10 flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500/12 to-accent-orange/8 border border-brand-500/10 flex items-center justify-center mx-auto mb-4">
             <Upload className="h-7 w-7 text-brand-400" />
           </div>
           <h3 className="font-display text-lg font-bold text-white mb-1.5">Todo listo. Solo falta contenido.</h3>
-          <p className="text-zinc-500 text-sm mb-6 max-w-xs mx-auto">
-            Sube tu primera carpeta de posts — 2 minutos y tienes el mes programado.
+          <p className="text-zinc-500 text-sm mb-2 max-w-xs mx-auto">
+            Programa 30 días de contenido en 2 minutos.
           </p>
+          <a
+            href="/api/batches/example"
+            className="text-xs text-brand-400 hover:text-brand-300 transition-colors mb-6 inline-block"
+          >
+            Descargar ZIP de ejemplo →
+          </a>
           {businesses[0] && (
             <Link
               href={`/businesses/${businesses[0].slug}/upload`}

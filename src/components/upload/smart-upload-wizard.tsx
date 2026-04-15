@@ -365,7 +365,7 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
           {step === "analyzing" && (
             <div className="flex flex-col items-center justify-center py-16 space-y-5 animate-fade-up">
               <div className="relative">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/15 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500/15 to-accent-orange/10 border border-brand-500/15 flex items-center justify-center">
                   <Sparkles className="h-8 w-8 text-brand-400 animate-pulse-subtle" />
                 </div>
                 <Loader2 className="absolute -top-1 -right-1 h-5 w-5 text-brand-400 animate-spin" />

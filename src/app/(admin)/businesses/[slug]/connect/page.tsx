@@ -65,7 +65,7 @@ export default function ConnectPage() {
       <div className="flex items-center gap-3 animate-fade-up stagger-1">
         <div className="flex-1 h-1.5 bg-zinc-800/60 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-brand-500 to-accent-violet rounded-full transition-all duration-500 progress-glow"
+            className="h-full bg-gradient-to-r from-brand-500 to-accent-orange rounded-full transition-all duration-500 progress-glow"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -231,7 +231,7 @@ function StepCard({
     <div className="rounded-2xl border border-white/[0.06] bg-surface-card overflow-hidden animate-fade-up">
       <div className="bg-gradient-subtle border-b border-white/[0.04] px-6 pt-6 pb-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/15 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500/15 to-accent-orange/10 border border-brand-500/15 flex items-center justify-center shrink-0">
             {icon}
           </div>
           <div>

@@ -53,7 +53,7 @@ export default async function BusinessPage({
 
       {/* Header */}
       <div className="flex items-center gap-4 animate-fade-up">
-        <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/10 flex items-center justify-center shrink-0">
+        <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-brand-500/15 to-accent-orange/10 border border-brand-500/10 flex items-center justify-center shrink-0">
           <span className="text-brand-400 font-display font-bold text-xl uppercase">{business.name[0]}</span>
         </div>
         <div>

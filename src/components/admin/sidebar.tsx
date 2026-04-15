@@ -56,7 +56,7 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 h-16 border-b border-white/[0.04]">
-        <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/20">
+        <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/15 to-accent-orange/10 border border-brand-500/20">
           <Zap className="h-4 w-4 text-brand-400" />
         </div>
         <span className="font-display font-bold text-base tracking-tight text-white">
@@ -76,7 +76,7 @@ export function Sidebar() {
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
                 isActive
-                  ? "bg-gradient-to-r from-brand-500/12 to-accent-violet/6 text-brand-300 border border-brand-500/10"
+                  ? "bg-gradient-to-r from-brand-500/12 to-accent-orange/6 text-brand-300 border border-brand-500/10"
                   : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300 border border-transparent"
               )}
             >

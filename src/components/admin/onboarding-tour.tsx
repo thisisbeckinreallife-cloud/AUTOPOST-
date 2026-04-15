@@ -98,7 +98,7 @@ export function OnboardingTour() {
           {/* Progress bar */}
           <div className="h-0.5 bg-white/[0.06]">
             <div
-              className="h-full bg-gradient-to-r from-brand-500 to-accent-violet transition-all duration-400"
+              className="h-full bg-gradient-to-r from-brand-500 to-accent-orange transition-all duration-400"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -106,7 +106,7 @@ export function OnboardingTour() {
           <div className="p-6 space-y-4">
             {/* Header */}
             <div className="flex items-start justify-between gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/15 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500/15 to-accent-orange/10 border border-brand-500/15 flex items-center justify-center shrink-0">
                 {current.icon}
               </div>
               <button

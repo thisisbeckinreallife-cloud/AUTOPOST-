@@ -56,7 +56,7 @@ export default function DemoPage() {
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-white/[0.04]">
         <Link href="/" className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/20 flex items-center justify-center">
+          <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-brand-500/15 to-accent-orange/10 border border-brand-500/20 flex items-center justify-center">
             <Zap className="h-3.5 w-3.5 text-brand-400" />
           </div>
           <span className="font-display font-bold text-sm text-white">
@@ -221,7 +221,7 @@ export default function DemoPage() {
             )}
 
             {/* CTA */}
-            <div className="rounded-2xl border border-brand-500/20 bg-gradient-to-r from-brand-500/[0.06] to-accent-violet/[0.04] p-6 text-center space-y-4">
+            <div className="rounded-2xl border border-brand-500/20 bg-gradient-to-r from-brand-500/[0.06] to-accent-orange/[0.04] p-6 text-center space-y-4">
               <Lock className="h-6 w-6 text-brand-400 mx-auto" />
               <div>
                 <p className="font-display font-bold text-white text-lg">¿Listo para publicar de verdad?</p>

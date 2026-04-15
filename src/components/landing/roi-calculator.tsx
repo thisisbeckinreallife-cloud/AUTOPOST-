@@ -83,7 +83,7 @@ export function ROICalculator() {
           </div>
 
           {/* Result */}
-          <div className="rounded-xl border border-brand-500/25 bg-gradient-to-r from-brand-500/[0.08] to-accent-rose/[0.05] p-5 text-center">
+          <div className="rounded-xl border border-brand-500/25 bg-gradient-to-r from-brand-500/[0.08] to-accent-orange/[0.05] p-5 text-center">
             <p className="text-sm text-zinc-400 mb-1">Con {posts} posts al mes ahorras</p>
             <p className="font-display font-extrabold text-4xl text-gradient tabular-nums">
               {savedHours}h

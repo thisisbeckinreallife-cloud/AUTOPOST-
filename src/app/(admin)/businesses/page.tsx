@@ -92,7 +92,7 @@ export default async function BusinessesPage() {
 
       {enriched.length === 0 ? (
         <div className="text-center py-20 border border-dashed border-white/[0.06] bg-surface-card/50 rounded-2xl animate-fade-up stagger-1">
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500/12 to-accent-violet/8 border border-brand-500/10 flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500/12 to-accent-orange/8 border border-brand-500/10 flex items-center justify-center mx-auto mb-4">
             <Instagram className="h-7 w-7 text-brand-400" />
           </div>
           <h3 className="font-display text-lg font-bold text-white mb-1.5">Tu lista de cuentas está vacía</h3>
@@ -120,7 +120,7 @@ export default async function BusinessesPage() {
                 {/* Main row */}
                 <Link href={`/businesses/${biz.slug}`} className="flex items-center gap-4 px-5 py-4">
                   {/* Avatar */}
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/10 flex items-center justify-center shrink-0">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-brand-500/15 to-accent-orange/10 border border-brand-500/10 flex items-center justify-center shrink-0">
                     <span className="text-brand-400 font-display font-bold text-base uppercase">
                       {biz.name[0]}
                     </span>

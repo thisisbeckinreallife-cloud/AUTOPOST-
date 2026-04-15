@@ -25,7 +25,7 @@ export default function LandingPage() {
       <nav className="fixed top-0 inset-x-0 z-50 glass-strong">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
           <div className="flex items-center gap-2.5">
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/20 to-accent-rose/10 border border-brand-500/25">
+            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/20 to-accent-orange/10 border border-brand-500/25">
               <Zap className="h-4 w-4 text-brand-400" />
               <div className="absolute inset-0 rounded-lg bg-brand-500/10 animate-glow-pulse" />
             </div>
@@ -33,7 +33,7 @@ export default function LandingPage() {
               Auto<span className="text-gradient">Post</span>
             </span>
           </div>
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-3">
             <a href="#como-funciona" className="hidden sm:inline text-sm text-zinc-500 hover:text-zinc-200 transition-colors">
               Cómo funciona
             </a>
@@ -42,9 +42,15 @@ export default function LandingPage() {
             </a>
             <Link
               href="/login"
-              className="text-sm font-semibold px-4 py-2 rounded-lg border border-white/[0.08] text-zinc-300 hover:text-white hover:border-white/[0.15] hover:bg-white/[0.04] transition-all"
+              className="hidden sm:inline text-sm font-medium px-4 py-2 rounded-lg text-zinc-400 hover:text-white transition-colors"
             >
               Iniciar sesión
+            </Link>
+            <Link
+              href="/signup"
+              className="text-sm font-semibold px-4 py-2 rounded-lg bg-gradient-brand-vivid text-white shadow-glow-sm hover:shadow-glow transition-all"
+            >
+              Empezar gratis
             </Link>
           </div>
         </div>
@@ -54,14 +60,14 @@ export default function LandingPage() {
       <section className="relative pt-36 pb-28 px-6">
         <div className="absolute inset-0 bg-gradient-hero pointer-events-none" />
         <div className="aurora w-[700px] h-[400px] bg-brand-500/[0.10] top-10 left-1/2 -translate-x-1/2" />
-        <div className="aurora w-[500px] h-[300px] bg-accent-rose/[0.06] top-40 left-1/4 -translate-x-1/2" style={{ animationDelay: "4s" }} />
-        <div className="aurora w-[400px] h-[250px] bg-accent-violet/[0.05] top-20 right-1/4 translate-x-1/2" style={{ animationDelay: "8s" }} />
+        <div className="aurora w-[500px] h-[300px] bg-accent-orange/[0.06] top-40 left-1/4 -translate-x-1/2" style={{ animationDelay: "4s" }} />
+        <div className="aurora w-[400px] h-[250px] bg-accent-orange/[0.05] top-20 right-1/4 translate-x-1/2" style={{ animationDelay: "8s" }} />
 
         <div className="relative max-w-3xl mx-auto text-center">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-500/20 bg-brand-500/[0.06] text-xs font-medium text-brand-300 mb-8 animate-fade-up backdrop-blur-sm">
             <Sparkles className="h-3.5 w-3.5" />
-            Automatización inteligente para Instagram
+            Despliegue masivo de Instagram
           </div>
 
           <h1 className="font-display font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tight leading-[1.05] mb-5 animate-fade-up stagger-1">
@@ -70,21 +76,20 @@ export default function LandingPage() {
             en 2 minutos
           </h1>
 
-          {/* Social proof */}
-          <p className="text-sm text-zinc-500 mb-4 animate-fade-up stagger-2">
-            Más de{" "}
-            <span className="text-zinc-300 font-semibold">500 agencias y creadores</span>{" "}
-            ya programan con AutoPost
+          {/* Subheadline — single focused line */}
+          <p className="text-lg sm:text-xl text-zinc-400 max-w-xl mx-auto mb-4 leading-relaxed animate-fade-up stagger-2">
+            Sube una carpeta con todo tu contenido. AutoPost detecta carruseles,
+            extrae los copies y{" "}
+            <span className="text-zinc-200 font-medium">programa 30 días automáticamente.</span>
           </p>
 
-          {/* Subheadline — differentiation copy */}
-          <p className="text-lg sm:text-xl text-zinc-400 max-w-xl mx-auto mb-3 leading-relaxed animate-fade-up stagger-2">
-            Sin arrastrar y soltar. Sin copiar-pegar copies.{" "}
-            <span className="text-zinc-200 font-medium">Solo sube la carpeta.</span>
-          </p>
-          <p className="text-base text-zinc-500 max-w-lg mx-auto mb-8 leading-relaxed animate-fade-up stagger-2">
-            AutoPost detecta carruseles, pone el copy solo y programa 30 días de una vez.{" "}
-            <span className="text-zinc-300">Tú a otra cosa.</span>
+          {/* Speed proof */}
+          <p className="text-sm text-zinc-500 mb-8 animate-fade-up stagger-2">
+            De{" "}
+            <span className="text-red-400/80 font-semibold">3 horas por cliente</span>{" "}
+            a{" "}
+            <span className="text-brand-400 font-semibold">2 minutos</span>{" "}
+            con AutoPost
           </p>
 
           {/* Trust badge */}
@@ -110,7 +115,7 @@ export default function LandingPage() {
             {[
               { day: "Lun 14:00", type: "Carrusel", dots: 5, color: "bg-brand-500/10 text-brand-400" },
               { day: "Mié 10:00", type: "Foto",     dots: 1, color: "bg-green-500/10 text-green-400" },
-              { day: "Vie 18:00", type: "Reel",     dots: 1, color: "bg-violet-500/10 text-violet-400" },
+              { day: "Vie 18:00", type: "Reel",     dots: 1, color: "bg-blue-500/10 text-blue-400" },
               { day: "Dom 09:00", type: "Carrusel", dots: 3, color: "bg-brand-500/10 text-brand-400" },
             ].map((row, i) => (
               <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.03] last:border-0 animate-mockup-blink" style={{ animationDelay: `${i * 0.8}s`, animationDuration: `${3 + i * 0.5}s` }}>
@@ -139,7 +144,7 @@ export default function LandingPage() {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up stagger-3">
             <Link
-              href="/login"
+              href="/signup"
               className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-sm shadow-glow hover:shadow-glow-lg hover:scale-[1.03] transition-all duration-200"
             >
               Subir mi primera carpeta — Gratis
@@ -167,7 +172,7 @@ export default function LandingPage() {
 
       {/* ─── How it works ─── */}
       <section id="como-funciona" className="py-28 px-6 relative">
-        <div className="aurora w-[500px] h-[300px] bg-accent-violet/[0.04] bottom-20 right-0" style={{ animationDelay: "6s" }} />
+        <div className="aurora w-[500px] h-[300px] bg-accent-orange/[0.04] bottom-20 right-0" style={{ animationDelay: "6s" }} />
 
         <div className="max-w-5xl mx-auto relative">
           <div className="text-center mb-16">
@@ -192,14 +197,14 @@ export default function LandingPage() {
               icon={<Layers className="h-5 w-5" />}
               title="Revisión automática"
               description="AutoPost detecta carruseles, empareja fotos con textos y te muestra todo para que lo revises."
-              accent="violet"
+              accent="blue"
             />
             <StepCard
               number="03"
               icon={<Calendar className="h-5 w-5" />}
               title="Programa y olvida"
               description="Elige horario y frecuencia. AutoPost publica automáticamente durante los próximos 30 días."
-              accent="rose"
+              accent="orange"
             />
           </div>
         </div>
@@ -212,7 +217,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/[0.05]">
               {/* Before */}
               <div className="p-8 space-y-4">
-                <p className="text-xs font-semibold text-zinc-600 uppercase tracking-[0.15em]">Con Later / Planoly</p>
+                <p className="text-xs font-semibold text-zinc-600 uppercase tracking-[0.15em]">Con herramientas tradicionales</p>
                 {[
                   "Subir cada foto una a una",
                   "Copiar y pegar cada caption manualmente",
@@ -271,10 +276,10 @@ export default function LandingPage() {
               glow="brand"
             />
             <FeatureCard
-              icon={<CheckCircle className="h-5 w-5 text-accent-violet" />}
+              icon={<CheckCircle className="h-5 w-5 text-accent-orange" />}
               title="Extracción de copy"
               description="Lee archivos de texto y los asocia a cada post automáticamente. Cero copia y pega."
-              glow="violet"
+              glow="orange"
             />
             <FeatureCard
               icon={<Clock className="h-5 w-5 text-brand-300" />}
@@ -283,10 +288,10 @@ export default function LandingPage() {
               glow="brand"
             />
             <FeatureCard
-              icon={<Shield className="h-5 w-5 text-accent-violet" />}
+              icon={<Shield className="h-5 w-5 text-accent-orange" />}
               title="Conexión segura Meta API"
               description="OAuth oficial de Meta. Tu contraseña nunca se comparte ni se almacena jamás."
-              glow="violet"
+              glow="orange"
             />
             <FeatureCard
               icon={<Instagram className="h-5 w-5 text-brand-400" />}
@@ -295,10 +300,10 @@ export default function LandingPage() {
               glow="brand"
             />
             <FeatureCard
-              icon={<Calendar className="h-5 w-5 text-accent-violet" />}
+              icon={<Calendar className="h-5 w-5 text-accent-orange" />}
               title="Vista previa completa"
               description="Ve exactamente qué se publicará y cuándo antes de confirmar. Sin sorpresas."
-              glow="violet"
+              glow="orange"
             />
             <FeatureCard
               icon={<Users className="h-5 w-5 text-brand-300" />}
@@ -338,11 +343,11 @@ export default function LandingPage() {
       {/* ─── CTA final ─── */}
       <section className="py-28 px-6 relative">
         <div className="aurora w-[600px] h-[350px] bg-brand-500/[0.07] top-0 left-1/2 -translate-x-1/2" style={{ animationDelay: "2s" }} />
-        <div className="aurora w-[400px] h-[250px] bg-accent-rose/[0.04] top-10 right-1/4" style={{ animationDelay: "5s" }} />
+        <div className="aurora w-[400px] h-[250px] bg-accent-orange/[0.04] top-10 right-1/4" style={{ animationDelay: "5s" }} />
 
         <div className="relative max-w-2xl mx-auto text-center">
           <div className="rounded-3xl border border-brand-500/20 bg-surface-card p-12 sm:p-16 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-500/[0.06] via-transparent to-accent-rose/[0.04] pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-500/[0.06] via-transparent to-accent-orange/[0.04] pointer-events-none" />
             <div className="relative">
               <h2 className="font-display font-bold text-3xl sm:text-4xl tracking-tight mb-4">
                 Deja de publicar <span className="text-gradient">a mano</span>
@@ -351,7 +356,7 @@ export default function LandingPage() {
                 Programa todo el mes de una vez y dedica tu tiempo a lo que importa.
               </p>
               <Link
-                href="/login"
+                href="/signup"
                 className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-base shadow-glow hover:shadow-glow-lg hover:scale-[1.03] transition-all duration-200"
               >
                 Empezar gratis
@@ -415,9 +420,9 @@ function StepCard({
 }) {
   const accents: Record<string, { bg: string; border: string; text: string; glow: string }> = {
     brand:  { bg: "bg-brand-500/10",  border: "border-brand-500/20",  text: "text-brand-400",  glow: "group-hover:shadow-glow-sm" },
-    violet: { bg: "bg-violet-500/10", border: "border-violet-500/20", text: "text-violet-400", glow: "group-hover:shadow-glow-violet" },
-    rose:   { bg: "bg-rose-500/10",   border: "border-rose-500/20",   text: "text-rose-400",   glow: "group-hover:shadow-glow-rose" },
-    cyan:   { bg: "bg-cyan-500/10",   border: "border-cyan-500/20",   text: "text-cyan-400",   glow: "group-hover:shadow-glow-cyan" },
+    blue: { bg: "bg-blue-500/10", border: "border-blue-500/20", text: "text-blue-400", glow: "group-hover:shadow-glow-amber" },
+    orange: { bg: "bg-orange-500/10", border: "border-orange-500/20", text: "text-orange-400", glow: "group-hover:shadow-glow-orange" },
+    cyan:   { bg: "bg-cyan-500/10",   border: "border-cyan-500/20",   text: "text-cyan-400",   glow: "group-hover:shadow-glow-blue" },
   };
   const a = accents[accent] ?? accents.brand;
 
@@ -453,7 +458,7 @@ function FeatureCard({
 }) {
   const glowColors: Record<string, string> = {
     brand:  "group-hover:border-brand-500/20",
-    violet: "group-hover:border-accent-violet/20",
+    orange: "group-hover:border-accent-orange/20",
   };
 
   return (
@@ -546,7 +551,7 @@ function TestimonialCard({
       </span>
       <p className="text-sm text-zinc-300 leading-relaxed relative z-10">"{quote}"</p>
       <div className="flex items-center gap-3 mt-auto">
-        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-brand-500/20 to-accent-rose/15 border border-brand-500/20 flex items-center justify-center shrink-0">
+        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-brand-500/20 to-accent-orange/15 border border-brand-500/20 flex items-center justify-center shrink-0">
           <span className="text-xs font-bold text-brand-300">{initials}</span>
         </div>
         <div>
@@ -568,8 +573,9 @@ const pricingTiers = [
     features: [
       "1 cuenta de Instagram",
       "30 posts por mes",
-      "Detección de carruseles",
-      "Extracción de copy automática",
+      "Detección automática de carruseles",
+      "Extracción de copy desde .txt",
+      "Publicación automática via API oficial",
     ],
     cta: "Empezar gratis",
     popular: false,
@@ -581,8 +587,8 @@ const pricingTiers = [
     features: [
       "5 cuentas de Instagram",
       "Posts ilimitados",
-      "Todo lo del plan Free",
-      "Posts colaborativos",
+      "Posts colaborativos (Collabs)",
+      "Flujo de aprobación de contenido",
       "Soporte prioritario por email",
     ],
     cta: "Empezar con Pro",
@@ -594,12 +600,12 @@ const pricingTiers = [
     description: "Para agencias y equipos",
     features: [
       "Cuentas ilimitadas",
-      "Multi-workspace",
       "Todo lo del plan Pro",
       "Panel multi-cliente",
+      "Logs de auditoría completos",
       "Soporte directo prioritario",
     ],
-    cta: "Hablar con ventas",
+    cta: "Empezar con Agency",
     popular: false,
   },
 ];
@@ -624,8 +630,22 @@ function PricingSection() {
           ))}
         </div>
 
-        <p className="text-center text-xs text-zinc-600 mt-8">
-          Sin tarjeta de crédito en el plan Free · Cancela en cualquier momento
+        <div className="flex flex-wrap items-center justify-center gap-6 mt-10">
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+            <Shield className="h-3.5 w-3.5 text-brand-400" />
+            Conexión oficial Meta API
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+            <Lock className="h-3.5 w-3.5 text-brand-400" />
+            Cifrado AES-256
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+            <CheckCircle className="h-3.5 w-3.5 text-brand-400" />
+            Cancela cuando quieras
+          </div>
+        </div>
+        <p className="text-center text-xs text-zinc-600 mt-4">
+          Sin tarjeta de crédito en el plan Free
         </p>
       </div>
     </section>
@@ -666,7 +686,7 @@ function PricingCard({ tier }: { tier: typeof pricingTiers[0] }) {
       </ul>
 
       <Link
-        href="/login"
+        href="/signup"
         className={cn(
           "inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200",
           tier.popular

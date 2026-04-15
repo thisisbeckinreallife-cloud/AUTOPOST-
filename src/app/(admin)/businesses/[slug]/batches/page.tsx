@@ -55,7 +55,7 @@ export default async function BatchesPage({
 
       {batches.length === 0 ? (
         <div className="text-center py-20 border border-dashed border-white/[0.06] bg-surface-card rounded-2xl animate-fade-up">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500/12 to-accent-violet/8 border border-brand-500/20 flex items-center justify-center mx-auto mb-5">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500/12 to-accent-orange/8 border border-brand-500/20 flex items-center justify-center mx-auto mb-5">
             <Upload className="h-8 w-8 text-brand-400" />
           </div>
           <h3 className="text-lg font-semibold text-zinc-100 mb-2">Aun no has subido contenido</h3>

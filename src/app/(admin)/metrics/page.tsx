@@ -103,7 +103,7 @@ export default async function MetricsPage() {
           <p className="text-sm font-medium text-zinc-300 mb-1">Tasa de éxito global</p>
           <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-brand-500 to-accent-violet rounded-full transition-all"
+              className="h-full bg-gradient-to-r from-brand-500 to-accent-orange rounded-full transition-all"
               style={{ width: `${successRate}%` }}
             />
           </div>

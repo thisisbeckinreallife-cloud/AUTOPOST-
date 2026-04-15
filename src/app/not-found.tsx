@@ -10,7 +10,7 @@ export default function NotFound() {
       <div className="aurora w-[500px] h-[300px] bg-brand-500/[0.06] top-1/3 left-1/2 -translate-x-1/2" />
 
       <div className="text-center relative animate-fade-up">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500/15 to-accent-violet/10 border border-brand-500/15 flex items-center justify-center mx-auto mb-6">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500/15 to-accent-orange/10 border border-brand-500/15 flex items-center justify-center mx-auto mb-6">
           <Zap className="h-8 w-8 text-brand-400" />
         </div>
 
