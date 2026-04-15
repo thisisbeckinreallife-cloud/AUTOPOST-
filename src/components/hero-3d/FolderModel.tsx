@@ -8,7 +8,7 @@ import * as THREE from "three";
 function FloatingFile({ index, total }: { index: number; total: number }) {
   const ref = useRef<THREE.Mesh>(null);
   const startTime = useRef(Math.random() * 10);
-  const fileColors = ["#FFB800", "#7C3AED", "#06D6A0", "#FB923C", "#3B82F6"];
+  const fileColors = ["#FFAA00", "#6366F1", "#34D399", "#FB923C", "#3B82F6"];
   const color = fileColors[index % fileColors.length];
 
   useFrame((state) => {
@@ -68,7 +68,7 @@ export function FolderModel({ scrollProgress = 0 }: { scrollProgress: number }) 
       {/* Folder base */}
       <RoundedBox args={[1.2, 0.08, 0.8]} radius={0.02} smoothness={2} position={[0, 0, 0]}>
         <meshPhysicalMaterial
-          color="#FFB800"
+          color="#FFAA00"
           metalness={0.2}
           roughness={0.4}
           transmission={0.15}
@@ -81,7 +81,7 @@ export function FolderModel({ scrollProgress = 0 }: { scrollProgress: number }) 
         <mesh ref={lidRef} position={[0, 0, 0.4]}>
           <boxGeometry args={[1.2, 0.04, 0.8]} />
           <meshPhysicalMaterial
-            color="#FFD040"
+            color="#FFC226"
             metalness={0.15}
             roughness={0.35}
             transmission={0.1}
@@ -92,7 +92,7 @@ export function FolderModel({ scrollProgress = 0 }: { scrollProgress: number }) 
       {/* Folder tab */}
       <mesh position={[-0.25, 0.06, -0.39]}>
         <boxGeometry args={[0.4, 0.06, 0.02]} />
-        <meshStandardMaterial color="#E5A500" roughness={0.4} />
+        <meshStandardMaterial color="#CC8800" roughness={0.4} />
       </mesh>
 
       {/* Floating files around folder */}
@@ -103,7 +103,7 @@ export function FolderModel({ scrollProgress = 0 }: { scrollProgress: number }) 
       {/* Folder glow */}
       <pointLight
         position={[0, 0.5, 0]}
-        color="#FFB800"
+        color="#FFAA00"
         intensity={0.5}
         distance={3}
         decay={2}

@@ -23,7 +23,7 @@ export function SceneLighting() {
       <directionalLight
         position={[-3, 4, 5]}
         intensity={0.6}
-        color="#FFB800"
+        color="#FFAA00"
         castShadow={false}
       />
 
@@ -31,21 +31,21 @@ export function SceneLighting() {
       <directionalLight
         position={[3, 2, -3]}
         intensity={0.4}
-        color="#7C3AED"
+        color="#6366F1"
       />
 
       {/* Cyan fill from below */}
       <directionalLight
         position={[0, -3, 2]}
         intensity={0.15}
-        color="#06D6A0"
+        color="#34D399"
       />
 
       {/* Animated point light near phone */}
       <pointLight
         ref={pointLightRef}
         position={[0, 1, 2]}
-        color="#FFB800"
+        color="#FFAA00"
         intensity={0.8}
         distance={8}
         decay={2}
@@ -54,7 +54,7 @@ export function SceneLighting() {
       {/* Back fill for depth */}
       <pointLight
         position={[-2, 0, -3]}
-        color="#7C3AED"
+        color="#6366F1"
         intensity={0.3}
         distance={6}
         decay={2}

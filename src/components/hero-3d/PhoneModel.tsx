@@ -6,7 +6,7 @@ import { RoundedBox, Text } from "@react-three/drei";
 import * as THREE from "three";
 
 // Instagram-style post placeholder colors
-const POST_COLORS = ["#FFB800", "#7C3AED", "#06D6A0", "#FB923C", "#3B82F6", "#EF4444"];
+const POST_COLORS = ["#FFAA00", "#6366F1", "#34D399", "#FB923C", "#3B82F6", "#F97066"];
 
 function FeedPost({ position, color, delay }: { position: [number, number, number]; color: string; delay: number }) {
   const ref = useRef<THREE.Mesh>(null);
@@ -51,19 +51,19 @@ function PhoneScreen() {
       {/* Screen background */}
       <mesh position={[0, 0.1, 0.075]}>
         <planeGeometry args={[1.05, 1.85]} />
-        <meshStandardMaterial color="#0B1120" roughness={0.1} metalness={0.8} />
+        <meshStandardMaterial color="#06080D" roughness={0.1} metalness={0.8} />
       </mesh>
 
       {/* Status bar area */}
       <mesh position={[0, 0.95, 0.076]}>
         <planeGeometry args={[1.0, 0.08]} />
-        <meshStandardMaterial color="#111827" roughness={0.5} />
+        <meshStandardMaterial color="#0C0F16" roughness={0.5} />
       </mesh>
 
       {/* Instagram header bar */}
       <mesh position={[0, 0.82, 0.076]}>
         <planeGeometry args={[1.0, 0.12]} />
-        <meshStandardMaterial color="#162032" roughness={0.5} />
+        <meshStandardMaterial color="#11141C" roughness={0.5} />
       </mesh>
 
       {/* Feed posts grid */}
@@ -108,7 +108,7 @@ export function PhoneModel() {
 
       {/* Screen bezel inner edge */}
       <RoundedBox args={[1.1, 2.0, 0.01]} radius={0.1} smoothness={4} position={[0, 0.05, 0.07]}>
-        <meshStandardMaterial color="#0B1120" roughness={0.2} metalness={0.5} />
+        <meshStandardMaterial color="#06080D" roughness={0.2} metalness={0.5} />
       </RoundedBox>
 
       {/* Screen content */}
@@ -117,7 +117,7 @@ export function PhoneModel() {
       {/* Camera notch */}
       <mesh position={[0, 1.0, 0.076]}>
         <circleGeometry args={[0.04, 16]} />
-        <meshStandardMaterial color="#0B1120" roughness={0.1} metalness={0.9} />
+        <meshStandardMaterial color="#06080D" roughness={0.1} metalness={0.9} />
       </mesh>
 
       {/* Side buttons */}
@@ -130,7 +130,7 @@ export function PhoneModel() {
       <mesh position={[0, 0.1, 0.08]}>
         <planeGeometry args={[1.15, 2.0]} />
         <meshBasicMaterial
-          color="#FFB800"
+          color="#FFAA00"
           transparent
           opacity={0.03}
           blending={THREE.AdditiveBlending}

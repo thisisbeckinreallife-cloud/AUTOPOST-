@@ -16,9 +16,9 @@ export function GoldParticles() {
     const colors = new Float32Array(PARTICLE_COUNT * 3);
     const sizes = new Float32Array(PARTICLE_COUNT);
 
-    const goldColor = new THREE.Color("#FFB800");
-    const cyanColor = new THREE.Color("#06D6A0");
-    const violetColor = new THREE.Color("#7C3AED");
+    const goldColor = new THREE.Color("#FFAA00");
+    const emeraldColor = new THREE.Color("#34D399");
+    const indigoColor = new THREE.Color("#6366F1");
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const i3 = i * 3;
@@ -38,7 +38,7 @@ export function GoldParticles() {
 
       // Color mix: 60% gold, 25% cyan, 15% violet
       const colorPick = Math.random();
-      const color = colorPick < 0.6 ? goldColor : colorPick < 0.85 ? cyanColor : violetColor;
+      const color = colorPick < 0.6 ? goldColor : colorPick < 0.85 ? emeraldColor : indigoColor;
       colors[i3] = color.r;
       colors[i3 + 1] = color.g;
       colors[i3 + 2] = color.b;
