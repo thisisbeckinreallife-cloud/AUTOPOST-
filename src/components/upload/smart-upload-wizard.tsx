@@ -23,6 +23,7 @@ import { CalendarPreview } from "./calendar-preview";
 import { TutorialPanel } from "./tutorial-panel";
 import {
   analyzeZip,
+  analyzeDirectMedia,
   cleanupPreviews,
   type DetectedPost,
   type AnalysisResult,
@@ -56,6 +57,8 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
   );
   const [error, setError] = useState("");
   const [uploadProgress, setUploadProgress] = useState("");
+  const [uploadMode, setUploadMode] = useState<"zip" | "direct">("zip");
+  const [directFiles, setDirectFiles] = useState<File[]>([]);
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout>>();
 
   // Cleanup preview URLs on unmount
@@ -96,6 +99,30 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
       setStep("review");
     } catch (err) {
       setError("No pudimos analizar tu archivo. Verifica que sea un ZIP valido.");
+      setStep("drop");
+    }
+  }, []);
+
+  const handleDirectMediaSelected = useCallback((files: File[]) => {
+    setError("");
+    setUploadMode("direct");
+    setDirectFiles(files);
+    setStep("analyzing");
+
+    try {
+      const result = analyzeDirectMedia(files);
+      setAnalysis(result);
+      setPosts(result.posts);
+
+      if (result.posts.length === 0) {
+        setError(result.summary);
+        setStep("drop");
+        return;
+      }
+
+      setStep("review");
+    } catch (err) {
+      setError("No pudimos analizar tus archivos. Verifica que sean fotos o videos validos.");
       setStep("drop");
     }
   }, []);
@@ -158,7 +185,6 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
   }
 
   async function handleUpload() {
-    if (!file) return;
     setStep("uploading");
     setUploadProgress("Preparando tus posts...");
     setError("");
@@ -172,93 +198,253 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
         return;
       }
 
-      const scheduleOverrides = validPosts.map((post, idx) => ({
-        index: idx,
-        publishAt: post.publishAt
-          ? new Date(Math.max(post.publishAt.getTime(), Date.now() + 10 * 60 * 1000)).toISOString()
-          : new Date(Date.now() + (24 + idx) * 60 * 60 * 1000).toISOString(),
-        caption: post.caption || undefined,
-        postType: post.postType,
-      }));
-
-      setUploadProgress("Obteniendo permiso de subida...");
-      const presignRes = await fetch("/api/batches/presign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          businessSlug,
-          fileName: file.name,
-          fileSize: file.size,
-        }),
-      });
-
-      if (!presignRes.ok) {
-        const presignData = await presignRes.json().catch(() => ({ error: "Error del servidor" }));
-        setError(presignData.error ?? `Error obteniendo URL de subida (${presignRes.status})`);
-        setStep("calendar");
-        return;
-      }
-
-      const { data: presignData } = await presignRes.json();
-      const { uploadUrl, storageKey, batchId, businessId } = presignData;
-
-      setUploadProgress("Subiendo archivo a la nube...");
-      const uploadRes = await fetch(uploadUrl, {
-        method: "PUT",
-        body: file,
-      });
-
-      if (!uploadRes.ok) {
-        let detail = "";
-        try { detail = await uploadRes.text(); } catch {}
-        console.error("R2 upload error:", uploadRes.status, detail);
-        setError(`Error subiendo a almacenamiento (${uploadRes.status}): ${detail.substring(0, 200)}`);
-        setStep("calendar");
-        return;
-      }
-
-      setUploadProgress("Procesando tus posts...");
-      const processRes = await fetch("/api/batches", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          batchId,
-          businessId,
-          storageKey,
-          fileName: file.name,
-          fileSize: file.size,
-          schedule: scheduleOverrides,
-        }),
-      });
-
-      const contentType = processRes.headers.get("content-type") ?? "";
-      let processData: { error?: string; data?: { batchId: string } };
-      if (contentType.includes("application/json")) {
-        processData = await processRes.json();
+      if (uploadMode === "direct") {
+        await handleDirectUpload(validPosts);
       } else {
-        const text = await processRes.text();
-        processData = { error: `Error del servidor (${processRes.status}): ${text.substring(0, 200)}` };
+        await handleZipUpload(validPosts);
       }
-
-      if (!processRes.ok) {
-        if (processRes.status === 409) {
-          setError("Este contenido ya fue subido anteriormente. Revisa tus batches.");
-        } else {
-          setError(processData.error ?? `Error procesando (${processRes.status}). Intentalo de nuevo.`);
-        }
-        setStep("calendar");
-        return;
-      }
-
-      setUploadProgress("Listo! Redirigiendo...");
-      cleanupPreviews(posts);
-      router.push(`/businesses/${businessSlug}/batches/${processData.data!.batchId}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error("Upload error:", msg, err);
       setError(`Error: ${msg}. Comprueba tu conexion e intentalo de nuevo.`);
       setStep("calendar");
     }
+  }
+
+  async function handleDirectUpload(validPosts: DetectedPost[]) {
+    // 1. Get a batchId for all presign calls
+    setUploadProgress("Obteniendo permiso de subida...");
+
+    // Build a map from filename to File for lookup
+    const fileMap = new Map<string, File>();
+    for (const f of directFiles) {
+      fileMap.set(f.name, f);
+    }
+
+    // Presign + upload each file
+    const firstPresign = await fetch("/api/batches/presign", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        businessSlug,
+        fileName: directFiles[0]?.name ?? "direct-upload",
+        fileSize: directFiles[0]?.size ?? 0,
+        contentType: directFiles[0]?.type,
+      }),
+    });
+
+    if (!firstPresign.ok) {
+      const data = await firstPresign.json().catch(() => ({ error: "Error del servidor" }));
+      setError(data.error ?? `Error obteniendo URL de subida (${firstPresign.status})`);
+      setStep("calendar");
+      return;
+    }
+
+    const { data: firstPresignData } = await firstPresign.json();
+    const batchId = firstPresignData.batchId;
+
+    // Upload all unique media files across all posts
+    const allMediaFiles: Array<{ file: File; media: DetectedPost["mediaFiles"][0] }> = [];
+    for (const post of validPosts) {
+      for (const media of post.mediaFiles) {
+        const f = fileMap.get(media.filename);
+        if (f && !allMediaFiles.some((m) => m.file.name === f.name)) {
+          allMediaFiles.push({ file: f, media });
+        }
+      }
+    }
+
+    // storageKey map: filename -> storageKey
+    const storageKeyMap = new Map<string, string>();
+
+    setUploadProgress(`Subiendo ${allMediaFiles.length} archivo${allMediaFiles.length !== 1 ? "s" : ""}...`);
+
+    for (let i = 0; i < allMediaFiles.length; i++) {
+      const { file: mediaFile } = allMediaFiles[i];
+      const fileName = mediaFile.name;
+
+      // Use the first presign for the first file, get new ones for the rest
+      let uploadUrl: string;
+      let storageKey: string;
+
+      if (i === 0) {
+        uploadUrl = firstPresignData.uploadUrl;
+        storageKey = firstPresignData.storageKey;
+      } else {
+        const presignRes = await fetch("/api/batches/presign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            businessSlug,
+            fileName,
+            fileSize: mediaFile.size,
+            contentType: mediaFile.type,
+          }),
+        });
+
+        if (!presignRes.ok) {
+          const data = await presignRes.json().catch(() => ({ error: "Error del servidor" }));
+          setError(data.error ?? `Error obteniendo URL de subida para ${fileName}`);
+          setStep("calendar");
+          return;
+        }
+
+        const { data: presignData } = await presignRes.json();
+        uploadUrl = presignData.uploadUrl;
+        storageKey = presignData.storageKey;
+      }
+
+      storageKeyMap.set(fileName, storageKey);
+
+      setUploadProgress(`Subiendo ${i + 1} de ${allMediaFiles.length}...`);
+      const uploadRes = await fetch(uploadUrl, {
+        method: "PUT",
+        body: mediaFile,
+      });
+
+      if (!uploadRes.ok) {
+        let detail = "";
+        try { detail = await uploadRes.text(); } catch {}
+        setError(`Error subiendo ${fileName} (${uploadRes.status}): ${detail.substring(0, 200)}`);
+        setStep("calendar");
+        return;
+      }
+    }
+
+    // 2. Call the direct batch endpoint
+    setUploadProgress("Procesando tus posts...");
+
+    const directPosts = validPosts.map((post, idx) => {
+      const publishAt = post.publishAt
+        ? new Date(Math.max(post.publishAt.getTime(), Date.now() + 10 * 60 * 1000)).toISOString()
+        : new Date(Date.now() + (24 + idx) * 60 * 60 * 1000).toISOString();
+
+      return {
+        storageKeys: post.mediaFiles.map((m) => storageKeyMap.get(m.filename) ?? ""),
+        filenames: post.mediaFiles.map((m) => m.filename),
+        fileSizes: post.mediaFiles.map((m) => m.size),
+        mimeTypes: post.mediaFiles.map((m) => m.mimeType),
+        caption: post.caption || "",
+        postType: post.postType,
+        publishAt,
+        collaborators: post.collaborators?.length ? post.collaborators : undefined,
+      };
+    });
+
+    const processRes = await fetch("/api/batches/direct", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        businessSlug,
+        batchId,
+        posts: directPosts,
+      }),
+    });
+
+    const contentType = processRes.headers.get("content-type") ?? "";
+    let processData: { error?: string; data?: { batchId: string } };
+    if (contentType.includes("application/json")) {
+      processData = await processRes.json();
+    } else {
+      const text = await processRes.text();
+      processData = { error: `Error del servidor (${processRes.status}): ${text.substring(0, 200)}` };
+    }
+
+    if (!processRes.ok) {
+      setError(processData.error ?? `Error procesando (${processRes.status}). Intentalo de nuevo.`);
+      setStep("calendar");
+      return;
+    }
+
+    setUploadProgress("Listo! Redirigiendo...");
+    cleanupPreviews(posts);
+    router.push(`/businesses/${businessSlug}/batches/${processData.data!.batchId}`);
+  }
+
+  async function handleZipUpload(validPosts: DetectedPost[]) {
+    if (!file) return;
+
+    const scheduleOverrides = validPosts.map((post, idx) => ({
+      index: idx,
+      publishAt: post.publishAt
+        ? new Date(Math.max(post.publishAt.getTime(), Date.now() + 10 * 60 * 1000)).toISOString()
+        : new Date(Date.now() + (24 + idx) * 60 * 60 * 1000).toISOString(),
+      caption: post.caption || undefined,
+      postType: post.postType,
+    }));
+
+    setUploadProgress("Obteniendo permiso de subida...");
+    const presignRes = await fetch("/api/batches/presign", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        businessSlug,
+        fileName: file.name,
+        fileSize: file.size,
+      }),
+    });
+
+    if (!presignRes.ok) {
+      const presignData = await presignRes.json().catch(() => ({ error: "Error del servidor" }));
+      setError(presignData.error ?? `Error obteniendo URL de subida (${presignRes.status})`);
+      setStep("calendar");
+      return;
+    }
+
+    const { data: presignData } = await presignRes.json();
+    const { uploadUrl, storageKey, batchId, businessId } = presignData;
+
+    setUploadProgress("Subiendo archivo a la nube...");
+    const uploadRes = await fetch(uploadUrl, {
+      method: "PUT",
+      body: file,
+    });
+
+    if (!uploadRes.ok) {
+      let detail = "";
+      try { detail = await uploadRes.text(); } catch {}
+      console.error("R2 upload error:", uploadRes.status, detail);
+      setError(`Error subiendo a almacenamiento (${uploadRes.status}): ${detail.substring(0, 200)}`);
+      setStep("calendar");
+      return;
+    }
+
+    setUploadProgress("Procesando tus posts...");
+    const processRes = await fetch("/api/batches", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        batchId,
+        businessId,
+        storageKey,
+        fileName: file.name,
+        fileSize: file.size,
+        schedule: scheduleOverrides,
+      }),
+    });
+
+    const contentType = processRes.headers.get("content-type") ?? "";
+    let processData: { error?: string; data?: { batchId: string } };
+    if (contentType.includes("application/json")) {
+      processData = await processRes.json();
+    } else {
+      const text = await processRes.text();
+      processData = { error: `Error del servidor (${processRes.status}): ${text.substring(0, 200)}` };
+    }
+
+    if (!processRes.ok) {
+      if (processRes.status === 409) {
+        setError("Este contenido ya fue subido anteriormente. Revisa tus batches.");
+      } else {
+        setError(processData.error ?? `Error procesando (${processRes.status}). Intentalo de nuevo.`);
+      }
+      setStep("calendar");
+      return;
+    }
+
+    setUploadProgress("Listo! Redirigiendo...");
+    cleanupPreviews(posts);
+    router.push(`/businesses/${businessSlug}/batches/${processData.data!.batchId}`);
   }
 
   // ─── Navigation ─────────────────────────────────────────────────────────
@@ -296,6 +482,8 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
       setPosts([]);
       setAnalysis(null);
       setFile(null);
+      setDirectFiles([]);
+      setUploadMode("zip");
       setStep("drop");
     } else if (step === "schedule") {
       setStep("review");
@@ -315,7 +503,7 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
         <h1 className="font-display text-xl font-bold text-white">{STEP_TITLES[step]}</h1>
         {step === "drop" && (
           <p className="text-zinc-500 text-sm mt-1">
-            Sube una carpeta con tus fotos y textos. Nosotros hacemos el resto.
+            Sube un video, foto, carpeta o ZIP. Nosotros hacemos el resto.
           </p>
         )}
       </div>
@@ -360,7 +548,12 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
       {/* Step content */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-6">
         <div>
-          {step === "drop" && <DropZone onFileSelected={handleFileSelected} />}
+          {step === "drop" && (
+            <DropZone
+              onFileSelected={handleFileSelected}
+              onDirectMediaSelected={handleDirectMediaSelected}
+            />
+          )}
 
           {step === "analyzing" && (
             <div className="flex flex-col items-center justify-center py-16 space-y-5 animate-fade-up">

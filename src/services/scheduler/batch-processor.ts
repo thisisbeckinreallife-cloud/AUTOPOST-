@@ -177,7 +177,7 @@ export async function processBatch(
   }
 }
 
-async function createPostDraftFromParsed(
+export async function createPostDraftFromParsed(
   post: ParsedPost,
   batchId: string,
   businessId: string,

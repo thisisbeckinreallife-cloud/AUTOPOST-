@@ -13,7 +13,7 @@ const TIPS: Record<string, { icon: React.ReactNode; title: string; content: stri
       icon: <FolderOpen className="h-4 w-4 text-brand-400" />,
       title: "Como preparar tu contenido",
       content:
-        "Mete tus fotos y videos en una carpeta. Puedes subirla directamente o comprimirla como ZIP. No importa como la organices.",
+        "Sube un video o foto directamente, o usa una carpeta/ZIP con varios posts. No importa como lo organices.",
     },
     {
       icon: <Image className="h-4 w-4 text-green-400" />,

@@ -52,6 +52,7 @@ export interface AnalysisResult {
     | "name_matched"   // post1.jpg + post1.txt pattern
     | "mixed"          // Some of everything
     | "only_text"      // Only text files
+    | "direct_upload"  // Direct file upload (no ZIP)
     | "unknown";
   /** Human-readable summary */
   summary: string;
@@ -672,6 +673,146 @@ export async function repackZip(posts: DetectedPost[]): Promise<Blob> {
     compression: "DEFLATE",
     compressionOptions: { level: 6 },
   });
+}
+
+// ─── Direct Media Analyzer ─────────────────────────────────────────────────
+
+/**
+ * Analyze directly uploaded media files (no ZIP).
+ * Groups files into posts: 1 video → reel, 1 image → image, multiple → carousel.
+ */
+export function analyzeDirectMedia(files: File[]): AnalysisResult {
+  const warnings: string[] = [];
+
+  const mediaFiles: Array<{ file: File; type: "image" | "video" }> = [];
+  for (const file of files) {
+    const name = file.name.toLowerCase();
+    if (isImage(name)) {
+      mediaFiles.push({ file, type: "image" });
+    } else if (isVideo(name)) {
+      mediaFiles.push({ file, type: "video" });
+    } else {
+      warnings.push(`Archivo ignorado: ${file.name} (formato no soportado)`);
+    }
+  }
+
+  if (mediaFiles.length === 0) {
+    return {
+      posts: [],
+      detectedPattern: "direct_upload",
+      summary: "No encontramos fotos o videos compatibles.",
+      warnings,
+    };
+  }
+
+  // Group videos as individual reels, images together as carousel or single
+  const posts: DetectedPost[] = [];
+  const videos = mediaFiles.filter((f) => f.type === "video");
+  const images = mediaFiles.filter((f) => f.type === "image");
+
+  // Each video becomes its own reel
+  for (const v of videos) {
+    const mimeType = ext(v.file.name) === "mov" ? "video/quicktime" : "video/mp4";
+    const previewUrl = URL.createObjectURL(v.file);
+    const media: AnalyzedMedia = {
+      filename: v.file.name,
+      path: v.file.name,
+      type: "video",
+      mimeType,
+      data: new ArrayBuffer(0), // Not needed for direct upload — file is uploaded separately
+      previewUrl,
+      size: v.file.size,
+    };
+
+    const partial = {
+      id: generateId(),
+      mediaFiles: [media],
+      caption: "",
+      captionSource: "none" as const,
+      matchConfidence: "high" as const,
+      sourceName: v.file.name,
+      extractedDate: null,
+      publishAt: null,
+      postType: "reel" as const,
+      collaborators: [] as string[],
+    };
+    const { status, statusMessage } = getStatusInfo(partial);
+    posts.push({ ...partial, status, statusMessage });
+  }
+
+  // Images: if 1 → image post, if 2-10 → carousel, if >10 → individual posts
+  if (images.length >= 2 && images.length <= 10) {
+    // One carousel
+    const mediaItems: AnalyzedMedia[] = images.map((img) => {
+      const e = ext(img.file.name);
+      const mimeType = e === "png" ? "image/png" : e === "webp" ? "image/webp" : "image/jpeg";
+      const previewUrl = URL.createObjectURL(img.file);
+      return {
+        filename: img.file.name,
+        path: img.file.name,
+        type: "image" as const,
+        mimeType,
+        data: new ArrayBuffer(0),
+        previewUrl,
+        size: img.file.size,
+      };
+    });
+
+    const partial = {
+      id: generateId(),
+      mediaFiles: mediaItems,
+      caption: "",
+      captionSource: "none" as const,
+      matchConfidence: "high" as const,
+      sourceName: `${images.length} fotos`,
+      extractedDate: null,
+      publishAt: null,
+      postType: "carousel" as const,
+      collaborators: [] as string[],
+    };
+    const { status, statusMessage } = getStatusInfo(partial);
+    posts.push({ ...partial, status, statusMessage });
+  } else {
+    // Individual image posts
+    for (const img of images) {
+      const e = ext(img.file.name);
+      const mimeType = e === "png" ? "image/png" : e === "webp" ? "image/webp" : "image/jpeg";
+      const previewUrl = URL.createObjectURL(img.file);
+      const media: AnalyzedMedia = {
+        filename: img.file.name,
+        path: img.file.name,
+        type: "image",
+        mimeType,
+        data: new ArrayBuffer(0),
+        previewUrl,
+        size: img.file.size,
+      };
+
+      const partial = {
+        id: generateId(),
+        mediaFiles: [media],
+        caption: "",
+        captionSource: "none" as const,
+        matchConfidence: "high" as const,
+        sourceName: img.file.name,
+        extractedDate: null,
+        publishAt: null,
+        postType: "image" as const,
+        collaborators: [] as string[],
+      };
+      const { status, statusMessage } = getStatusInfo(partial);
+      posts.push({ ...partial, status, statusMessage });
+    }
+  }
+
+  const summary = `${posts.length} post${posts.length !== 1 ? "s" : ""} detectado${posts.length !== 1 ? "s" : ""}. Agrega el texto y programa la publicacion.`;
+
+  return {
+    posts,
+    detectedPattern: "direct_upload",
+    summary,
+    warnings,
+  };
 }
 
 // ─── Cleanup ────────────────────────────────────────────────────────────────

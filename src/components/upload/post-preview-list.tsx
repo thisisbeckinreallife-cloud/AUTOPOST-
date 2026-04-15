@@ -51,6 +51,10 @@ const PATTERN_MESSAGES: Record<string, { title: string; desc: string }> = {
     title: "Solo hay textos",
     desc: "No encontramos fotos ni videos. Necesitas al menos una imagen por post.",
   },
+  direct_upload: {
+    title: "Subida directa",
+    desc: "Archivos subidos directamente. Agrega el texto y programa tu publicacion.",
+  },
   unknown: {
     title: "No pudimos entender la estructura",
     desc: "Revisa que tu archivo tenga fotos o videos.",
@@ -209,7 +213,9 @@ function PostCard({
         {statusIcon}
 
         <div className="w-9 h-9 rounded-lg overflow-hidden bg-zinc-800 shrink-0 flex items-center justify-center">
-          {post.mediaFiles[0]?.previewUrl ? (
+          {post.mediaFiles[0]?.previewUrl && post.mediaFiles[0]?.type === "video" ? (
+            <video src={post.mediaFiles[0].previewUrl} className="w-full h-full object-cover" muted playsInline />
+          ) : post.mediaFiles[0]?.previewUrl ? (
             <img src={post.mediaFiles[0].previewUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
           ) : post.mediaFiles[0]?.type === "video" ? (
             <Film className="h-4 w-4 text-zinc-500" />
@@ -249,7 +255,9 @@ function PostCard({
           <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
             {post.mediaFiles.map((media, i) => (
               <div key={i} className="w-16 h-16 rounded-lg overflow-hidden bg-zinc-800 shrink-0 flex items-center justify-center border border-white/[0.04]">
-                {media.previewUrl ? (
+                {media.previewUrl && media.type === "video" ? (
+                  <video src={media.previewUrl} className="w-full h-full object-cover" muted playsInline />
+                ) : media.previewUrl ? (
                   <img src={media.previewUrl} alt={media.filename} className="w-full h-full object-cover" loading="lazy" />
                 ) : media.type === "video" ? (
                   <div className="text-center">

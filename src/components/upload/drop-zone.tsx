@@ -9,11 +9,22 @@ import {
   FolderInput,
   AlertCircle,
   FileUp,
+  Film,
 } from "lucide-react";
 import JSZip from "jszip";
 
+const MEDIA_EXTENSIONS = new Set([
+  ".jpg", ".jpeg", ".png", ".webp", ".mp4", ".mov",
+]);
+
+function isMediaFile(file: File): boolean {
+  const name = file.name.toLowerCase();
+  return [...MEDIA_EXTENSIONS].some((ext) => name.endsWith(ext));
+}
+
 interface DropZoneProps {
   onFileSelected: (file: File) => void;
+  onDirectMediaSelected?: (files: File[]) => void;
   disabled?: boolean;
 }
 
@@ -122,9 +133,10 @@ async function compressToZip(files: File[], folderName: string): Promise<File> {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
-export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
+export function DropZone({ onFileSelected, onDirectMediaSelected, disabled }: DropZoneProps) {
   const zipFileRef = useRef<HTMLInputElement>(null);
   const folderRef = useRef<HTMLInputElement>(null);
+  const mediaFileRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [compressing, setCompressing] = useState(false);
@@ -242,6 +254,20 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
         return;
       }
 
+      // Check for direct media files (photos/videos)
+      if (e.dataTransfer.files.length > 0 && onDirectMediaSelected) {
+        const mediaFiles: File[] = [];
+        for (let i = 0; i < e.dataTransfer.files.length; i++) {
+          const f = e.dataTransfer.files[i];
+          if (isMediaFile(f)) mediaFiles.push(f);
+        }
+        if (mediaFiles.length > 0) {
+          setSelectedFile(mediaFiles[0]);
+          onDirectMediaSelected(mediaFiles);
+          return;
+        }
+      }
+
       if (e.dataTransfer.files.length > 0) {
         const f = e.dataTransfer.files[0];
         if (f.size === 0 && f.type === "") {
@@ -252,7 +278,7 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
         }
       }
 
-      setError("Solo puedes subir archivos ZIP o carpetas con fotos/videos.");
+      setError("Solo puedes subir archivos ZIP, carpetas, fotos o videos.");
     },
     [disabled, compressing, onFileSelected, processFolder]
   );
@@ -282,6 +308,23 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
       setSelectedFile(f);
       onFileSelected(f);
     }
+  }
+
+  function handleMediaFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
+    setError("");
+
+    const files: File[] = [];
+    for (let i = 0; i < fileList.length; i++) {
+      if (isMediaFile(fileList[i])) files.push(fileList[i]);
+    }
+    if (files.length === 0) {
+      setError("No se encontraron fotos o videos compatibles.");
+      return;
+    }
+    setSelectedFile(files[0]);
+    onDirectMediaSelected?.(files);
   }
 
   async function handleFolderChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -347,6 +390,15 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
         directory=""
         multiple
       />
+      <input
+        ref={mediaFileRef}
+        type="file"
+        accept=".mp4,.mov,.jpg,.jpeg,.png,.webp"
+        className="hidden"
+        onChange={handleMediaFileChange}
+        disabled={disabled}
+        multiple
+      />
     </>
   );
 
@@ -410,7 +462,7 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
               <>
                 <FolderOpen className="h-12 w-12 text-brand-400 mx-auto mb-4" />
                 <p className="text-lg font-semibold text-brand-400">
-                  Suelta aqui tu carpeta o ZIP
+                  Suelta aqui tu carpeta, ZIP, video o foto
                 </p>
               </>
             ) : (
@@ -419,7 +471,7 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
                   <Upload className="h-7 w-7 text-brand-400" />
                 </div>
                 <p className="text-base font-semibold text-zinc-200">
-                  Arrastra aqui tu carpeta o ZIP
+                  Arrastra aqui tu contenido
                 </p>
                 <p className="text-sm text-zinc-500 mt-1">
                   No importa como lo tengas organizado. Nosotros lo ordenamos por ti.
@@ -430,19 +482,34 @@ export function DropZone({ onFileSelected, disabled }: DropZoneProps) {
         </div>
 
         {/* Action buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <button
+            type="button"
+            onClick={() => mediaFileRef.current?.click()}
+            disabled={disabled || !onDirectMediaSelected}
+            className="flex items-center gap-3 border border-brand-500/20 hover:border-brand-500/40 bg-brand-500/[0.04] hover:bg-brand-500/[0.06] rounded-xl p-4 transition-all text-left group disabled:opacity-50 disabled:pointer-events-none"
+          >
+            <div className="w-10 h-10 rounded-lg bg-brand-500/10 group-hover:bg-brand-500/15 flex items-center justify-center shrink-0 transition-colors">
+              <Film className="h-5 w-5 text-brand-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-brand-300">Subir video o foto</p>
+              <p className="text-xs text-brand-400/60 mt-0.5">Reel, imagen o carousel</p>
+            </div>
+          </button>
+
           <button
             type="button"
             onClick={() => folderRef.current?.click()}
             disabled={disabled}
-            className="flex items-center gap-3 border border-brand-500/20 hover:border-brand-500/40 bg-brand-500/[0.04] hover:bg-brand-500/[0.06] rounded-xl p-4 transition-all text-left group disabled:opacity-50 disabled:pointer-events-none"
+            className="flex items-center gap-3 border border-white/[0.06] hover:border-white/[0.1] bg-surface-card hover:bg-surface-hover rounded-xl p-4 transition-all text-left group disabled:opacity-50 disabled:pointer-events-none"
           >
-            <div className="w-10 h-10 rounded-lg bg-brand-500/10 group-hover:bg-brand-500/15 flex items-center justify-center shrink-0 transition-colors">
-              <FolderInput className="h-5 w-5 text-brand-400" />
+            <div className="w-10 h-10 rounded-lg bg-zinc-800 group-hover:bg-zinc-700 flex items-center justify-center shrink-0 transition-colors">
+              <FolderInput className="h-5 w-5 text-zinc-400" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-brand-300">Seleccionar carpeta</p>
-              <p className="text-xs text-brand-400/60 mt-0.5">La comprimimos por ti</p>
+              <p className="text-sm font-semibold text-zinc-300">Seleccionar carpeta</p>
+              <p className="text-xs text-zinc-500 mt-0.5">La comprimimos por ti</p>
             </div>
           </button>
 

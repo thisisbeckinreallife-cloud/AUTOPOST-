@@ -20,10 +20,11 @@ export async function POST(request: NextRequest) {
     await requireSession();
 
     const body = await request.json();
-    const { businessSlug, fileName, fileSize } = body as {
+    const { businessSlug, fileName, fileSize, contentType } = body as {
       businessSlug: string;
       fileName: string;
       fileSize: number;
+      contentType?: string;
     };
 
     if (!businessSlug || !fileName) {
@@ -33,9 +34,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (fileSize > 100 * 1024 * 1024) {
+    // Per-type size limits
+    const IMAGE_EXTS = [".jpg", ".jpeg", ".png", ".webp"];
+    const VIDEO_EXTS = [".mp4", ".mov"];
+    const ext = fileName.toLowerCase().replace(/^.*(\.[^.]+)$/, "$1");
+    const isImage = IMAGE_EXTS.includes(ext);
+    const isVideo = VIDEO_EXTS.includes(ext);
+    const isZip = ext === ".zip";
+
+    if (!isImage && !isVideo && !isZip) {
       return NextResponse.json(
-        { error: "El archivo excede el limite de 100MB" },
+        { error: "Formato de archivo no soportado. Usa JPG, PNG, WEBP, MP4, MOV o ZIP." },
+        { status: 400 }
+      );
+    }
+
+    const maxSize = isImage ? 8 * 1024 * 1024 : 100 * 1024 * 1024;
+    if (fileSize > maxSize) {
+      return NextResponse.json(
+        { error: isImage ? "La imagen excede el limite de 8MB" : "El archivo excede el limite de 100MB" },
         { status: 413 }
       );
     }
