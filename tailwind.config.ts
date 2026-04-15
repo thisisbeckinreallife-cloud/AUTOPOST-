@@ -11,6 +11,7 @@ const config: Config = {
       fontFamily: {
         sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
         display: ['"Inter Tight"', "Inter", "system-ui", "sans-serif"],
+        headline: ['"General Sans"', '"Inter Tight"', "Inter", "system-ui", "sans-serif"],
       },
       colors: {
         brand: {

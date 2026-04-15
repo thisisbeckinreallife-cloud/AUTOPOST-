@@ -12,159 +12,152 @@ import {
   Sparkles,
   Users,
   Lock,
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FAQAccordion } from "@/components/landing/faq-accordion";
 import { StatsStrip } from "@/components/landing/stats-strip";
 import { ROICalculator } from "@/components/landing/roi-calculator";
+import { HeroVideo } from "@/components/landing/hero-video";
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-surface-primary text-zinc-100 overflow-hidden">
-      {/* ─── Navbar ─── */}
-      <nav className="fixed top-0 inset-x-0 z-50 glass-strong">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
-          <div className="flex items-center gap-2.5">
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/20 to-accent-orange/10 border border-brand-500/25">
-              <Zap className="h-4 w-4 text-brand-400" />
-              <div className="absolute inset-0 rounded-lg bg-brand-500/10 animate-glow-pulse" />
-            </div>
-            <span className="font-display font-bold text-lg tracking-tight">
-              Auto<span className="text-gradient">Post</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <a href="#como-funciona" className="hidden sm:inline text-sm text-zinc-500 hover:text-zinc-200 transition-colors">
-              Cómo funciona
-            </a>
-            <a href="#precios" className="hidden sm:inline text-sm text-zinc-500 hover:text-zinc-200 transition-colors">
-              Precios
-            </a>
-            <Link
-              href="/login"
-              className="hidden sm:inline text-sm font-medium px-4 py-2 rounded-lg text-zinc-400 hover:text-white transition-colors"
-            >
-              Iniciar sesión
-            </Link>
-            <Link
-              href="/signup"
-              className="text-sm font-semibold px-4 py-2 rounded-lg bg-gradient-brand-vivid text-white shadow-glow-sm hover:shadow-glow transition-all"
-            >
-              Empezar gratis
-            </Link>
-          </div>
-        </div>
-      </nav>
+      {/* ═══════════════════════════════════════════════════════════════════
+           CINEMATIC HERO — full-screen video + oversized headline
+           ═══════════════════════════════════════════════════════════════════ */}
+      <section className="relative min-h-screen flex flex-col overflow-hidden">
+        {/* Background video */}
+        <HeroVideo />
 
-      {/* ─── Hero ─── */}
-      <section className="relative pt-36 pb-28 px-6">
-        <div className="absolute inset-0 bg-gradient-hero pointer-events-none" />
-        <div className="aurora w-[700px] h-[400px] bg-brand-500/[0.10] top-10 left-1/2 -translate-x-1/2" />
-        <div className="aurora w-[500px] h-[300px] bg-accent-orange/[0.06] top-40 left-1/4 -translate-x-1/2" style={{ animationDelay: "4s" }} />
-        <div className="aurora w-[400px] h-[250px] bg-accent-orange/[0.05] top-20 right-1/4 translate-x-1/2" style={{ animationDelay: "8s" }} />
+        {/* Blurred overlay shape */}
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[984px] h-[527px] opacity-90 bg-gray-950 pointer-events-none"
+          style={{ filter: "blur(82px)" }}
+        />
 
-        <div className="relative max-w-3xl mx-auto text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-500/20 bg-brand-500/[0.06] text-xs font-medium text-brand-300 mb-8 animate-fade-up backdrop-blur-sm">
-            <Sparkles className="h-3.5 w-3.5" />
-            Despliegue masivo de Instagram
-          </div>
-
-          <h1 className="font-display font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tight leading-[1.05] mb-5 animate-fade-up stagger-1">
-            Programa un mes de{" "}
-            <span className="text-gradient-hero">Instagram</span>{" "}
-            en 2 minutos
-          </h1>
-
-          {/* Subheadline — single focused line */}
-          <p className="text-lg sm:text-xl text-zinc-400 max-w-xl mx-auto mb-4 leading-relaxed animate-fade-up stagger-2">
-            Sube una carpeta con todo tu contenido. AutoPost detecta carruseles,
-            extrae los copies y{" "}
-            <span className="text-zinc-200 font-medium">programa 30 días automáticamente.</span>
-          </p>
-
-          {/* Speed proof */}
-          <p className="text-sm text-zinc-500 mb-8 animate-fade-up stagger-2">
-            De{" "}
-            <span className="text-red-400/80 font-semibold">3 horas por cliente</span>{" "}
-            a{" "}
-            <span className="text-brand-400 font-semibold">2 minutos</span>{" "}
-            con AutoPost
-          </p>
-
-          {/* Trust badge */}
-          <div className="flex items-center justify-center gap-1.5 mb-8 animate-fade-up stagger-2">
-            <Lock className="h-3 w-3 text-green-400" />
-            <span className="text-xs text-zinc-500">
-              Conexión oficial via{" "}
-              <span className="text-zinc-400 font-medium">Instagram API de Meta</span>
-              {" "}— tus credenciales nunca se comparten
-            </span>
-          </div>
-
-          {/* Dashboard mockup */}
-          <div className="relative mx-auto mt-4 mb-10 max-w-lg rounded-2xl border border-white/[0.08] bg-surface-card/80 backdrop-blur-sm overflow-hidden shadow-elevated animate-fade-up stagger-2">
-            {/* Toolbar */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.04] bg-surface-secondary/60">
-              <div className="h-2 w-2 rounded-full bg-red-500/50" />
-              <div className="h-2 w-2 rounded-full bg-amber-500/50" />
-              <div className="h-2 w-2 rounded-full bg-green-500/50" />
-              <span className="ml-2 text-[10px] text-zinc-600 font-mono">autopost — cola de publicaciones</span>
-            </div>
-            {/* Fake post rows */}
-            {[
-              { day: "Lun 14:00", type: "Carrusel", dots: 5, color: "bg-brand-500/10 text-brand-400" },
-              { day: "Mié 10:00", type: "Foto",     dots: 1, color: "bg-green-500/10 text-green-400" },
-              { day: "Vie 18:00", type: "Reel",     dots: 1, color: "bg-blue-500/10 text-blue-400" },
-              { day: "Dom 09:00", type: "Carrusel", dots: 3, color: "bg-brand-500/10 text-brand-400" },
-            ].map((row, i) => (
-              <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.03] last:border-0 animate-mockup-blink" style={{ animationDelay: `${i * 0.8}s`, animationDuration: `${3 + i * 0.5}s` }}>
-                <div className="flex gap-1 shrink-0">
-                  {Array.from({ length: Math.min(row.dots, 3) }).map((_, j) => (
-                    <div key={j} className="h-7 w-7 rounded-md bg-zinc-800 border border-white/[0.06]" />
-                  ))}
-                  {row.dots > 3 && (
-                    <div className="h-7 w-7 rounded-md bg-zinc-800 border border-white/[0.06] flex items-center justify-center">
-                      <span className="text-[9px] text-zinc-500">+{row.dots - 3}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="h-1.5 w-28 rounded-full bg-zinc-700" />
-                  <div className="h-1.5 w-16 rounded-full bg-zinc-800 mt-1.5" />
-                </div>
-                <span className="text-[10px] text-zinc-600 shrink-0 font-mono">{row.day}</span>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${row.color}`}>
-                  {row.type}
-                </span>
+        {/* ─── Navbar ─── */}
+        <nav className="relative z-10 w-full py-5 px-8">
+          <div className="flex items-center justify-between">
+            {/* Left: logo */}
+            <div className="flex items-center gap-2.5">
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/20 to-accent-orange/10 border border-brand-500/25">
+                <Zap className="h-4 w-4 text-brand-400" />
               </div>
-            ))}
+              <span className="font-display font-bold text-lg tracking-tight">
+                Auto<span className="text-gradient">Post</span>
+              </span>
+            </div>
+
+            {/* Center: nav links */}
+            <div className="hidden md:flex items-center gap-1">
+              <a href="#como-funciona" className="flex items-center gap-1 px-3 py-2 text-sm text-zinc-100/90 hover:text-white transition-colors rounded-lg">
+                Funciones
+                <ChevronDown className="h-3.5 w-3.5 opacity-50" />
+              </a>
+              <a href="#como-funciona" className="px-3 py-2 text-sm text-zinc-100/90 hover:text-white transition-colors rounded-lg">
+                Soluciones
+              </a>
+              <a href="#precios" className="px-3 py-2 text-sm text-zinc-100/90 hover:text-white transition-colors rounded-lg">
+                Precios
+              </a>
+              <a href="#faq" className="flex items-center gap-1 px-3 py-2 text-sm text-zinc-100/90 hover:text-white transition-colors rounded-lg">
+                Recursos
+                <ChevronDown className="h-3.5 w-3.5 opacity-50" />
+              </a>
+            </div>
+
+            {/* Right: CTA */}
+            <div className="flex items-center gap-3">
+              <Link
+                href="/login"
+                className="hidden sm:inline text-sm font-medium px-4 py-2 text-zinc-400 hover:text-white transition-colors"
+              >
+                Iniciar sesión
+              </Link>
+              <Link
+                href="/signup"
+                className="text-sm font-semibold px-4 py-2 rounded-full bg-gradient-brand-vivid text-white shadow-glow-sm hover:shadow-glow transition-all"
+              >
+                Empezar gratis
+              </Link>
+            </div>
           </div>
 
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up stagger-3">
-            <Link
-              href="/signup"
-              className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-sm shadow-glow hover:shadow-glow-lg hover:scale-[1.03] transition-all duration-200"
-            >
-              Subir mi primera carpeta — Gratis
-              <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-            <a
-              href="#como-funciona"
-              className="animate-cta-pulse inline-flex items-center gap-2 text-zinc-400 hover:text-white font-medium px-6 py-4 text-sm rounded-xl border border-white/[0.06] hover:border-white/[0.15] transition-all duration-200"
-            >
-              Ver demo de 60 segundos
-              <ArrowRight className="h-3.5 w-3.5" />
-            </a>
-          </div>
+          {/* Navbar divider */}
+          <div className="mt-[3px] h-px bg-gradient-to-r from-transparent via-zinc-100/20 to-transparent" />
+        </nav>
 
-          <p className="text-xs text-zinc-600 mt-5 animate-fade-up stagger-4">
-            Sin tarjeta de crédito · Cancela cuando quieras
-          </p>
+        {/* ─── Hero content ─── */}
+        <div className="relative z-10 flex-1 flex items-center justify-center overflow-visible">
+          {/* Centered blur behind text */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[984px] h-[527px] opacity-90 bg-gray-950 pointer-events-none" style={{ filter: "blur(82px)" }} />
+
+          <div className="text-center px-6 max-w-6xl mx-auto">
+            {/* Oversized headline */}
+            <h1 className="font-headline font-normal tracking-[-0.024em] leading-[1.02] animate-fade-up">
+              <span className="block text-zinc-100 text-6xl sm:text-8xl md:text-9xl lg:text-[160px] xl:text-[200px]">
+                Programa
+              </span>
+              <span
+                className="block text-6xl sm:text-8xl md:text-9xl lg:text-[160px] xl:text-[200px]"
+                style={{
+                  backgroundImage: "linear-gradient(to left, #3B82F6, #FB923C, #FBBF24)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                Instagram
+              </span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-zinc-300/80 text-lg leading-8 max-w-md mx-auto mt-[9px] animate-fade-up stagger-1">
+              Sube una carpeta. AutoPost programa<br />
+              30 días de contenido en 2 minutos.
+            </p>
+
+            {/* CTA */}
+            <div className="mt-[25px] animate-fade-up stagger-2">
+              <Link
+                href="/signup"
+                className="inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-[29px] py-[24px] rounded-full text-sm shadow-glow hover:shadow-glow-lg hover:scale-[1.03] transition-all duration-200"
+              >
+                Subir mi primera carpeta — Gratis
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
         </div>
 
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-px bg-gradient-to-r from-transparent via-brand-500/20 to-transparent" />
+        {/* ─── Logo marquee ─── */}
+        <div className="relative z-10 pb-10">
+          <div className="max-w-5xl mx-auto px-8">
+            <div className="flex items-center gap-12">
+              {/* Left: static text */}
+              <div className="hidden md:block shrink-0 text-zinc-100/50 text-sm leading-5 max-w-[140px]">
+                Confiado por marcas<br />y agencias
+              </div>
+
+              {/* Right: scrolling marquee */}
+              <div className="flex-1 overflow-hidden">
+                <div className="animate-marquee flex gap-16 w-max">
+                  {[...marqueeLogos, ...marqueeLogos].map((logo, i) => (
+                    <div key={i} className="flex items-center gap-3 shrink-0">
+                      <div className="liquid-glass flex h-6 w-6 items-center justify-center rounded-lg text-xs font-bold text-zinc-100">
+                        {logo.letter}
+                      </div>
+                      <span className="text-base font-semibold text-zinc-100 whitespace-nowrap">
+                        {logo.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* ─── Stats strip ─── */}
@@ -562,6 +555,17 @@ function TestimonialCard({
     </div>
   );
 }
+
+/* ─── Logo marquee data ─── */
+
+const marqueeLogos = [
+  { letter: "P", name: "Pulso" },
+  { letter: "S", name: "SocialCraft" },
+  { letter: "N", name: "Nómada" },
+  { letter: "C", name: "Creativa" },
+  { letter: "A", name: "Astral" },
+  { letter: "V", name: "Viraly" },
+];
 
 /* ─── Pricing ─── */
 
