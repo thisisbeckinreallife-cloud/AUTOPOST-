@@ -12,97 +12,91 @@ import {
   Sparkles,
   Users,
   Lock,
-  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FAQAccordion } from "@/components/landing/faq-accordion";
 import { StatsStrip } from "@/components/landing/stats-strip";
 import { ROICalculator } from "@/components/landing/roi-calculator";
-import { HeroVideo } from "@/components/landing/hero-video";
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-surface-primary text-zinc-100 overflow-hidden">
       {/* ═══════════════════════════════════════════════════════════════════
-           CINEMATIC HERO — full-screen video + oversized headline
+           HERO — cinematic full-screen with animated gradient mesh
            ═══════════════════════════════════════════════════════════════════ */}
-      <section className="relative min-h-screen flex flex-col overflow-hidden">
-        {/* Background video */}
-        <HeroVideo />
-
-        {/* Blurred overlay shape */}
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[984px] h-[527px] opacity-90 bg-gray-950 pointer-events-none"
-          style={{ filter: "blur(82px)" }}
-        />
+      <section className="relative min-h-screen flex flex-col">
+        {/* Animated gradient mesh background */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 bg-surface-primary" />
+          {/* Large ambient orbs — slow-moving, on-brand */}
+          <div className="absolute w-[900px] h-[600px] top-[-10%] left-[-15%] rounded-full opacity-30 animate-drift" style={{ background: "radial-gradient(circle, rgba(245,158,11,0.18) 0%, transparent 70%)" }} />
+          <div className="absolute w-[700px] h-[700px] bottom-[-20%] right-[-10%] rounded-full opacity-20 animate-drift" style={{ background: "radial-gradient(circle, rgba(251,146,60,0.15) 0%, transparent 70%)", animationDelay: "4s", animationDirection: "reverse" }} />
+          <div className="absolute w-[500px] h-[500px] top-[30%] right-[20%] rounded-full opacity-15 animate-float" style={{ background: "radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)", animationDelay: "2s" }} />
+          {/* Subtle noise texture */}
+          <div className="absolute inset-0 noise opacity-40" />
+          {/* Vignette */}
+          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 60% at 50% 45%, transparent 0%, rgba(11,17,32,0.6) 100%)" }} />
+        </div>
 
         {/* ─── Navbar ─── */}
-        <nav className="relative z-10 w-full py-5 px-8">
-          <div className="flex items-center justify-between">
-            {/* Left: logo */}
+        <nav className="relative z-20 w-full px-6 sm:px-8 pt-5 pb-4">
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/20 to-accent-orange/10 border border-brand-500/25">
                 <Zap className="h-4 w-4 text-brand-400" />
+                <div className="absolute inset-0 rounded-lg bg-brand-500/10 animate-glow-pulse" />
               </div>
               <span className="font-display font-bold text-lg tracking-tight">
                 Auto<span className="text-gradient">Post</span>
               </span>
             </div>
-
-            {/* Center: nav links */}
-            <div className="hidden md:flex items-center gap-1">
-              <a href="#como-funciona" className="flex items-center gap-1 px-3 py-2 text-sm text-zinc-100/90 hover:text-white transition-colors rounded-lg">
-                Funciones
-                <ChevronDown className="h-3.5 w-3.5 opacity-50" />
+            <div className="hidden md:flex items-center gap-5">
+              <a href="#como-funciona" className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors">
+                Cómo funciona
               </a>
-              <a href="#como-funciona" className="px-3 py-2 text-sm text-zinc-100/90 hover:text-white transition-colors rounded-lg">
-                Soluciones
-              </a>
-              <a href="#precios" className="px-3 py-2 text-sm text-zinc-100/90 hover:text-white transition-colors rounded-lg">
+              <a href="#precios" className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors">
                 Precios
               </a>
-              <a href="#faq" className="flex items-center gap-1 px-3 py-2 text-sm text-zinc-100/90 hover:text-white transition-colors rounded-lg">
-                Recursos
-                <ChevronDown className="h-3.5 w-3.5 opacity-50" />
+              <a href="/demo" className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors">
+                Demo
               </a>
             </div>
-
-            {/* Right: CTA */}
             <div className="flex items-center gap-3">
               <Link
                 href="/login"
-                className="hidden sm:inline text-sm font-medium px-4 py-2 text-zinc-400 hover:text-white transition-colors"
+                className="hidden sm:inline text-sm font-medium text-zinc-400 hover:text-white transition-colors"
               >
                 Iniciar sesión
               </Link>
               <Link
                 href="/signup"
-                className="text-sm font-semibold px-4 py-2 rounded-full bg-gradient-brand-vivid text-white shadow-glow-sm hover:shadow-glow transition-all"
+                className="text-sm font-semibold px-5 py-2.5 rounded-xl bg-gradient-brand-vivid text-white shadow-glow-sm hover:shadow-glow transition-all"
               >
                 Empezar gratis
               </Link>
             </div>
           </div>
-
-          {/* Navbar divider */}
-          <div className="mt-[3px] h-px bg-gradient-to-r from-transparent via-zinc-100/20 to-transparent" />
+          <div className="max-w-6xl mx-auto mt-4 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
         </nav>
 
         {/* ─── Hero content ─── */}
-        <div className="relative z-10 flex-1 flex items-center justify-center overflow-visible">
-          {/* Centered blur behind text */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[984px] h-[527px] opacity-90 bg-gray-950 pointer-events-none" style={{ filter: "blur(82px)" }} />
+        <div className="relative z-10 flex-1 flex items-center justify-center px-6">
+          <div className="text-center max-w-5xl mx-auto">
+            {/* Category badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-500/20 bg-brand-500/[0.06] text-xs font-medium text-brand-300 mb-8 animate-fade-up backdrop-blur-sm">
+              <Sparkles className="h-3.5 w-3.5" />
+              Despliegue masivo de Instagram
+            </div>
 
-          <div className="text-center px-6 max-w-6xl mx-auto">
-            {/* Oversized headline */}
-            <h1 className="font-headline font-normal tracking-[-0.024em] leading-[1.02] animate-fade-up">
-              <span className="block text-zinc-100 text-6xl sm:text-8xl md:text-9xl lg:text-[160px] xl:text-[200px]">
-                Programa
+            {/* Large headline — responsive, never clips */}
+            <h1 className="font-headline font-semibold tracking-[-0.03em] leading-[0.95] mb-6 animate-fade-up stagger-1">
+              <span className="block text-zinc-100 text-[clamp(2.5rem,8vw,7rem)]">
+                Un mes de
               </span>
               <span
-                className="block text-6xl sm:text-8xl md:text-9xl lg:text-[160px] xl:text-[200px]"
+                className="block text-[clamp(3rem,10vw,9rem)]"
                 style={{
-                  backgroundImage: "linear-gradient(to left, #3B82F6, #FB923C, #FBBF24)",
+                  backgroundImage: "linear-gradient(135deg, #FBBF24 0%, #FB923C 50%, #F59E0B 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -110,54 +104,75 @@ export default function LandingPage() {
               >
                 Instagram
               </span>
+              <span className="block text-zinc-100 text-[clamp(2.5rem,8vw,7rem)]">
+                en 2 minutos
+              </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-zinc-300/80 text-lg leading-8 max-w-md mx-auto mt-[9px] animate-fade-up stagger-1">
-              Sube una carpeta. AutoPost programa<br />
-              30 días de contenido en 2 minutos.
+            <p className="text-zinc-400 text-base sm:text-lg leading-relaxed max-w-lg mx-auto mb-4 animate-fade-up stagger-2">
+              Sube una carpeta con todo tu contenido.{" "}
+              <span className="text-zinc-200">AutoPost detecta carruseles, extrae los copies y programa 30 días.</span>
             </p>
 
-            {/* CTA */}
-            <div className="mt-[25px] animate-fade-up stagger-2">
+            {/* Speed proof */}
+            <p className="text-sm text-zinc-500 mb-8 animate-fade-up stagger-2">
+              De{" "}
+              <span className="text-red-400/80 font-semibold">3 horas por cliente</span>
+              {" "}a{" "}
+              <span className="text-brand-400 font-semibold">2 minutos</span>
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up stagger-3">
               <Link
                 href="/signup"
-                className="inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-[29px] py-[24px] rounded-full text-sm shadow-glow hover:shadow-glow-lg hover:scale-[1.03] transition-all duration-200"
+                className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-sm shadow-glow hover:shadow-glow-lg hover:scale-[1.02] transition-all duration-200"
               >
                 Subir mi primera carpeta — Gratis
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
+              <a
+                href="#como-funciona"
+                className="inline-flex items-center gap-2 text-zinc-400 hover:text-white font-medium px-6 py-4 text-sm rounded-xl border border-white/[0.06] hover:border-white/[0.12] transition-all duration-200"
+              >
+                Ver cómo funciona
+                <ArrowRight className="h-3.5 w-3.5" />
+              </a>
+            </div>
+
+            <p className="text-xs text-zinc-600 mt-5 animate-fade-up stagger-4">
+              Sin tarjeta de crédito · Cancela cuando quieras
+            </p>
+          </div>
+        </div>
+
+        {/* ─── Trust bar (bottom of hero) ─── */}
+        <div className="relative z-10 pb-8 pt-4">
+          <div className="max-w-3xl mx-auto px-6">
+            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+              <div className="flex items-center gap-2 text-xs text-zinc-500">
+                <Shield className="h-3.5 w-3.5 text-brand-400/70" />
+                <span>API oficial de Meta</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-zinc-500">
+                <Lock className="h-3.5 w-3.5 text-brand-400/70" />
+                <span>Cifrado AES-256</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-zinc-500">
+                <Instagram className="h-3.5 w-3.5 text-brand-400/70" />
+                <span>Fotos, reels y carruseles</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-zinc-500">
+                <Users className="h-3.5 w-3.5 text-brand-400/70" />
+                <span>Posts colaborativos</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* ─── Logo marquee ─── */}
-        <div className="relative z-10 pb-10">
-          <div className="max-w-5xl mx-auto px-8">
-            <div className="flex items-center gap-12">
-              {/* Left: static text */}
-              <div className="hidden md:block shrink-0 text-zinc-100/50 text-sm leading-5 max-w-[140px]">
-                Confiado por marcas<br />y agencias
-              </div>
-
-              {/* Right: scrolling marquee */}
-              <div className="flex-1 overflow-hidden">
-                <div className="animate-marquee flex gap-16 w-max">
-                  {[...marqueeLogos, ...marqueeLogos].map((logo, i) => (
-                    <div key={i} className="flex items-center gap-3 shrink-0">
-                      <div className="liquid-glass flex h-6 w-6 items-center justify-center rounded-lg text-xs font-bold text-zinc-100">
-                        {logo.letter}
-                      </div>
-                      <span className="text-base font-semibold text-zinc-100 whitespace-nowrap">
-                        {logo.name}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Bottom gradient divider */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-500/15 to-transparent" />
       </section>
 
       {/* ─── Stats strip ─── */}
@@ -555,17 +570,6 @@ function TestimonialCard({
     </div>
   );
 }
-
-/* ─── Logo marquee data ─── */
-
-const marqueeLogos = [
-  { letter: "P", name: "Pulso" },
-  { letter: "S", name: "SocialCraft" },
-  { letter: "N", name: "Nómada" },
-  { letter: "C", name: "Creativa" },
-  { letter: "A", name: "Astral" },
-  { letter: "V", name: "Viraly" },
-];
 
 /* ─── Pricing ─── */
 
