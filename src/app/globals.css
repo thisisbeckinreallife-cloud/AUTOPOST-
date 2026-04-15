@@ -292,3 +292,23 @@ input:focus, textarea:focus, select:focus {
   background-size: 200% 200%;
   animation: gradient-shift 12s ease infinite;
 }
+
+/* ─── Rose gradient text ─── */
+.text-gradient-rose {
+  background: linear-gradient(135deg, #EC4899, #8B5CF6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── FAQ accordion transitions ─── */
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+  opacity: 0;
+}
+.faq-answer.open {
+  max-height: 300px;
+  opacity: 1;
+}

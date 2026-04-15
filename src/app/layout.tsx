@@ -3,8 +3,22 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "AutoPost — Instagram Scheduler",
-  description: "Schedule a month of Instagram in 2 minutes. Batch upload, auto-schedule, publish.",
+  title: "AutoPost — Programa un mes de Instagram en 2 minutos",
+  description:
+    "Sube la carpeta. AutoPost detecta carruseles, pone el copy solo y programa 30 días de una vez.",
+  openGraph: {
+    title: "AutoPost — Programa un mes de Instagram en 2 minutos",
+    description:
+      "Sube la carpeta. AutoPost detecta carruseles, pone el copy solo y programa 30 días de una vez.",
+    type: "website",
+    url: "https://autopost-production-cd57.up.railway.app",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AutoPost — Programa un mes de Instagram en 2 minutos",
+    description:
+      "Sube la carpeta. AutoPost detecta carruseles, pone el copy solo y programa 30 días de una vez.",
+  },
 };
 
 export default function RootLayout({

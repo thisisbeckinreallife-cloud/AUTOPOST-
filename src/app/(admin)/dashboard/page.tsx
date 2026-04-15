@@ -72,21 +72,21 @@ export default async function DashboardPage() {
           <div className="space-y-2">
             <OnboardStep
               n={1} done={hasBusinesses}
-              title="Anade tu cuenta de Instagram"
-              desc="Registra la cuenta que quieres gestionar"
-              href="/businesses/new" cta="Anadir"
+              title="Añade tu cuenta de Instagram"
+              desc="Dinos qué cuenta de Instagram vas a automatizar"
+              href="/businesses/new" cta="Añadir"
             />
             <OnboardStep
               n={2} done={hasConnected}
-              title="Conecta tu Instagram"
-              desc="Autoriza a AutoPost para publicar en tu nombre"
+              title="Conecta Instagram con un clic"
+              desc="Autorización oficial de Meta — tus credenciales nunca se comparten"
               href={businesses[0] ? `/businesses/${businesses[0].slug}/connect` : "/businesses/new"}
               cta="Conectar" disabled={!hasBusinesses}
             />
             <OnboardStep
               n={3} done={hasContent}
-              title="Sube el contenido del mes"
-              desc="Sube una carpeta o ZIP con tus posts"
+              title="Sube tu primera carpeta"
+              desc="Arrastra un ZIP o carpeta. AutoPost lo organiza todo solo."
               href={businesses[0] ? `/businesses/${businesses[0].slug}/upload` : "/businesses/new"}
               cta="Subir" disabled={!hasConnected}
             />
@@ -187,9 +187,9 @@ export default async function DashboardPage() {
           <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500/12 to-accent-violet/8 border border-brand-500/10 flex items-center justify-center mx-auto mb-4">
             <Upload className="h-7 w-7 text-brand-400" />
           </div>
-          <h3 className="font-display text-lg font-bold text-white mb-1.5">Tu calendario esta vacio</h3>
+          <h3 className="font-display text-lg font-bold text-white mb-1.5">Todo listo. Solo falta contenido.</h3>
           <p className="text-zinc-500 text-sm mb-6 max-w-xs mx-auto">
-            Sube el contenido del mes y AutoPost se encarga de publicar por ti
+            Sube tu primera carpeta de posts — 2 minutos y tienes el mes programado.
           </p>
           {businesses[0] && (
             <Link
@@ -197,7 +197,7 @@ export default async function DashboardPage() {
               className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-glow-sm hover:shadow-glow transition-all"
             >
               <Plus className="h-4 w-4" />
-              Subir contenido
+              Subir mi primera carpeta
             </Link>
           )}
         </div>

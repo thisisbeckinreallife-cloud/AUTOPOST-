@@ -210,7 +210,7 @@ function PostCard({
 
         <div className="w-9 h-9 rounded-lg overflow-hidden bg-zinc-800 shrink-0 flex items-center justify-center">
           {post.mediaFiles[0]?.previewUrl ? (
-            <img src={post.mediaFiles[0].previewUrl} alt="" className="w-full h-full object-cover" />
+            <img src={post.mediaFiles[0].previewUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
           ) : post.mediaFiles[0]?.type === "video" ? (
             <Film className="h-4 w-4 text-zinc-500" />
           ) : (
@@ -250,7 +250,7 @@ function PostCard({
             {post.mediaFiles.map((media, i) => (
               <div key={i} className="w-16 h-16 rounded-lg overflow-hidden bg-zinc-800 shrink-0 flex items-center justify-center border border-white/[0.04]">
                 {media.previewUrl ? (
-                  <img src={media.previewUrl} alt={media.filename} className="w-full h-full object-cover" />
+                  <img src={media.previewUrl} alt={media.filename} className="w-full h-full object-cover" loading="lazy" />
                 ) : media.type === "video" ? (
                   <div className="text-center">
                     <Film className="h-5 w-5 text-zinc-500 mx-auto" />

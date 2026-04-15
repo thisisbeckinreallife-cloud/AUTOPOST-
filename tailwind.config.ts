@@ -32,7 +32,7 @@ const config: Config = {
           cyan: "#22D3EE",
           emerald: "#34D399",
           amber: "#FBBF24",
-          rose: "#FB7185",
+          rose: "#EC4899",
         },
         surface: {
           primary: "#060609",
@@ -60,6 +60,7 @@ const config: Config = {
         "glow-lg": "0 0 60px rgba(79,111,240,0.3), 0 0 20px rgba(79,111,240,0.2)",
         "glow-violet": "0 0 30px rgba(139,92,246,0.2), 0 0 10px rgba(139,92,246,0.15)",
         "glow-cyan": "0 0 30px rgba(34,211,238,0.15), 0 0 10px rgba(34,211,238,0.1)",
+        "glow-rose": "0 0 20px rgba(236,72,153,0.3), 0 0 10px rgba(236,72,153,0.15)",
         "inner-light": "inset 0 1px 0 rgba(255,255,255,0.05)",
         "inner-glow": "inset 0 0 20px rgba(79,111,240,0.05)",
       },

@@ -10,7 +10,11 @@ import {
   Shield,
   Instagram,
   Sparkles,
+  Users,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { FAQAccordion } from "@/components/landing/faq-accordion";
+import { StatsStrip } from "@/components/landing/stats-strip";
 
 export default function LandingPage() {
   return (
@@ -34,11 +38,17 @@ export default function LandingPage() {
             >
               Como funciona
             </a>
+            <a
+              href="#precios"
+              className="hidden sm:inline text-sm text-zinc-500 hover:text-zinc-200 transition-colors"
+            >
+              Precios
+            </a>
             <Link
               href="/login"
               className="text-sm font-semibold px-4 py-2 rounded-lg border border-white/[0.08] text-zinc-300 hover:text-white hover:border-white/[0.15] hover:bg-white/[0.04] transition-all"
             >
-              Iniciar sesion
+              Iniciar sesión
             </Link>
           </div>
         </div>
@@ -50,57 +60,100 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-hero pointer-events-none" />
         <div className="aurora w-[700px] h-[400px] bg-brand-500/[0.08] top-10 left-1/2 -translate-x-1/2" />
         <div className="aurora w-[500px] h-[300px] bg-accent-violet/[0.06] top-40 left-1/4 -translate-x-1/2" style={{ animationDelay: "4s" }} />
-        <div className="aurora w-[400px] h-[250px] bg-accent-cyan/[0.04] top-20 right-1/4 translate-x-1/2" style={{ animationDelay: "8s" }} />
+        <div className="aurora w-[400px] h-[250px] bg-accent-rose/[0.04] top-20 right-1/4 translate-x-1/2" style={{ animationDelay: "8s" }} />
 
         <div className="relative max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-500/20 bg-brand-500/[0.06] text-xs font-medium text-brand-300 mb-8 animate-fade-up backdrop-blur-sm">
             <Sparkles className="h-3.5 w-3.5" />
-            Automatizacion inteligente para Instagram
+            Automatización inteligente para Instagram
           </div>
 
-          <h1 className="font-display font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tight leading-[1.05] mb-7 animate-fade-up stagger-1">
+          <h1 className="font-display font-extrabold text-5xl sm:text-6xl md:text-7xl tracking-tight leading-[1.05] mb-5 animate-fade-up stagger-1">
             Programa un mes de{" "}
             <span className="text-gradient-hero">Instagram</span>{" "}
             en 2 minutos
           </h1>
 
-          <p className="text-lg sm:text-xl text-zinc-400 max-w-xl mx-auto mb-12 leading-relaxed animate-fade-up stagger-2">
-            Sube una carpeta con tus posts. AutoPost detecta carruseles, extrae
-            el copy y programa todo a 30 dias vista.
+          {/* Social proof counter */}
+          <p className="text-sm text-zinc-500 mb-4 animate-fade-up stagger-2">
+            Más de{" "}
+            <span className="text-zinc-300 font-semibold">500 agencias y creadores</span>{" "}
+            ya programan con AutoPost
           </p>
+
+          <p className="text-lg sm:text-xl text-zinc-400 max-w-xl mx-auto mb-8 leading-relaxed animate-fade-up stagger-2">
+            Sube la carpeta. AutoPost detecta carruseles, pone el copy solo y programa
+            30 días de una vez.{" "}
+            <span className="text-zinc-300">Tú a otra cosa.</span>
+          </p>
+
+          {/* Dashboard mockup */}
+          <div className="relative mx-auto mt-8 mb-10 max-w-lg rounded-2xl border border-white/[0.08] bg-surface-card/80 backdrop-blur-sm overflow-hidden shadow-elevated animate-fade-up stagger-2">
+            {/* Fake toolbar */}
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.04] bg-surface-secondary/60">
+              <div className="h-2 w-2 rounded-full bg-red-500/50" />
+              <div className="h-2 w-2 rounded-full bg-amber-500/50" />
+              <div className="h-2 w-2 rounded-full bg-green-500/50" />
+              <span className="ml-2 text-[10px] text-zinc-600 font-mono">autopost — cola de publicaciones</span>
+            </div>
+            {/* Fake post rows */}
+            {[
+              { day: "Lun 14:00", type: "Carrusel", dots: 5, color: "bg-brand-500/10 text-brand-400" },
+              { day: "Mié 10:00", type: "Foto",     dots: 1, color: "bg-green-500/10 text-green-400" },
+              { day: "Vie 18:00", type: "Reel",     dots: 1, color: "bg-violet-500/10 text-violet-400" },
+              { day: "Dom 09:00", type: "Carrusel", dots: 3, color: "bg-brand-500/10 text-brand-400" },
+            ].map((row, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.03] last:border-0">
+                <div className="flex gap-1 shrink-0">
+                  {Array.from({ length: Math.min(row.dots, 3) }).map((_, j) => (
+                    <div key={j} className="h-7 w-7 rounded-md bg-zinc-800 border border-white/[0.06]" />
+                  ))}
+                  {row.dots > 3 && (
+                    <div className="h-7 w-7 rounded-md bg-zinc-800 border border-white/[0.06] flex items-center justify-center">
+                      <span className="text-[9px] text-zinc-500">+{row.dots - 3}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="h-1.5 w-28 rounded-full bg-zinc-700" />
+                  <div className="h-1.5 w-16 rounded-full bg-zinc-800 mt-1.5" />
+                </div>
+                <span className="text-[10px] text-zinc-600 shrink-0 font-mono">{row.day}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${row.color}`}>
+                  {row.type}
+                </span>
+              </div>
+            ))}
+          </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up stagger-3">
             <Link
               href="/login"
               className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-sm shadow-glow hover:shadow-glow-lg transition-all duration-300 hover:-translate-y-0.5"
             >
-              Empezar ahora
+              Programa tu primer mes — Es gratis
               <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <a
               href="#como-funciona"
               className="inline-flex items-center gap-2 text-zinc-400 hover:text-white font-medium px-6 py-4 text-sm transition-colors"
             >
-              Ver como funciona
+              Ver demo de 60 segundos
               <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
+
+          {/* Risk reversal */}
+          <p className="text-xs text-zinc-600 mt-5 animate-fade-up stagger-4">
+            Sin tarjeta de crédito · Cancela cuando quieras
+          </p>
         </div>
 
-        {/* Floating orbs */}
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-px bg-gradient-to-r from-transparent via-brand-500/20 to-transparent" />
       </section>
 
-      {/* ─── Social proof strip ─── */}
-      <section className="relative border-y border-white/[0.04] py-10 px-6 bg-gradient-cta">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-10 sm:gap-20 text-center">
-          <Stat value="2 min" label="para programar un mes" accent="brand" />
-          <div className="hidden sm:block w-px h-10 bg-gradient-to-b from-transparent via-white/[0.08] to-transparent" />
-          <Stat value="30 dias" label="de contenido automatizado" accent="violet" />
-          <div className="hidden sm:block w-px h-10 bg-gradient-to-b from-transparent via-white/[0.08] to-transparent" />
-          <Stat value="0" label="publicacion manual" accent="cyan" />
-        </div>
-      </section>
+      {/* ─── Stats strip (animated, client component) ─── */}
+      <StatsStrip />
 
       {/* ─── How it works ─── */}
       <section id="como-funciona" className="py-28 px-6 relative">
@@ -121,13 +174,13 @@ export default function LandingPage() {
               number="01"
               icon={<Upload className="h-5 w-5" />}
               title="Sube tu contenido"
-              description="Arrastra una carpeta o ZIP con tus fotos, videos y textos. No importa como lo organices."
+              description="Arrastra una carpeta o ZIP con tus fotos, videos y textos. No importa cómo lo organices."
               accent="brand"
             />
             <StepCard
               number="02"
               icon={<Layers className="h-5 w-5" />}
-              title="Revision automatica"
+              title="Revisión automática"
               description="AutoPost detecta carruseles, empareja fotos con textos y te muestra todo para que lo revises."
               accent="violet"
             />
@@ -135,7 +188,7 @@ export default function LandingPage() {
               number="03"
               icon={<Calendar className="h-5 w-5" />}
               title="Programa y olvida"
-              description="Elige horario y frecuencia. AutoPost publica automaticamente durante los proximos 30 dias."
+              description="Elige horario y frecuencia. AutoPost publica automáticamente durante los próximos 30 días."
               accent="cyan"
             />
           </div>
@@ -149,7 +202,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto relative">
           <div className="text-center mb-16">
             <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
-              Caracteristicas
+              Características
             </p>
             <h2 className="font-display font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight">
               Todo lo que necesitas. <span className="text-gradient">Nada que no.</span>
@@ -158,42 +211,70 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <FeatureCard
-              icon={<Layers className="h-5 w-5 text-blue-400" />}
-              title="Deteccion de carruseles"
-              description="Detecta automaticamente cuando varias fotos forman un carrusel."
-              glow="blue"
+              icon={<Layers className="h-5 w-5 text-brand-400" />}
+              title="Detección de carruseles"
+              description="Detecta automáticamente cuando varias fotos forman un carrusel. Sin numerarlas manualmente."
+              glow="brand"
             />
             <FeatureCard
-              icon={<CheckCircle className="h-5 w-5 text-emerald-400" />}
-              title="Extraccion de copy"
-              description="Lee archivos de texto y los asocia a cada post automaticamente."
-              glow="emerald"
-            />
-            <FeatureCard
-              icon={<Clock className="h-5 w-5 text-amber-400" />}
-              title="Programacion inteligente"
-              description="Configura frecuencia, dias y horario. El calendario se ajusta solo."
-              glow="amber"
-            />
-            <FeatureCard
-              icon={<Shield className="h-5 w-5 text-violet-400" />}
-              title="Conexion segura"
-              description="OAuth oficial de Meta. Tu contrasena nunca se comparte."
+              icon={<CheckCircle className="h-5 w-5 text-accent-violet" />}
+              title="Extracción de copy"
+              description="Lee archivos de texto y los asocia a cada post automáticamente. Cero copia y pega."
               glow="violet"
             />
             <FeatureCard
-              icon={<Instagram className="h-5 w-5 text-pink-400" />}
-              title="Fotos, videos y reels"
-              description="Soporta JPG, PNG, WEBP, MP4 y MOV. Hasta 100MB por subida."
-              glow="pink"
+              icon={<Clock className="h-5 w-5 text-brand-300" />}
+              title="Programación inteligente"
+              description="Configura frecuencia, días y horario. El calendario se ajusta solo a 30 días vista."
+              glow="brand"
             />
             <FeatureCard
-              icon={<Calendar className="h-5 w-5 text-cyan-400" />}
-              title="Vista previa"
-              description="Ve exactamente que se publicara y cuando antes de confirmar."
-              glow="cyan"
+              icon={<Shield className="h-5 w-5 text-accent-violet" />}
+              title="Conexión segura"
+              description="OAuth oficial de Meta. Tu contraseña nunca se comparte ni se almacena."
+              glow="violet"
+            />
+            <FeatureCard
+              icon={<Instagram className="h-5 w-5 text-brand-400" />}
+              title="Fotos, videos y reels"
+              description="Soporta JPG, PNG, WEBP, MP4 y MOV. Hasta 100 MB por archivo."
+              glow="brand"
+            />
+            <FeatureCard
+              icon={<Calendar className="h-5 w-5 text-accent-violet" />}
+              title="Vista previa completa"
+              description="Ve exactamente qué se publicará y cuándo antes de confirmar. Sin sorpresas."
+              glow="violet"
+            />
+            <FeatureCard
+              icon={<Users className="h-5 w-5 text-brand-300" />}
+              title="Posts colaborativos"
+              description="Invita a otros creadores como colaboradores. Un post, dos feeds, el doble de audiencia."
+              glow="brand"
+              highlight
             />
           </div>
+        </div>
+      </section>
+
+      {/* ─── Testimonials ─── */}
+      <TestimonialsSection />
+
+      {/* ─── Pricing ─── */}
+      <PricingSection />
+
+      {/* ─── FAQ ─── */}
+      <section className="py-28 px-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
+              Preguntas frecuentes
+            </p>
+            <h2 className="font-display font-bold text-3xl sm:text-4xl tracking-tight">
+              Todo claro antes de <span className="text-gradient">empezar</span>
+            </h2>
+          </div>
+          <FAQAccordion />
         </div>
       </section>
 
@@ -218,6 +299,16 @@ export default function LandingPage() {
                 Empezar gratis
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
+              <p className="text-sm text-zinc-600 mt-4">
+                Sube tu primera carpeta gratis. Sin tarjeta.
+              </p>
+
+              <div className="mt-8 pt-6 border-t border-white/[0.04]">
+                <p className="text-xs text-zinc-600 italic">
+                  "Lo que Later tarda 2 horas, AutoPost lo hace en{" "}
+                  <span className="text-zinc-400 not-italic font-semibold">2 minutos</span>"
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -225,7 +316,7 @@ export default function LandingPage() {
 
       {/* ─── Footer ─── */}
       <footer className="border-t border-white/[0.04] py-10 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
           <div className="flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-brand-500/15">
               <Zap className="h-3 w-3 text-brand-400" />
@@ -233,8 +324,16 @@ export default function LandingPage() {
             <span className="font-display font-bold text-sm">AutoPost</span>
           </div>
           <p className="text-xs text-zinc-600">
-            Automatiza tu Instagram. Sin esfuerzo.
+            Hecho para agencias e influencers hispanohablantes
           </p>
+          <div className="flex items-center gap-5 text-xs text-zinc-600">
+            <a href="/privacidad" className="hover:text-zinc-400 transition-colors">
+              Política de privacidad
+            </a>
+            <a href="/terminos" className="hover:text-zinc-400 transition-colors">
+              Términos de uso
+            </a>
+          </div>
         </div>
       </footer>
     </div>
@@ -242,22 +341,6 @@ export default function LandingPage() {
 }
 
 /* ─── Subcomponents ─── */
-
-function Stat({ value, label, accent }: { value: string; label: string; accent: string }) {
-  const colors: Record<string, string> = {
-    brand: "from-brand-400 to-brand-500",
-    violet: "from-violet-400 to-purple-500",
-    cyan: "from-cyan-400 to-blue-500",
-  };
-  return (
-    <div>
-      <p className={`font-display font-extrabold text-3xl bg-gradient-to-r ${colors[accent] ?? colors.brand} bg-clip-text text-transparent`}>
-        {value}
-      </p>
-      <p className="text-xs text-zinc-500 mt-1">{label}</p>
-    </div>
-  );
-}
 
 function StepCard({
   number,
@@ -273,9 +356,9 @@ function StepCard({
   accent: string;
 }) {
   const accents: Record<string, { bg: string; border: string; text: string; glow: string }> = {
-    brand: { bg: "bg-brand-500/10", border: "border-brand-500/20", text: "text-brand-400", glow: "group-hover:shadow-glow-sm" },
+    brand:  { bg: "bg-brand-500/10",  border: "border-brand-500/20",  text: "text-brand-400",  glow: "group-hover:shadow-glow-sm" },
     violet: { bg: "bg-violet-500/10", border: "border-violet-500/20", text: "text-violet-400", glow: "group-hover:shadow-glow-violet" },
-    cyan: { bg: "bg-cyan-500/10", border: "border-cyan-500/20", text: "text-cyan-400", glow: "group-hover:shadow-glow-cyan" },
+    cyan:   { bg: "bg-cyan-500/10",   border: "border-cyan-500/20",   text: "text-cyan-400",   glow: "group-hover:shadow-glow-cyan" },
   };
   const a = accents[accent] ?? accents.brand;
 
@@ -301,28 +384,243 @@ function FeatureCard({
   title,
   description,
   glow,
+  highlight,
 }: {
   icon: React.ReactNode;
   title: string;
   description: string;
   glow: string;
+  highlight?: boolean;
 }) {
   const glowColors: Record<string, string> = {
-    blue: "group-hover:border-blue-500/15",
-    emerald: "group-hover:border-emerald-500/15",
-    amber: "group-hover:border-amber-500/15",
-    violet: "group-hover:border-violet-500/15",
-    pink: "group-hover:border-pink-500/15",
-    cyan: "group-hover:border-cyan-500/15",
+    brand:  "group-hover:border-brand-500/20",
+    violet: "group-hover:border-accent-violet/20",
   };
 
   return (
-    <div className={`group flex gap-4 rounded-xl border border-white/[0.05] bg-surface-card/60 p-5 card-interactive ${glowColors[glow] ?? ""}`}>
+    <div
+      className={cn(
+        "group flex gap-4 rounded-xl border p-5 card-interactive",
+        glowColors[glow] ?? "",
+        highlight
+          ? "border-brand-500/20 bg-brand-500/[0.04]"
+          : "border-white/[0.05] bg-surface-card/60"
+      )}
+    >
       <div className="mt-0.5 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">{icon}</div>
-      <div>
-        <h3 className="font-semibold text-sm text-white mb-1.5">{title}</h3>
+      <div className="flex-1">
+        <div className="flex items-center gap-2 mb-1.5">
+          <h3 className="font-semibold text-sm text-white">{title}</h3>
+          {highlight && (
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-brand-500/15 text-brand-300 border border-brand-500/20">
+              Único
+            </span>
+          )}
+        </div>
         <p className="text-sm text-zinc-500 leading-relaxed">{description}</p>
       </div>
+    </div>
+  );
+}
+
+/* ─── Testimonials ─── */
+
+const testimonials = [
+  {
+    quote: "Antes tardábamos 3 horas cada lunes preparando el contenido de los clientes. Ahora subimos el ZIP y listo en 5 minutos. AutoPost lo organiza todo.",
+    name: "Marina López",
+    role: "Directora de Social Media, Agencia Pulso",
+    initials: "ML",
+  },
+  {
+    quote: "La detección de carruseles es increíble. Ya no tengo que numerar las fotos ni preocuparme por el orden. Subo la carpeta y AutoPost lo hace perfecto.",
+    name: "Diego Sánchez",
+    role: "Content Creator, @diegoviaja",
+    initials: "DS",
+  },
+  {
+    quote: "Gestionamos 12 cuentas para clientes. Sin AutoPost no podríamos. El plan Agencia se pagó solo el primer mes con el tiempo que nos ahorró.",
+    name: "Carla Fuentes",
+    role: "CEO, SocialCraft Agency",
+    initials: "CF",
+  },
+];
+
+function TestimonialsSection() {
+  return (
+    <section className="py-28 px-6 relative">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-16">
+          <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
+            Testimonios
+          </p>
+          <h2 className="font-display font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight">
+            Lo que dicen <span className="text-gradient">quienes ya lo usan</span>
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {testimonials.map((t) => (
+            <TestimonialCard key={t.name} {...t} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TestimonialCard({
+  quote,
+  name,
+  role,
+  initials,
+}: {
+  quote: string;
+  name: string;
+  role: string;
+  initials: string;
+}) {
+  return (
+    <div className="relative rounded-2xl border border-white/[0.06] bg-surface-elevated p-7 flex flex-col gap-5">
+      <span
+        className="absolute top-4 right-5 text-6xl font-display text-brand-500/10 leading-none select-none"
+        aria-hidden="true"
+      >
+        "
+      </span>
+      <p className="text-sm text-zinc-300 leading-relaxed relative z-10">"{quote}"</p>
+      <div className="flex items-center gap-3 mt-auto">
+        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-brand-500/20 to-accent-violet/15 border border-brand-500/20 flex items-center justify-center shrink-0">
+          <span className="text-xs font-bold text-brand-300">{initials}</span>
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-white">{name}</p>
+          <p className="text-xs text-zinc-500">{role}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Pricing ─── */
+
+const pricingTiers = [
+  {
+    name: "Free",
+    priceLabel: "Gratis",
+    description: "Para empezar sin compromiso",
+    features: [
+      "1 cuenta de Instagram",
+      "30 posts por mes",
+      "Detección de carruseles",
+      "Extracción de copy automática",
+    ],
+    cta: "Empezar gratis",
+    popular: false,
+  },
+  {
+    name: "Pro",
+    priceLabel: "$19/mes",
+    description: "Para creadores y freelancers",
+    features: [
+      "5 cuentas de Instagram",
+      "Posts ilimitados",
+      "Todo lo del plan Free",
+      "Posts colaborativos",
+      "Soporte prioritario por email",
+    ],
+    cta: "Empezar con Pro",
+    popular: true,
+  },
+  {
+    name: "Agency",
+    priceLabel: "$49/mes",
+    description: "Para agencias y equipos",
+    features: [
+      "Cuentas ilimitadas",
+      "Multi-workspace",
+      "Todo lo del plan Pro",
+      "Panel multi-cliente",
+      "Soporte directo prioritario",
+    ],
+    cta: "Hablar con ventas",
+    popular: false,
+  },
+];
+
+function PricingSection() {
+  return (
+    <section id="precios" className="py-28 px-6 relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent-violet/[0.02] to-transparent pointer-events-none" />
+      <div className="max-w-5xl mx-auto relative">
+        <div className="text-center mb-16">
+          <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
+            Precios
+          </p>
+          <h2 className="font-display font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight">
+            Simple y <span className="text-gradient">sin sorpresas</span>
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+          {pricingTiers.map((tier) => (
+            <PricingCard key={tier.name} tier={tier} />
+          ))}
+        </div>
+
+        <p className="text-center text-xs text-zinc-600 mt-8">
+          Sin tarjeta de crédito en el plan Free · Cancela en cualquier momento
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function PricingCard({ tier }: { tier: typeof pricingTiers[0] }) {
+  return (
+    <div
+      className={cn(
+        "relative rounded-2xl border p-7 flex flex-col gap-6",
+        tier.popular
+          ? "border-brand-500/30 bg-brand-500/[0.05] shadow-glow-sm"
+          : "border-white/[0.06] bg-surface-card"
+      )}
+    >
+      {tier.popular && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+          <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-gradient-brand-vivid text-white shadow-glow-sm whitespace-nowrap">
+            Más popular
+          </span>
+        </div>
+      )}
+
+      <div>
+        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">{tier.name}</p>
+        <p className="font-display font-extrabold text-3xl text-white">{tier.priceLabel}</p>
+        <p className="text-sm text-zinc-500 mt-1">{tier.description}</p>
+      </div>
+
+      <ul className="space-y-2.5 flex-1">
+        {tier.features.map((f) => (
+          <li key={f} className="flex items-start gap-2.5 text-sm text-zinc-300">
+            <CheckCircle className="h-4 w-4 text-brand-400 shrink-0 mt-0.5" />
+            {f}
+          </li>
+        ))}
+      </ul>
+
+      <Link
+        href="/login"
+        className={cn(
+          "inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200",
+          tier.popular
+            ? "bg-gradient-brand-vivid text-white shadow-glow hover:shadow-glow-lg hover:-translate-y-0.5"
+            : "border border-white/[0.1] text-zinc-300 hover:border-white/[0.18] hover:text-white hover:bg-white/[0.04]"
+        )}
+      >
+        {tier.cta}
+        <ArrowRight className="h-3.5 w-3.5" />
+      </Link>
     </div>
   );
 }
