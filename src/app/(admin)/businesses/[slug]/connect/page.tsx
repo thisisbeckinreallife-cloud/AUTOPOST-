@@ -21,13 +21,13 @@ export default function ConnectPage() {
       const res = await fetch(`/api/businesses/${slug}/connect`);
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "No se pudo iniciar la conexion. Intentalo de nuevo.");
+        setError(data.error ?? "No pudimos conectar con Instagram. Inténtalo de nuevo o escríbenos si el error persiste.");
         setLoading(false);
         return;
       }
       window.location.href = data.data.oauthUrl;
     } catch {
-      setError("Error de red. Comprueba tu conexion e intentalo de nuevo.");
+      setError("Error de red. Comprueba tu conexión e inténtalo de nuevo.");
       setLoading(false);
     }
   }
@@ -50,6 +50,15 @@ export default function ConnectPage() {
           <h1 className="font-display text-xl font-bold text-white">Conecta tu Instagram</h1>
           <p className="text-zinc-500 text-sm mt-0.5">Paso {step} de {TOTAL}</p>
         </div>
+      </div>
+
+      {/* Meta API trust badge */}
+      <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-green-500/15 bg-green-500/[0.04]">
+        <Shield className="h-4 w-4 text-green-400 shrink-0" />
+        <p className="text-xs text-zinc-400 leading-relaxed">
+          <span className="text-green-400 font-semibold">Conexión oficial via Instagram API de Meta</span>
+          {" "}— AutoPost nunca accede a tu contraseña. Puedes revocar el acceso en cualquier momento desde Instagram.
+        </p>
       </div>
 
       {/* Progress bar */}

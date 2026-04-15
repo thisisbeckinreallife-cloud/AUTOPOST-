@@ -7,20 +7,20 @@
    ══════════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  --background: #060609;
-  --foreground: #F4F4F5;
-  --surface-card: #10101A;
-  --surface-secondary: #0C0C12;
+  --background: #0D0D14;
+  --foreground: #F1F5F9;
+  --surface-card: #161624;
+  --surface-secondary: #13131E;
   --border-primary: rgba(255,255,255,0.06);
   --border-subtle: rgba(255,255,255,0.04);
   --border-hover: rgba(255,255,255,0.12);
-  --text-primary: #F4F4F5;
-  --text-secondary: #A1A1AA;
-  --text-muted: #71717A;
-  --brand-500: #4F6FF0;
-  --brand-600: #3A54E8;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --brand-500: #7C3AED;
+  --brand-600: #6D28D9;
   --accent-violet: #8B5CF6;
-  --accent-cyan: #22D3EE;
+  --accent-rose: #EC4899;
   --radius: 0.75rem;
 }
 
@@ -49,8 +49,8 @@ body {
 
 /* ─── Selection ─── */
 ::selection {
-  background: rgba(79, 111, 240, 0.35);
-  color: #F4F4F5;
+  background: rgba(124, 58, 237, 0.35);
+  color: #F1F5F9;
 }
 
 /* ─── Focus ─── */
@@ -146,7 +146,7 @@ a, button, input, textarea, select {
 
 /* ─── Skeleton loading ─── */
 .skeleton {
-  background: linear-gradient(90deg, #141420 25%, #1E1E2E 50%, #141420 75%);
+  background: linear-gradient(90deg, #18182A 25%, #232338 50%, #18182A 75%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite linear;
   border-radius: 6px;
@@ -157,29 +157,29 @@ a, button, input, textarea, select {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .text-gradient {
-  background: linear-gradient(135deg, #6B91F7, #8B5CF6);
+  background: linear-gradient(135deg, #A78BFA, #EC4899);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .text-gradient-hero {
-  background: linear-gradient(135deg, #F4F4F5 0%, #6B91F7 40%, #8B5CF6 70%, #22D3EE 100%);
+  background: linear-gradient(135deg, #F1F5F9 0%, #C4B5FD 40%, #EC4899 80%, #F472B6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .bg-gradient-brand {
-  background: linear-gradient(135deg, #4F6FF0, #3A54E8);
+  background: linear-gradient(135deg, #7C3AED, #6D28D9);
 }
 
 .bg-gradient-brand-vivid {
-  background: linear-gradient(135deg, #4F6FF0, #8B5CF6);
+  background: linear-gradient(135deg, #7C3AED, #EC4899);
 }
 
 .bg-gradient-accent {
-  background: linear-gradient(135deg, #4F6FF0, #22D3EE);
+  background: linear-gradient(135deg, #7C3AED, #EC4899);
 }
 
 /* ─── Animated gradient border ─── */
@@ -193,7 +193,7 @@ a, button, input, textarea, select {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(79,111,240,0.4), rgba(139,92,246,0.3), rgba(34,211,238,0.2));
+  background: linear-gradient(135deg, rgba(124,58,237,0.4), rgba(236,72,153,0.3), rgba(139,92,246,0.2));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -210,7 +210,7 @@ a, button, input, textarea, select {
   inset: -1px;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(79, 111, 240, 0.25), rgba(139, 92, 246, 0.1), transparent 60%);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(236, 72, 153, 0.12), transparent 60%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -273,7 +273,7 @@ input::placeholder, textarea::placeholder {
 }
 input:focus, textarea:focus, select:focus {
   border-color: var(--brand-500);
-  box-shadow: 0 0 0 3px rgba(79, 111, 240, 0.12), 0 0 15px rgba(79, 111, 240, 0.06);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12), 0 0 15px rgba(124, 58, 237, 0.06);
   outline: none;
 }
 
@@ -291,6 +291,11 @@ input:focus, textarea:focus, select:focus {
 .animate-gradient-shift {
   background-size: 200% 200%;
   animation: gradient-shift 12s ease infinite;
+}
+
+/* ─── CTA secondary pulse animation ─── */
+.animate-cta-pulse {
+  animation: ctaPulse 2s ease-in-out infinite;
 }
 
 /* ─── Rose gradient text ─── */

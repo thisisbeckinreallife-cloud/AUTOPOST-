@@ -11,10 +11,12 @@ import {
   Instagram,
   Sparkles,
   Users,
+  Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FAQAccordion } from "@/components/landing/faq-accordion";
 import { StatsStrip } from "@/components/landing/stats-strip";
+import { ROICalculator } from "@/components/landing/roi-calculator";
 
 export default function LandingPage() {
   return (
@@ -23,7 +25,7 @@ export default function LandingPage() {
       <nav className="fixed top-0 inset-x-0 z-50 glass-strong">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
           <div className="flex items-center gap-2.5">
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/20 to-accent-violet/10 border border-brand-500/25">
+            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/20 to-accent-rose/10 border border-brand-500/25">
               <Zap className="h-4 w-4 text-brand-400" />
               <div className="absolute inset-0 rounded-lg bg-brand-500/10 animate-glow-pulse" />
             </div>
@@ -31,17 +33,11 @@ export default function LandingPage() {
               Auto<span className="text-gradient">Post</span>
             </span>
           </div>
-          <div className="flex items-center gap-4">
-            <a
-              href="#como-funciona"
-              className="hidden sm:inline text-sm text-zinc-500 hover:text-zinc-200 transition-colors"
-            >
-              Como funciona
+          <div className="flex items-center gap-5">
+            <a href="#como-funciona" className="hidden sm:inline text-sm text-zinc-500 hover:text-zinc-200 transition-colors">
+              Cómo funciona
             </a>
-            <a
-              href="#precios"
-              className="hidden sm:inline text-sm text-zinc-500 hover:text-zinc-200 transition-colors"
-            >
+            <a href="#precios" className="hidden sm:inline text-sm text-zinc-500 hover:text-zinc-200 transition-colors">
               Precios
             </a>
             <Link
@@ -56,13 +52,13 @@ export default function LandingPage() {
 
       {/* ─── Hero ─── */}
       <section className="relative pt-36 pb-28 px-6">
-        {/* Atmospheric background */}
         <div className="absolute inset-0 bg-gradient-hero pointer-events-none" />
-        <div className="aurora w-[700px] h-[400px] bg-brand-500/[0.08] top-10 left-1/2 -translate-x-1/2" />
-        <div className="aurora w-[500px] h-[300px] bg-accent-violet/[0.06] top-40 left-1/4 -translate-x-1/2" style={{ animationDelay: "4s" }} />
-        <div className="aurora w-[400px] h-[250px] bg-accent-rose/[0.04] top-20 right-1/4 translate-x-1/2" style={{ animationDelay: "8s" }} />
+        <div className="aurora w-[700px] h-[400px] bg-brand-500/[0.10] top-10 left-1/2 -translate-x-1/2" />
+        <div className="aurora w-[500px] h-[300px] bg-accent-rose/[0.06] top-40 left-1/4 -translate-x-1/2" style={{ animationDelay: "4s" }} />
+        <div className="aurora w-[400px] h-[250px] bg-accent-violet/[0.05] top-20 right-1/4 translate-x-1/2" style={{ animationDelay: "8s" }} />
 
         <div className="relative max-w-3xl mx-auto text-center">
+          {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-500/20 bg-brand-500/[0.06] text-xs font-medium text-brand-300 mb-8 animate-fade-up backdrop-blur-sm">
             <Sparkles className="h-3.5 w-3.5" />
             Automatización inteligente para Instagram
@@ -74,22 +70,36 @@ export default function LandingPage() {
             en 2 minutos
           </h1>
 
-          {/* Social proof counter */}
+          {/* Social proof */}
           <p className="text-sm text-zinc-500 mb-4 animate-fade-up stagger-2">
             Más de{" "}
             <span className="text-zinc-300 font-semibold">500 agencias y creadores</span>{" "}
             ya programan con AutoPost
           </p>
 
-          <p className="text-lg sm:text-xl text-zinc-400 max-w-xl mx-auto mb-8 leading-relaxed animate-fade-up stagger-2">
-            Sube la carpeta. AutoPost detecta carruseles, pone el copy solo y programa
-            30 días de una vez.{" "}
+          {/* Subheadline — differentiation copy */}
+          <p className="text-lg sm:text-xl text-zinc-400 max-w-xl mx-auto mb-3 leading-relaxed animate-fade-up stagger-2">
+            Sin arrastrar y soltar. Sin copiar-pegar copies.{" "}
+            <span className="text-zinc-200 font-medium">Solo sube la carpeta.</span>
+          </p>
+          <p className="text-base text-zinc-500 max-w-lg mx-auto mb-8 leading-relaxed animate-fade-up stagger-2">
+            AutoPost detecta carruseles, pone el copy solo y programa 30 días de una vez.{" "}
             <span className="text-zinc-300">Tú a otra cosa.</span>
           </p>
 
+          {/* Trust badge */}
+          <div className="flex items-center justify-center gap-1.5 mb-8 animate-fade-up stagger-2">
+            <Lock className="h-3 w-3 text-green-400" />
+            <span className="text-xs text-zinc-500">
+              Conexión oficial via{" "}
+              <span className="text-zinc-400 font-medium">Instagram API de Meta</span>
+              {" "}— tus credenciales nunca se comparten
+            </span>
+          </div>
+
           {/* Dashboard mockup */}
-          <div className="relative mx-auto mt-8 mb-10 max-w-lg rounded-2xl border border-white/[0.08] bg-surface-card/80 backdrop-blur-sm overflow-hidden shadow-elevated animate-fade-up stagger-2">
-            {/* Fake toolbar */}
+          <div className="relative mx-auto mt-4 mb-10 max-w-lg rounded-2xl border border-white/[0.08] bg-surface-card/80 backdrop-blur-sm overflow-hidden shadow-elevated animate-fade-up stagger-2">
+            {/* Toolbar */}
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.04] bg-surface-secondary/60">
               <div className="h-2 w-2 rounded-full bg-red-500/50" />
               <div className="h-2 w-2 rounded-full bg-amber-500/50" />
@@ -103,7 +113,7 @@ export default function LandingPage() {
               { day: "Vie 18:00", type: "Reel",     dots: 1, color: "bg-violet-500/10 text-violet-400" },
               { day: "Dom 09:00", type: "Carrusel", dots: 3, color: "bg-brand-500/10 text-brand-400" },
             ].map((row, i) => (
-              <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.03] last:border-0">
+              <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.03] last:border-0 animate-mockup-blink" style={{ animationDelay: `${i * 0.8}s`, animationDuration: `${3 + i * 0.5}s` }}>
                 <div className="flex gap-1 shrink-0">
                   {Array.from({ length: Math.min(row.dots, 3) }).map((_, j) => (
                     <div key={j} className="h-7 w-7 rounded-md bg-zinc-800 border border-white/[0.06]" />
@@ -126,24 +136,24 @@ export default function LandingPage() {
             ))}
           </div>
 
+          {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up stagger-3">
             <Link
               href="/login"
-              className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-sm shadow-glow hover:shadow-glow-lg transition-all duration-300 hover:-translate-y-0.5"
+              className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-sm shadow-glow hover:shadow-glow-lg hover:scale-[1.03] transition-all duration-200"
             >
-              Programa tu primer mes — Es gratis
+              Subir mi primera carpeta — Gratis
               <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <a
               href="#como-funciona"
-              className="inline-flex items-center gap-2 text-zinc-400 hover:text-white font-medium px-6 py-4 text-sm transition-colors"
+              className="animate-cta-pulse inline-flex items-center gap-2 text-zinc-400 hover:text-white font-medium px-6 py-4 text-sm rounded-xl border border-white/[0.06] hover:border-white/[0.15] transition-all duration-200"
             >
               Ver demo de 60 segundos
               <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
 
-          {/* Risk reversal */}
           <p className="text-xs text-zinc-600 mt-5 animate-fade-up stagger-4">
             Sin tarjeta de crédito · Cancela cuando quieras
           </p>
@@ -152,7 +162,7 @@ export default function LandingPage() {
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-px bg-gradient-to-r from-transparent via-brand-500/20 to-transparent" />
       </section>
 
-      {/* ─── Stats strip (animated, client component) ─── */}
+      {/* ─── Stats strip ─── */}
       <StatsStrip />
 
       {/* ─── How it works ─── */}
@@ -162,7 +172,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto relative">
           <div className="text-center mb-16">
             <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
-              Como funciona
+              Cómo funciona
             </p>
             <h2 className="font-display font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight">
               Tres pasos. <span className="text-gradient">Cero complicaciones.</span>
@@ -173,8 +183,8 @@ export default function LandingPage() {
             <StepCard
               number="01"
               icon={<Upload className="h-5 w-5" />}
-              title="Sube tu contenido"
-              description="Arrastra una carpeta o ZIP con tus fotos, videos y textos. No importa cómo lo organices."
+              title="Arrastra tu carpeta (o ZIP)"
+              description="Sube tu carpeta o ZIP con fotos, videos y textos. No importa cómo lo organices — AutoPost lo entiende."
               accent="brand"
             />
             <StepCard
@@ -189,8 +199,52 @@ export default function LandingPage() {
               icon={<Calendar className="h-5 w-5" />}
               title="Programa y olvida"
               description="Elige horario y frecuencia. AutoPost publica automáticamente durante los próximos 30 días."
-              accent="cyan"
+              accent="rose"
             />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Differentiation block ─── */}
+      <section className="py-16 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="rounded-2xl border border-brand-500/15 bg-surface-card overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/[0.05]">
+              {/* Before */}
+              <div className="p-8 space-y-4">
+                <p className="text-xs font-semibold text-zinc-600 uppercase tracking-[0.15em]">Con Later / Planoly</p>
+                {[
+                  "Subir cada foto una a una",
+                  "Copiar y pegar cada caption manualmente",
+                  "Arrastrar y soltar para ordenar el carrusel",
+                  "Configurar la fecha de cada post por separado",
+                  "2-3 horas de trabajo por cliente",
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-3">
+                    <span className="mt-0.5 h-4 w-4 rounded-full border border-red-500/30 bg-red-500/10 flex items-center justify-center shrink-0">
+                      <span className="h-1.5 w-1.5 rounded-full bg-red-500/50" />
+                    </span>
+                    <p className="text-sm text-zinc-500 leading-relaxed">{item}</p>
+                  </div>
+                ))}
+              </div>
+              {/* After */}
+              <div className="p-8 space-y-4 bg-brand-500/[0.03]">
+                <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.15em]">Con AutoPost</p>
+                {[
+                  "Subir una carpeta o ZIP con todo",
+                  "Copy extraído automáticamente del .txt",
+                  "Carruseles detectados sin numerar fotos",
+                  "30 días de programación en una sola configuración",
+                  "2 minutos por cliente",
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-3">
+                    <CheckCircle className="mt-0.5 h-4 w-4 text-brand-400 shrink-0" />
+                    <p className="text-sm text-zinc-300 leading-relaxed">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -230,8 +284,8 @@ export default function LandingPage() {
             />
             <FeatureCard
               icon={<Shield className="h-5 w-5 text-accent-violet" />}
-              title="Conexión segura"
-              description="OAuth oficial de Meta. Tu contraseña nunca se comparte ni se almacena."
+              title="Conexión segura Meta API"
+              description="OAuth oficial de Meta. Tu contraseña nunca se comparte ni se almacena jamás."
               glow="violet"
             />
             <FeatureCard
@@ -249,13 +303,16 @@ export default function LandingPage() {
             <FeatureCard
               icon={<Users className="h-5 w-5 text-brand-300" />}
               title="Posts colaborativos"
-              description="Invita a otros creadores como colaboradores. Un post, dos feeds, el doble de audiencia."
+              description="Aparece en dos feeds a la vez. Sin coordinación manual — doble audiencia, un solo post."
               glow="brand"
               highlight
             />
           </div>
         </div>
       </section>
+
+      {/* ─── ROI Calculator ─── */}
+      <ROICalculator />
 
       {/* ─── Testimonials ─── */}
       <TestimonialsSection />
@@ -280,11 +337,12 @@ export default function LandingPage() {
 
       {/* ─── CTA final ─── */}
       <section className="py-28 px-6 relative">
-        <div className="aurora w-[600px] h-[350px] bg-brand-500/[0.06] top-0 left-1/2 -translate-x-1/2" style={{ animationDelay: "2s" }} />
+        <div className="aurora w-[600px] h-[350px] bg-brand-500/[0.07] top-0 left-1/2 -translate-x-1/2" style={{ animationDelay: "2s" }} />
+        <div className="aurora w-[400px] h-[250px] bg-accent-rose/[0.04] top-10 right-1/4" style={{ animationDelay: "5s" }} />
 
         <div className="relative max-w-2xl mx-auto text-center">
-          <div className="rounded-3xl border border-white/[0.06] bg-surface-card p-12 sm:p-16 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-500/[0.04] via-transparent to-accent-violet/[0.03] pointer-events-none" />
+          <div className="rounded-3xl border border-brand-500/20 bg-surface-card p-12 sm:p-16 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-500/[0.06] via-transparent to-accent-rose/[0.04] pointer-events-none" />
             <div className="relative">
               <h2 className="font-display font-bold text-3xl sm:text-4xl tracking-tight mb-4">
                 Deja de publicar <span className="text-gradient">a mano</span>
@@ -294,7 +352,7 @@ export default function LandingPage() {
               </p>
               <Link
                 href="/login"
-                className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-base shadow-glow hover:shadow-glow-lg transition-all duration-300 hover:-translate-y-0.5"
+                className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-base shadow-glow hover:shadow-glow-lg hover:scale-[1.03] transition-all duration-200"
               >
                 Empezar gratis
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
@@ -358,6 +416,7 @@ function StepCard({
   const accents: Record<string, { bg: string; border: string; text: string; glow: string }> = {
     brand:  { bg: "bg-brand-500/10",  border: "border-brand-500/20",  text: "text-brand-400",  glow: "group-hover:shadow-glow-sm" },
     violet: { bg: "bg-violet-500/10", border: "border-violet-500/20", text: "text-violet-400", glow: "group-hover:shadow-glow-violet" },
+    rose:   { bg: "bg-rose-500/10",   border: "border-rose-500/20",   text: "text-rose-400",   glow: "group-hover:shadow-glow-rose" },
     cyan:   { bg: "bg-cyan-500/10",   border: "border-cyan-500/20",   text: "text-cyan-400",   glow: "group-hover:shadow-glow-cyan" },
   };
   const a = accents[accent] ?? accents.brand;
@@ -482,15 +541,12 @@ function TestimonialCard({
 }) {
   return (
     <div className="relative rounded-2xl border border-white/[0.06] bg-surface-elevated p-7 flex flex-col gap-5">
-      <span
-        className="absolute top-4 right-5 text-6xl font-display text-brand-500/10 leading-none select-none"
-        aria-hidden="true"
-      >
+      <span className="absolute top-4 right-5 text-6xl font-display text-brand-500/10 leading-none select-none" aria-hidden="true">
         "
       </span>
       <p className="text-sm text-zinc-300 leading-relaxed relative z-10">"{quote}"</p>
       <div className="flex items-center gap-3 mt-auto">
-        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-brand-500/20 to-accent-violet/15 border border-brand-500/20 flex items-center justify-center shrink-0">
+        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-brand-500/20 to-accent-rose/15 border border-brand-500/20 flex items-center justify-center shrink-0">
           <span className="text-xs font-bold text-brand-300">{initials}</span>
         </div>
         <div>
@@ -551,7 +607,7 @@ const pricingTiers = [
 function PricingSection() {
   return (
     <section id="precios" className="py-28 px-6 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent-violet/[0.02] to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-500/[0.02] to-transparent pointer-events-none" />
       <div className="max-w-5xl mx-auto relative">
         <div className="text-center mb-16">
           <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
@@ -614,7 +670,7 @@ function PricingCard({ tier }: { tier: typeof pricingTiers[0] }) {
         className={cn(
           "inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200",
           tier.popular
-            ? "bg-gradient-brand-vivid text-white shadow-glow hover:shadow-glow-lg hover:-translate-y-0.5"
+            ? "bg-gradient-brand-vivid text-white shadow-glow hover:shadow-glow-lg hover:scale-[1.02]"
             : "border border-white/[0.1] text-zinc-300 hover:border-white/[0.18] hover:text-white hover:bg-white/[0.04]"
         )}
       >
