@@ -65,7 +65,7 @@ import {
   HERO_SEQ,
 } from "@/components/motion";
 
-// Dynamic import for 3D scene
+// Dynamic import for 3D scene (kept for potential future use below-fold)
 const HeroScene = dynamic(() => import("@/components/hero-3d/HeroScene"), {
   ssr: false,
   loading: () => (
@@ -102,65 +102,67 @@ export default function LandingPage() {
            HERO — Cinematic entrance with Aceternity-style highlight
            ═══════════════════════════════════════════════════════════════════ */}
       <section className="relative min-h-screen flex flex-col overflow-hidden">
-        {/* Background — morphing blobs (inspired by Aceternity Aurora) */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute inset-0 bg-surface-primary" />
-
-          {/* Morph blob 1 — brand gold */}
+        {/* ─── Background Video ─── */}
+        <div className="absolute inset-0 z-0">
           <motion.div
-            className="absolute w-[900px] h-[600px] top-[-10%] left-[-10%] opacity-20 morph-blob"
-            style={{ background: "radial-gradient(circle, rgba(255,170,0,0.2) 0%, transparent 60%)" }}
-            animate={{
-              rotate: [0, 360],
-              x: [0, 30, -20, 10, 0],
-              y: [0, -15, 10, -5, 0],
+            className="absolute inset-0"
+            initial={{ opacity: 0, scale: 1.08 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 2.5, ease: EASE_CINEMATIC }}
+          >
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+            >
+              <source
+                src="https://res.cloudinary.com/dfonotyfb/video/upload/v1775585556/dds3_1_rqhg7x.mp4"
+                type="video/mp4"
+              />
+            </video>
+          </motion.div>
+
+          {/* Dark overlay for readability — gradient from edges */}
+          <div
+            className="absolute inset-0 z-[1]"
+            style={{
+              background: `
+                linear-gradient(180deg, rgba(6,8,13,0.55) 0%, rgba(6,8,13,0.3) 40%, rgba(6,8,13,0.5) 70%, rgba(6,8,13,0.92) 100%),
+                radial-gradient(ellipse 80% 60% at 50% 45%, transparent 0%, rgba(6,8,13,0.6) 100%)
+              `,
             }}
-            transition={{ rotate: { duration: 60, repeat: Infinity, ease: "linear" }, x: { duration: 20, repeat: Infinity, ease: "easeInOut" }, y: { duration: 16, repeat: Infinity, ease: "easeInOut" } }}
           />
 
-          {/* Morph blob 2 — indigo */}
-          <motion.div
-            className="absolute w-[700px] h-[700px] bottom-[-20%] right-[-5%] opacity-15 morph-blob"
-            style={{ background: "radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 60%)", animationDelay: "4s" }}
-            animate={{ x: [0, -20, 15, -10, 0] }}
-            transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
+          {/* Brand-tinted overlay — warm gold wash */}
+          <div
+            className="absolute inset-0 z-[2] mix-blend-soft-light opacity-30"
+            style={{
+              background: "linear-gradient(135deg, rgba(255,170,0,0.15) 0%, transparent 50%, rgba(99,102,241,0.1) 100%)",
+            }}
           />
 
-          {/* Morph blob 3 — emerald */}
-          <motion.div
-            className="absolute w-[500px] h-[500px] top-[30%] right-[20%] opacity-10 morph-blob"
-            style={{ background: "radial-gradient(circle, rgba(52,211,153,0.14) 0%, transparent 60%)", animationDelay: "8s" }}
-            animate={{ y: [0, -25, 0, 18, 0] }}
-            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          />
-
-          {/* Noise overlay */}
-          <div className="absolute inset-0 noise opacity-30" />
-
-          {/* Vignette */}
-          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 60% at 50% 45%, transparent 0%, rgba(6,8,13,0.75) 100%)" }} />
+          {/* Noise texture over video for cinematic grain */}
+          <div className="absolute inset-0 z-[3] noise opacity-40" />
         </div>
 
+        {/* Premium starfield — persistent twinkling over video */}
+        <Meteors count={50} color="#FFAA00" variant="starfield" className="z-[4] opacity-70" />
+
+        {/* Premium meteors — multi-glow diagonal streaks */}
+        <Meteors count={10} color="#FFAA00" colorSecondary="#6366F1" variant="premium" className="z-[4]" />
+
         {/* Mouse-following gradient (Aceternity Spotlight style) */}
-        <MouseGradient mouseX={mouseX} mouseY={mouseY} />
-
-        {/* Meteor shower — diagonal gold streaks */}
-        <Meteors count={15} color="#FFAA00" />
-
-        {/* 3D Scene — blur fade in (Magic UI BlurFade) */}
-        <motion.div
-          initial={{ opacity: 0, filter: "blur(20px)" }}
-          animate={{ opacity: 1, filter: "blur(0px)" }}
-          transition={{ duration: 2, delay: HERO_SEQ.scene, ease: EASE_CINEMATIC }}
-        >
-          <HeroScene />
-        </motion.div>
+        <div className="z-[5]">
+          <MouseGradient mouseX={mouseX} mouseY={mouseY} />
+        </div>
 
         {/* ─── Navbar ─── */}
         <motion.nav
           className={cn(
             "fixed top-0 left-0 right-0 z-50 w-full px-6 sm:px-8 py-5 transition-all duration-500",
-            navScrolled && "navbar-scrolled"
+            navScrolled ? "navbar-scrolled" : "bg-transparent"
           )}
           initial={{ y: -30, opacity: 0, filter: "blur(10px)" }}
           animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
@@ -211,9 +213,9 @@ export default function LandingPage() {
         </motion.nav>
 
         {/* ─── Hero content ─── */}
-        <div className="relative z-10 flex-1 flex items-center px-6 pt-20">
-          <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-[55%_45%] gap-8 items-center">
-            <div className="text-center lg:text-left">
+        <div className="relative z-10 flex-1 flex items-start sm:items-center px-6 pt-28 sm:pt-32 lg:pt-20" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>
+          <div className="max-w-4xl mx-auto w-full">
+            <div className="text-center">
               {/* Badge — scale-in with spring (Aceternity Badge style) */}
               <motion.div
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-500/20 bg-brand-500/[0.06] text-xs font-medium text-brand-300 mb-8 backdrop-blur-sm"
@@ -247,7 +249,7 @@ export default function LandingPage() {
 
               {/* Subtitle — blur fade in (Magic UI BlurFade) */}
               <motion.p
-                className="text-zinc-400 text-base sm:text-lg leading-relaxed max-w-lg mx-auto lg:mx-0 mb-4"
+                className="text-zinc-300 text-base sm:text-lg leading-relaxed max-w-lg mx-auto mb-4"
                 initial={{ opacity: 0, y: 25, filter: "blur(8px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 0.8, delay: HERO_SEQ.subtitle, ease: EASE_CINEMATIC }}
@@ -257,7 +259,7 @@ export default function LandingPage() {
               </motion.p>
 
               <motion.p
-                className="text-sm text-zinc-500 mb-8"
+                className="text-sm text-zinc-400 mb-8"
                 initial={{ opacity: 0, filter: "blur(6px)" }}
                 animate={{ opacity: 1, filter: "blur(0px)" }}
                 transition={{ delay: HERO_SEQ.subtitle + 0.15, duration: 0.6, ease: EASE_CINEMATIC }}
@@ -268,7 +270,7 @@ export default function LandingPage() {
 
               {/* CTAs — spring entrance with Higgsfield-style tactile feedback */}
               <motion.div
-                className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4"
+                className="flex flex-col sm:flex-row items-center justify-center gap-4"
                 initial={{ opacity: 0, y: 30, filter: "blur(6px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 0.8, delay: HERO_SEQ.ctas, ease: EASE_CINEMATIC }}
@@ -306,8 +308,6 @@ export default function LandingPage() {
                 Sin tarjeta de credito · Cancela cuando quieras
               </motion.p>
             </div>
-
-            <div className="hidden lg:block h-[500px]" aria-hidden="true" />
           </div>
         </div>
 
