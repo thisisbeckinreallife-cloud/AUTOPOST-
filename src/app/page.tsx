@@ -28,6 +28,7 @@ import {
   Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GooeyText } from "@/components/ui/gooey-text-morphing";
 import { FAQAccordion } from "@/components/landing/faq-accordion";
 import { StatsStrip } from "@/components/landing/stats-strip";
 import { ROICalculator } from "@/components/landing/roi-calculator";
@@ -147,11 +148,11 @@ export default function LandingPage() {
           <div className="absolute inset-0 z-[3] noise opacity-40" />
         </div>
 
-        {/* Premium starfield — persistent twinkling over video */}
-        <Meteors count={50} color="#FFAA00" variant="starfield" className="z-[4] opacity-70" />
+        {/* Subtle starfield — soft twinkling over video */}
+        <Meteors count={35} color="rgba(255,255,255,0.6)" variant="starfield" className="z-[4] opacity-50" />
 
-        {/* Premium meteors — multi-glow diagonal streaks */}
-        <Meteors count={10} color="#FFAA00" colorSecondary="#6366F1" variant="premium" className="z-[4]" />
+        {/* Subtle meteors — neutral tones, varied directions */}
+        <Meteors count={6} color="rgba(200,200,220,0.5)" colorSecondary="rgba(180,180,200,0.3)" variant="premium" className="z-[4] opacity-40" />
 
         {/* Mouse-following gradient (Aceternity Spotlight style) */}
         <div className="z-[5]">
@@ -229,22 +230,26 @@ export default function LandingPage() {
                 Automatizacion de Instagram para agencias
               </motion.div>
 
-              {/* Headline — TextScramble decrypt effect + shimmer highlight */}
+              {/* Headline — GooeyText morphing between key phrases */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3, delay: HERO_SEQ.headline }}
+                initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                transition={{ duration: 1, delay: HERO_SEQ.headline, ease: EASE_CINEMATIC }}
+                className="mb-6"
               >
-                <TextScramble
-                  as="h1"
-                  className="font-display font-extrabold tracking-[-0.03em] leading-[0.92] mb-6 text-[clamp(2.5rem,7vw,5.5rem)]"
-                  delay={HERO_SEQ.headline * 1000}
-                  speed={30}
-                  iterations={4}
-                  highlight={{ words: ["Instagram"], className: "text-shimmer" }}
-                >
-                  Un mes de Instagram en 2 minutos
-                </TextScramble>
+                <h1 className="font-display font-extrabold tracking-[-0.03em] leading-[0.92] text-[clamp(2.5rem,7vw,5.5rem)]">
+                  Un mes de
+                </h1>
+                <GooeyText
+                  texts={["Instagram", "contenido", "engagement", "crecimiento"]}
+                  morphTime={1.5}
+                  cooldownTime={0.5}
+                  className="h-[clamp(3rem,8vw,6.5rem)]"
+                  textClassName="font-display font-extrabold tracking-[-0.03em] text-[clamp(2.5rem,7vw,5.5rem)] text-gradient"
+                />
+                <h1 className="font-display font-extrabold tracking-[-0.03em] leading-[0.92] text-[clamp(2.5rem,7vw,5.5rem)]">
+                  en 2 minutos
+                </h1>
               </motion.div>
 
               {/* Subtitle — blur fade in (Magic UI BlurFade) */}
@@ -633,7 +638,7 @@ export default function LandingPage() {
               <GlowingStars count={40} color="#FFAA00" interactive>
                 <div className="rounded-3xl border border-brand-500/20 bg-surface-card p-12 sm:p-16 relative overflow-hidden card-glow-hover">
                   <div className="absolute inset-0 bg-gradient-to-br from-brand-500/[0.06] via-transparent to-accent-indigo/[0.04] pointer-events-none rounded-3xl" />
-                  <Meteors count={8} color="#6366F1" />
+                  <Meteors count={5} color="rgba(180,180,210,0.3)" variant="premium" className="opacity-30" />
                   <div className="relative">
                     <TextScramble
                       as="h2"

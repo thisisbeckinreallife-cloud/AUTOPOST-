@@ -48,12 +48,13 @@ export function Meteors({
         id: i,
         left: Math.random() * 120 - 10,
         top: Math.random() * 40 - 20,
-        delay: Math.random() * (isPremium ? 12 : 8),
-        duration: isPremium ? 2 + Math.random() * 4 : 1.5 + Math.random() * 3,
-        size: isPremium ? 100 + Math.random() * 200 : 80 + Math.random() * 120,
-        thickness: isPremium ? 1 + Math.random() * 1.5 : 1,
-        opacity: isPremium ? 0.3 + Math.random() * 0.7 : 0.6 + Math.random() * 0.4,
-        angle: isPremium ? 210 + Math.random() * 20 : 215,
+        delay: Math.random() * (isPremium ? 15 : 8),
+        duration: isPremium ? 3 + Math.random() * 5 : 1.5 + Math.random() * 3,
+        size: isPremium ? 120 + Math.random() * 180 : 80 + Math.random() * 120,
+        thickness: isPremium ? 0.5 + Math.random() * 1 : 1,
+        opacity: isPremium ? 0.15 + Math.random() * 0.45 : 0.6 + Math.random() * 0.4,
+        // Varied directions: mostly diagonal but spread across 180-260° range
+        angle: isPremium ? 180 + Math.random() * 80 : 215,
       }))
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps
