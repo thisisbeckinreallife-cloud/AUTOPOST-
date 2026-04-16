@@ -3,7 +3,15 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+  useMotionValue,
+  useSpring,
+  useMotionValueEvent,
+} from "framer-motion";
 import {
   Zap,
   Upload,
@@ -17,10 +25,7 @@ import {
   Sparkles,
   Users,
   Lock,
-  X,
-  ChevronDown,
   Eye,
-  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FAQAccordion } from "@/components/landing/faq-accordion";
@@ -40,10 +45,17 @@ import {
   MotionCounter,
   MotionText,
   MotionParallax,
+  MotionMagnetic,
+  MotionFloat,
   EASE_OUT_EXPO,
+  EASE_CINEMATIC,
+  EASE_BACK_OUT,
   SPRING_BOUNCE,
+  SPRING_SNAPPY,
+  SPRING_WOBBLY,
   DURATION,
   STAGGER,
+  HERO_SEQ,
 } from "@/components/motion";
 
 // Dynamic import for 3D scene
@@ -56,19 +68,6 @@ const HeroScene = dynamic(() => import("@/components/hero-3d/HeroScene"), {
   ),
 });
 
-/* ═══════════════════════════════════════════════════════════════════
-   HERO SEQUENCE TIMINGS
-   ═══════════════════════════════════════════════════════════════════ */
-const SEQ = {
-  navbar: 0,
-  badge: 0.2,
-  headline: 0.4,
-  subtitle: 0.8,
-  ctas: 1.0,
-  trust: 1.2,
-  scene: 1.5,
-};
-
 export default function LandingPage() {
   const [navScrolled, setNavScrolled] = useState(false);
   const [isAnnual, setIsAnnual] = useState(false);
@@ -76,7 +75,7 @@ export default function LandingPage() {
   const mouseY = useMotionValue(0);
 
   useEffect(() => {
-    const onScroll = () => setNavScrolled(window.scrollY > 100);
+    const onScroll = () => setNavScrolled(window.scrollY > 80);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -87,51 +86,62 @@ export default function LandingPage() {
   }, [mouseX, mouseY]);
 
   return (
-    <div className="min-h-screen bg-surface-primary text-zinc-100 overflow-hidden" onMouseMove={handleMouseMove}>
+    <div className="min-h-screen bg-surface-primary text-zinc-100 overflow-hidden grain" onMouseMove={handleMouseMove}>
       <CustomCursor />
       <StickyCTA />
       <ScrollProgress />
 
       {/* ═══════════════════════════════════════════════════════════════════
-           HERO
+           HERO — Cinematic entrance with Aceternity-style highlight
            ═══════════════════════════════════════════════════════════════════ */}
       <section className="relative min-h-screen flex flex-col overflow-hidden">
-        {/* Background */}
+        {/* Background — morphing blobs (inspired by Aceternity Aurora) */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 bg-surface-primary" />
-          {/* Orbs — larger, with rotation */}
+
+          {/* Morph blob 1 — brand gold */}
           <motion.div
-            className="absolute w-[1000px] h-[700px] top-[-15%] left-[-15%] rounded-full opacity-25"
-            style={{ background: "radial-gradient(circle, rgba(255,170,0,0.18) 0%, transparent 65%)" }}
-            animate={{ rotate: [0, 5, 0, -3, 0], x: [0, 15, -10, 5, 0], y: [0, -10, 5, -5, 0] }}
-            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute w-[900px] h-[600px] top-[-10%] left-[-10%] opacity-20 morph-blob"
+            style={{ background: "radial-gradient(circle, rgba(255,170,0,0.2) 0%, transparent 60%)" }}
+            animate={{
+              rotate: [0, 360],
+              x: [0, 30, -20, 10, 0],
+              y: [0, -15, 10, -5, 0],
+            }}
+            transition={{ rotate: { duration: 60, repeat: Infinity, ease: "linear" }, x: { duration: 20, repeat: Infinity, ease: "easeInOut" }, y: { duration: 16, repeat: Infinity, ease: "easeInOut" } }}
           />
+
+          {/* Morph blob 2 — indigo */}
           <motion.div
-            className="absolute w-[800px] h-[800px] bottom-[-25%] right-[-10%] rounded-full opacity-18"
-            style={{ background: "radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 65%)" }}
-            animate={{ rotate: [0, -3, 0, 5, 0], x: [0, -10, 15, -5, 0] }}
+            className="absolute w-[700px] h-[700px] bottom-[-20%] right-[-5%] opacity-15 morph-blob"
+            style={{ background: "radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 60%)", animationDelay: "4s" }}
+            animate={{ x: [0, -20, 15, -10, 0] }}
             transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
           />
+
+          {/* Morph blob 3 — emerald */}
           <motion.div
-            className="absolute w-[600px] h-[600px] top-[25%] right-[15%] rounded-full opacity-12"
-            style={{ background: "radial-gradient(circle, rgba(52,211,153,0.12) 0%, transparent 65%)" }}
-            animate={{ y: [0, -20, 0, 15, 0] }}
-            transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute w-[500px] h-[500px] top-[30%] right-[20%] opacity-10 morph-blob"
+            style={{ background: "radial-gradient(circle, rgba(52,211,153,0.14) 0%, transparent 60%)", animationDelay: "8s" }}
+            animate={{ y: [0, -25, 0, 18, 0] }}
+            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
           />
-          {/* Noise */}
-          <div className="absolute inset-0 noise opacity-35" />
+
+          {/* Noise overlay */}
+          <div className="absolute inset-0 noise opacity-30" />
+
           {/* Vignette */}
-          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 60% at 50% 45%, transparent 0%, rgba(6,8,13,0.7) 100%)" }} />
+          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 60% at 50% 45%, transparent 0%, rgba(6,8,13,0.75) 100%)" }} />
         </div>
 
-        {/* Mouse-following gradient */}
+        {/* Mouse-following gradient (Aceternity Spotlight style) */}
         <MouseGradient mouseX={mouseX} mouseY={mouseY} />
 
-        {/* 3D Scene */}
+        {/* 3D Scene — blur fade in (Magic UI BlurFade) */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.5, delay: SEQ.scene }}
+          initial={{ opacity: 0, filter: "blur(20px)" }}
+          animate={{ opacity: 1, filter: "blur(0px)" }}
+          transition={{ duration: 2, delay: HERO_SEQ.scene, ease: EASE_CINEMATIC }}
         >
           <HeroScene />
         </motion.div>
@@ -142,12 +152,16 @@ export default function LandingPage() {
             "fixed top-0 left-0 right-0 z-50 w-full px-6 sm:px-8 py-5 transition-all duration-500",
             navScrolled && "navbar-scrolled"
           )}
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: SEQ.navbar }}
+          initial={{ y: -30, opacity: 0, filter: "blur(10px)" }}
+          animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+          transition={{ duration: 0.8, ease: EASE_CINEMATIC, delay: HERO_SEQ.navbar }}
         >
           <div className="max-w-6xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
+            <motion.div
+              className="flex items-center gap-2.5"
+              whileHover={{ scale: 1.03 }}
+              transition={{ duration: 0.2 }}
+            >
               <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/20 to-accent-indigo/10 border border-brand-500/25">
                 <Zap className="h-4 w-4 text-brand-400" aria-hidden="true" />
                 <div className="absolute inset-0 rounded-lg bg-brand-500/10 animate-glow-pulse" />
@@ -155,17 +169,17 @@ export default function LandingPage() {
               <span className="font-display font-bold text-lg tracking-tight">
                 Auto<span className="text-gradient">Post</span>
               </span>
-            </div>
+            </motion.div>
             <div className="hidden md:flex items-center gap-6">
-              <a href="#como-funciona" className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors link-underline">
-                Como funciona
-              </a>
-              <a href="#precios" className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors link-underline">
-                Precios
-              </a>
-              <a href="/demo" className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors link-underline">
-                Demo
-              </a>
+              {[
+                { href: "#como-funciona", label: "Como funciona" },
+                { href: "#precios", label: "Precios" },
+                { href: "/demo", label: "Demo" },
+              ].map((link) => (
+                <a key={link.href} href={link.href} className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors link-underline">
+                  {link.label}
+                </a>
+              ))}
             </div>
             <div className="flex items-center gap-3">
               <Link
@@ -174,12 +188,14 @@ export default function LandingPage() {
               >
                 Iniciar sesion
               </Link>
-              <Link
-                href="/signup"
-                className="text-sm font-semibold px-5 py-2.5 rounded-xl bg-gradient-brand-vivid text-white shadow-glow-sm hover:shadow-glow transition-all btn-glow btn-ripple"
-              >
-                Empezar gratis
-              </Link>
+              <MotionMagnetic strength={0.1}>
+                <Link
+                  href="/signup"
+                  className="text-sm font-semibold px-5 py-2.5 rounded-xl bg-gradient-brand-vivid text-white shadow-glow-sm hover:shadow-glow transition-all btn-glow btn-ripple active:scale-[0.97] active:translate-y-0.5"
+                >
+                  Empezar gratis
+                </Link>
+              </MotionMagnetic>
             </div>
           </div>
         </motion.nav>
@@ -188,34 +204,37 @@ export default function LandingPage() {
         <div className="relative z-10 flex-1 flex items-center px-6 pt-20">
           <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-[55%_45%] gap-8 items-center">
             <div className="text-center lg:text-left">
-              {/* Badge */}
+              {/* Badge — scale-in with spring (Aceternity Badge style) */}
               <motion.div
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-500/20 bg-brand-500/[0.06] text-xs font-medium text-brand-300 mb-8 backdrop-blur-sm"
-                initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+                initial={{ opacity: 0, scale: 0.6, filter: "blur(10px)" }}
                 animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                transition={{ duration: 0.5, delay: SEQ.badge, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ ...SPRING_BOUNCE, delay: HERO_SEQ.badge }}
               >
-                <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                <motion.div animate={{ rotate: [0, 15, -15, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}>
+                  <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                </motion.div>
                 Automatizacion de Instagram para agencias
               </motion.div>
 
-              {/* Headline */}
+              {/* Headline — word-by-word 3D reveal (Aceternity TextGenerate + Hero Highlight) */}
               <MotionText
                 as="h1"
                 className="font-display font-extrabold tracking-[-0.03em] leading-[0.92] mb-6 text-[clamp(2.5rem,7vw,5.5rem)]"
-                delay={SEQ.headline}
-                stagger={0.08}
+                delay={HERO_SEQ.headline}
+                stagger={0.07}
+                effect="slide"
                 highlight={{ words: ["Instagram"], className: "text-shimmer" }}
               >
                 Un mes de Instagram en 2 minutos
               </MotionText>
 
-              {/* Subtitle */}
+              {/* Subtitle — blur fade in (Magic UI BlurFade) */}
               <motion.p
                 className="text-zinc-400 text-base sm:text-lg leading-relaxed max-w-lg mx-auto lg:mx-0 mb-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: DURATION.normal, delay: SEQ.subtitle, ease: [0.16, 1, 0.3, 1] }}
+                initial={{ opacity: 0, y: 25, filter: "blur(8px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                transition={{ duration: 0.8, delay: HERO_SEQ.subtitle, ease: EASE_CINEMATIC }}
               >
                 Arrastra tu carpeta.{" "}
                 <span className="text-zinc-200">AutoPost detecta carruseles, extrae los copies y programa 30 dias.</span>
@@ -223,37 +242,39 @@ export default function LandingPage() {
 
               <motion.p
                 className="text-sm text-zinc-500 mb-8"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: SEQ.subtitle + 0.1 }}
+                initial={{ opacity: 0, filter: "blur(6px)" }}
+                animate={{ opacity: 1, filter: "blur(0px)" }}
+                transition={{ delay: HERO_SEQ.subtitle + 0.15, duration: 0.6, ease: EASE_CINEMATIC }}
               >
                 <span className="text-accent-coral font-semibold">90x mas rapido</span>
                 {" "}que hacerlo a mano
               </motion.p>
 
-              {/* CTAs */}
+              {/* CTAs — spring entrance with Higgsfield-style tactile feedback */}
               <motion.div
                 className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ ...SPRING_BOUNCE, delay: SEQ.ctas }}
+                initial={{ opacity: 0, y: 30, filter: "blur(6px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                transition={{ duration: 0.8, delay: HERO_SEQ.ctas, ease: EASE_CINEMATIC }}
               >
-                <Link
-                  href="/signup"
-                  className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-sm shadow-glow btn-glow btn-ripple"
-                >
-                  Programar mi primer mes — Gratis
-                  <motion.span
-                    className="inline-block"
-                    whileHover={{ x: 4 }}
-                    transition={{ type: "spring", stiffness: 300 }}
+                <MotionMagnetic strength={0.12} scale>
+                  <Link
+                    href="/signup"
+                    className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-sm shadow-glow btn-glow btn-ripple btn-pulse-ring active:scale-[0.97] active:translate-y-0.5 transition-transform"
                   >
-                    <ArrowRight className="h-4 w-4" />
-                  </motion.span>
-                </Link>
+                    Programar mi primer mes — Gratis
+                    <motion.span
+                      className="inline-block"
+                      animate={{ x: [0, 4, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
+                    >
+                      <ArrowRight className="h-4 w-4" />
+                    </motion.span>
+                  </Link>
+                </MotionMagnetic>
                 <a
                   href="#como-funciona"
-                  className="inline-flex items-center gap-2 text-zinc-400 hover:text-white font-medium px-6 py-4 text-sm rounded-xl border border-white/[0.06] hover:border-white/[0.14] transition-all duration-200"
+                  className="inline-flex items-center gap-2 text-zinc-400 hover:text-white font-medium px-6 py-4 text-sm rounded-xl border border-white/[0.06] hover:border-white/[0.14] transition-all duration-300 active:scale-[0.97] active:translate-y-0.5"
                 >
                   Ver como funciona
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -264,7 +285,7 @@ export default function LandingPage() {
                 className="text-xs text-zinc-600 mt-5"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: SEQ.ctas + 0.2 }}
+                transition={{ delay: HERO_SEQ.ctas + 0.3 }}
               >
                 Sin tarjeta de credito · Cancela cuando quieras
               </motion.p>
@@ -274,15 +295,15 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* ─── Trust bar ─── */}
+        {/* ─── Trust bar — stagger with blur fade ─── */}
         <motion.div
           className="relative z-10 pb-8 pt-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: SEQ.trust }}
+          transition={{ delay: HERO_SEQ.trust, duration: 0.6 }}
         >
           <div className="max-w-3xl mx-auto px-6">
-            <MotionStagger stagger={0.1} delay={SEQ.trust} className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+            <MotionStagger stagger={0.12} delay={HERO_SEQ.trust} className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
               {[
                 { icon: Shield, label: "API oficial de Meta" },
                 { icon: Lock, label: "Cifrado AES-256" },
@@ -300,20 +321,20 @@ export default function LandingPage() {
           </div>
         </motion.div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-500/15 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 section-divider" />
       </section>
 
       {/* ─── Stats strip ─── */}
       <StatsStrip />
 
       {/* ═══════════════════════════════════════════════════════════════════
-           HOW IT WORKS
+           HOW IT WORKS — 3D tilt cards + connecting beam
            ═══════════════════════════════════════════════════════════════════ */}
       <section id="como-funciona" className="py-28 px-6 relative">
         <div className="aurora w-[500px] h-[300px] bg-accent-indigo/[0.04] bottom-20 right-0" style={{ animationDelay: "6s" }} />
 
         <div className="max-w-5xl mx-auto relative">
-          <MotionReveal>
+          <MotionReveal cinematic>
             <div className="text-center mb-16">
               <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
                 Como funciona
@@ -321,6 +342,7 @@ export default function LandingPage() {
               <MotionText
                 as="h2"
                 className="font-display font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight"
+                effect="blur"
                 highlight={{ words: ["Cero"], className: "text-gradient" }}
               >
                 Tres pasos. Cero complicaciones.
@@ -328,26 +350,34 @@ export default function LandingPage() {
             </div>
           </MotionReveal>
 
-          {/* SVG connecting line (desktop) */}
+          {/* Connecting beam (Aceternity Tracing Beam inspired) */}
           <div className="hidden md:block absolute top-[58%] left-[17%] right-[17%] h-[2px] -translate-y-1/2 pointer-events-none">
             <motion.div
-              className="h-full rounded-full"
-              style={{ background: "linear-gradient(90deg, rgba(255,170,0,0.2), rgba(99,102,241,0.2), rgba(251,146,60,0.2))" }}
+              className="h-full rounded-full relative overflow-hidden"
+              style={{ background: "linear-gradient(90deg, rgba(255,170,0,0.15), rgba(99,102,241,0.15), rgba(251,146,60,0.15))" }}
               initial={{ scaleX: 0 }}
               whileInView={{ scaleX: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 1.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            />
+              transition={{ duration: 1.5, delay: 0.4, ease: EASE_CINEMATIC }}
+            >
+              {/* Animated beam traveling along the line */}
+              <motion.div
+                className="absolute top-0 h-full w-24 rounded-full"
+                style={{ background: "linear-gradient(90deg, transparent, rgba(255,170,0,0.6), transparent)" }}
+                animate={{ left: ["-10%", "110%"] }}
+                transition={{ duration: 3, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }}
+              />
+            </motion.div>
           </div>
 
-          <MotionStagger stagger={0.15} className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+          <MotionStagger stagger={STAGGER.wide} className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
             {[
               { number: "01", icon: Upload, title: "Arrastra tu carpeta (o ZIP)", desc: "Sube tu carpeta o ZIP con fotos, videos y textos. No importa como lo organices — AutoPost lo entiende.", accent: "brand" },
               { number: "02", icon: Layers, title: "Revision automatica", desc: "AutoPost detecta carruseles, empareja fotos con textos y te muestra todo para que lo revises.", accent: "indigo" },
               { number: "03", icon: Calendar, title: "Programa y olvida", desc: "Elige horario y frecuencia. AutoPost publica automaticamente durante los proximos 30 dias.", accent: "orange" },
             ].map(({ number, icon: Icon, title, desc, accent }) => (
               <MotionStaggerItem key={number}>
-                <TiltCard>
+                <TiltCard shine>
                   <StepCard number={number} icon={<Icon className="h-5 w-5" />} title={title} description={desc} accent={accent} />
                 </TiltCard>
               </MotionStaggerItem>
@@ -360,20 +390,20 @@ export default function LandingPage() {
       <ProductDemo />
 
       {/* ═══════════════════════════════════════════════════════════════════
-           BEFORE / AFTER
+           BEFORE / AFTER — stagger with cross-out effect
            ═══════════════════════════════════════════════════════════════════ */}
       <section className="py-16 px-6">
         <div className="max-w-4xl mx-auto">
-          <MotionReveal>
-            <div className="rounded-2xl border border-brand-500/15 bg-surface-card overflow-hidden relative">
-              {/* Center badge */}
+          <MotionReveal cinematic scale>
+            <div className="rounded-2xl border border-brand-500/15 bg-surface-card overflow-hidden relative card-shine">
+              {/* Center badge — pop animation (Aceternity Badge) */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden md:flex">
                 <motion.div
                   className="px-4 py-2 rounded-full bg-surface-primary border border-brand-500/30 text-xs font-bold text-brand-400 shadow-glow-sm"
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
+                  initial={{ scale: 0, rotate: -20 }}
+                  whileInView={{ scale: 1, rotate: 0 }}
                   viewport={{ once: true }}
-                  transition={SPRING_BOUNCE}
+                  transition={SPRING_WOBBLY}
                 >
                   2h → 2min
                 </motion.div>
@@ -383,7 +413,7 @@ export default function LandingPage() {
                 {/* Before */}
                 <div className="p-8 space-y-4">
                   <p className="text-xs font-semibold text-zinc-500 uppercase tracking-[0.15em]">Como lo haces hoy</p>
-                  <MotionStagger stagger={0.08}>
+                  <MotionStagger stagger={0.1}>
                     {[
                       "Subir cada foto una a una",
                       "Copiar y pegar cada caption manualmente",
@@ -405,7 +435,7 @@ export default function LandingPage() {
                 {/* After */}
                 <div className="p-8 space-y-4 bg-brand-500/[0.03]">
                   <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.15em]">Como sera con AutoPost</p>
-                  <MotionStagger stagger={0.08}>
+                  <MotionStagger stagger={0.1}>
                     {[
                       "Subir una carpeta o ZIP con todo",
                       "Copy extraido automaticamente del .txt",
@@ -416,10 +446,10 @@ export default function LandingPage() {
                       <MotionStaggerItem key={item} direction="right">
                         <div className="flex items-start gap-3">
                           <motion.div
-                            initial={{ scale: 0 }}
-                            whileInView={{ scale: 1 }}
+                            initial={{ scale: 0, rotate: -90 }}
+                            whileInView={{ scale: 1, rotate: 0 }}
                             viewport={{ once: true }}
-                            transition={{ ...SPRING_BOUNCE, delay: 0.2 }}
+                            transition={{ ...SPRING_BOUNCE, delay: 0.3 }}
                           >
                             <CheckCircle className="mt-0.5 h-4 w-4 text-brand-400 shrink-0" aria-hidden="true" />
                           </motion.div>
@@ -436,13 +466,13 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
-           FEATURES — BENTO GRID
+           FEATURES — BENTO GRID with Aceternity card effects
            ═══════════════════════════════════════════════════════════════════ */}
       <section className="py-28 px-6 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-500/[0.015] to-transparent pointer-events-none" />
 
         <div className="max-w-5xl mx-auto relative">
-          <MotionReveal>
+          <MotionReveal cinematic>
             <div className="text-center mb-16">
               <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
                 Caracteristicas
@@ -450,6 +480,7 @@ export default function LandingPage() {
               <MotionText
                 as="h2"
                 className="font-display font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight"
+                effect="clip"
                 highlight={{ words: ["poco"], className: "text-gradient" }}
               >
                 Disenado para hacer mucho en poco tiempo
@@ -505,7 +536,7 @@ export default function LandingPage() {
               />
             </MotionStaggerItem>
 
-            {/* Highlight card — spans 2 cols */}
+            {/* Highlight card — spans 2 cols with Aceternity Glowing Effect */}
             <MotionStaggerItem className="sm:col-span-2">
               <BentoCard
                 icon={<Users className="h-5 w-5 text-accent-indigo" />}
@@ -531,27 +562,25 @@ export default function LandingPage() {
       </section>
 
       {/* ─── ROI Calculator ─── */}
-      <MotionReveal>
-        <ROICalculator />
-      </MotionReveal>
+      <ROICalculator />
 
       {/* ─── Comparison Table ─── */}
       <ComparisonTable />
 
       {/* ═══════════════════════════════════════════════════════════════════
-           TESTIMONIALS — MARQUEE
+           TESTIMONIALS — Infinite marquee (Magic UI Marquee)
            ═══════════════════════════════════════════════════════════════════ */}
       <TestimonialsSection />
 
       {/* ═══════════════════════════════════════════════════════════════════
-           PRICING
+           PRICING — with moving border (Aceternity MovingBorder)
            ═══════════════════════════════════════════════════════════════════ */}
       <PricingSection isAnnual={isAnnual} onToggleAnnual={() => setIsAnnual(!isAnnual)} />
 
       {/* ─── FAQ ─── */}
       <section className="py-28 px-6">
         <div className="max-w-2xl mx-auto">
-          <MotionReveal>
+          <MotionReveal cinematic>
             <div className="text-center mb-12">
               <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
                 Preguntas frecuentes
@@ -559,6 +588,7 @@ export default function LandingPage() {
               <MotionText
                 as="h2"
                 className="font-display font-bold text-3xl sm:text-4xl tracking-tight"
+                effect="blur"
                 highlight={{ words: ["empezar"], className: "text-gradient" }}
               >
                 Todo claro antes de empezar
@@ -572,21 +602,21 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
-           FINAL CTA — with magnetic button
+           FINAL CTA — with magnetic button + border beam
            ═══════════════════════════════════════════════════════════════════ */}
       <section className="py-28 px-6 relative">
         <div className="aurora w-[700px] h-[400px] bg-brand-500/[0.06] top-0 left-1/2 -translate-x-1/2" style={{ animationDelay: "2s" }} />
-        <div className="aurora w-[500px] h-[300px] bg-accent-indigo/[0.04] top-10 right-1/4" style={{ animationDelay: "5s" }} />
 
-        <MotionReveal>
+        <MotionReveal cinematic scale>
           <div className="relative max-w-2xl mx-auto text-center">
-            <div className="rounded-3xl border border-brand-500/20 bg-surface-card p-12 sm:p-16 relative overflow-hidden border-rotating">
+            <div className="rounded-3xl border border-brand-500/20 bg-surface-card p-12 sm:p-16 relative overflow-hidden border-rotating card-glow-hover">
               <div className="absolute inset-[1px] rounded-3xl bg-surface-card" />
               <div className="absolute inset-0 bg-gradient-to-br from-brand-500/[0.06] via-transparent to-accent-indigo/[0.04] pointer-events-none rounded-3xl" />
               <div className="relative">
                 <MotionText
                   as="h2"
                   className="font-display font-bold text-3xl sm:text-4xl tracking-tight mb-4"
+                  effect="slide"
                   highlight={{ words: ["2", "minutos"], className: "text-gradient" }}
                 >
                   Tu proximo mes de contenido listo en 2 minutos
@@ -594,15 +624,15 @@ export default function LandingPage() {
                 <p className="text-lg text-zinc-400 mb-10 max-w-md mx-auto">
                   Programa todo el mes de una vez y dedica tu tiempo a lo que importa.
                 </p>
-                <MagneticButton>
+                <MotionMagnetic strength={0.15} scale>
                   <Link
                     href="/signup"
-                    className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-base shadow-glow btn-glow btn-ripple"
+                    className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-base shadow-glow btn-glow btn-ripple btn-pulse-ring active:scale-[0.97] active:translate-y-0.5 transition-transform"
                   >
                     Empezar gratis — primera carpeta incluida
-                    <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
-                </MagneticButton>
+                </MotionMagnetic>
                 <p className="text-sm text-zinc-500 mt-4">
                   Sin tarjeta de credito. Sin compromisos.
                 </p>
@@ -655,14 +685,14 @@ function StepCard({
   const a = accents[accent] ?? accents.brand;
 
   return (
-    <div className={`group relative rounded-2xl border border-white/[0.06] bg-surface-card p-7 h-full card-spotlight ${a.glow}`}>
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+    <div className={`group relative rounded-2xl border border-white/[0.06] bg-surface-card p-7 h-full card-spotlight card-glow-hover ${a.glow}`}>
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       <div className="relative">
         <div className="flex items-center gap-3 mb-5">
           <motion.div
             className={`flex h-11 w-11 items-center justify-center rounded-xl ${a.bg} border ${a.border} ${a.text}`}
-            whileHover={{ scale: 1.15 }}
-            transition={{ type: "spring", stiffness: 300 }}
+            whileHover={{ scale: 1.15, rotate: 5 }}
+            transition={{ type: "spring", stiffness: 300, damping: 15 }}
           >
             {icon}
           </motion.div>
@@ -691,7 +721,7 @@ function BentoCard({
   return (
     <div
       className={cn(
-        "group relative rounded-2xl border p-6 h-full card-interactive card-spotlight transition-all",
+        "group relative rounded-2xl border p-6 h-full card-interactive card-spotlight card-shine transition-all",
         size === "large" ? "sm:flex sm:items-start sm:gap-5" : "",
         highlight ? "border-brand-500/20 bg-brand-500/[0.04]" : "border-white/[0.05] bg-surface-card/80",
         glowBorders[glow] ?? "",
@@ -699,9 +729,9 @@ function BentoCard({
     >
       <div className={cn("shrink-0 mb-4 sm:mb-0", size === "large" ? "" : "")}>
         <motion.div
-          className="opacity-80 group-hover:opacity-100 transition-opacity"
-          whileHover={{ scale: 1.1, rotate: 5 }}
-          transition={{ type: "spring", stiffness: 300 }}
+          className="opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+          whileHover={{ scale: 1.15, rotate: 8 }}
+          transition={{ type: "spring", stiffness: 300, damping: 12 }}
         >
           {icon}
         </motion.div>
@@ -710,9 +740,13 @@ function BentoCard({
         <div className="flex items-center gap-2 mb-1.5">
           <h3 className="font-semibold text-sm text-white">{title}</h3>
           {badge && (
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-brand-500/15 text-brand-300 border border-brand-500/20">
+            <motion.span
+              className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-brand-500/15 text-brand-300 border border-brand-500/20"
+              animate={{ boxShadow: ["0 0 0 0 rgba(255,170,0,0)", "0 0 0 4px rgba(255,170,0,0.1)", "0 0 0 0 rgba(255,170,0,0)"] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
               {badge}
-            </span>
+            </motion.span>
           )}
         </div>
         <p className="text-sm text-zinc-400 leading-relaxed">{description}</p>
@@ -721,7 +755,7 @@ function BentoCard({
   );
 }
 
-/* ─── Testimonials Marquee ─── */
+/* ─── Testimonials Marquee (Magic UI Marquee style) ─── */
 
 const testimonials = [
   {
@@ -754,7 +788,7 @@ function TestimonialsSection() {
   return (
     <section className="py-28 relative overflow-hidden">
       <div className="px-6">
-        <MotionReveal>
+        <MotionReveal cinematic>
           <div className="text-center mb-16">
             <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
               Testimonios
@@ -762,6 +796,7 @@ function TestimonialsSection() {
             <MotionText
               as="h2"
               className="font-display font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight"
+              effect="clip"
               highlight={{ words: ["usan"], className: "text-gradient" }}
             >
               Lo que dicen quienes ya lo usan
@@ -770,12 +805,13 @@ function TestimonialsSection() {
         </MotionReveal>
       </div>
 
-      {/* Marquee */}
+      {/* Marquee with hover pause */}
       <div className="marquee-container">
         <motion.div
-          className="flex gap-6 w-max hover:[animation-play-state:paused]"
+          className="flex gap-6 w-max"
           animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
+          whileHover={{ animationPlayState: "paused" } as any}
         >
           {[...testimonials, ...testimonials].map((t, i) => (
             <TestimonialCard key={`${t.name}-${i}`} {...t} />
@@ -788,17 +824,21 @@ function TestimonialsSection() {
 
 function TestimonialCard({ quote, name, role, initials }: typeof testimonials[0]) {
   return (
-    <div className="relative w-[340px] shrink-0 rounded-2xl border border-white/[0.06] bg-surface-card p-7 flex flex-col gap-5 hover:scale-[1.03] hover:-translate-y-1 transition-all duration-300 hover:border-white/[0.1]">
+    <motion.div
+      className="relative w-[340px] shrink-0 rounded-2xl border border-white/[0.06] bg-surface-card p-7 flex flex-col gap-5 card-shine"
+      whileHover={{ scale: 1.03, y: -4, borderColor: "rgba(255,255,255,0.12)" }}
+      transition={{ duration: 0.35, ease: EASE_OUT_EXPO }}
+    >
       <span className="absolute top-4 right-5 text-5xl font-display text-brand-500/8 leading-none select-none" aria-hidden="true">
         &ldquo;
       </span>
       <p className="text-sm text-zinc-300 leading-relaxed relative z-10">&ldquo;{quote}&rdquo;</p>
       <div className="flex items-center gap-3 mt-auto">
         <div className="relative h-9 w-9 rounded-full flex items-center justify-center shrink-0">
-          {/* Rotating ring */}
+          {/* Rotating ring — Aceternity MovingBorder inspired */}
           <div className="absolute inset-[-2px] rounded-full" style={{
             background: "conic-gradient(from 0deg, #FFAA00, #6366F1, #34D399, #FFAA00)",
-            animation: "rotateBorder 8s linear infinite",
+            animation: "rotateBorder 6s linear infinite",
           }} />
           <div className="absolute inset-0 rounded-full bg-surface-card" />
           <span className="text-xs font-bold text-brand-300 relative z-10">{initials}</span>
@@ -808,7 +848,7 @@ function TestimonialCard({ quote, name, role, initials }: typeof testimonials[0]
           <p className="text-xs text-zinc-500">{role}</p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -837,7 +877,7 @@ function PricingSection({ isAnnual, onToggleAnnual }: { isAnnual: boolean; onTog
     <section id="precios" className="py-28 px-6 relative">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-500/[0.015] to-transparent pointer-events-none" />
       <div className="max-w-5xl mx-auto relative">
-        <MotionReveal>
+        <MotionReveal cinematic>
           <div className="text-center mb-8">
             <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
               Precios
@@ -845,6 +885,7 @@ function PricingSection({ isAnnual, onToggleAnnual }: { isAnnual: boolean; onTog
             <MotionText
               as="h2"
               className="font-display font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight"
+              effect="blur"
               highlight={{ words: ["sorpresas"], className: "text-gradient" }}
             >
               Simple y sin sorpresas
@@ -857,7 +898,7 @@ function PricingSection({ isAnnual, onToggleAnnual }: { isAnnual: boolean; onTog
         <MotionStagger stagger={0.12} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
           {pricingTiers.map((tier) => (
             <MotionStaggerItem key={tier.name}>
-              <TiltCard>
+              <TiltCard shine>
                 <PricingCard tier={tier} isAnnual={isAnnual} />
               </TiltCard>
             </MotionStaggerItem>
@@ -893,7 +934,7 @@ function PricingCard({ tier, isAnnual }: { tier: typeof pricingTiers[0]; isAnnua
   return (
     <div
       className={cn(
-        "relative rounded-2xl border p-7 flex flex-col gap-6 h-full",
+        "relative rounded-2xl border p-7 flex flex-col gap-6 h-full card-glow-hover",
         tier.popular
           ? "border-transparent bg-surface-card border-rotating"
           : "border-white/[0.06] bg-surface-card"
@@ -906,10 +947,10 @@ function PricingCard({ tier, isAnnual }: { tier: typeof pricingTiers[0]; isAnnua
           <div className="absolute -top-10 left-1/2 -translate-x-1/2">
             <motion.span
               className="text-[11px] font-bold px-3 py-1 rounded-full bg-gradient-brand-magic text-white shadow-glow-sm whitespace-nowrap"
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
+              initial={{ scale: 0, rotate: -10 }}
+              whileInView={{ scale: 1, rotate: 0 }}
               viewport={{ once: true }}
-              transition={SPRING_BOUNCE}
+              transition={SPRING_WOBBLY}
             >
               Mas popular
             </motion.span>
@@ -919,9 +960,20 @@ function PricingCard({ tier, isAnnual }: { tier: typeof pricingTiers[0]; isAnnua
         <div className="mb-6">
           <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">{tier.name}</p>
           <div className="flex items-baseline gap-2">
-            <p className="font-display font-extrabold text-4xl text-white">{displayPrice}</p>
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={displayPrice}
+                className="font-display font-extrabold text-4xl text-white"
+                initial={{ y: 10, opacity: 0, filter: "blur(4px)" }}
+                animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                exit={{ y: -10, opacity: 0, filter: "blur(4px)" }}
+                transition={{ duration: 0.3, ease: EASE_CINEMATIC }}
+              >
+                {displayPrice}
+              </motion.p>
+            </AnimatePresence>
             {tier.price > 0 && (
-              <span className="text-sm text-zinc-500">/{isAnnual ? "mes" : "mes"}</span>
+              <span className="text-sm text-zinc-500">/mes</span>
             )}
           </div>
           {isAnnual && tier.price > 0 && (
@@ -935,10 +987,10 @@ function PricingCard({ tier, isAnnual }: { tier: typeof pricingTiers[0]; isAnnua
             <motion.li
               key={f}
               className="flex items-start gap-2.5 text-sm text-zinc-300"
-              initial={{ opacity: 0, x: -10 }}
+              initial={{ opacity: 0, x: -15 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.1 + i * 0.08 }}
+              transition={{ delay: 0.1 + i * 0.08, duration: 0.5, ease: EASE_CINEMATIC }}
             >
               <CheckCircle className="h-4 w-4 text-brand-400 shrink-0 mt-0.5" aria-hidden="true" />
               {f}
@@ -949,7 +1001,7 @@ function PricingCard({ tier, isAnnual }: { tier: typeof pricingTiers[0]; isAnnua
         <Link
           href="/signup"
           className={cn(
-            "inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200 btn-ripple w-full",
+            "inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 btn-ripple w-full active:scale-[0.97] active:translate-y-0.5",
             tier.popular
               ? "bg-gradient-brand-vivid text-white shadow-glow btn-glow"
               : "border border-white/[0.1] text-zinc-300 hover:border-white/[0.18] hover:text-white hover:bg-white/[0.04]"
@@ -963,12 +1015,15 @@ function PricingCard({ tier, isAnnual }: { tier: typeof pricingTiers[0]; isAnnua
   );
 }
 
-/* ─── Mouse Gradient ─── */
+/* ─── Mouse Gradient (Aceternity Spotlight) ─── */
 
 function MouseGradient({ mouseX, mouseY }: { mouseX: ReturnType<typeof useMotionValue<number>>; mouseY: ReturnType<typeof useMotionValue<number>> }) {
+  const springX = useSpring(mouseX, { stiffness: 50, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 50, damping: 20 });
+
   const background = useTransform(
-    [mouseX, mouseY] as any,
-    ([x, y]: number[]) => `radial-gradient(800px circle at ${x}px ${y}px, rgba(255,170,0,0.04), transparent 60%)`
+    [springX, springY] as any,
+    ([x, y]: number[]) => `radial-gradient(900px circle at ${x}px ${y}px, rgba(255,170,0,0.04), transparent 55%)`
   );
 
   return (
@@ -976,38 +1031,5 @@ function MouseGradient({ mouseX, mouseY }: { mouseX: ReturnType<typeof useMotion
       className="absolute inset-0 pointer-events-none z-[2]"
       style={{ background }}
     />
-  );
-}
-
-/* ─── Magnetic Button ─── */
-
-function MagneticButton({ children }: { children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const springX = useSpring(x, { stiffness: 200, damping: 20 });
-  const springY = useSpring(y, { stiffness: 200, damping: 20 });
-
-  const handleMouse = (e: React.MouseEvent) => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    x.set((e.clientX - centerX) * 0.15);
-    y.set((e.clientY - centerY) * 0.15);
-  };
-
-  const reset = () => { x.set(0); y.set(0); };
-
-  return (
-    <motion.div
-      ref={ref}
-      onMouseMove={handleMouse}
-      onMouseLeave={reset}
-      style={{ x: springX, y: springY }}
-      className="inline-block"
-    >
-      {children}
-    </motion.div>
   );
 }

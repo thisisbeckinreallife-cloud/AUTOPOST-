@@ -1,8 +1,8 @@
 "use client";
 
-import { motion, type Variant } from "framer-motion";
+import { motion, type Variant, useReducedMotion } from "framer-motion";
 import { type ReactNode } from "react";
-import { EASE_OUT_EXPO, DURATION } from "./constants";
+import { EASE_OUT_EXPO, EASE_CINEMATIC, DURATION } from "./constants";
 
 type Direction = "up" | "down" | "left" | "right" | "none";
 
@@ -12,16 +12,20 @@ interface MotionRevealProps {
   delay?: number;
   duration?: number;
   blur?: boolean;
+  scale?: boolean;
+  rotate?: boolean;
   className?: string;
   once?: boolean;
   amount?: number;
+  /** Use cinematic easing for dramatic reveals */
+  cinematic?: boolean;
 }
 
 const offsets: Record<Direction, { x?: number; y?: number }> = {
-  up:    { y: 40 },
-  down:  { y: -30 },
-  left:  { x: -40 },
-  right: { x: 40 },
+  up:    { y: 60 },
+  down:  { y: -40 },
+  left:  { x: -60 },
+  right: { x: 60 },
   none:  {},
 };
 
@@ -29,18 +33,28 @@ export function MotionReveal({
   children,
   direction = "up",
   delay = 0,
-  duration = DURATION.normal,
+  duration = DURATION.slow,
   blur = true,
+  scale = false,
+  rotate = false,
   className,
   once = true,
-  amount = 0.2,
+  amount = 0.15,
+  cinematic = false,
 }: MotionRevealProps) {
+  const prefersReducedMotion = useReducedMotion();
   const offset = offsets[direction];
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
 
   const hidden: Variant = {
     opacity: 0,
     ...offset,
-    ...(blur ? { filter: "blur(4px)" } : {}),
+    ...(blur ? { filter: "blur(8px)" } : {}),
+    ...(scale ? { scale: 0.92 } : {}),
+    ...(rotate ? { rotateX: 15 } : {}),
   };
 
   const visible: Variant = {
@@ -48,9 +62,11 @@ export function MotionReveal({
     x: 0,
     y: 0,
     filter: "blur(0px)",
+    scale: 1,
+    rotateX: 0,
     transition: {
-      duration,
-      ease: [0.16, 1, 0.3, 1],
+      duration: cinematic ? DURATION.cinematic : duration,
+      ease: cinematic ? EASE_CINEMATIC : EASE_OUT_EXPO,
       delay,
     },
   };
@@ -62,6 +78,7 @@ export function MotionReveal({
       viewport={{ once, amount }}
       variants={{ hidden, visible }}
       className={className}
+      style={rotate ? { perspective: 1200 } : undefined}
     >
       {children}
     </motion.div>

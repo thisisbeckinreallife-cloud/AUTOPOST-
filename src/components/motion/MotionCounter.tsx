@@ -7,6 +7,7 @@ import {
   useSpring,
   useInView,
   useTransform,
+  useReducedMotion,
 } from "framer-motion";
 
 interface MotionCounterProps {
@@ -30,11 +31,12 @@ export function MotionCounter({
 }: MotionCounterProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once, amount: 0.5 });
+  const prefersReducedMotion = useReducedMotion();
 
   const motionValue = useMotionValue(0);
   const spring = useSpring(motionValue, {
-    stiffness: 50,
-    damping: 20,
+    stiffness: 40,
+    damping: 25,
     duration,
   });
 
@@ -44,9 +46,15 @@ export function MotionCounter({
 
   useEffect(() => {
     if (isInView) {
-      motionValue.set(value);
+      if (prefersReducedMotion) {
+        motionValue.set(value);
+      } else {
+        // Small delay for dramatic effect
+        const timer = setTimeout(() => motionValue.set(value), 200);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [isInView, value, motionValue]);
+  }, [isInView, value, motionValue, prefersReducedMotion]);
 
   return (
     <motion.span ref={ref} className={className}>

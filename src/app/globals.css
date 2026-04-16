@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   AUTOPOST — Obsidian Premium Design System
+   AUTOPOST — Obsidian Premium Design System v2
+   Cinema-grade motion & effects
    ══════════════════════════════════════════════════════════════════════════════ */
 
 :root {
@@ -41,6 +42,12 @@
 @property --angle {
   syntax: '<angle>';
   initial-value: 0deg;
+  inherits: false;
+}
+
+@property --shimmer-pos {
+  syntax: '<percentage>';
+  initial-value: -100%;
   inherits: false;
 }
 
@@ -94,7 +101,7 @@ a, button, input, textarea, select {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   KEYFRAMES
+   KEYFRAMES — Cinema-grade
    ══════════════════════════════════════════════════════════════════════════════ */
 
 @keyframes progress {
@@ -123,6 +130,35 @@ a, button, input, textarea, select {
 @keyframes orbit {
   0% { transform: rotate(0deg) translateX(120px) rotate(0deg); }
   100% { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.02); }
+}
+
+@keyframes slide-shine {
+  0% { --shimmer-pos: -100%; }
+  100% { --shimmer-pos: 200%; }
+}
+
+@keyframes float-3d {
+  0%, 100% { transform: translateY(0) rotateX(0) rotateY(0); }
+  25% { transform: translateY(-8px) rotateX(2deg) rotateY(-1deg); }
+  50% { transform: translateY(-12px) rotateX(0) rotateY(2deg); }
+  75% { transform: translateY(-5px) rotateX(-1deg) rotateY(0); }
+}
+
+@keyframes morph-blob {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  25% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  50% { border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%; }
+  75% { border-radius: 60% 40% 60% 30% / 60% 40% 30% 60%; }
 }
 
 /* ─── Stagger system ─── */
@@ -162,6 +198,17 @@ a, button, input, textarea, select {
   backdrop-filter: blur(32px) saturate(1.5);
   -webkit-backdrop-filter: blur(32px) saturate(1.5);
   border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+/* ─── Frosted glass with inner light ─── */
+.glass-premium {
+  background: rgba(17, 20, 28, 0.6);
+  backdrop-filter: blur(40px) saturate(1.8);
+  -webkit-backdrop-filter: blur(40px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 /* ─── Skeleton loading ─── */
@@ -204,6 +251,13 @@ a, button, input, textarea, select {
   background-clip: text;
 }
 
+.text-gradient-orange {
+  background: linear-gradient(135deg, #FB923C, #FFAA00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .bg-gradient-brand {
   background: linear-gradient(135deg, #FFAA00, #CC8800);
 }
@@ -220,14 +274,18 @@ a, button, input, textarea, select {
   background: linear-gradient(135deg, #FFAA00, #FB923C);
 }
 
-/* ─── Text shimmer effect ─── */
+/* ─── Text shimmer effect (premium) ─── */
 .text-shimmer {
-  background: linear-gradient(90deg, #FFAA00 0%, #FFC226 25%, #FFAA00 50%, #F97066 75%, #FFAA00 100%);
-  background-size: 200% auto;
+  background: linear-gradient(
+    90deg,
+    #FFAA00 0%, #FFC226 20%, #FFAA00 40%,
+    #F97066 60%, #FFC226 80%, #FFAA00 100%
+  );
+  background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: shimmer 3s linear infinite;
+  animation: shimmer 4s linear infinite;
 }
 
 /* ─── Animated gradient border ─── */
@@ -248,7 +306,7 @@ a, button, input, textarea, select {
   pointer-events: none;
 }
 
-/* ─── Rotating conic border ─── */
+/* ─── Rotating conic border (cinema) ─── */
 .border-rotating {
   position: relative;
   border: none !important;
@@ -264,11 +322,36 @@ a, button, input, textarea, select {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
-  animation: rotateBorder 3s linear infinite;
+  animation: rotateBorder 4s linear infinite;
 }
 
 @keyframes rotateBorder {
   to { --angle: 360deg; }
+}
+
+/* ─── Shine sweep effect on cards ─── */
+.card-shine {
+  position: relative;
+  overflow: hidden;
+}
+.card-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.03) 45%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.03) 55%,
+    transparent 60%
+  );
+  transform: translateX(-100%);
+  pointer-events: none;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-shine:hover::after {
+  transform: translateX(100%);
 }
 
 /* ─── Subtle accent border (top-left glow) ─── */
@@ -297,6 +380,12 @@ a, button, input, textarea, select {
   pointer-events: none;
 }
 
+/* ─── Morphing blob background ─── */
+.morph-blob {
+  animation: morph-blob 12s ease-in-out infinite;
+  filter: blur(80px);
+}
+
 /* ─── Noise texture overlay ─── */
 .noise::after {
   content: '';
@@ -308,6 +397,28 @@ a, button, input, textarea, select {
   mix-blend-mode: overlay;
 }
 
+/* ─── Animated grain overlay ─── */
+.grain {
+  position: relative;
+}
+.grain::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  animation: grain-drift 8s linear infinite;
+}
+@keyframes grain-drift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-10%, -10%); }
+}
+
 /* ─── Dot grid (subtle) ─── */
 .bg-dots {
   background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
@@ -315,16 +426,22 @@ a, button, input, textarea, select {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   INTERACTIVE CARDS
+   INTERACTIVE CARDS — Cinema Edition
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .card-interactive {
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .card-interactive:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08), 0 0 30px rgba(255,170,0,0.06);
-  border-color: rgba(255,255,255,0.12);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.6),
+    0 0 0 1px rgba(255,255,255,0.1),
+    0 0 40px rgba(255,170,0,0.06);
+  border-color: rgba(255,255,255,0.14);
 }
 
 /* ─── Card spotlight effect (follows cursor) ─── */
@@ -336,12 +453,30 @@ a, button, input, textarea, select {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(400px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(255,170,0,0.06), transparent 60%);
+  background: radial-gradient(500px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(255,170,0,0.07), transparent 55%);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
 }
 .card-spotlight:hover::after {
+  opacity: 1;
+}
+
+/* ─── Card with inner glow on hover ─── */
+.card-glow-hover {
+  position: relative;
+}
+.card-glow-hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255,170,0,0.08), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+.card-glow-hover:hover::before {
   opacity: 1;
 }
 
@@ -382,19 +517,6 @@ input:focus, textarea:focus, select:focus {
   animation: gradient-shift 12s ease infinite;
 }
 
-/* ─── CTA secondary pulse animation ─── */
-.animate-cta-pulse {
-  animation: ctaPulse 2s ease-in-out infinite;
-}
-
-/* ─── Orange gradient text ─── */
-.text-gradient-orange {
-  background: linear-gradient(135deg, #FB923C, #FFAA00);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
 /* ═══════════════════════════════════════════════════════════════════════════
    LIQUID GLASS
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -421,52 +543,20 @@ input:focus, textarea:focus, select:focus {
   pointer-events: none;
 }
 
-/* ─── FAQ accordion transitions ─── */
+/* ─── FAQ accordion transitions (spring-like) ─── */
 .faq-answer {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
   opacity: 0;
+}
+.faq-answer > div {
+  overflow: hidden;
 }
 .faq-answer.open {
-  max-height: 300px;
+  grid-template-rows: 1fr;
   opacity: 1;
 }
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   SCROLL REVEAL (legacy, kept for backward compat)
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.scroll-reveal {
-  opacity: 0;
-  transform: translateY(30px);
-  filter: blur(4px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.scroll-reveal.revealed {
-  opacity: 1;
-  transform: translateY(0);
-  filter: blur(0);
-}
-
-/* Stagger for children */
-.scroll-reveal-stagger > * {
-  opacity: 0;
-  transform: translateY(20px);
-  filter: blur(3px);
-  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.scroll-reveal-stagger.revealed > *:nth-child(1) { transition-delay: 0ms; opacity: 1; transform: translateY(0); filter: blur(0); }
-.scroll-reveal-stagger.revealed > *:nth-child(2) { transition-delay: 80ms; opacity: 1; transform: translateY(0); filter: blur(0); }
-.scroll-reveal-stagger.revealed > *:nth-child(3) { transition-delay: 160ms; opacity: 1; transform: translateY(0); filter: blur(0); }
-.scroll-reveal-stagger.revealed > *:nth-child(4) { transition-delay: 240ms; opacity: 1; transform: translateY(0); filter: blur(0); }
-.scroll-reveal-stagger.revealed > *:nth-child(5) { transition-delay: 320ms; opacity: 1; transform: translateY(0); filter: blur(0); }
-.scroll-reveal-stagger.revealed > *:nth-child(6) { transition-delay: 400ms; opacity: 1; transform: translateY(0); filter: blur(0); }
-.scroll-reveal-stagger.revealed > *:nth-child(7) { transition-delay: 480ms; opacity: 1; transform: translateY(0); filter: blur(0); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    3D TILT CARD
@@ -474,15 +564,18 @@ input:focus, textarea:focus, select:focus {
 
 .card-3d {
   transform-style: preserve-3d;
-  perspective: 1000px;
-  transition: transform 0.15s ease-out, box-shadow 0.25s ease-out;
+  perspective: 1200px;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease-out;
 }
 .card-3d:hover {
-  box-shadow: 0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08), 0 0 40px rgba(255,170,0,0.08);
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.6),
+    0 0 0 1px rgba(255,255,255,0.1),
+    0 0 50px rgba(255,170,0,0.08);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   BUTTON EFFECTS
+   BUTTON EFFECTS — Cinema Edition
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .btn-ripple {
@@ -493,33 +586,49 @@ input:focus, textarea:focus, select:focus {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), rgba(255,255,255,0.3), transparent 60%);
+  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), rgba(255,255,255,0.35), transparent 60%);
   opacity: 0;
   transform: scale(0);
-  transition: opacity 0.4s, transform 0.4s;
+  transition: opacity 0.5s, transform 0.5s;
   pointer-events: none;
 }
 .btn-ripple:active::after {
   opacity: 1;
-  transform: scale(2.5);
+  transform: scale(3);
   transition: 0s;
 }
 
-/* ─── Magnetic button ─── */
-.btn-magnetic {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* ─── Button hover glow ─── */
+/* ─── Button hover glow (enhanced) ─── */
 .btn-glow {
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  transition: box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .btn-glow:hover {
-  box-shadow: 0 0 25px rgba(255,170,0,0.22), 0 0 10px rgba(255,170,0,0.14), 0 8px 24px rgba(0,0,0,0.3);
-  transform: scale(1.03);
+  box-shadow:
+    0 0 30px rgba(255,170,0,0.25),
+    0 0 15px rgba(255,170,0,0.15),
+    0 10px 30px rgba(0,0,0,0.3),
+    0 0 80px rgba(255,170,0,0.08);
+  transform: scale(1.04) translateY(-1px);
 }
 .btn-glow:active {
   transform: scale(0.98);
+  box-shadow:
+    0 0 15px rgba(255,170,0,0.2),
+    0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* ─── Pulse ring on buttons ─── */
+.btn-pulse-ring {
+  position: relative;
+}
+.btn-pulse-ring::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  border: 2px solid rgba(255,170,0,0.3);
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  pointer-events: none;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -537,12 +646,12 @@ input:focus, textarea:focus, select:focus {
   pointer-events: none;
   z-index: 9999;
   mix-blend-mode: screen;
-  transition: width 0.2s, height 0.2s, opacity 0.2s, border 0.2s;
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), height 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s, background 0.2s;
 }
 .cursor-dot.hovering {
-  width: 32px;
-  height: 32px;
-  opacity: 0.4;
+  width: 40px;
+  height: 40px;
+  opacity: 0.3;
   border: 2px solid #FFAA00;
   background: transparent;
 }
@@ -574,7 +683,7 @@ input:focus, textarea:focus, select:focus {
   backdrop-filter: blur(20px);
   border-top: 1px solid rgba(255,255,255,0.06);
   transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .sticky-cta.visible {
   transform: translateY(0);
@@ -586,11 +695,12 @@ input:focus, textarea:focus, select:focus {
 
 .navbar-scrolled {
   background: rgba(6, 8, 13, 0.85) !important;
-  backdrop-filter: blur(20px) saturate(1.5);
-  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
   border-bottom: 1px solid rgba(255,255,255,0.06);
   padding-top: 0.75rem !important;
   padding-bottom: 0.75rem !important;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.3);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -620,7 +730,6 @@ input:focus, textarea:focus, select:focus {
   overflow: hidden;
   pointer-events: none;
 }
-/* CSS-based post-processing: vignette + subtle bloom glow */
 .hero-3d-canvas::after {
   content: '';
   position: absolute;
@@ -636,8 +745,8 @@ input:focus, textarea:focus, select:focus {
 
 .marquee-container {
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -656,11 +765,44 @@ input:focus, textarea:focus, select:focus {
   height: 1px;
   background: var(--brand-500);
   transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .link-underline:hover::after {
   transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SECTION DIVIDERS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,170,0,0.15), rgba(99,102,241,0.1), transparent);
+}
+
+.section-glow {
+  position: relative;
+}
+.section-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,170,0,0.2), transparent);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLL PROGRESS BAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.scroll-progress-bar {
+  background: linear-gradient(180deg, #FFAA00, #6366F1);
+  box-shadow: 0 0 10px rgba(255,170,0,0.4), 0 0 20px rgba(255,170,0,0.2);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -671,22 +813,22 @@ input:focus, textarea:focus, select:focus {
   .hero-3d-canvas {
     display: none !important;
   }
-  .scroll-reveal {
+  .scroll-reveal, .scroll-reveal-stagger > * {
     opacity: 1;
     transform: none;
     filter: none;
     transition: none;
   }
-  .scroll-reveal-stagger > * {
-    opacity: 1;
-    transform: none;
-    filter: none;
-    transition: none;
-  }
-  .border-rotating::before {
+  .border-rotating::before,
+  .aurora,
+  .morph-blob,
+  .grain::before {
     animation: none;
   }
-  .aurora {
+  .card-shine::after {
+    display: none;
+  }
+  .btn-pulse-ring::before {
     animation: none;
   }
 }

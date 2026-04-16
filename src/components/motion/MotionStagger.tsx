@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { type ReactNode } from "react";
-import { EASE_OUT_EXPO, DURATION, STAGGER } from "./constants";
+import { EASE_OUT_EXPO, EASE_CINEMATIC, DURATION, STAGGER } from "./constants";
 
 interface MotionStaggerProps {
   children: ReactNode;
@@ -21,8 +21,14 @@ export function MotionStagger({
   delay = 0,
   className,
   once = true,
-  amount = 0.15,
+  amount = 0.1,
 }: MotionStaggerProps) {
+  const prefersReducedMotion = useReducedMotion();
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       initial="hidden"
@@ -44,7 +50,7 @@ export function MotionStagger({
   );
 }
 
-/** Child item for MotionStagger — wraps each child */
+/** Child item for MotionStagger */
 export function MotionStaggerItem({
   children,
   className,
@@ -55,23 +61,23 @@ export function MotionStaggerItem({
   direction?: "up" | "down" | "left" | "right";
 }) {
   const offset =
-    direction === "up"    ? { y: 30 } :
-    direction === "down"  ? { y: -20 } :
-    direction === "left"  ? { x: -30 } :
-                            { x: 30 };
+    direction === "up"    ? { y: 40 } :
+    direction === "down"  ? { y: -30 } :
+    direction === "left"  ? { x: -40 } :
+                            { x: 40 };
 
   return (
     <motion.div
       variants={{
-        hidden: { opacity: 0, filter: "blur(4px)", ...offset },
+        hidden: { opacity: 0, filter: "blur(6px)", ...offset },
         visible: {
           opacity: 1,
           x: 0,
           y: 0,
           filter: "blur(0px)",
           transition: {
-            duration: DURATION.normal,
-            ease: [0.16, 1, 0.3, 1],
+            duration: DURATION.slow,
+            ease: EASE_CINEMATIC,
           },
         },
       }}

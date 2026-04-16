@@ -6,9 +6,11 @@ interface TiltCardProps {
   children: ReactNode;
   className?: string;
   maxTilt?: number;
+  /** Enable shine sweep on hover */
+  shine?: boolean;
 }
 
-export function TiltCard({ children, className = "", maxTilt = 5 }: TiltCardProps) {
+export function TiltCard({ children, className = "", maxTilt = 6, shine = true }: TiltCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
 
   const handleMouseMove = useCallback(
@@ -25,20 +27,25 @@ export function TiltCard({ children, className = "", maxTilt = 5 }: TiltCardProp
       const rotateX = ((y - centerY) / centerY) * -maxTilt;
       const rotateY = ((x - centerX) / centerX) * maxTilt;
 
-      cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
+      // Smoother transform with scale boost
+      cardRef.current.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-3px) scale(1.02)`;
+
+      // Update spotlight position
+      cardRef.current.style.setProperty("--spotlight-x", `${(x / rect.width) * 100}%`);
+      cardRef.current.style.setProperty("--spotlight-y", `${(y / rect.height) * 100}%`);
     },
     [maxTilt]
   );
 
   const handleMouseLeave = useCallback(() => {
     if (!cardRef.current) return;
-    cardRef.current.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)";
+    cardRef.current.style.transform = "perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(0px) scale(1)";
   }, []);
 
   return (
     <div
       ref={cardRef}
-      className={`card-3d ${className}`}
+      className={`card-3d ${shine ? "card-shine" : ""} ${className}`}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
