@@ -239,7 +239,7 @@ export default function LandingPage() {
               >
                 <div className="font-display font-extrabold tracking-[-0.03em] leading-[1.1] text-[clamp(2.2rem,6vw,4.5rem)]">
                   <span>Un mes de</span>
-                  <div className="relative my-2" style={{ height: "clamp(3rem, 8vw, 6rem)" }}>
+                  <div className="relative" style={{ height: "clamp(2.8rem, 6.5vw, 5rem)" }}>
                     <GooeyText
                       texts={["Instagram", "contenido", "engagement", "crecimiento"]}
                       morphTime={1.5}
