@@ -9,6 +9,8 @@ interface GooeyTextProps {
   cooldownTime?: number;
   className?: string;
   textClassName?: string;
+  /** Solid color for the morphing text (gradient classes won't work with the SVG filter) */
+  color?: string;
 }
 
 export function GooeyText({
@@ -16,10 +18,12 @@ export function GooeyText({
   morphTime = 1,
   cooldownTime = 0.25,
   className,
-  textClassName
+  textClassName,
+  color = "#FFC226",
 }: GooeyTextProps) {
   const text1Ref = React.useRef<HTMLSpanElement>(null);
   const text2Ref = React.useRef<HTMLSpanElement>(null);
+  const filterId = React.useId();
 
   React.useEffect(() => {
     let textIndex = texts.length - 1;
@@ -92,11 +96,15 @@ export function GooeyText({
     };
   }, [texts, morphTime, cooldownTime]);
 
+  const longestText = texts.reduce((a, b) => (a.length >= b.length ? a : b));
+  const safeFilterId = `gooey-${filterId.replace(/:/g, "")}`;
+
   return (
-    <div className={cn("relative", className)}>
+    <span className={cn("relative inline-block align-baseline", className)}>
+      {/* SVG filter — unique ID per instance */}
       <svg className="absolute h-0 w-0" aria-hidden="true" focusable="false">
         <defs>
-          <filter id="gooey-threshold">
+          <filter id={safeFilterId}>
             <feColorMatrix
               in="SourceGraphic"
               type="matrix"
@@ -109,25 +117,33 @@ export function GooeyText({
         </defs>
       </svg>
 
-      <div
-        className="flex items-center justify-center"
-        style={{ filter: "url(#gooey-threshold)" }}
+      {/* Invisible sizer — reserves width + height of the longest word */}
+      <span className={cn("invisible whitespace-nowrap", textClassName)} aria-hidden="true">
+        {longestText}
+      </span>
+
+      {/* Morphing layer — absolute over the sizer */}
+      <span
+        className="absolute inset-0 flex items-center justify-center"
+        style={{ filter: `url(#${safeFilterId})` }}
       >
         <span
           ref={text1Ref}
           className={cn(
-            "absolute inline-block select-none text-center",
+            "absolute inline-block select-none text-center whitespace-nowrap",
             textClassName
           )}
+          style={{ color }}
         />
         <span
           ref={text2Ref}
           className={cn(
-            "absolute inline-block select-none text-center",
+            "absolute inline-block select-none text-center whitespace-nowrap",
             textClassName
           )}
+          style={{ color }}
         />
-      </div>
-    </div>
+      </span>
+    </span>
   );
 }

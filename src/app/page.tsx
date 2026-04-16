@@ -28,7 +28,7 @@ import {
   Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { RotatingText } from "@/components/ui/rotating-text";
+import { GooeyText } from "@/components/ui/gooey-text-morphing";
 import { FAQAccordion } from "@/components/landing/faq-accordion";
 import { StatsStrip } from "@/components/landing/stats-strip";
 import { ROICalculator } from "@/components/landing/roi-calculator";
@@ -230,7 +230,7 @@ export default function LandingPage() {
                 Automatizacion de Instagram para agencias
               </motion.div>
 
-              {/* Headline — RotatingText morphing between key phrases */}
+              {/* Headline — GooeyText morphing between key phrases */}
               <motion.h1
                 className="font-display font-extrabold tracking-[-0.03em] leading-[1.1] text-[clamp(2.4rem,6.5vw,5rem)] mb-6"
                 initial={{ opacity: 0, y: 30, filter: "blur(12px)" }}
@@ -238,12 +238,11 @@ export default function LandingPage() {
                 transition={{ duration: 1.2, delay: HERO_SEQ.headline, ease: EASE_CINEMATIC }}
               >
                 Un mes de{" "}
-                <RotatingText
+                <GooeyText
                   texts={["Instagram", "contenido", "engagement", "crecimiento"]}
-                  interval={3000}
-                  variant="morph"
-                  className="align-baseline"
-                  textClassName="text-gradient"
+                  morphTime={1.5}
+                  cooldownTime={2}
+                  color="#FFC226"
                 />
                 <br />
                 en 2 minutos
