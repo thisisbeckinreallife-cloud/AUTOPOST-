@@ -96,7 +96,7 @@ export default function LandingPage() {
   }, [mouseX, mouseY]);
 
   return (
-    <div className="min-h-screen bg-surface-primary text-zinc-100 overflow-hidden grain" onMouseMove={handleMouseMove}>
+    <div className="min-h-screen bg-white text-zinc-900 overflow-hidden" onMouseMove={handleMouseMove}>
       <CustomCursor />
       <StickyCTA />
       <ScrollProgress />
@@ -127,34 +127,34 @@ export default function LandingPage() {
             </video>
           </motion.div>
 
-          {/* Dark overlay for readability — stronger center for text */}
+          {/* Light overlay for readability — stronger center for text */}
           <div
             className="absolute inset-0 z-[1]"
             style={{
               background: `
-                linear-gradient(180deg, rgba(6,8,13,0.6) 0%, rgba(6,8,13,0.45) 30%, rgba(6,8,13,0.55) 60%, rgba(6,8,13,0.95) 100%),
-                radial-gradient(ellipse 70% 50% at 50% 40%, rgba(6,8,13,0.35) 0%, rgba(6,8,13,0.65) 100%)
+                linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.40) 30%, rgba(255,255,255,0.50) 60%, rgba(255,255,255,0.97) 100%),
+                radial-gradient(ellipse 70% 50% at 50% 40%, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.60) 100%)
               `,
             }}
           />
 
           {/* Brand-tinted overlay — warm gold wash */}
           <div
-            className="absolute inset-0 z-[2] mix-blend-soft-light opacity-30"
+            className="absolute inset-0 z-[2] mix-blend-multiply opacity-15"
             style={{
               background: "linear-gradient(135deg, rgba(255,170,0,0.15) 0%, transparent 50%, rgba(99,102,241,0.1) 100%)",
             }}
           />
 
           {/* Noise texture over video for cinematic grain */}
-          <div className="absolute inset-0 z-[3] noise opacity-40" />
+          <div className="absolute inset-0 z-[3] noise opacity-10" />
         </div>
 
         {/* Subtle starfield — soft twinkling over video */}
-        <Meteors count={35} color="rgba(255,255,255,0.6)" variant="starfield" className="z-[4] opacity-50" />
+        <Meteors count={35} color="rgba(60,60,80,0.5)" variant="starfield" className="z-[4] opacity-50" />
 
         {/* Subtle meteors — neutral tones, varied directions */}
-        <Meteors count={6} color="rgba(200,200,220,0.5)" colorSecondary="rgba(180,180,200,0.3)" variant="premium" className="z-[4] opacity-40" />
+        <Meteors count={6} color="rgba(80,80,100,0.4)" colorSecondary="rgba(60,60,80,0.3)" variant="premium" className="z-[4] opacity-30" />
 
         {/* Mouse-following gradient (Aceternity Spotlight style) */}
         <div className="z-[5]">
@@ -191,7 +191,7 @@ export default function LandingPage() {
                 { href: "#precios", label: "Precios" },
                 { href: "/demo", label: "Demo" },
               ].map((link) => (
-                <a key={link.href} href={link.href} className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors link-underline">
+                <a key={link.href} href={link.href} className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors link-underline">
                   {link.label}
                 </a>
               ))}
@@ -199,7 +199,7 @@ export default function LandingPage() {
             <div className="flex items-center gap-3">
               <Link
                 href="/login"
-                className="hidden sm:inline text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+                className="hidden sm:inline text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
               >
                 Iniciar sesion
               </Link>
@@ -216,12 +216,12 @@ export default function LandingPage() {
         </motion.nav>
 
         {/* ─── Hero content ─── */}
-        <div className="relative z-10 flex-1 flex items-start sm:items-center px-6 pt-28 sm:pt-32 lg:pt-20" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>
+        <div className="relative z-10 flex-1 flex items-start sm:items-center px-6 pt-28 sm:pt-32 lg:pt-20">
           <div className="max-w-4xl mx-auto w-full">
             <div className="text-center">
               {/* Badge — scale-in with spring (Aceternity Badge style) */}
               <motion.div
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-500/20 bg-brand-500/[0.06] text-xs font-medium text-brand-300 mb-8 backdrop-blur-sm"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-500/25 bg-brand-500/[0.08] text-xs font-medium text-brand-700 mb-8 backdrop-blur-sm"
                 initial={{ opacity: 0, scale: 0.6, filter: "blur(10px)" }}
                 animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                 transition={{ ...SPRING_BOUNCE, delay: HERO_SEQ.badge }}
@@ -247,7 +247,7 @@ export default function LandingPage() {
                     texts={["Instagram", "contenido", "engagement", "crecimiento"]}
                     morphTime={1.5}
                     cooldownTime={2}
-                    color="#FFC226"
+                    color="#B37700"
                     textClassName="font-display font-extrabold tracking-[-0.03em] text-[clamp(2.4rem,6.5vw,5rem)]"
                   />
                 </div>
@@ -258,17 +258,17 @@ export default function LandingPage() {
 
               {/* Subtitle — blur fade in (Magic UI BlurFade) */}
               <motion.p
-                className="text-zinc-200/90 text-base sm:text-lg leading-relaxed max-w-lg mx-auto mb-3"
+                className="text-zinc-600 text-base sm:text-lg leading-relaxed max-w-lg mx-auto mb-3"
                 initial={{ opacity: 0, y: 25, filter: "blur(8px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 0.8, delay: HERO_SEQ.subtitle, ease: EASE_CINEMATIC }}
               >
                 Arrastra tu carpeta.{" "}
-                <span className="text-zinc-200">AutoPost detecta carruseles, extrae los copies y programa 30 dias.</span>
+                <span className="text-zinc-700">AutoPost detecta carruseles, extrae los copies y programa 30 dias.</span>
               </motion.p>
 
               <motion.p
-                className="text-sm text-zinc-400 mb-8"
+                className="text-sm text-zinc-500 mb-8"
                 initial={{ opacity: 0, filter: "blur(6px)" }}
                 animate={{ opacity: 1, filter: "blur(0px)" }}
                 transition={{ delay: HERO_SEQ.subtitle + 0.15, duration: 0.6, ease: EASE_CINEMATIC }}
@@ -301,7 +301,7 @@ export default function LandingPage() {
                 </MotionMagnetic>
                 <a
                   href="#como-funciona"
-                  className="inline-flex items-center gap-2 text-zinc-400 hover:text-white font-medium px-6 py-4 text-sm rounded-xl border border-white/[0.06] hover:border-white/[0.14] transition-all duration-300 active:scale-[0.97] active:translate-y-0.5"
+                  className="inline-flex items-center gap-2 text-zinc-600 hover:text-zinc-900 font-medium px-6 py-4 text-sm rounded-xl border border-zinc-200 hover:border-zinc-300 transition-all duration-300 active:scale-[0.97] active:translate-y-0.5"
                 >
                   Ver como funciona
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -309,7 +309,7 @@ export default function LandingPage() {
               </motion.div>
 
               <motion.p
-                className="text-xs text-zinc-600 mt-5"
+                className="text-xs text-zinc-400 mt-5"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: HERO_SEQ.ctas + 0.3 }}
@@ -337,7 +337,7 @@ export default function LandingPage() {
               ].map(({ icon: Icon, label }) => (
                 <MotionStaggerItem key={label}>
                   <div className="flex items-center gap-2 text-xs text-zinc-500">
-                    <Icon className="h-3.5 w-3.5 text-brand-500/60" aria-hidden="true" />
+                    <Icon className="h-3.5 w-3.5 text-brand-600/70" aria-hidden="true" />
                     <span>{label}</span>
                   </div>
                 </MotionStaggerItem>
@@ -356,8 +356,6 @@ export default function LandingPage() {
            HOW IT WORKS — 3D tilt cards + connecting beam
            ═══════════════════════════════════════════════════════════════════ */}
       <section id="como-funciona" className="py-32 px-6 relative overflow-hidden">
-        <AnimatedGridPattern cellSize={48} maxActive={12} interval={400} color="rgba(255, 170, 0, 0.05)" interactive={false} />
-        <div className="aurora w-[500px] h-[300px] bg-accent-indigo/[0.04] bottom-20 right-0" style={{ animationDelay: "6s" }} />
 
         <div className="max-w-5xl mx-auto relative">
           <MotionReveal direction="up" blur scale cinematic>
@@ -428,11 +426,11 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-surface-primary via-brand-500/[0.01] to-surface-primary pointer-events-none" />
         <div className="max-w-4xl mx-auto relative">
           <MotionReveal direction="up" blur cinematic>
-            <div className="rounded-2xl border border-brand-500/15 bg-surface-card overflow-hidden relative card-shine">
+            <div className="rounded-2xl border border-brand-500/15 bg-white overflow-hidden relative card-shine shadow-card">
               {/* Center badge — pop animation (Aceternity Badge) */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden md:flex">
                 <motion.div
-                  className="px-4 py-2 rounded-full bg-surface-primary border border-brand-500/30 text-xs font-bold text-brand-400 shadow-glow-sm"
+                  className="px-4 py-2 rounded-full bg-white shadow-md border border-brand-500/30 text-xs font-bold text-brand-400 shadow-glow-sm"
                   initial={{ scale: 0, rotate: -20 }}
                   whileInView={{ scale: 1, rotate: 0 }}
                   viewport={{ once: true }}
@@ -442,7 +440,7 @@ export default function LandingPage() {
                 </motion.div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/[0.05]">
+              <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-zinc-100">
                 {/* Before */}
                 <div className="p-8 space-y-4">
                   <p className="text-xs font-semibold text-zinc-500 uppercase tracking-[0.15em]">Como lo haces hoy</p>
@@ -459,14 +457,14 @@ export default function LandingPage() {
                           <span className="mt-0.5 h-4 w-4 rounded-full border border-accent-coral/30 bg-accent-coral/10 flex items-center justify-center shrink-0">
                             <span className="h-1.5 w-1.5 rounded-full bg-accent-coral/50" />
                           </span>
-                          <p className="text-sm text-zinc-500 leading-relaxed line-through decoration-zinc-700">{item}</p>
+                          <p className="text-sm text-zinc-500 leading-relaxed line-through decoration-zinc-300">{item}</p>
                         </div>
                       </MotionStaggerItem>
                     ))}
                   </MotionStagger>
                 </div>
                 {/* After */}
-                <div className="p-8 space-y-4 bg-brand-500/[0.03]">
+                <div className="p-8 space-y-4 bg-amber-50/50">
                   <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.15em]">Como sera con AutoPost</p>
                   <MotionStagger stagger={0.1}>
                     {[
@@ -486,7 +484,7 @@ export default function LandingPage() {
                           >
                             <CheckCircle className="mt-0.5 h-4 w-4 text-brand-400 shrink-0" aria-hidden="true" />
                           </motion.div>
-                          <p className="text-sm text-zinc-300 leading-relaxed">{item}</p>
+                          <p className="text-sm text-zinc-700 leading-relaxed">{item}</p>
                         </div>
                       </MotionStaggerItem>
                     ))}
@@ -503,7 +501,6 @@ export default function LandingPage() {
            ═══════════════════════════════════════════════════════════════════ */}
       <section className="py-32 px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-500/[0.012] to-transparent pointer-events-none" />
-        <AnimatedGridPattern cellSize={56} maxActive={8} interval={500} color="rgba(99, 102, 241, 0.04)" interactive={false} />
 
         <div className="max-w-5xl mx-auto relative">
           <MotionReveal direction="up" blur scale cinematic>
@@ -578,17 +575,15 @@ export default function LandingPage() {
 
             {/* Highlight card — spans 2 cols with GlowingStars */}
             <MotionStaggerItem className="sm:col-span-2">
-              <GlowingStars count={35} color="#6366F1" interactive>
-                <BentoCard
-                  icon={<Users className="h-5 w-5 text-accent-indigo" />}
-                  title="Posts colaborativos"
-                  description="Aparece en dos feeds a la vez. Sin coordinacion manual — doble audiencia, un solo post. La funcionalidad que los demas no tienen."
-                  size="large"
-                  glow="indigo"
-                  highlight
-                  badge="Unico"
-                />
-              </GlowingStars>
+              <BentoCard
+                icon={<Users className="h-5 w-5 text-accent-indigo" />}
+                title="Posts colaborativos"
+                description="Aparece en dos feeds a la vez. Sin coordinacion manual — doble audiencia, un solo post. La funcionalidad que los demas no tienen."
+                size="large"
+                glow="indigo"
+                highlight
+                badge="Unico"
+              />
             </MotionStaggerItem>
 
             <MotionStaggerItem>
@@ -659,42 +654,37 @@ export default function LandingPage() {
            FINAL CTA — with magnetic button + border beam
            ═══════════════════════════════════════════════════════════════════ */}
       <section className="py-32 px-6 relative overflow-hidden">
-        <div className="aurora w-[700px] h-[400px] bg-brand-500/[0.06] top-0 left-1/2 -translate-x-1/2" style={{ animationDelay: "2s" }} />
-
         <MotionReveal direction="up" blur scale cinematic>
           <div className="relative max-w-2xl mx-auto text-center">
             <BorderBeam size={250} duration={10} color="#FFAA00" colorTo="#6366F1" borderWidth={2}>
-              <GlowingStars count={40} color="#FFAA00" interactive>
-                <div className="rounded-3xl border border-brand-500/20 bg-surface-card p-12 sm:p-16 relative overflow-hidden card-glow-hover">
-                  <div className="absolute inset-0 bg-gradient-to-br from-brand-500/[0.06] via-transparent to-accent-indigo/[0.04] pointer-events-none rounded-3xl" />
-                  <Meteors count={5} color="rgba(180,180,210,0.3)" variant="premium" className="opacity-30" />
-                  <div className="relative">
-                    <MotionText
-                      as="h2"
-                      className="font-display font-bold text-3xl sm:text-4xl tracking-tight mb-4"
-                      effect="blur"
-                      highlight={{ words: ["2", "minutos"], className: "text-gradient" }}
+              <div className="rounded-3xl border border-brand-500/20 bg-white shadow-lg p-12 sm:p-16 relative overflow-hidden card-glow-hover">
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-50/50 via-transparent to-indigo-50/30 pointer-events-none rounded-3xl" />
+                <div className="relative">
+                  <MotionText
+                    as="h2"
+                    className="font-display font-bold text-3xl sm:text-4xl tracking-tight mb-4"
+                    effect="blur"
+                    highlight={{ words: ["2", "minutos"], className: "text-gradient" }}
+                  >
+                    Tu proximo mes de contenido listo en 2 minutos
+                  </MotionText>
+                  <p className="text-lg text-zinc-500 mb-10 max-w-md mx-auto">
+                    Mientras tu duermes, AutoPost publica. Programa 30 dias en 2 minutos.
+                  </p>
+                  <MotionMagnetic strength={0.15} scale>
+                    <Link
+                      href="/signup"
+                      className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-base shadow-glow btn-glow btn-ripple btn-pulse-ring active:scale-[0.97] active:translate-y-0.5 transition-transform"
                     >
-                      Tu proximo mes de contenido listo en 2 minutos
-                    </MotionText>
-                    <p className="text-lg text-zinc-400 mb-10 max-w-md mx-auto">
-                      Mientras tu duermes, AutoPost publica. Programa 30 dias en 2 minutos.
-                    </p>
-                    <MotionMagnetic strength={0.15} scale>
-                      <Link
-                        href="/signup"
-                        className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-base shadow-glow btn-glow btn-ripple btn-pulse-ring active:scale-[0.97] active:translate-y-0.5 transition-transform"
-                      >
-                        Empezar gratis — primera carpeta incluida
-                        <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                      </Link>
-                    </MotionMagnetic>
-                    <p className="text-sm text-zinc-500 mt-4">
-                      Sin tarjeta de credito. Sin compromisos.
-                    </p>
-                  </div>
+                      Empezar gratis — primera carpeta incluida
+                      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                  </MotionMagnetic>
+                  <p className="text-sm text-zinc-500 mt-4">
+                    Sin tarjeta de credito. Sin compromisos.
+                  </p>
                 </div>
-              </GlowingStars>
+              </div>
             </BorderBeam>
           </div>
         </MotionReveal>
@@ -702,7 +692,7 @@ export default function LandingPage() {
 
       {/* ─── Footer ─── */}
       <MotionReveal>
-        <footer className="border-t border-white/[0.04] py-10 px-6">
+        <footer className="border-t border-zinc-100 py-10 px-6">
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
             <div className="flex items-center gap-2">
               <div className="flex h-6 w-6 items-center justify-center rounded-md bg-brand-500/15">
@@ -710,14 +700,14 @@ export default function LandingPage() {
               </div>
               <span className="font-display font-bold text-sm">AutoPost</span>
             </div>
-            <p className="text-xs text-zinc-600">
+            <p className="text-xs text-zinc-400">
               Hecho para agencias e influencers hispanohablantes
             </p>
             <div className="flex items-center gap-5 text-xs text-zinc-500">
-              <a href="/privacidad" className="hover:text-zinc-300 transition-colors link-underline">
+              <a href="/privacidad" className="hover:text-zinc-900 transition-colors link-underline">
                 Politica de privacidad
               </a>
-              <a href="/terminos" className="hover:text-zinc-300 transition-colors link-underline">
+              <a href="/terminos" className="hover:text-zinc-900 transition-colors link-underline">
                 Terminos de uso
               </a>
             </div>
@@ -743,7 +733,7 @@ function StepCard({
   const a = accents[accent] ?? accents.brand;
 
   return (
-    <div className={`group relative rounded-2xl border border-white/[0.06] bg-surface-card p-7 h-full card-spotlight card-glow-hover ${a.glow}`}>
+    <div className={`group relative rounded-2xl border border-zinc-100 bg-white shadow-sm p-7 h-full card-spotlight card-glow-hover ${a.glow}`}>
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       <div className="relative">
         <div className="flex items-center gap-3 mb-5">
@@ -756,8 +746,8 @@ function StepCard({
           </motion.div>
           <span className="text-xs font-mono text-zinc-600 tracking-wider">{number}</span>
         </div>
-        <h3 className="font-display font-bold text-lg text-white mb-2">{title}</h3>
-        <p className="text-sm text-zinc-400 leading-relaxed">{description}</p>
+        <h3 className="font-display font-bold text-lg text-zinc-900 mb-2">{title}</h3>
+        <p className="text-sm text-zinc-500 leading-relaxed">{description}</p>
       </div>
     </div>
   );
@@ -781,7 +771,7 @@ function BentoCard({
       className={cn(
         "group relative rounded-2xl border p-6 h-full card-interactive card-spotlight card-shine transition-all",
         size === "large" ? "sm:flex sm:items-start sm:gap-5" : "",
-        highlight ? "border-brand-500/20 bg-brand-500/[0.04]" : "border-white/[0.05] bg-surface-card/80",
+        highlight ? "border-brand-500/20 bg-brand-500/[0.04]" : "border-zinc-100 bg-white shadow-sm",
         glowBorders[glow] ?? "",
       )}
     >
@@ -796,10 +786,10 @@ function BentoCard({
       </div>
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-1.5">
-          <h3 className="font-semibold text-sm text-white">{title}</h3>
+          <h3 className="font-semibold text-sm text-zinc-900">{title}</h3>
           {badge && (
             <motion.span
-              className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-brand-500/15 text-brand-300 border border-brand-500/20"
+              className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-brand-500/15 text-brand-600 border border-brand-500/20"
               animate={{ boxShadow: ["0 0 0 0 rgba(255,170,0,0)", "0 0 0 4px rgba(255,170,0,0.1)", "0 0 0 0 rgba(255,170,0,0)"] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
@@ -807,7 +797,7 @@ function BentoCard({
             </motion.span>
           )}
         </div>
-        <p className="text-sm text-zinc-400 leading-relaxed">{description}</p>
+        <p className="text-sm text-zinc-500 leading-relaxed">{description}</p>
       </div>
     </div>
   );
@@ -890,14 +880,14 @@ function TestimonialsSection() {
 function TestimonialCard({ quote, name, role, initials }: typeof testimonials[0]) {
   return (
     <motion.div
-      className="relative w-[340px] shrink-0 rounded-2xl border border-white/[0.06] bg-surface-card p-7 flex flex-col gap-5 card-shine"
-      whileHover={{ scale: 1.03, y: -4, borderColor: "rgba(255,255,255,0.12)" }}
+      className="relative w-[340px] shrink-0 rounded-2xl border border-zinc-100 bg-white shadow-sm p-7 flex flex-col gap-5 card-shine"
+      whileHover={{ scale: 1.03, y: -4, borderColor: "rgba(0,0,0,0.08)" }}
       transition={{ duration: 0.35, ease: EASE_OUT_EXPO }}
     >
       <span className="absolute top-4 right-5 text-5xl font-display text-brand-500/8 leading-none select-none" aria-hidden="true">
         &ldquo;
       </span>
-      <p className="text-sm text-zinc-300 leading-relaxed relative z-10">&ldquo;{quote}&rdquo;</p>
+      <p className="text-sm text-zinc-600 leading-relaxed relative z-10">&ldquo;{quote}&rdquo;</p>
       <div className="flex items-center gap-3 mt-auto">
         <div className="relative h-9 w-9 rounded-full flex items-center justify-center shrink-0">
           {/* Rotating ring — Aceternity MovingBorder inspired */}
@@ -905,11 +895,11 @@ function TestimonialCard({ quote, name, role, initials }: typeof testimonials[0]
             background: "conic-gradient(from 0deg, #FFAA00, #6366F1, #34D399, #FFAA00)",
             animation: "rotateBorder 6s linear infinite",
           }} />
-          <div className="absolute inset-0 rounded-full bg-surface-card" />
-          <span className="text-xs font-bold text-brand-300 relative z-10">{initials}</span>
+          <div className="absolute inset-0 rounded-full bg-white" />
+          <span className="text-xs font-bold text-brand-600 relative z-10">{initials}</span>
         </div>
         <div>
-          <p className="text-sm font-semibold text-white">{name}</p>
+          <p className="text-sm font-semibold text-zinc-900">{name}</p>
           <p className="text-xs text-zinc-500">{role}</p>
         </div>
       </div>
@@ -928,7 +918,7 @@ function MouseGradient({ mouseX, mouseY }: { mouseX: ReturnType<typeof useMotion
 
   const background = useTransform(
     [springX, springY] as any,
-    ([x, y]: number[]) => `radial-gradient(900px circle at ${x}px ${y}px, rgba(255,170,0,0.04), transparent 55%)`
+    ([x, y]: number[]) => `radial-gradient(900px circle at ${x}px ${y}px, rgba(255,170,0,0.06), transparent 55%)`
   );
 
   return (

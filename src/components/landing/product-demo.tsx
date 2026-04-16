@@ -73,12 +73,12 @@ export function ProductDemo() {
                     className={`relative flex items-start gap-3 p-4 rounded-xl text-left transition-all duration-300 w-full ${
                       isActive
                         ? "bg-brand-500/[0.08] border border-brand-500/20"
-                        : "border border-transparent hover:bg-white/[0.03] hover:border-white/[0.06]"
+                        : "border border-transparent hover:bg-zinc-50 hover:border-zinc-200"
                     }`}
                   >
                     <motion.div
                       className={`shrink-0 h-10 w-10 rounded-lg flex items-center justify-center ${
-                        isActive ? "bg-brand-500/15 text-brand-400" : "bg-white/[0.04] text-zinc-500"
+                        isActive ? "bg-brand-500/15 text-brand-400" : "bg-zinc-100 text-zinc-500"
                       }`}
                       animate={isActive ? { scale: [1, 1.1, 1] } : { scale: 1 }}
                       transition={{ duration: 0.4, ease: EASE_CINEMATIC }}
@@ -86,7 +86,7 @@ export function ProductDemo() {
                       <Icon className="h-5 w-5" />
                     </motion.div>
                     <div className="hidden lg:block">
-                      <p className={`text-sm font-semibold transition-colors duration-300 ${isActive ? "text-white" : "text-zinc-400"}`}>
+                      <p className={`text-sm font-semibold transition-colors duration-300 ${isActive ? "text-zinc-900" : "text-zinc-500"}`}>
                         {step.title}
                       </p>
                       <p className="text-xs text-zinc-500 mt-0.5">{step.description}</p>
@@ -107,16 +107,16 @@ export function ProductDemo() {
             </div>
 
             {/* Demo visual */}
-            <div className="relative rounded-2xl border border-white/[0.06] bg-surface-card overflow-hidden min-h-[400px] card-shine">
+            <div className="relative rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden min-h-[400px] card-shine">
               {/* Browser chrome */}
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06] bg-surface-secondary">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-100 bg-surface-secondary">
                 <div className="flex gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500/40" />
                   <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/40" />
                   <div className="w-2.5 h-2.5 rounded-full bg-green-500/40" />
                 </div>
                 <div className="flex-1 text-center">
-                  <span className="text-[10px] text-zinc-600 font-mono">app.autopost.io</span>
+                  <span className="text-[10px] text-zinc-400 font-mono">app.autopost.io</span>
                 </div>
               </div>
 
@@ -165,8 +165,8 @@ function DemoStep1() {
         >
           <Upload className="h-10 w-10 text-brand-400/60 mx-auto mb-4" />
         </motion.div>
-        <p className="text-sm text-zinc-400">Arrastra tu carpeta aqui</p>
-        <p className="text-xs text-zinc-600 mt-1">JPG, PNG, MP4, MOV, TXT</p>
+        <p className="text-sm text-zinc-500">Arrastra tu carpeta aqui</p>
+        <p className="text-xs text-zinc-400 mt-1">JPG, PNG, MP4, MOV, TXT</p>
       </motion.div>
       <div className="flex gap-2 flex-wrap justify-center">
         {["foto_1.jpg", "foto_2.jpg", "copy.txt", "reel.mp4"].map((f, i) => (
@@ -175,7 +175,7 @@ function DemoStep1() {
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.4 + i * 0.12, type: "spring", stiffness: 200, damping: 18 }}
-            className="text-[10px] px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-zinc-500 font-mono"
+            className="text-[10px] px-2.5 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-500 font-mono"
           >
             {f}
           </motion.div>
@@ -216,7 +216,7 @@ function DemoStep2() {
           initial={{ opacity: 0, x: -30, filter: "blur(4px)" }}
           animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
           transition={{ delay: 0.8 + i * 0.35, duration: 0.6, ease: EASE_CINEMATIC }}
-          className="flex items-center gap-4 p-3.5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+          className="flex items-center gap-4 p-3.5 rounded-xl border border-zinc-100 bg-zinc-50 hover:bg-zinc-100 transition-colors"
         >
           <div className="flex gap-1">
             {Array.from({ length: post.count }).map((_, j) => (
@@ -230,7 +230,7 @@ function DemoStep2() {
             ))}
           </div>
           <div className="flex-1">
-            <p className="text-xs font-semibold text-white">{post.type}</p>
+            <p className="text-xs font-semibold text-zinc-900">{post.type}</p>
             <p className="text-[10px] text-zinc-500">{post.items} · {post.copy}</p>
           </div>
           <motion.div
@@ -253,7 +253,7 @@ function DemoStep3() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm font-semibold text-white">Mayo 2026</p>
+        <p className="text-sm font-semibold text-zinc-900">Mayo 2026</p>
         <motion.p
           className="text-xs text-brand-400 font-mono"
           initial={{ opacity: 0 }}
@@ -265,7 +265,7 @@ function DemoStep3() {
       </div>
       <div className="grid grid-cols-7 gap-1.5">
         {["L", "M", "X", "J", "V", "S", "D"].map((d) => (
-          <div key={d} className="text-[10px] text-zinc-600 text-center py-1 font-medium">{d}</div>
+          <div key={d} className="text-[10px] text-zinc-400 text-center py-1 font-medium">{d}</div>
         ))}
         {days.map((day, i) => {
           const isScheduled = scheduledDays.includes(day);
@@ -283,7 +283,7 @@ function DemoStep3() {
               className={`aspect-square rounded-lg flex items-center justify-center text-xs transition-all ${
                 isScheduled
                   ? "bg-brand-500/15 text-brand-400 border border-brand-500/20 font-semibold shadow-inner-glow"
-                  : "text-zinc-600 bg-white/[0.02] hover:bg-white/[0.04]"
+                  : "text-zinc-400 bg-zinc-50 hover:bg-zinc-100"
               }`}
             >
               {day}

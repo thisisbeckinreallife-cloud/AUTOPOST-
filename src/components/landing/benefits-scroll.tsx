@@ -61,25 +61,25 @@ const accentMap: Record<string, { icon: string; bg: string; border: string; glow
     icon: "text-brand-400",
     bg: "bg-brand-500/10",
     border: "border-brand-500/20",
-    glow: "shadow-[0_0_20px_rgba(255,170,0,0.08)]",
+    glow: "shadow-sm",
   },
   indigo: {
     icon: "text-accent-indigo",
     bg: "bg-accent-indigo/10",
     border: "border-accent-indigo/20",
-    glow: "shadow-[0_0_20px_rgba(99,102,241,0.08)]",
+    glow: "shadow-sm",
   },
   orange: {
     icon: "text-accent-orange",
     bg: "bg-accent-orange/10",
     border: "border-accent-orange/20",
-    glow: "shadow-[0_0_20px_rgba(251,146,60,0.08)]",
+    glow: "shadow-sm",
   },
   emerald: {
     icon: "text-accent-emerald",
     bg: "bg-accent-emerald/10",
     border: "border-accent-emerald/20",
-    glow: "shadow-[0_0_20px_rgba(52,211,153,0.08)]",
+    glow: "shadow-sm",
   },
 };
 
@@ -101,14 +101,14 @@ export function BenefitsScroll() {
             >
               Por que AutoPost
             </motion.p>
-            <h2 className="font-display font-bold text-3xl sm:text-4xl md:text-[3.5rem] tracking-tight text-white leading-tight">
+            <h2 className="font-display font-bold text-3xl sm:text-4xl md:text-[3.5rem] tracking-tight text-zinc-900 leading-tight">
               Todo lo que necesitas para{" "}
               <br className="hidden sm:block" />
               <span className="bg-gradient-to-r from-brand-400 via-brand-300 to-accent-indigo bg-clip-text text-transparent">
                 automatizar Instagram
               </span>
             </h2>
-            <p className="text-zinc-400 text-base sm:text-lg mt-4 max-w-2xl mx-auto">
+            <p className="text-zinc-500 text-base sm:text-lg mt-4 max-w-2xl mx-auto">
               De carpeta de archivos a un mes de contenido programado.
               Sin esfuerzo, sin errores, sin perder horas.
             </p>
@@ -126,7 +126,7 @@ export function BenefitsScroll() {
                   key={benefit.title}
                   className={cn(
                     "group relative rounded-2xl border p-5 flex flex-col gap-3 transition-all duration-300",
-                    "bg-surface-primary/60 backdrop-blur-sm",
+                    "bg-white/80 backdrop-blur-sm",
                     colors.border,
                     "hover:border-opacity-50",
                     colors.glow
@@ -145,10 +145,10 @@ export function BenefitsScroll() {
                   >
                     <Icon className={cn("h-5 w-5", colors.icon)} aria-hidden="true" />
                   </div>
-                  <h3 className="font-display font-semibold text-sm text-white">
+                  <h3 className="font-display font-semibold text-sm text-zinc-900">
                     {benefit.title}
                   </h3>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
+                  <p className="text-xs text-zinc-500 leading-relaxed">
                     {benefit.desc}
                   </p>
                 </motion.div>
@@ -157,14 +157,14 @@ export function BenefitsScroll() {
           </div>
 
           {/* Bottom trust strip */}
-          <div className="flex flex-wrap items-center justify-center gap-6 mt-6 pt-5 border-t border-white/[0.04]">
+          <div className="flex flex-wrap items-center justify-center gap-6 mt-6 pt-5 border-t border-zinc-100">
             {[
               { icon: Instagram, text: "JPG, PNG, WEBP, MP4, MOV" },
               { icon: Shield, text: "Cifrado AES-256" },
               { icon: Zap, text: "Publicacion via API oficial" },
             ].map(({ icon: TrustIcon, text }) => (
               <div key={text} className="flex items-center gap-2 text-xs text-zinc-500">
-                <TrustIcon className="h-3.5 w-3.5 text-brand-500/50" aria-hidden="true" />
+                <TrustIcon className="h-3.5 w-3.5 text-brand-600/60" aria-hidden="true" />
                 {text}
               </div>
             ))}

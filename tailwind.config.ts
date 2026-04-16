@@ -39,39 +39,39 @@ const config: Config = {
           slate:   "#7C8DB5",  // muted text (WCAG compliant)
         },
         surface: {
-          primary:   "#06080D",  // obsidian black — deepest
-          secondary: "#0C0F16",  // dark obsidian
-          tertiary:  "#161A24",  // medium obsidian
-          card:      "#11141C",  // card surface
-          hover:     "#1A1E28",  // hover state
-          elevated:  "#1E2230",  // elevated/modal
+          primary:   "#FFFFFF",
+          secondary: "#FAFAFA",
+          tertiary:  "#F5F5F7",
+          card:      "#FFFFFF",
+          hover:     "#F0F0F2",
+          elevated:  "#FFFFFF",
         },
         neutral: {
-          750: "#2A2E3A",
-          850: "#1A1E28",
+          750: "#D1D1D6",
+          850: "#E5E5EA",
         },
       },
       borderColor: {
-        DEFAULT: "rgba(255,255,255,0.08)",
+        DEFAULT: "rgba(0,0,0,0.06)",
       },
       boxShadow: {
-        "card":         "0 1px 3px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)",
-        "card-hover":   "0 8px 28px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08)",
-        "elevated":     "0 16px 48px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05)",
-        "glow-sm":      "0 0 15px rgba(255,170,0,0.15), 0 0 5px rgba(255,170,0,0.08)",
-        "glow":         "0 0 25px rgba(255,170,0,0.22), 0 0 10px rgba(255,170,0,0.14)",
-        "glow-md":      "0 0 40px rgba(255,170,0,0.28), 0 0 15px rgba(255,170,0,0.16)",
-        "glow-lg":      "0 0 60px rgba(255,170,0,0.35), 0 0 25px rgba(255,170,0,0.20)",
-        "glow-amber":   "0 0 30px rgba(255,170,0,0.22), 0 0 10px rgba(255,170,0,0.14)",
-        "glow-blue":    "0 0 30px rgba(59,130,246,0.18), 0 0 10px rgba(59,130,246,0.10)",
-        "glow-orange":  "0 0 20px rgba(251,146,60,0.28), 0 0 10px rgba(251,146,60,0.14)",
-        "glow-indigo":  "0 0 30px rgba(99,102,241,0.22), 0 0 10px rgba(99,102,241,0.12)",
-        "glow-violet":  "0 0 30px rgba(99,102,241,0.22), 0 0 10px rgba(99,102,241,0.12)",
-        "glow-emerald": "0 0 20px rgba(52,211,153,0.22), 0 0 10px rgba(52,211,153,0.12)",
-        "glow-cyan":    "0 0 20px rgba(52,211,153,0.22), 0 0 10px rgba(52,211,153,0.12)",
-        "glow-coral":   "0 0 20px rgba(249,112,102,0.22), 0 0 10px rgba(249,112,102,0.12)",
-        "inner-light":  "inset 0 1px 0 rgba(255,255,255,0.05)",
-        "inner-glow":   "inset 0 0 20px rgba(255,170,0,0.05)",
+        "card":         "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
+        "card-hover":   "0 8px 28px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)",
+        "elevated":     "0 12px 40px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.03)",
+        "glow-sm":      "0 0 15px rgba(255,170,0,0.10), 0 0 5px rgba(255,170,0,0.05)",
+        "glow":         "0 0 25px rgba(255,170,0,0.14), 0 0 10px rgba(255,170,0,0.08)",
+        "glow-md":      "0 0 40px rgba(255,170,0,0.18), 0 0 15px rgba(255,170,0,0.10)",
+        "glow-lg":      "0 0 60px rgba(255,170,0,0.22), 0 0 25px rgba(255,170,0,0.12)",
+        "glow-amber":   "0 0 30px rgba(255,170,0,0.14), 0 0 10px rgba(255,170,0,0.08)",
+        "glow-blue":    "0 0 30px rgba(59,130,246,0.12), 0 0 10px rgba(59,130,246,0.06)",
+        "glow-orange":  "0 0 20px rgba(251,146,60,0.18), 0 0 10px rgba(251,146,60,0.08)",
+        "glow-indigo":  "0 0 30px rgba(99,102,241,0.14), 0 0 10px rgba(99,102,241,0.08)",
+        "glow-violet":  "0 0 30px rgba(99,102,241,0.14), 0 0 10px rgba(99,102,241,0.08)",
+        "glow-emerald": "0 0 20px rgba(52,211,153,0.14), 0 0 10px rgba(52,211,153,0.08)",
+        "glow-cyan":    "0 0 20px rgba(52,211,153,0.14), 0 0 10px rgba(52,211,153,0.08)",
+        "glow-coral":   "0 0 20px rgba(249,112,102,0.14), 0 0 10px rgba(249,112,102,0.08)",
+        "inner-light":  "inset 0 1px 0 rgba(0,0,0,0.03)",
+        "inner-glow":   "inset 0 0 20px rgba(255,170,0,0.03)",
       },
       borderRadius: {
         "2xl": "1rem",

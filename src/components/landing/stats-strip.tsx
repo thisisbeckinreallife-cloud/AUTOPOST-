@@ -11,7 +11,7 @@ const stats = [
 
 export function StatsStrip() {
   return (
-    <section className="relative border-y border-white/[0.04] py-14 px-6 bg-gradient-cta overflow-hidden">
+    <section className="relative border-y border-zinc-100 py-14 px-6 bg-gradient-cta overflow-hidden">
       {/* Subtle animated glow */}
       <div className="absolute inset-0 bg-gradient-to-r from-brand-500/[0.03] via-transparent to-accent-indigo/[0.03] pointer-events-none" />
 
@@ -41,7 +41,7 @@ export function StatsStrip() {
                 <p className="text-xs text-zinc-500">{stat.label}</p>
               </div>
               {i < stats.length - 1 && (
-                <div className="hidden sm:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-12 bg-gradient-to-b from-transparent via-white/[0.08] to-transparent" />
+                <div className="hidden sm:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-12 bg-gradient-to-b from-transparent via-zinc-200 to-transparent" />
               )}
             </motion.div>
           ))}
@@ -49,9 +49,9 @@ export function StatsStrip() {
           <div className="hidden sm:flex absolute inset-0 items-center justify-center pointer-events-none">
             <div className="max-w-4xl w-full flex">
               <div className="flex-1" />
-              <div className="w-px h-12 bg-gradient-to-b from-transparent via-white/[0.08] to-transparent" />
+              <div className="w-px h-12 bg-gradient-to-b from-transparent via-zinc-200 to-transparent" />
               <div className="flex-1" />
-              <div className="w-px h-12 bg-gradient-to-b from-transparent via-white/[0.08] to-transparent" />
+              <div className="w-px h-12 bg-gradient-to-b from-transparent via-zinc-200 to-transparent" />
               <div className="flex-1" />
             </div>
           </div>

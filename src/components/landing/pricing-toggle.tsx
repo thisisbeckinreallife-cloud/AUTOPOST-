@@ -11,12 +11,12 @@ interface PricingToggleProps {
 export function PricingToggle({ isAnnual, onToggle }: PricingToggleProps) {
   return (
     <div className="flex items-center justify-center gap-3 mb-12">
-      <span className={`text-sm font-medium transition-colors duration-300 ${!isAnnual ? "text-white" : "text-zinc-500"}`}>
+      <span className={`text-sm font-medium transition-colors duration-300 ${!isAnnual ? "text-zinc-900" : "text-zinc-500"}`}>
         Mensual
       </span>
       <button
         onClick={onToggle}
-        className="relative w-14 h-7 rounded-full bg-surface-card border border-white/[0.08] transition-colors hover:border-white/[0.12] active:scale-95"
+        className="relative w-14 h-7 rounded-full bg-zinc-100 border border-zinc-200 transition-colors hover:border-zinc-300 active:scale-95"
         aria-label="Toggle billing period"
       >
         <motion.div
@@ -35,7 +35,7 @@ export function PricingToggle({ isAnnual, onToggle }: PricingToggleProps) {
           transition={{ duration: 0.3 }}
         />
       </button>
-      <span className={`text-sm font-medium transition-colors duration-300 ${isAnnual ? "text-white" : "text-zinc-500"}`}>
+      <span className={`text-sm font-medium transition-colors duration-300 ${isAnnual ? "text-zinc-900" : "text-zinc-500"}`}>
         Anual
       </span>
       <AnimatePresence>

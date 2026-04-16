@@ -40,8 +40,8 @@ export function FAQAccordion() {
           <motion.div
             key={i}
             className={cn(
-              "rounded-xl border bg-surface-card overflow-hidden transition-colors duration-300",
-              isOpen ? "border-brand-500/20" : "border-white/[0.06]"
+              "rounded-xl border bg-white shadow-sm overflow-hidden transition-colors duration-300",
+              isOpen ? "border-brand-500/20" : "border-zinc-100"
             )}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -50,13 +50,13 @@ export function FAQAccordion() {
             layout
           >
             <button
-              className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-white/[0.02] transition-colors group"
+              className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-zinc-50 transition-colors group"
               onClick={() => setOpenIndex(isOpen ? null : i)}
               aria-expanded={isOpen}
             >
               <span className={cn(
                 "text-sm font-semibold pr-4 transition-colors duration-300",
-                isOpen ? "text-white" : "text-zinc-300"
+                isOpen ? "text-zinc-900" : "text-zinc-700"
               )}>
                 {faq.q}
               </span>
@@ -79,7 +79,7 @@ export function FAQAccordion() {
                   transition={{ duration: 0.4, ease: EASE_CINEMATIC }}
                   className="overflow-hidden"
                 >
-                  <p className="px-6 pb-5 text-sm text-zinc-400 leading-relaxed">{faq.a}</p>
+                  <p className="px-6 pb-5 text-sm text-zinc-500 leading-relaxed">{faq.a}</p>
                 </motion.div>
               )}
             </AnimatePresence>

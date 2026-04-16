@@ -3,23 +3,23 @@
 @tailwind utilities;
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   AUTOPOST — Obsidian Premium Design System v2
+   AUTOPOST — Apple Premium Light Design System v2
    Cinema-grade motion & effects
    ══════════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  --background: #06080D;
-  --foreground: #F0F0F5;
-  --surface-card: #11141C;
-  --surface-secondary: #0C0F16;
-  --surface-tertiary: #161A24;
-  --surface-elevated: #1E2230;
-  --border-primary: rgba(255,255,255,0.07);
-  --border-subtle: rgba(255,255,255,0.04);
-  --border-hover: rgba(255,255,255,0.14);
-  --text-primary: #F0F0F5;
-  --text-secondary: #8B8FA3;
-  --text-muted: #5C6070;
+  --background: #FFFFFF;
+  --foreground: #1D1D1F;
+  --surface-card: #FFFFFF;
+  --surface-secondary: #FAFAFA;
+  --surface-tertiary: #F5F5F7;
+  --surface-elevated: #FFFFFF;
+  --border-primary: rgba(0,0,0,0.06);
+  --border-subtle: rgba(0,0,0,0.03);
+  --border-hover: rgba(0,0,0,0.12);
+  --text-primary: #1D1D1F;
+  --text-secondary: #86868B;
+  --text-muted: #AEAEB2;
   --brand-500: #FFAA00;
   --brand-400: #FFC226;
   --brand-600: #CC8800;
@@ -67,17 +67,17 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.06);
+  background: rgba(0,0,0,0.10);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.20);
 }
 
 /* ─── Selection ─── */
 ::selection {
   background: rgba(255, 170, 0, 0.35);
-  color: #F0F0F5;
+  color: #1D1D1F;
 }
 
 /* ─── Focus ─── */
@@ -181,39 +181,37 @@ a, button, input, textarea, select {
 
 .surface-elevated {
   background: var(--surface-elevated);
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid rgba(0,0,0,0.06);
   border-radius: var(--radius);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
 }
 
 .glass {
-  background: rgba(6, 8, 13, 0.80);
+  background: rgba(255, 255, 255, 0.80);
   backdrop-filter: blur(24px) saturate(1.6);
   -webkit-backdrop-filter: blur(24px) saturate(1.6);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .glass-strong {
-  background: rgba(6, 8, 13, 0.92);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(32px) saturate(1.5);
   -webkit-backdrop-filter: blur(32px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 /* ─── Frosted glass with inner light ─── */
 .glass-premium {
-  background: rgba(17, 20, 28, 0.6);
+  background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(40px) saturate(1.8);
   -webkit-backdrop-filter: blur(40px) saturate(1.8);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 8px 32px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
 }
 
 /* ─── Skeleton loading ─── */
 .skeleton {
-  background: linear-gradient(90deg, #161A24 25%, #1E2230 50%, #161A24 75%);
+  background: linear-gradient(90deg, #F5F5F7 25%, #EEEEF0 50%, #F5F5F7 75%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite linear;
   border-radius: 6px;
@@ -341,9 +339,9 @@ a, button, input, textarea, select {
   background: linear-gradient(
     105deg,
     transparent 40%,
-    rgba(255, 255, 255, 0.03) 45%,
-    rgba(255, 255, 255, 0.06) 50%,
-    rgba(255, 255, 255, 0.03) 55%,
+    rgba(0, 0, 0, 0.02) 45%,
+    rgba(0, 0, 0, 0.03) 50%,
+    rgba(0, 0, 0, 0.02) 55%,
     transparent 60%
   );
   transform: translateX(-100%);
@@ -392,7 +390,7 @@ a, button, input, textarea, select {
   position: absolute;
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  opacity: 0.35;
+  opacity: 0.06;
   pointer-events: none;
   mix-blend-mode: overlay;
 }
@@ -410,7 +408,7 @@ a, button, input, textarea, select {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.04'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 1;
-  opacity: 0.5;
+  opacity: 0;
   mix-blend-mode: overlay;
   animation: grain-drift 8s linear infinite;
 }
@@ -421,7 +419,7 @@ a, button, input, textarea, select {
 
 /* ─── Dot grid (subtle) ─── */
 .bg-dots {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -436,12 +434,9 @@ a, button, input, textarea, select {
     border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .card-interactive:hover {
-  transform: translateY(-6px) scale(1.01);
-  box-shadow:
-    0 20px 60px rgba(0,0,0,0.6),
-    0 0 0 1px rgba(255,255,255,0.1),
-    0 0 40px rgba(255,170,0,0.06);
-  border-color: rgba(255,255,255,0.14);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.10);
 }
 
 /* ─── Card spotlight effect (follows cursor) ─── */
@@ -453,7 +448,7 @@ a, button, input, textarea, select {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(500px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(255,170,0,0.07), transparent 55%);
+  background: radial-gradient(500px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(255,170,0,0.04), transparent 55%);
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.4s ease;
@@ -471,7 +466,7 @@ a, button, input, textarea, select {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(ellipse at 50% 0%, rgba(255,170,0,0.08), transparent 60%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(255,170,0,0.04), transparent 60%);
   opacity: 0;
   transition: opacity 0.5s ease;
   pointer-events: none;
@@ -526,7 +521,7 @@ input:focus, textarea:focus, select:focus {
   background-blend-mode: luminosity;
   backdrop-filter: blur(4px);
   border: none;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.04);
   position: relative;
   overflow: hidden;
 }
@@ -568,10 +563,7 @@ input:focus, textarea:focus, select:focus {
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease-out;
 }
 .card-3d:hover {
-  box-shadow:
-    0 30px 80px rgba(0,0,0,0.6),
-    0 0 0 1px rgba(255,255,255,0.1),
-    0 0 50px rgba(255,170,0,0.08);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -604,17 +596,14 @@ input:focus, textarea:focus, select:focus {
 }
 .btn-glow:hover {
   box-shadow:
-    0 0 30px rgba(255,170,0,0.25),
-    0 0 15px rgba(255,170,0,0.15),
-    0 10px 30px rgba(0,0,0,0.3),
-    0 0 80px rgba(255,170,0,0.08);
+    0 0 25px rgba(255,170,0,0.20),
+    0 0 12px rgba(255,170,0,0.12),
+    0 8px 24px rgba(0,0,0,0.10);
   transform: scale(1.04) translateY(-1px);
 }
 .btn-glow:active {
   transform: scale(0.98);
-  box-shadow:
-    0 0 15px rgba(255,170,0,0.2),
-    0 5px 15px rgba(0,0,0,0.3);
+  box-shadow: 0 0 12px rgba(255,170,0,0.15), 0 4px 12px rgba(0,0,0,0.10);
 }
 
 /* ─── Pulse ring on buttons ─── */
@@ -645,7 +634,7 @@ input:focus, textarea:focus, select:focus {
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
-  mix-blend-mode: screen;
+  mix-blend-mode: normal;
   transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), height 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s, background 0.2s;
 }
 .cursor-dot.hovering {
@@ -679,9 +668,9 @@ input:focus, textarea:focus, select:focus {
   right: 0;
   z-index: 50;
   padding: 12px 16px;
-  background: rgba(6, 8, 13, 0.95);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(0,0,0,0.06);
   transform: translateY(100%);
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -694,13 +683,13 @@ input:focus, textarea:focus, select:focus {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .navbar-scrolled {
-  background: rgba(6, 8, 13, 0.85) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
   backdrop-filter: blur(24px) saturate(1.5);
   -webkit-backdrop-filter: blur(24px) saturate(1.5);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
   padding-top: 0.75rem !important;
   padding-bottom: 0.75rem !important;
-  box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -735,7 +724,7 @@ input:focus, textarea:focus, select:focus {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse 60% 50% at 50% 50%, transparent 0%, rgba(6,8,13,0.5) 100%);
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, transparent 0%, rgba(255,255,255,0.5) 100%);
   z-index: 2;
 }
 
@@ -779,7 +768,7 @@ input:focus, textarea:focus, select:focus {
 
 .section-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,170,0,0.15), rgba(99,102,241,0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.04), rgba(0,0,0,0.06), transparent);
 }
 
 .section-glow {
@@ -793,7 +782,7 @@ input:focus, textarea:focus, select:focus {
   transform: translateX(-50%);
   width: 60%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,170,0,0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

@@ -47,14 +47,14 @@ export function ComparisonTable() {
         </MotionReveal>
 
         <MotionReveal delay={0.15}>
-          <div className="overflow-x-auto rounded-2xl border border-white/[0.06] card-shine group">
+          <div className="overflow-x-auto rounded-2xl border border-zinc-200 card-shine group">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/[0.06]">
-                  <th className="text-left p-4 font-medium text-zinc-400 min-w-[200px] sticky left-0 bg-surface-card z-10">
+                <tr className="border-b border-zinc-200">
+                  <th className="text-left p-4 font-medium text-zinc-500 min-w-[200px] sticky left-0 bg-white z-10">
                     Funcionalidad
                   </th>
-                  <th className="p-4 text-center min-w-[100px] bg-brand-500/[0.06] border-x border-brand-500/10">
+                  <th className="p-4 text-center min-w-[100px] bg-amber-50 border-x border-amber-100">
                     <span className="font-display font-bold text-brand-400">AutoPost</span>
                   </th>
                   <th className="p-4 text-center min-w-[100px] text-zinc-500 font-medium">Later</th>
@@ -66,14 +66,14 @@ export function ComparisonTable() {
                 {features.map((f, rowIdx) => (
                   <motion.tr
                     key={f.name}
-                    className="border-b border-white/[0.03] last:border-0 hover:bg-white/[0.02] transition-colors"
+                    className="border-b border-zinc-50 last:border-0 hover:bg-zinc-50 transition-colors"
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: rowIdx * 0.06, duration: 0.5, ease: EASE_CINEMATIC }}
                   >
-                    <td className="p-4 text-zinc-300 sticky left-0 bg-surface-card z-10">{f.name}</td>
-                    <td className="p-4 bg-brand-500/[0.03] border-x border-brand-500/[0.06]">
+                    <td className="p-4 text-zinc-700 sticky left-0 bg-white z-10">{f.name}</td>
+                    <td className="p-4 bg-amber-50/50 border-x border-amber-100">
                       <motion.div
                         initial={{ scale: 0 }}
                         whileInView={{ scale: 1 }}
@@ -103,9 +103,9 @@ export function ComparisonTable() {
               <p className="text-2xl font-display font-bold text-brand-400">$19<span className="text-sm text-zinc-500">/mes</span></p>
               <p className="text-xs text-zinc-500 mt-1">AutoPost Pro</p>
             </motion.div>
-            <div className="w-px bg-white/[0.06]" />
+            <div className="w-px bg-zinc-200" />
             <div className="text-center">
-              <p className="text-2xl font-display font-bold text-zinc-500">$25-99<span className="text-sm text-zinc-600">/mes</span></p>
+              <p className="text-2xl font-display font-bold text-zinc-500">$25-99<span className="text-sm text-zinc-400">/mes</span></p>
               <p className="text-xs text-zinc-500 mt-1">Competidores</p>
             </div>
           </div>

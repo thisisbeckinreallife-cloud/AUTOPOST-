@@ -101,9 +101,9 @@ export function Meteors({
               style={{
                 width: isPremium ? `${6 + meteor.thickness * 2}px` : "4px",
                 height: isPremium ? `${6 + meteor.thickness * 2}px` : "4px",
-                backgroundColor: "#fff",
+                backgroundColor: color,
                 boxShadow: isPremium
-                  ? `0 0 4px 2px #fff, 0 0 8px 3px ${trailColor}, 0 0 20px 6px ${trailColor}80, 0 0 40px 10px ${trailColor}30`
+                  ? `0 0 4px 2px ${color}, 0 0 8px 3px ${trailColor}, 0 0 20px 6px ${trailColor}80, 0 0 40px 10px ${trailColor}30`
                   : `0 0 6px 2px ${trailColor}, 0 0 16px 4px ${trailColor}60`,
               }}
             />
@@ -153,7 +153,7 @@ function Starfield({
             top: `${star.y}%`,
             width: star.size,
             height: star.size,
-            backgroundColor: star.brightness > 0.7 ? "#fff" : color,
+            backgroundColor: color,
             boxShadow:
               star.brightness > 0.6
                 ? `0 0 ${star.size * 3}px ${color}, 0 0 ${star.size * 6}px ${color}40`

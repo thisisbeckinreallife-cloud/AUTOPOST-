@@ -102,7 +102,7 @@ export function PricingSectionNew({
             >
               Simple y sin sorpresas
             </MotionText>
-            <p className="text-zinc-400 text-base sm:text-lg mt-4 max-w-xl mx-auto">
+            <p className="text-zinc-500 text-base sm:text-lg mt-4 max-w-xl mx-auto">
               Elige el plan que se adapta a tu volumen. Cambia o cancela cuando quieras.
             </p>
           </div>
@@ -185,13 +185,13 @@ function PricingCard({
       className={cn(
         "relative rounded-2xl border p-7 flex flex-col gap-6 h-full card-glow-hover w-full",
         tier.popular
-          ? "border-transparent bg-surface-card border-rotating"
-          : "border-white/[0.06] bg-surface-card"
+          ? "border-transparent bg-white shadow-lg border-rotating"
+          : "border-zinc-100 bg-white shadow-sm"
       )}
       aria-label={`Plan ${tier.name}`}
     >
       {tier.popular && (
-        <div className="absolute inset-[1.5px] rounded-2xl bg-surface-card z-0" />
+        <div className="absolute inset-[1.5px] rounded-2xl bg-white z-0" />
       )}
 
       <div className="relative z-10 flex flex-col h-full">
@@ -219,14 +219,14 @@ function PricingCard({
           <div className="flex items-baseline gap-2">
             <PriceMorph
               value={displayPrice}
-              className="font-display font-extrabold text-4xl text-white"
+              className="font-display font-extrabold text-4xl text-zinc-900"
             />
             {tier.price > 0 && (
               <span className="text-sm text-zinc-500">/mes</span>
             )}
           </div>
           {isAnnual && tier.price > 0 && (
-            <p className="text-xs text-zinc-600 mt-1 line-through">
+            <p className="text-xs text-zinc-400 mt-1 line-through">
               ${tier.price}/mes
             </p>
           )}
@@ -234,14 +234,14 @@ function PricingCard({
         </div>
 
         {/* Divider */}
-        <div className="border-t border-white/[0.06] mb-6" />
+        <div className="border-t border-zinc-100 mb-6" />
 
         {/* Features */}
         <ul className="space-y-2.5 flex-1 mb-6">
           {tier.features.map((f, i) => (
             <motion.li
               key={f}
-              className="flex items-start gap-2.5 text-sm text-zinc-300"
+              className="flex items-start gap-2.5 text-sm text-zinc-700"
               initial={{ opacity: 0, x: -15 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -269,7 +269,7 @@ function PricingCard({
                 "inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 btn-ripple w-full active:scale-[0.97] active:translate-y-0.5",
                 tier.popular
                   ? "bg-gradient-brand-vivid text-white shadow-glow btn-glow"
-                  : "border border-white/[0.1] text-zinc-300 hover:border-white/[0.18] hover:text-white hover:bg-white/[0.04]"
+                  : "border border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:text-zinc-900 hover:bg-zinc-50"
               )}
             >
               {tier.cta}

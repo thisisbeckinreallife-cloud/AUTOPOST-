@@ -11,7 +11,7 @@ export function ScrollProgress() {
   return (
     <>
       {/* Track */}
-      <div className="fixed top-0 right-0 w-[2px] h-screen z-50 bg-white/[0.03]" />
+      <div className="fixed top-0 right-0 w-[2px] h-screen z-50 bg-black/[0.05]" />
       {/* Progress */}
       <motion.div
         className="fixed top-0 right-0 w-[2px] h-screen z-50 origin-top scroll-progress-bar"
