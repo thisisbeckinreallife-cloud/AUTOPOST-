@@ -41,6 +41,7 @@ import { ComparisonTable } from "@/components/landing/comparison-table";
 import { PricingToggle } from "@/components/landing/pricing-toggle";
 import { BenefitsScroll } from "@/components/landing/benefits-scroll";
 import { PricingSectionNew } from "@/components/landing/pricing-section";
+import HeroScrollAnimation from "@/components/ui/hero-scroll-animation";
 import {
   MotionReveal,
   MotionStagger,
@@ -351,6 +352,11 @@ export default function LandingPage() {
 
       {/* ─── Stats strip ─── */}
       <StatsStrip />
+
+      {/* ═══════════════════════════════════════════════════════════════════
+           HERO SCROLL — Scroll-triggered transition into features
+           ═══════════════════════════════════════════════════════════════════ */}
+      <HeroScrollAnimation />
 
       {/* ═══════════════════════════════════════════════════════════════════
            HOW IT WORKS — 3D tilt cards + connecting beam
