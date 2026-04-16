@@ -230,23 +230,29 @@ export default function LandingPage() {
                 Automatizacion de Instagram para agencias
               </motion.div>
 
-              {/* Headline — GooeyText morphing between key phrases */}
-              <motion.h1
-                className="font-display font-extrabold tracking-[-0.03em] leading-[1.1] text-[clamp(2.4rem,6.5vw,5rem)] mb-6"
+              {/* Headline — 3 lines: static / gooey morph / static */}
+              <motion.div
+                className="mb-6"
                 initial={{ opacity: 0, y: 30, filter: "blur(12px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 1.2, delay: HERO_SEQ.headline, ease: EASE_CINEMATIC }}
               >
-                Un mes de{" "}
-                <GooeyText
-                  texts={["Instagram", "contenido", "engagement", "crecimiento"]}
-                  morphTime={1.5}
-                  cooldownTime={2}
-                  color="#FFC226"
-                />
-                <br />
-                en 2 minutos
-              </motion.h1>
+                <h1 className="font-display font-extrabold tracking-[-0.03em] leading-[1.05] text-[clamp(2.4rem,6.5vw,5rem)]">
+                  Un mes de
+                </h1>
+                <div className="flex justify-center my-1">
+                  <GooeyText
+                    texts={["Instagram", "contenido", "engagement", "crecimiento"]}
+                    morphTime={1.5}
+                    cooldownTime={2}
+                    color="#FFC226"
+                    textClassName="font-display font-extrabold tracking-[-0.03em] text-[clamp(2.4rem,6.5vw,5rem)]"
+                  />
+                </div>
+                <h1 className="font-display font-extrabold tracking-[-0.03em] leading-[1.05] text-[clamp(2.4rem,6.5vw,5rem)]">
+                  en 2 minutos
+                </h1>
+              </motion.div>
 
               {/* Subtitle — blur fade in (Magic UI BlurFade) */}
               <motion.p
@@ -347,16 +353,22 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════════════════════
            HOW IT WORKS — 3D tilt cards + connecting beam
            ═══════════════════════════════════════════════════════════════════ */}
-      <section id="como-funciona" className="py-28 px-6 relative">
-        <AnimatedGridPattern cellSize={48} maxActive={12} interval={400} color="rgba(255, 170, 0, 0.08)" interactive={false} />
+      <section id="como-funciona" className="py-32 px-6 relative overflow-hidden">
+        <AnimatedGridPattern cellSize={48} maxActive={12} interval={400} color="rgba(255, 170, 0, 0.05)" interactive={false} />
         <div className="aurora w-[500px] h-[300px] bg-accent-indigo/[0.04] bottom-20 right-0" style={{ animationDelay: "6s" }} />
 
         <div className="max-w-5xl mx-auto relative">
-          <MotionReveal cinematic>
-            <div className="text-center mb-16">
-              <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
+          <MotionReveal direction="up" blur scale cinematic>
+            <div className="text-center mb-20">
+              <motion.p
+                className="text-xs font-semibold text-brand-400 uppercase tracking-[0.25em] mb-5"
+                initial={{ opacity: 0, letterSpacing: "0.5em" }}
+                whileInView={{ opacity: 1, letterSpacing: "0.25em" }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, ease: EASE_CINEMATIC }}
+              >
                 Como funciona
-              </p>
+              </motion.p>
               <MotionText
                 as="h2"
                 className="font-display font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight"
@@ -410,9 +422,10 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════════════════════
            BEFORE / AFTER — stagger with cross-out effect
            ═══════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 px-6">
-        <div className="max-w-4xl mx-auto">
-          <MotionReveal cinematic scale>
+      <section className="py-24 px-6 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-surface-primary via-brand-500/[0.01] to-surface-primary pointer-events-none" />
+        <div className="max-w-4xl mx-auto relative">
+          <MotionReveal direction="up" blur cinematic>
             <div className="rounded-2xl border border-brand-500/15 bg-surface-card overflow-hidden relative card-shine">
               {/* Center badge — pop animation (Aceternity Badge) */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden md:flex">
@@ -486,16 +499,22 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════════════════════
            FEATURES — BENTO GRID with Aceternity card effects
            ═══════════════════════════════════════════════════════════════════ */}
-      <section className="py-28 px-6 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-500/[0.015] to-transparent pointer-events-none" />
-        <AnimatedGridPattern cellSize={56} maxActive={8} interval={500} color="rgba(99, 102, 241, 0.06)" interactive={false} />
+      <section className="py-32 px-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-500/[0.012] to-transparent pointer-events-none" />
+        <AnimatedGridPattern cellSize={56} maxActive={8} interval={500} color="rgba(99, 102, 241, 0.04)" interactive={false} />
 
         <div className="max-w-5xl mx-auto relative">
-          <MotionReveal cinematic>
-            <div className="text-center mb-16">
-              <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
+          <MotionReveal direction="up" blur scale cinematic>
+            <div className="text-center mb-20">
+              <motion.p
+                className="text-xs font-semibold text-brand-400 uppercase tracking-[0.25em] mb-5"
+                initial={{ opacity: 0, letterSpacing: "0.5em" }}
+                whileInView={{ opacity: 1, letterSpacing: "0.25em" }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, ease: EASE_CINEMATIC }}
+              >
                 Caracteristicas
-              </p>
+              </motion.p>
               <MotionText
                 as="h2"
                 className="font-display font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight"
@@ -599,13 +618,20 @@ export default function LandingPage() {
       <PricingSection isAnnual={isAnnual} onToggleAnnual={() => setIsAnnual(!isAnnual)} />
 
       {/* ─── FAQ ─── */}
-      <section className="py-28 px-6">
-        <div className="max-w-2xl mx-auto">
-          <MotionReveal cinematic>
-            <div className="text-center mb-12">
-              <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
+      <section className="py-32 px-6 relative">
+        <div className="absolute inset-0 section-glow pointer-events-none" />
+        <div className="max-w-2xl mx-auto relative">
+          <MotionReveal direction="up" blur cinematic>
+            <div className="text-center mb-14">
+              <motion.p
+                className="text-xs font-semibold text-brand-400 uppercase tracking-[0.25em] mb-5"
+                initial={{ opacity: 0, letterSpacing: "0.5em" }}
+                whileInView={{ opacity: 1, letterSpacing: "0.25em" }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, ease: EASE_CINEMATIC }}
+              >
                 Preguntas frecuentes
-              </p>
+              </motion.p>
               <MotionText
                 as="h2"
                 className="font-display font-bold text-3xl sm:text-4xl tracking-tight"
@@ -625,10 +651,10 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════════════════════
            FINAL CTA — with magnetic button + border beam
            ═══════════════════════════════════════════════════════════════════ */}
-      <section className="py-28 px-6 relative">
+      <section className="py-32 px-6 relative overflow-hidden">
         <div className="aurora w-[700px] h-[400px] bg-brand-500/[0.06] top-0 left-1/2 -translate-x-1/2" style={{ animationDelay: "2s" }} />
 
-        <MotionReveal cinematic scale>
+        <MotionReveal direction="up" blur scale cinematic>
           <div className="relative max-w-2xl mx-auto text-center">
             <BorderBeam size={250} duration={10} color="#FFAA00" colorTo="#6366F1" borderWidth={2}>
               <GlowingStars count={40} color="#FFAA00" interactive>
@@ -811,13 +837,20 @@ const testimonials = [
 
 function TestimonialsSection() {
   return (
-    <section className="py-28 relative overflow-hidden">
+    <section className="py-32 relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 section-divider" />
       <div className="px-6">
-        <MotionReveal cinematic>
-          <div className="text-center mb-16">
-            <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
+        <MotionReveal direction="up" blur cinematic>
+          <div className="text-center mb-20">
+            <motion.p
+              className="text-xs font-semibold text-brand-400 uppercase tracking-[0.25em] mb-5"
+              initial={{ opacity: 0, letterSpacing: "0.5em" }}
+              whileInView={{ opacity: 1, letterSpacing: "0.25em" }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease: EASE_CINEMATIC }}
+            >
               Testimonios
-            </p>
+            </motion.p>
             <MotionText
               as="h2"
               className="font-display font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight"
@@ -899,14 +932,20 @@ const pricingTiers = [
 
 function PricingSection({ isAnnual, onToggleAnnual }: { isAnnual: boolean; onToggleAnnual: () => void }) {
   return (
-    <section id="precios" className="py-28 px-6 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-500/[0.015] to-transparent pointer-events-none" />
+    <section id="precios" className="py-32 px-6 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-500/[0.012] to-transparent pointer-events-none" />
       <div className="max-w-5xl mx-auto relative">
-        <MotionReveal cinematic>
-          <div className="text-center mb-8">
-            <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
+        <MotionReveal direction="up" blur cinematic>
+          <div className="text-center mb-10">
+            <motion.p
+              className="text-xs font-semibold text-brand-400 uppercase tracking-[0.25em] mb-5"
+              initial={{ opacity: 0, letterSpacing: "0.5em" }}
+              whileInView={{ opacity: 1, letterSpacing: "0.25em" }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease: EASE_CINEMATIC }}
+            >
               Precios
-            </p>
+            </motion.p>
             <MotionText
               as="h2"
               className="font-display font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight"
