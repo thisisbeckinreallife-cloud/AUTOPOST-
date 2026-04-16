@@ -28,7 +28,7 @@ import {
   Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { GooeyText } from "@/components/ui/gooey-text-morphing";
+import { RotatingText } from "@/components/ui/rotating-text";
 import { FAQAccordion } from "@/components/landing/faq-accordion";
 import { StatsStrip } from "@/components/landing/stats-strip";
 import { ROICalculator } from "@/components/landing/roi-calculator";
@@ -125,13 +125,13 @@ export default function LandingPage() {
             </video>
           </motion.div>
 
-          {/* Dark overlay for readability — gradient from edges */}
+          {/* Dark overlay for readability — stronger center for text */}
           <div
             className="absolute inset-0 z-[1]"
             style={{
               background: `
-                linear-gradient(180deg, rgba(6,8,13,0.55) 0%, rgba(6,8,13,0.3) 40%, rgba(6,8,13,0.5) 70%, rgba(6,8,13,0.92) 100%),
-                radial-gradient(ellipse 80% 60% at 50% 45%, transparent 0%, rgba(6,8,13,0.6) 100%)
+                linear-gradient(180deg, rgba(6,8,13,0.6) 0%, rgba(6,8,13,0.45) 30%, rgba(6,8,13,0.55) 60%, rgba(6,8,13,0.95) 100%),
+                radial-gradient(ellipse 70% 50% at 50% 40%, rgba(6,8,13,0.35) 0%, rgba(6,8,13,0.65) 100%)
               `,
             }}
           />
@@ -230,31 +230,28 @@ export default function LandingPage() {
                 Automatizacion de Instagram para agencias
               </motion.div>
 
-              {/* Headline — GooeyText morphing between key phrases */}
-              <motion.div
-                initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+              {/* Headline — RotatingText morphing between key phrases */}
+              <motion.h1
+                className="font-display font-extrabold tracking-[-0.03em] leading-[1.1] text-[clamp(2.4rem,6.5vw,5rem)] mb-6"
+                initial={{ opacity: 0, y: 30, filter: "blur(12px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                transition={{ duration: 1, delay: HERO_SEQ.headline, ease: EASE_CINEMATIC }}
-                className="mb-8"
+                transition={{ duration: 1.2, delay: HERO_SEQ.headline, ease: EASE_CINEMATIC }}
               >
-                <div className="font-display font-extrabold tracking-[-0.03em] leading-[1.1] text-[clamp(2.2rem,6vw,4.5rem)]">
-                  <span>Un mes de</span>
-                  <div className="relative" style={{ height: "clamp(2.8rem, 6.5vw, 5rem)" }}>
-                    <GooeyText
-                      texts={["Instagram", "contenido", "engagement", "crecimiento"]}
-                      morphTime={1.5}
-                      cooldownTime={0.5}
-                      className="absolute inset-0"
-                      textClassName="font-display font-extrabold tracking-[-0.03em] text-[clamp(2.2rem,6vw,4.5rem)] text-gradient"
-                    />
-                  </div>
-                  <span>en 2 minutos</span>
-                </div>
-              </motion.div>
+                Un mes de{" "}
+                <RotatingText
+                  texts={["Instagram", "contenido", "engagement", "crecimiento"]}
+                  interval={3000}
+                  variant="morph"
+                  className="align-baseline"
+                  textClassName="text-gradient"
+                />
+                <br />
+                en 2 minutos
+              </motion.h1>
 
               {/* Subtitle — blur fade in (Magic UI BlurFade) */}
               <motion.p
-                className="text-zinc-300 text-base sm:text-lg leading-relaxed max-w-lg mx-auto mb-4"
+                className="text-zinc-200/90 text-base sm:text-lg leading-relaxed max-w-lg mx-auto mb-3"
                 initial={{ opacity: 0, y: 25, filter: "blur(8px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 0.8, delay: HERO_SEQ.subtitle, ease: EASE_CINEMATIC }}
