@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MotionCounter, MotionReveal, EASE_CINEMATIC, STAGGER } from "@/components/motion";
+import { MotionReveal, NumberTicker, EASE_CINEMATIC, STAGGER } from "@/components/motion";
 
 const stats = [
   { value: 2, suffix: " min", label: "para programar un mes", gradient: "from-brand-400 to-brand-500" },
@@ -33,7 +33,7 @@ export function StatsStrip() {
               <div className="flex flex-col items-center gap-1.5">
                 <p className={`font-display font-extrabold text-4xl sm:text-5xl bg-gradient-to-r bg-clip-text text-transparent ${stat.gradient}`}>
                   {stat.value > 0 ? (
-                    <MotionCounter value={stat.value} suffix={stat.suffix} />
+                    <NumberTicker value={stat.value} suffix={stat.suffix} delay={300 + i * 200} />
                   ) : (
                     <>0{stat.suffix}</>
                   )}

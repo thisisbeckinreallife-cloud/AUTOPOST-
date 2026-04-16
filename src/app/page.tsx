@@ -47,6 +47,13 @@ import {
   MotionParallax,
   MotionMagnetic,
   MotionFloat,
+  TextScramble,
+  BorderBeam,
+  AnimatedGridPattern,
+  NumberTicker,
+  PriceMorph,
+  GlowingStars,
+  Meteors,
   EASE_OUT_EXPO,
   EASE_CINEMATIC,
   EASE_BACK_OUT,
@@ -137,6 +144,9 @@ export default function LandingPage() {
         {/* Mouse-following gradient (Aceternity Spotlight style) */}
         <MouseGradient mouseX={mouseX} mouseY={mouseY} />
 
+        {/* Meteor shower — diagonal gold streaks */}
+        <Meteors count={15} color="#FFAA00" />
+
         {/* 3D Scene — blur fade in (Magic UI BlurFade) */}
         <motion.div
           initial={{ opacity: 0, filter: "blur(20px)" }}
@@ -217,17 +227,23 @@ export default function LandingPage() {
                 Automatizacion de Instagram para agencias
               </motion.div>
 
-              {/* Headline — word-by-word 3D reveal (Aceternity TextGenerate + Hero Highlight) */}
-              <MotionText
-                as="h1"
-                className="font-display font-extrabold tracking-[-0.03em] leading-[0.92] mb-6 text-[clamp(2.5rem,7vw,5.5rem)]"
-                delay={HERO_SEQ.headline}
-                stagger={0.07}
-                effect="slide"
-                highlight={{ words: ["Instagram"], className: "text-shimmer" }}
+              {/* Headline — TextScramble decrypt effect + shimmer highlight */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: HERO_SEQ.headline }}
               >
-                Un mes de Instagram en 2 minutos
-              </MotionText>
+                <TextScramble
+                  as="h1"
+                  className="font-display font-extrabold tracking-[-0.03em] leading-[0.92] mb-6 text-[clamp(2.5rem,7vw,5.5rem)]"
+                  delay={HERO_SEQ.headline * 1000}
+                  speed={30}
+                  iterations={4}
+                  highlight={{ words: ["Instagram"], className: "text-shimmer" }}
+                >
+                  Un mes de Instagram en 2 minutos
+                </TextScramble>
+              </motion.div>
 
               {/* Subtitle — blur fade in (Magic UI BlurFade) */}
               <motion.p
@@ -331,6 +347,7 @@ export default function LandingPage() {
            HOW IT WORKS — 3D tilt cards + connecting beam
            ═══════════════════════════════════════════════════════════════════ */}
       <section id="como-funciona" className="py-28 px-6 relative">
+        <AnimatedGridPattern cellSize={48} maxActive={12} interval={400} color="rgba(255, 170, 0, 0.08)" interactive={false} />
         <div className="aurora w-[500px] h-[300px] bg-accent-indigo/[0.04] bottom-20 right-0" style={{ animationDelay: "6s" }} />
 
         <div className="max-w-5xl mx-auto relative">
@@ -470,6 +487,7 @@ export default function LandingPage() {
            ═══════════════════════════════════════════════════════════════════ */}
       <section className="py-28 px-6 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-500/[0.015] to-transparent pointer-events-none" />
+        <AnimatedGridPattern cellSize={56} maxActive={8} interval={500} color="rgba(99, 102, 241, 0.06)" interactive={false} />
 
         <div className="max-w-5xl mx-auto relative">
           <MotionReveal cinematic>
@@ -536,17 +554,19 @@ export default function LandingPage() {
               />
             </MotionStaggerItem>
 
-            {/* Highlight card — spans 2 cols with Aceternity Glowing Effect */}
+            {/* Highlight card — spans 2 cols with GlowingStars */}
             <MotionStaggerItem className="sm:col-span-2">
-              <BentoCard
-                icon={<Users className="h-5 w-5 text-accent-indigo" />}
-                title="Posts colaborativos"
-                description="Aparece en dos feeds a la vez. Sin coordinacion manual — doble audiencia, un solo post. La funcionalidad que los demas no tienen."
-                size="large"
-                glow="indigo"
-                highlight
-                badge="Unico"
-              />
+              <GlowingStars count={35} color="#6366F1" interactive>
+                <BentoCard
+                  icon={<Users className="h-5 w-5 text-accent-indigo" />}
+                  title="Posts colaborativos"
+                  description="Aparece en dos feeds a la vez. Sin coordinacion manual — doble audiencia, un solo post. La funcionalidad que los demas no tienen."
+                  size="large"
+                  glow="indigo"
+                  highlight
+                  badge="Unico"
+                />
+              </GlowingStars>
             </MotionStaggerItem>
 
             <MotionStaggerItem>
@@ -609,35 +629,40 @@ export default function LandingPage() {
 
         <MotionReveal cinematic scale>
           <div className="relative max-w-2xl mx-auto text-center">
-            <div className="rounded-3xl border border-brand-500/20 bg-surface-card p-12 sm:p-16 relative overflow-hidden border-rotating card-glow-hover">
-              <div className="absolute inset-[1px] rounded-3xl bg-surface-card" />
-              <div className="absolute inset-0 bg-gradient-to-br from-brand-500/[0.06] via-transparent to-accent-indigo/[0.04] pointer-events-none rounded-3xl" />
-              <div className="relative">
-                <MotionText
-                  as="h2"
-                  className="font-display font-bold text-3xl sm:text-4xl tracking-tight mb-4"
-                  effect="slide"
-                  highlight={{ words: ["2", "minutos"], className: "text-gradient" }}
-                >
-                  Tu proximo mes de contenido listo en 2 minutos
-                </MotionText>
-                <p className="text-lg text-zinc-400 mb-10 max-w-md mx-auto">
-                  Programa todo el mes de una vez y dedica tu tiempo a lo que importa.
-                </p>
-                <MotionMagnetic strength={0.15} scale>
-                  <Link
-                    href="/signup"
-                    className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-base shadow-glow btn-glow btn-ripple btn-pulse-ring active:scale-[0.97] active:translate-y-0.5 transition-transform"
-                  >
-                    Empezar gratis — primera carpeta incluida
-                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </MotionMagnetic>
-                <p className="text-sm text-zinc-500 mt-4">
-                  Sin tarjeta de credito. Sin compromisos.
-                </p>
-              </div>
-            </div>
+            <BorderBeam size={250} duration={10} color="#FFAA00" colorTo="#6366F1" borderWidth={2}>
+              <GlowingStars count={40} color="#FFAA00" interactive>
+                <div className="rounded-3xl border border-brand-500/20 bg-surface-card p-12 sm:p-16 relative overflow-hidden card-glow-hover">
+                  <div className="absolute inset-0 bg-gradient-to-br from-brand-500/[0.06] via-transparent to-accent-indigo/[0.04] pointer-events-none rounded-3xl" />
+                  <Meteors count={8} color="#6366F1" />
+                  <div className="relative">
+                    <TextScramble
+                      as="h2"
+                      className="font-display font-bold text-3xl sm:text-4xl tracking-tight mb-4"
+                      speed={25}
+                      iterations={3}
+                      highlight={{ words: ["2", "minutos"], className: "text-gradient" }}
+                    >
+                      Tu proximo mes de contenido listo en 2 minutos
+                    </TextScramble>
+                    <p className="text-lg text-zinc-400 mb-10 max-w-md mx-auto">
+                      Mientras tu duermes, AutoPost publica. Programa 30 dias en 2 minutos.
+                    </p>
+                    <MotionMagnetic strength={0.15} scale>
+                      <Link
+                        href="/signup"
+                        className="group inline-flex items-center gap-2 bg-gradient-brand-vivid text-white font-semibold px-8 py-4 rounded-xl text-base shadow-glow btn-glow btn-ripple btn-pulse-ring active:scale-[0.97] active:translate-y-0.5 transition-transform"
+                      >
+                        Empezar gratis — primera carpeta incluida
+                        <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    </MotionMagnetic>
+                    <p className="text-sm text-zinc-500 mt-4">
+                      Sin tarjeta de credito. Sin compromisos.
+                    </p>
+                  </div>
+                </div>
+              </GlowingStars>
+            </BorderBeam>
           </div>
         </MotionReveal>
       </section>
@@ -898,9 +923,17 @@ function PricingSection({ isAnnual, onToggleAnnual }: { isAnnual: boolean; onTog
         <MotionStagger stagger={0.12} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
           {pricingTiers.map((tier) => (
             <MotionStaggerItem key={tier.name}>
-              <TiltCard shine>
-                <PricingCard tier={tier} isAnnual={isAnnual} />
-              </TiltCard>
+              {tier.popular ? (
+                <BorderBeam size={180} duration={8} color="#FFAA00" colorTo="#6366F1" borderWidth={1.5}>
+                  <TiltCard shine>
+                    <PricingCard tier={tier} isAnnual={isAnnual} />
+                  </TiltCard>
+                </BorderBeam>
+              ) : (
+                <TiltCard shine>
+                  <PricingCard tier={tier} isAnnual={isAnnual} />
+                </TiltCard>
+              )}
             </MotionStaggerItem>
           ))}
         </MotionStagger>
@@ -960,18 +993,10 @@ function PricingCard({ tier, isAnnual }: { tier: typeof pricingTiers[0]; isAnnua
         <div className="mb-6">
           <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">{tier.name}</p>
           <div className="flex items-baseline gap-2">
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={displayPrice}
-                className="font-display font-extrabold text-4xl text-white"
-                initial={{ y: 10, opacity: 0, filter: "blur(4px)" }}
-                animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-                exit={{ y: -10, opacity: 0, filter: "blur(4px)" }}
-                transition={{ duration: 0.3, ease: EASE_CINEMATIC }}
-              >
-                {displayPrice}
-              </motion.p>
-            </AnimatePresence>
+            <PriceMorph
+              value={displayPrice}
+              className="font-display font-extrabold text-4xl text-white"
+            />
             {tier.price > 0 && (
               <span className="text-sm text-zinc-500">/mes</span>
             )}

@@ -6,6 +6,12 @@ export { MotionParallax } from "./MotionParallax";
 export { MotionMagnetic } from "./MotionMagnetic";
 export { MotionGlow } from "./MotionGlow";
 export { MotionFloat } from "./MotionFloat";
+export { TextScramble } from "./TextScramble";
+export { BorderBeam } from "./BorderBeam";
+export { AnimatedGridPattern } from "./AnimatedGridPattern";
+export { NumberTicker, PriceMorph } from "./NumberTicker";
+export { GlowingStars } from "./GlowingStars";
+export { Meteors } from "./Meteors";
 export {
   EASE_OUT_EXPO,
   EASE_CINEMATIC,
