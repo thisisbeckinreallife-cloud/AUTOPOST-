@@ -23,7 +23,7 @@ export function Meteors({
   colorSecondary,
   variant = "default",
 }: MeteorsProps) {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = !!useReducedMotion();
   const [meteors, setMeteors] = useState<
     {
       id: number;
@@ -57,8 +57,7 @@ export function Meteors({
         angle: isPremium ? 180 + Math.random() * 80 : 215,
       }))
     );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, variant]);
+  }, [count, variant, prefersReducedMotion]);
 
   if (prefersReducedMotion) return null;
 

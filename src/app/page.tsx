@@ -235,21 +235,21 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 1, delay: HERO_SEQ.headline, ease: EASE_CINEMATIC }}
-                className="mb-6"
+                className="mb-8"
               >
-                <h1 className="font-display font-extrabold tracking-[-0.03em] leading-[0.92] text-[clamp(2.5rem,7vw,5.5rem)]">
-                  Un mes de
-                </h1>
-                <GooeyText
-                  texts={["Instagram", "contenido", "engagement", "crecimiento"]}
-                  morphTime={1.5}
-                  cooldownTime={0.5}
-                  className="h-[clamp(3rem,8vw,6.5rem)]"
-                  textClassName="font-display font-extrabold tracking-[-0.03em] text-[clamp(2.5rem,7vw,5.5rem)] text-gradient"
-                />
-                <h1 className="font-display font-extrabold tracking-[-0.03em] leading-[0.92] text-[clamp(2.5rem,7vw,5.5rem)]">
-                  en 2 minutos
-                </h1>
+                <div className="font-display font-extrabold tracking-[-0.03em] leading-[1.1] text-[clamp(2.2rem,6vw,4.5rem)]">
+                  <span>Un mes de</span>
+                  <div className="relative my-2" style={{ height: "clamp(3rem, 8vw, 6rem)" }}>
+                    <GooeyText
+                      texts={["Instagram", "contenido", "engagement", "crecimiento"]}
+                      morphTime={1.5}
+                      cooldownTime={0.5}
+                      className="absolute inset-0"
+                      textClassName="font-display font-extrabold tracking-[-0.03em] text-[clamp(2.2rem,6vw,4.5rem)] text-gradient"
+                    />
+                  </div>
+                  <span>en 2 minutos</span>
+                </div>
               </motion.div>
 
               {/* Subtitle — blur fade in (Magic UI BlurFade) */}
@@ -640,15 +640,14 @@ export default function LandingPage() {
                   <div className="absolute inset-0 bg-gradient-to-br from-brand-500/[0.06] via-transparent to-accent-indigo/[0.04] pointer-events-none rounded-3xl" />
                   <Meteors count={5} color="rgba(180,180,210,0.3)" variant="premium" className="opacity-30" />
                   <div className="relative">
-                    <TextScramble
+                    <MotionText
                       as="h2"
                       className="font-display font-bold text-3xl sm:text-4xl tracking-tight mb-4"
-                      speed={25}
-                      iterations={3}
+                      effect="blur"
                       highlight={{ words: ["2", "minutos"], className: "text-gradient" }}
                     >
                       Tu proximo mes de contenido listo en 2 minutos
-                    </TextScramble>
+                    </MotionText>
                     <p className="text-lg text-zinc-400 mb-10 max-w-md mx-auto">
                       Mientras tu duermes, AutoPost publica. Programa 30 dias en 2 minutos.
                     </p>
