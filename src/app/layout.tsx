@@ -3,21 +3,21 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "AutoPost — Programa un mes de Instagram en 2 minutos",
+  title: "Hatch — Drop a folder. Hatch a month.",
   description:
-    "Sube la carpeta. AutoPost detecta carruseles, pone el copy solo y programa 30 días de una vez.",
+    "El único scheduler de Instagram que entiende carpetas. Suéltala. Detectamos carruseles, programamos 30 días y publicamos vía API oficial de Meta.",
   openGraph: {
-    title: "AutoPost — Programa un mes de Instagram en 2 minutos",
+    title: "Hatch — Drop a folder. Hatch a month.",
     description:
-      "Sube la carpeta. AutoPost detecta carruseles, pone el copy solo y programa 30 días de una vez.",
+      "El único scheduler que entiende carpetas. Un mes de Instagram programado en 2 minutos.",
     type: "website",
     url: "https://autopost-production-cd57.up.railway.app",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AutoPost — Programa un mes de Instagram en 2 minutos",
+    title: "Hatch — Drop a folder. Hatch a month.",
     description:
-      "Sube la carpeta. AutoPost detecta carruseles, pone el copy solo y programa 30 días de una vez.",
+      "El único scheduler que entiende carpetas. Un mes de Instagram programado en 2 minutos.",
   },
 };
 
