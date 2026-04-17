@@ -477,7 +477,7 @@ function Act4({ opacity, inner, mobile }: { opacity: MotionValue<number>; inner:
         style={{ y: calY, opacity: calOpacity, willChange: "transform, opacity" }}
       >
         <BorderBeam size={mobile ? 220 : 360} duration={5} color="#A8DADC" colorTo="#7DBCBE" borderWidth={1.5}>
-          <CalendarGrid lit={30} mobile={mobile} glow />
+          <CalendarGrid lit={30} mobile={mobile} glow interactive />
         </BorderBeam>
       </motion.div>
 

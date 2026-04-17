@@ -236,19 +236,11 @@ export function FolderAsset({ state = "closed", size = 280, className = "" }: Pr
       {/* ── Cobalt signature edge glow (bottom) ── */}
       <rect x="14" y="340" width="422" height="3" fill="url(#cobaltGlow)" rx="1.5" />
 
-      {/* ── Hatch wordmark on front (only when closed) ── */}
+      {/* ── Egg minimal mark (only when closed) ── */}
       {state === "closed" && (
-        <g opacity="0.9">
-          {/* Egg icon */}
-          <ellipse cx="220" cy="208" rx="11" ry="14" fill="rgba(168,218,220,0.18)" />
-          <ellipse cx="220" cy="208" rx="9" ry="12" fill="none"
-            stroke="rgba(168,218,220,0.45)" strokeWidth="1" />
-          {/* Hatch label below */}
-          <text x="220" y="246" fontSize="13" fontWeight="700" fill="rgba(255,255,255,0.55)"
-            textAnchor="middle" fontFamily="Satoshi, Inter, system-ui, sans-serif"
-            letterSpacing="0.12em">
-            ABRIL · 30 POSTS
-          </text>
+        <g opacity="0.65">
+          <ellipse cx="220" cy="218" rx="9" ry="12" fill="none"
+            stroke="rgba(168,218,220,0.55)" strokeWidth="1.25" />
         </g>
       )}
     </svg>
