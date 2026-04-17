@@ -20,22 +20,23 @@
   --text-primary: #1D1D1F;
   --text-secondary: #86868B;
   --text-muted: #AEAEB2;
-  --brand-500: #FFAA00;
-  --brand-400: #FFC226;
-  --brand-600: #CC8800;
-  --accent-orange: #FB923C;
-  --accent-indigo: #6366F1;
-  --accent-violet: #6366F1;
-  --accent-emerald: #34D399;
-  --accent-cyan: #34D399;
-  --accent-coral: #F97066;
-  --accent-blue: #3B82F6;
+  /* Brand tokens — Aluminum Studio (overrides AutoPost gold legacy) */
+  --brand-500: #1D1D1F;  /* graphite */
+  --brand-400: #86868B;  /* silver */
+  --brand-600: #0A0A0F;  /* ink */
+  --accent-orange: #A8DADC;  /* cobalt glow */
+  --accent-indigo: #7DBCBE;  /* cobalt deep */
+  --accent-violet: #7DBCBE;
+  --accent-emerald: #16A34A;
+  --accent-cyan: #A8DADC;
+  --accent-coral: #86868B;
+  --accent-blue: #7DBCBE;
   --radius: 0.75rem;
 
-  /* Gradient tokens */
-  --gradient-brand: linear-gradient(135deg, #FFAA00 0%, #F97066 100%);
-  --gradient-magic: linear-gradient(135deg, #FFAA00 0%, #6366F1 100%);
-  --gradient-glow: radial-gradient(600px circle, rgba(255,170,0,0.07), transparent 70%);
+  /* Gradient tokens — remapeados a Aluminum Studio */
+  --gradient-brand: linear-gradient(135deg, #1D1D1F 0%, #48484A 100%);
+  --gradient-magic: linear-gradient(135deg, #1D1D1F 0%, #7DBCBE 100%);
+  --gradient-glow: radial-gradient(600px circle, rgba(168,218,220,0.10), transparent 70%);
 }
 
 /* Rotating border angle property */
@@ -76,7 +77,7 @@ body {
 
 /* ─── Selection ─── */
 ::selection {
-  background: rgba(255, 170, 0, 0.35);
+  background: rgba(168,218,220, 0.35);
   color: #1D1D1F;
 }
 
@@ -222,7 +223,7 @@ a, button, input, textarea, select {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .text-gradient {
-  background: linear-gradient(135deg, #FFC226, #FB923C);
+  background: linear-gradient(135deg, #86868B, #A8DADC);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -236,7 +237,7 @@ a, button, input, textarea, select {
 }
 
 .text-gradient-gold-violet {
-  background: linear-gradient(135deg, #FFC226 0%, #6366F1 100%);
+  background: linear-gradient(135deg, #86868B 0%, #7DBCBE 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -250,14 +251,14 @@ a, button, input, textarea, select {
 }
 
 .text-gradient-orange {
-  background: linear-gradient(135deg, #FB923C, #FFAA00);
+  background: linear-gradient(135deg, #A8DADC, #1D1D1F);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .bg-gradient-brand {
-  background: linear-gradient(135deg, #FFAA00, #CC8800);
+  background: linear-gradient(135deg, #1D1D1F, #0A0A0F);
 }
 
 .bg-gradient-brand-vivid {
@@ -269,15 +270,15 @@ a, button, input, textarea, select {
 }
 
 .bg-gradient-accent {
-  background: linear-gradient(135deg, #FFAA00, #FB923C);
+  background: linear-gradient(135deg, #1D1D1F, #A8DADC);
 }
 
 /* ─── Text shimmer effect (premium) ─── */
 .text-shimmer {
   background: linear-gradient(
     90deg,
-    #FFAA00 0%, #FFC226 20%, #FFAA00 40%,
-    #F97066 60%, #FFC226 80%, #FFAA00 100%
+    #1D1D1F 0%, #86868B 20%, #1D1D1F 40%,
+    #86868B 60%, #86868B 80%, #1D1D1F 100%
   );
   background-size: 300% auto;
   -webkit-background-clip: text;
@@ -297,7 +298,7 @@ a, button, input, textarea, select {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(255,170,0,0.4), rgba(99,102,241,0.3), rgba(52,211,153,0.2));
+  background: linear-gradient(135deg, rgba(168,218,220,0.4), rgba(125,188,190,0.3), rgba(52,211,153,0.2));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -315,7 +316,7 @@ a, button, input, textarea, select {
   inset: -1px;
   border-radius: inherit;
   padding: 1.5px;
-  background: conic-gradient(from var(--angle, 0deg), #FFAA00, #6366F1, #34D399, #FFAA00);
+  background: conic-gradient(from var(--angle, 0deg), #1D1D1F, #7DBCBE, #34D399, #1D1D1F);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -362,7 +363,7 @@ a, button, input, textarea, select {
   inset: -1px;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(255, 170, 0, 0.3), rgba(99, 102, 241, 0.12), transparent 60%);
+  background: linear-gradient(135deg, rgba(168,218,220, 0.3), rgba(99, 102, 241, 0.12), transparent 60%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -448,7 +449,7 @@ a, button, input, textarea, select {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(500px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(255,170,0,0.04), transparent 55%);
+  background: radial-gradient(500px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(168,218,220,0.04), transparent 55%);
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.4s ease;
@@ -466,7 +467,7 @@ a, button, input, textarea, select {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(ellipse at 50% 0%, rgba(255,170,0,0.04), transparent 60%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(168,218,220,0.04), transparent 60%);
   opacity: 0;
   transition: opacity 0.5s ease;
   pointer-events: none;
@@ -492,7 +493,7 @@ input::placeholder, textarea::placeholder {
 }
 input:focus, textarea:focus, select:focus {
   border-color: var(--brand-500);
-  box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.12), 0 0 15px rgba(255, 170, 0, 0.06);
+  box-shadow: 0 0 0 3px rgba(168,218,220, 0.12), 0 0 15px rgba(168,218,220, 0.06);
   outline: none;
 }
 
@@ -503,7 +504,7 @@ input:focus, textarea:focus, select:focus {
 
 /* ─── Progress bar ─── */
 .progress-glow {
-  box-shadow: 0 0 12px rgba(255, 170, 0, 0.4);
+  box-shadow: 0 0 12px rgba(168,218,220, 0.4);
 }
 
 /* ─── Gradient shift ─── */
@@ -596,14 +597,14 @@ input:focus, textarea:focus, select:focus {
 }
 .btn-glow:hover {
   box-shadow:
-    0 0 25px rgba(255,170,0,0.20),
-    0 0 12px rgba(255,170,0,0.12),
+    0 0 25px rgba(168,218,220,0.20),
+    0 0 12px rgba(168,218,220,0.12),
     0 8px 24px rgba(0,0,0,0.10);
   transform: scale(1.04) translateY(-1px);
 }
 .btn-glow:active {
   transform: scale(0.98);
-  box-shadow: 0 0 12px rgba(255,170,0,0.15), 0 4px 12px rgba(0,0,0,0.10);
+  box-shadow: 0 0 12px rgba(168,218,220,0.15), 0 4px 12px rgba(0,0,0,0.10);
 }
 
 /* ─── Pulse ring on buttons ─── */
@@ -615,7 +616,7 @@ input:focus, textarea:focus, select:focus {
   position: absolute;
   inset: -3px;
   border-radius: inherit;
-  border: 2px solid rgba(255,170,0,0.3);
+  border: 2px solid rgba(168,218,220,0.3);
   animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   pointer-events: none;
 }
@@ -630,7 +631,7 @@ input:focus, textarea:focus, select:focus {
   left: 0;
   width: 8px;
   height: 8px;
-  background: #FFAA00;
+  background: #1D1D1F;
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
@@ -641,7 +642,7 @@ input:focus, textarea:focus, select:focus {
   width: 40px;
   height: 40px;
   opacity: 0.3;
-  border: 2px solid #FFAA00;
+  border: 2px solid #1D1D1F;
   background: transparent;
 }
 .cursor-trail {
@@ -650,7 +651,7 @@ input:focus, textarea:focus, select:focus {
   left: 0;
   width: 4px;
   height: 4px;
-  background: #FFAA00;
+  background: #1D1D1F;
   border-radius: 50%;
   pointer-events: none;
   z-index: 9998;
@@ -790,8 +791,8 @@ input:focus, textarea:focus, select:focus {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .scroll-progress-bar {
-  background: linear-gradient(180deg, #FFAA00, #6366F1);
-  box-shadow: 0 0 10px rgba(255,170,0,0.4), 0 0 20px rgba(255,170,0,0.2);
+  background: linear-gradient(180deg, #1D1D1F, #7DBCBE);
+  box-shadow: 0 0 10px rgba(168,218,220,0.4), 0 0 20px rgba(168,218,220,0.2);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

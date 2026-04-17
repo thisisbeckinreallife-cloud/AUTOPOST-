@@ -39,11 +39,11 @@ export default function HatchHero() {
     };
     window.addEventListener("resize", debounced, { passive: true });
 
-    /* Low-end device detection */
+    /* Low-end device detection — solo fallback si hardware MUY limitado */
     const nav = navigator as any;
-    const lowMem = (nav.deviceMemory ?? 8) < 4;
-    const lowCores = (nav.hardwareConcurrency ?? 8) < 4;
-    if (lowMem || lowCores) setLowEnd(true);
+    const lowMem = typeof nav.deviceMemory === "number" && nav.deviceMemory < 2;
+    const lowCores = typeof nav.hardwareConcurrency === "number" && nav.hardwareConcurrency < 2;
+    if (lowMem && lowCores) setLowEnd(true);
 
     return () => {
       window.removeEventListener("resize", debounced);
@@ -59,13 +59,15 @@ export default function HatchHero() {
       const el = containerRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
+      /* Guard: container aún no hidratado (height 0) */
+      if (rect.height <= window.innerHeight) return;
       const scrolled = -rect.top;
       const total = rect.height - window.innerHeight;
-      const p = total > 0 ? Math.max(0, Math.min(1, scrolled / total)) : 0;
+      const p = Math.max(0, Math.min(1, scrolled / total));
       scrollYProgress.set(p);
     };
-    /* Initial sync + listeners */
-    update();
+    /* Double-RAF initial sync — asegura layout completo antes de medir */
+    requestAnimationFrame(() => requestAnimationFrame(update));
     const handleScroll = () => update();
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll, { passive: true });
@@ -73,7 +75,9 @@ export default function HatchHero() {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
     };
-  }, [scrollYProgress]);
+    // scrollYProgress es estable (useMotionValue ref), no necesita estar en deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* Fallback estático (reduce motion o low-end) */
   if (reduceMotion || lowEnd) {

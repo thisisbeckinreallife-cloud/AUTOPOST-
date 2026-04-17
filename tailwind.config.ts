@@ -14,29 +14,35 @@ const config: Config = {
         headline: ["Satoshi", "Inter", "system-ui", "sans-serif"],
       },
       colors: {
+        /* ══════════════════════════════════════════════════════════════
+           brand.* y accent.* ahora son ALIASES a Aluminum Studio.
+           Los valores antiguos (gold/indigo AutoPost) se preservan como
+           comentarios para rollback. Esto permite rebrand instantáneo de
+           127+ clases en admin/auth sin tocar JSX.
+           ══════════════════════════════════════════════════════════════ */
         brand: {
-          50:  "#FFF8E0",
-          100: "#FFECB3",
-          200: "#FFE080",
-          300: "#FFD24D",
-          400: "#FFC626",
-          500: "#FFAA00",  // Primary — deep premium gold
-          600: "#CC8800",
-          700: "#996600",
-          800: "#664400",
-          900: "#332200",
-          950: "#1A1100",
+          50:  "#FAFAFC",  // (was #FFF8E0 gold tint)
+          100: "#F5F5F7",  // Athens
+          200: "#E8E8ED",  // surfAlt
+          300: "#D1D1D6",
+          400: "#86868B",  // silver (was #FFC626 gold)
+          500: "#1D1D1F",  // graphite primary (was #FFAA00 gold)
+          600: "#0A0A0F",  // ink (was #CC8800)
+          700: "#48484A",
+          800: "#2C2C2E",
+          900: "#1D1D1F",
+          950: "#0A0A0F",
         },
         accent: {
-          orange:  "#FB923C",  // warm orange
-          indigo:  "#6366F1",  // modern indigo (replaces violet)
-          violet:  "#6366F1",  // alias for backward compat
-          blue:    "#3B82F6",  // electric blue (trust)
-          emerald: "#34D399",  // warm emerald (replaces cyan)
-          cyan:    "#34D399",  // alias for backward compat
-          coral:   "#F97066",  // coral (urgency, "before" states)
-          red:     "#EF4444",  // red (error/danger)
-          slate:   "#7C8DB5",  // muted text (WCAG compliant)
+          orange:  "#A8DADC",  // cobalt glow (was #FB923C orange)
+          indigo:  "#7DBCBE",  // cobalt deep (was #6366F1 indigo)
+          violet:  "#7DBCBE",
+          blue:    "#7DBCBE",
+          emerald: "#16A34A",  // true green preserved for success states
+          cyan:    "#A8DADC",
+          coral:   "#86868B",  // silver (was #F97066 coral)
+          red:     "#DC2626",  // error preserved
+          slate:   "#64748B",
         },
         surface: {
           primary:   "#FFFFFF",
@@ -68,20 +74,20 @@ const config: Config = {
         "card":         "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
         "card-hover":   "0 8px 28px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)",
         "elevated":     "0 12px 40px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.03)",
-        "glow-sm":      "0 0 15px rgba(255,170,0,0.10), 0 0 5px rgba(255,170,0,0.05)",
-        "glow":         "0 0 25px rgba(255,170,0,0.14), 0 0 10px rgba(255,170,0,0.08)",
-        "glow-md":      "0 0 40px rgba(255,170,0,0.18), 0 0 15px rgba(255,170,0,0.10)",
-        "glow-lg":      "0 0 60px rgba(255,170,0,0.22), 0 0 25px rgba(255,170,0,0.12)",
-        "glow-amber":   "0 0 30px rgba(255,170,0,0.14), 0 0 10px rgba(255,170,0,0.08)",
+        "glow-sm":      "0 0 15px rgba(168,218,220,0.10), 0 0 5px rgba(168,218,220,0.05)",
+        "glow":         "0 0 25px rgba(168,218,220,0.14), 0 0 10px rgba(168,218,220,0.08)",
+        "glow-md":      "0 0 40px rgba(168,218,220,0.18), 0 0 15px rgba(168,218,220,0.10)",
+        "glow-lg":      "0 0 60px rgba(168,218,220,0.22), 0 0 25px rgba(168,218,220,0.12)",
+        "glow-amber":   "0 0 30px rgba(168,218,220,0.14), 0 0 10px rgba(168,218,220,0.08)",
         "glow-blue":    "0 0 30px rgba(59,130,246,0.12), 0 0 10px rgba(59,130,246,0.06)",
-        "glow-orange":  "0 0 20px rgba(251,146,60,0.18), 0 0 10px rgba(251,146,60,0.08)",
-        "glow-indigo":  "0 0 30px rgba(99,102,241,0.14), 0 0 10px rgba(99,102,241,0.08)",
-        "glow-violet":  "0 0 30px rgba(99,102,241,0.14), 0 0 10px rgba(99,102,241,0.08)",
+        "glow-orange":  "0 0 20px rgba(168,218,220,0.18), 0 0 10px rgba(168,218,220,0.08)",
+        "glow-indigo":  "0 0 30px rgba(125,188,190,0.14), 0 0 10px rgba(125,188,190,0.08)",
+        "glow-violet":  "0 0 30px rgba(125,188,190,0.14), 0 0 10px rgba(125,188,190,0.08)",
         "glow-emerald": "0 0 20px rgba(52,211,153,0.14), 0 0 10px rgba(52,211,153,0.08)",
         "glow-cyan":    "0 0 20px rgba(52,211,153,0.14), 0 0 10px rgba(52,211,153,0.08)",
-        "glow-coral":   "0 0 20px rgba(249,112,102,0.14), 0 0 10px rgba(249,112,102,0.08)",
+        "glow-coral":   "0 0 20px rgba(134,134,139,0.14), 0 0 10px rgba(134,134,139,0.08)",
         "inner-light":  "inset 0 1px 0 rgba(0,0,0,0.03)",
-        "inner-glow":   "inset 0 0 20px rgba(255,170,0,0.03)",
+        "inner-glow":   "inset 0 0 20px rgba(168,218,220,0.03)",
       },
       borderRadius: {
         "2xl": "1rem",
@@ -164,8 +170,8 @@ const config: Config = {
           "100%": { backgroundPosition: "200% 0%" },
         },
         ctaPulse: {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(255,170,0,0)" },
-          "50%":      { boxShadow: "0 0 0 6px rgba(255,170,0,0.12)" },
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(168,218,220,0)" },
+          "50%":      { boxShadow: "0 0 0 6px rgba(168,218,220,0.12)" },
         },
         mockupBlink: {
           "0%, 90%, 100%": { opacity: "1" },
@@ -186,11 +192,11 @@ const config: Config = {
       },
       backgroundImage: {
         "gradient-radial":  "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-subtle":  "linear-gradient(145deg, rgba(255,170,0,0.04) 0%, transparent 50%)",
-        "gradient-mesh":    "radial-gradient(at 40% 20%, rgba(255,170,0,0.08) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(251,146,60,0.05) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(99,102,241,0.04) 0px, transparent 50%)",
-        "gradient-hero":    "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255,170,0,0.15) 0%, transparent 60%)",
-        "gradient-cta":     "linear-gradient(135deg, rgba(255,170,0,0.08) 0%, rgba(251,146,60,0.05) 50%, rgba(99,102,241,0.04) 100%)",
-        "gradient-spotlight": "radial-gradient(600px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(255,170,0,0.06), transparent 70%)",
+        "gradient-subtle":  "linear-gradient(145deg, rgba(168,218,220,0.04) 0%, transparent 50%)",
+        "gradient-mesh":    "radial-gradient(at 40% 20%, rgba(168,218,220,0.08) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(168,218,220,0.05) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(125,188,190,0.04) 0px, transparent 50%)",
+        "gradient-hero":    "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(168,218,220,0.15) 0%, transparent 60%)",
+        "gradient-cta":     "linear-gradient(135deg, rgba(168,218,220,0.08) 0%, rgba(168,218,220,0.05) 50%, rgba(125,188,190,0.04) 100%)",
+        "gradient-spotlight": "radial-gradient(600px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(168,218,220,0.06), transparent 70%)",
       },
       spacing: {
         "18": "4.5rem",

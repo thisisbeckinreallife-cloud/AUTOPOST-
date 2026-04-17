@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Zap, Lock, Mail, ArrowRight, UserPlus } from "lucide-react";
+import { Lock, Mail, ArrowRight, Egg } from "lucide-react";
 import Link from "next/link";
 
 function SignupForm() {
@@ -17,11 +17,11 @@ function SignupForm() {
     setError("");
 
     if (form.password !== form.passwordConfirm) {
-      setError("Las contrasenas no coinciden");
+      setError("Las contraseñas no coinciden");
       return;
     }
     if (form.password.length < 8) {
-      setError("La contrasena debe tener al menos 8 caracteres");
+      setError("La contraseña debe tener al menos 8 caracteres");
       return;
     }
 
@@ -43,131 +43,164 @@ function SignupForm() {
       router.push("/dashboard");
       router.refresh();
     } catch {
-      setError("Error de conexion");
+      setError("Error de conexión");
     } finally {
       setLoading(false);
     }
   }
 
+  const inputStyle: React.CSSProperties = {
+    background: "#FFFFFF",
+    border: "1px solid rgba(29,29,31,0.10)",
+    color: "#1D1D1F",
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="animate-fade-up stagger-1">
-        <label className="block text-sm font-medium text-zinc-400 mb-2">Email</label>
-        <div className="relative group">
-          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600 group-focus-within:text-brand-400 transition-colors" />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-xs font-semibold mb-2" style={{ color: "#48484A", letterSpacing: "0.05em" }}>
+          EMAIL
+        </label>
+        <div className="relative">
+          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#86868B" }} />
           <input
             type="email"
             required
             autoFocus
             value={form.email}
             onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] pl-11 pr-4 py-3.5 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 focus:bg-white/[0.05] transition-all"
+            className="w-full rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none"
+            style={inputStyle}
             placeholder="tu@email.com"
           />
         </div>
       </div>
-      <div className="animate-fade-up stagger-2">
-        <label className="block text-sm font-medium text-zinc-400 mb-2">Contrasena</label>
-        <div className="relative group">
-          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600 group-focus-within:text-brand-400 transition-colors" />
+      <div>
+        <label className="block text-xs font-semibold mb-2" style={{ color: "#48484A", letterSpacing: "0.05em" }}>
+          CONTRASEÑA
+        </label>
+        <div className="relative">
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#86868B" }} />
           <input
             type="password"
             required
+            minLength={8}
             value={form.password}
             onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] pl-11 pr-4 py-3.5 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 focus:bg-white/[0.05] transition-all"
-            placeholder="Minimo 8 caracteres"
+            className="w-full rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none"
+            style={inputStyle}
+            placeholder="Mínimo 8 caracteres"
           />
         </div>
       </div>
-      <div className="animate-fade-up stagger-3">
-        <label className="block text-sm font-medium text-zinc-400 mb-2">Confirmar contrasena</label>
-        <div className="relative group">
-          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600 group-focus-within:text-brand-400 transition-colors" />
+      <div>
+        <label className="block text-xs font-semibold mb-2" style={{ color: "#48484A", letterSpacing: "0.05em" }}>
+          REPITE LA CONTRASEÑA
+        </label>
+        <div className="relative">
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#86868B" }} />
           <input
             type="password"
             required
             value={form.passwordConfirm}
             onChange={(e) => setForm((f) => ({ ...f, passwordConfirm: e.target.value }))}
-            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] pl-11 pr-4 py-3.5 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500/40 focus:bg-white/[0.05] transition-all"
-            placeholder="Repite tu contrasena"
+            className="w-full rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none"
+            style={inputStyle}
           />
         </div>
       </div>
 
       {error && (
-        <div className="rounded-xl bg-red-500/8 border border-red-500/15 px-4 py-3 text-sm text-red-400 animate-fade-in">
+        <div
+          className="rounded-xl px-4 py-3 text-sm"
+          style={{ background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.20)", color: "#DC2626" }}
+        >
           {error}
         </div>
       )}
 
-      <div className="pt-2 animate-fade-up stagger-4">
-        <Button
-          type="submit"
-          loading={loading}
-          className="w-full h-12 text-sm font-semibold rounded-xl bg-gradient-brand-vivid hover:shadow-glow shadow-glow-sm transition-all duration-300 gap-2"
-        >
-          Crear cuenta gratis
-          <UserPlus className="h-4 w-4" />
-        </Button>
-      </div>
+      <Button
+        type="submit"
+        loading={loading}
+        className="w-full h-12 text-sm font-semibold rounded-full gap-2 transition-all hover:scale-[1.01] active:scale-[0.98]"
+        style={{
+          background: "#1D1D1F",
+          color: "#F5F5F7",
+          boxShadow: "0 8px 24px -8px rgba(29,29,31,0.50), 0 0 0 1px #1D1D1F, 0 0 32px -10px rgba(168,218,220,0.35)",
+        }}
+      >
+        Crear mi cuenta
+        <ArrowRight className="h-4 w-4" />
+      </Button>
     </form>
   );
 }
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen bg-surface-primary flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Atmospheric background */}
-      <div className="absolute inset-0 bg-gradient-hero pointer-events-none" />
-      <div className="aurora w-[600px] h-[400px] bg-brand-500/[0.07] top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-      <div className="aurora w-[400px] h-[300px] bg-accent-orange/[0.05] bottom-1/4 left-1/3" style={{ animationDelay: "4s" }} />
-
-      <div className="w-full max-w-sm relative z-10">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-10 animate-fade-up">
-          <div className="relative mb-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500/15 to-accent-orange/10 border border-brand-500/20">
-              <Zap className="h-7 w-7 text-brand-400" />
-            </div>
-            <div className="absolute inset-0 rounded-2xl bg-brand-500/10 animate-glow-pulse" />
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "#F5F5F7" }}>
+      <div className="w-full max-w-sm">
+        <div className="flex flex-col items-center mb-8">
+          <div
+            className="relative mb-4 flex h-12 w-12 items-center justify-center rounded-xl"
+            style={{
+              background: "#1D1D1F",
+              boxShadow: "0 8px 20px -6px rgba(29,29,31,0.30), 0 0 0 1px rgba(168,218,220,0.15)",
+            }}
+          >
+            <Egg className="h-5 w-5" style={{ color: "#A8DADC" }} />
           </div>
-          <span className="font-display text-2xl font-bold tracking-tight text-white">
-            Auto<span className="text-gradient">Post</span>
+          <span
+            className="font-bold text-lg tracking-tight"
+            style={{ color: "#1D1D1F", letterSpacing: "-0.01em", fontFamily: "Satoshi, Inter, system-ui, sans-serif" }}
+          >
+            Hatch
           </span>
-          <p className="text-xs text-zinc-600 mt-1.5 tracking-[0.2em] uppercase">
-            Instagram Scheduler
-          </p>
         </div>
 
-        {/* Signup card */}
-        <div className="rounded-2xl border border-white/[0.06] bg-surface-card/80 backdrop-blur-xl shadow-elevated p-8 relative overflow-hidden animate-fade-up stagger-1">
-          <div className="absolute inset-0 bg-gradient-to-br from-brand-500/[0.03] via-transparent to-accent-orange/[0.02] pointer-events-none" />
-          <div className="relative">
-            <div className="text-center mb-7">
-              <h1 className="text-xl font-display font-bold text-white">Crea tu cuenta</h1>
-              <p className="text-sm text-zinc-500 mt-1">Empieza a programar en 2 minutos</p>
-            </div>
-            <Suspense fallback={<div className="h-64" />}>
-              <SignupForm />
-            </Suspense>
+        <div
+          className="rounded-2xl p-7"
+          style={{
+            background: "#FFFFFF",
+            border: "1px solid rgba(29,29,31,0.06)",
+            boxShadow: "0 24px 48px -16px rgba(29,29,31,0.10), inset 0 1px 0 rgba(255,255,255,0.8)",
+          }}
+        >
+          <div className="text-center mb-6">
+            <h1
+              className="text-2xl font-bold"
+              style={{ color: "#1D1D1F", fontFamily: "Satoshi, Inter, system-ui, sans-serif", letterSpacing: "-0.02em" }}
+            >
+              Crea tu primera carpeta.
+            </h1>
           </div>
+          <Suspense fallback={<div className="h-64" />}>
+            <SignupForm />
+          </Suspense>
         </div>
 
-        {/* Links */}
-        <div className="text-center mt-6 space-y-2 animate-fade-in stagger-4">
-          <p className="text-sm text-zinc-500">
-            Ya tienes cuenta?{" "}
-            <Link href="/login" className="text-brand-400 hover:text-brand-300 transition-colors font-medium">
-              Inicia sesion
+        <div className="text-center mt-5">
+          <p className="text-sm" style={{ color: "#48484A" }}>
+            ¿Ya tienes cuenta?{" "}
+            <Link href="/login" className="font-semibold transition-colors hover:underline" style={{ color: "#7DBCBE" }}>
+              Entrar
             </Link>
           </p>
-          <Link
-            href="/"
-            className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors inline-block"
-          >
-            ← Volver a AutoPost
-          </Link>
+        </div>
+
+        <div className="flex items-center justify-center gap-3 mt-6 text-[10px]" style={{ color: "#86868B" }}>
+          <span className="flex items-center gap-1">
+            <span className="h-1 w-1 rounded-full" style={{ background: "#16A34A" }} />
+            Sin tarjeta
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="h-1 w-1 rounded-full" style={{ background: "#7DBCBE" }} />
+            API oficial de Meta
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="h-1 w-1 rounded-full" style={{ background: "#86868B" }} />
+            AES-256
+          </span>
         </div>
       </div>
     </div>

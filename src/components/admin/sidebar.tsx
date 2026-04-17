@@ -10,12 +10,12 @@ import {
   Settings,
   HelpCircle,
   Building2,
-  Zap,
   Menu,
   X,
   Globe,
   FileText,
   BarChart2,
+  Egg,
 } from "lucide-react";
 import { useLocale } from "@/lib/i18n";
 
@@ -51,16 +51,37 @@ export function Sidebar() {
 
   const sidebar = (
     <aside
-      className="fixed left-0 top-0 h-full w-64 bg-surface-card/90 backdrop-blur-xl border-r border-white/[0.04] text-white flex flex-col z-40"
+      className="fixed left-0 top-0 h-full w-64 flex flex-col z-40"
+      style={{
+        background: "#1D1D1F",
+        borderRight: "1px solid rgba(168,218,220,0.10)",
+        color: "#F5F5F7",
+      }}
       onKeyDown={handleKeyDown}
     >
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 h-16 border-b border-white/[0.04]">
-        <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500/15 to-accent-orange/10 border border-brand-500/20">
-          <Zap className="h-4 w-4 text-brand-400" />
+      <div
+        className="flex items-center gap-2.5 px-5 h-16"
+        style={{ borderBottom: "1px solid rgba(168,218,220,0.08)" }}
+      >
+        <div
+          className="relative flex h-8 w-8 items-center justify-center rounded-lg"
+          style={{
+            background: "rgba(168,218,220,0.10)",
+            border: "1px solid rgba(168,218,220,0.20)",
+          }}
+        >
+          <Egg className="h-4 w-4" style={{ color: "#A8DADC" }} />
         </div>
-        <span className="font-display font-bold text-base tracking-tight text-white">
-          Auto<span className="text-gradient">Post</span>
+        <span
+          className="font-bold text-base tracking-tight"
+          style={{
+            color: "#F5F5F7",
+            letterSpacing: "-0.01em",
+            fontFamily: "Satoshi, Inter, system-ui, sans-serif",
+          }}
+        >
+          Hatch
         </span>
       </div>
 
@@ -73,20 +94,26 @@ export function Sidebar() {
               key={href}
               href={href}
               onClick={() => setMobileOpen(false)}
-              className={cn(
-                "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-                isActive
-                  ? "bg-gradient-to-r from-brand-500/12 to-accent-orange/6 text-brand-300 border border-brand-500/10"
-                  : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300 border border-transparent"
-              )}
+              className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all"
+              style={{
+                background: isActive ? "rgba(168,218,220,0.10)" : "transparent",
+                border: isActive ? "1px solid rgba(168,218,220,0.22)" : "1px solid transparent",
+                color: isActive ? "#F5F5F7" : "#86868B",
+              }}
             >
-              <Icon className={cn(
-                "h-[18px] w-[18px] transition-colors",
-                isActive ? "text-brand-400" : "text-zinc-600 group-hover:text-zinc-400"
-              )} />
+              <Icon
+                className="h-[18px] w-[18px] transition-colors"
+                style={{ color: isActive ? "#A8DADC" : "#86868B" }}
+              />
               {label}
               {isActive && (
-                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-brand-400 shadow-glow-sm" />
+                <div
+                  className="ml-auto h-1.5 w-1.5 rounded-full"
+                  style={{
+                    background: "#A8DADC",
+                    boxShadow: "0 0 8px rgba(168,218,220,0.55)",
+                  }}
+                />
               )}
             </Link>
           );
@@ -94,10 +121,14 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom */}
-      <div className="px-3 py-3 border-t border-white/[0.04] space-y-0.5">
+      <div
+        className="px-3 py-3 space-y-0.5"
+        style={{ borderTop: "1px solid rgba(168,218,220,0.08)" }}
+      >
         <button
           onClick={toggleLocale}
-          className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-zinc-600 hover:bg-white/[0.04] hover:text-zinc-400 transition-colors"
+          className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-white/[0.04]"
+          style={{ color: "#86868B" }}
           title={locale === "es" ? "Switch to English" : "Cambiar a Espanol"}
         >
           <Globe className="h-[18px] w-[18px]" />
@@ -107,14 +138,16 @@ export function Sidebar() {
           href="https://help.instagram.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-zinc-600 hover:bg-white/[0.04] hover:text-zinc-400 transition-colors"
+          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-white/[0.04]"
+          style={{ color: "#86868B" }}
         >
           <HelpCircle className="h-[18px] w-[18px]" />
           {locale === "es" ? "Ayuda" : "Help"}
         </a>
         <button
           onClick={handleLogout}
-          className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-zinc-600 hover:bg-red-500/8 hover:text-red-400 transition-colors"
+          className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-red-500/[0.08] hover:text-red-400"
+          style={{ color: "#86868B" }}
         >
           <LogOut className="h-[18px] w-[18px]" />
           {locale === "es" ? "Cerrar sesion" : "Log out"}
