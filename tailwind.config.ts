@@ -50,6 +50,16 @@ const config: Config = {
           750: "#D1D1D6",
           850: "#E5E5EA",
         },
+        hatch: {
+          graphite:    "#1D1D1F",
+          graphiteAlt: "#2C2C2E",
+          athens:      "#F5F5F7",
+          surfAlt:     "#E8E8ED",
+          silver:      "#86868B",
+          silverDark:  "#48484A",
+          glow:        "#A8DADC",
+          cobalt:      "#7DBCBE",
+        },
       },
       borderColor: {
         DEFAULT: "rgba(0,0,0,0.06)",
