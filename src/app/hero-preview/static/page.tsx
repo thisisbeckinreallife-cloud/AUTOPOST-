@@ -162,7 +162,7 @@ function Act2Static() {
       >
         Watch it <span style={{ color: HATCH.cobalt }}>open.</span>
       </h1>
-      <div style={{ transform: "scale(1.1) rotateY(5deg)", transformPerspective: 1200 }}>
+      <div style={{ transform: "perspective(1200px) scale(1.1) rotateY(5deg)" }}>
         <FolderAsset state="open" size={300} />
       </div>
     </div>
