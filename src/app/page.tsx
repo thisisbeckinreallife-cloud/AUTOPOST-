@@ -99,7 +99,7 @@ export default function LandingPage() {
   }, [mouseX, mouseY]);
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900 overflow-hidden" onMouseMove={handleMouseMove}>
+    <div className="min-h-screen bg-white text-zinc-900 overflow-x-hidden" onMouseMove={handleMouseMove}>
       <CustomCursor />
       <StickyCTA />
       <ScrollProgress />
