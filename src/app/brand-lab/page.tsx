@@ -234,13 +234,98 @@ const MOTION_REFS = [
     use: "Únicamente en el CTA final \"Programar mis primeros 30 días\". Genera urgencia visual.",
     impl: "Tu BorderBeam actual (✓ ya está). Color: el accent del palette elegido + el primary.",
   },
+  {
+    title: "Logo → nav transformation on scroll",
+    src: "Trend 2026 (Awwwards), Tobi Lutke site",
+    desc: "El logo grande del hero se contrae y morpha en la navbar al scrollear. Identidad visual con motion.",
+    use: "El wordmark Hatch grande del hero se transforma en el logo de 32px de la nav cuando se hace scroll.",
+    impl: "framer-motion `useScroll` + `useTransform` sobre `scale`, `x`, `y` del wordmark. ScrollTrigger en `useMotionValueEvent`.",
+  },
+  {
+    title: "Oversized typography vs solid backdrop",
+    src: "Trend 2026, Vercel ship pages",
+    desc: "Tipografía gigante (clamp 6vw a 12vw) sobre fondo sólido. Cero ornamento. Letra como protagonista.",
+    use: "Hero headline \"Drop a folder. Hatch a month.\" en font-size masivo, sin badges ni ilustraciones encima.",
+    impl: "`font-size: clamp(3rem, 10vw, 9rem); letter-spacing: -0.04em; line-height: 0.9;` sobre fondo `#1D1D1F` o `#F5F5F7`.",
+  },
+  {
+    title: "Frosted Liquid Glass nav",
+    src: "iOS 26, macOS Tahoe, Apple Vision",
+    desc: "Navbar con backdrop blur saturate 180% + borde luminoso. El fondo se ve atravesado.",
+    use: "Sticky nav de Hatch — al scroll baja opacidad del fondo blanco, el backdrop blur revela el contenido detrás.",
+    impl: "`background: rgba(245,245,247,0.72); backdrop-filter: blur(24px) saturate(180%);` + transición de `border-bottom` al scrollear.",
+  },
+  {
+    title: "Scroll-driven SVG path stroke",
+    src: "Stripe, Linear changelog",
+    desc: "Una línea SVG se dibuja a medida que scrolleas — conecta secciones como un hilo narrativo.",
+    use: "Conectar los 3 pasos del \"Cómo funciona\" con una línea aluminum animada que se traza al scroll.",
+    impl: "SVG `<path>` con `strokeDasharray` + `strokeDashoffset` controlados por `useScroll`.",
+  },
+  {
+    title: "Spring elastic feedback",
+    src: "Apple iOS interactions, Raycast",
+    desc: "Cuando el usuario clica, el elemento hace un overshoot sutil (scale 0.96 → 1.04 → 1). Físico.",
+    use: "TODOS los botones de Hatch. Reemplazar el `active:scale-[0.97]` actual por spring con overshoot.",
+    impl: "framer-motion `<motion.button whileTap={{ scale: 0.96 }} transition={{ type: 'spring', stiffness: 400, damping: 17 }}>`.",
+  },
+  {
+    title: "Aurora gradient drift",
+    src: "Stripe homepage 2024-26, Vercel",
+    desc: "Gradiente difuso que se mueve lentamente como aurora boreal. Sutil, no distractivo.",
+    use: "Background del hero como reemplazo del video actual. Tinte cobalt #A8DADC al 8% de opacidad.",
+    impl: "CSS gradient con `background-size: 200% 200%; animation: aurora 30s ease infinite;` + dos capas con blend mode soft-light.",
+  },
+];
+
+/* ─── Component library sources ──────────────────────────────────── */
+const TEMPLATE_SOURCES = [
+  {
+    name: "Aceternity UI",
+    url: "https://ui.aceternity.com",
+    desc: "200+ componentes free + 100 premium blocks. Específicos para Apple-aesthetic con framer-motion. Pro: $199 lifetime.",
+    fit: "Spotlight, BorderBeam, Cards 3D, Bento Grid, Hero Highlight — todos pegan con Aluminum.",
+    badge: "Recomendado",
+  },
+  {
+    name: "Magic UI",
+    url: "https://magicui.design",
+    desc: "150+ componentes animados free. Compañero perfecto de shadcn/ui. Marquee, NumberTicker, AnimatedBeam.",
+    fit: "AnimatedList, Marquee, NumberTicker, OrbitingCircles para mostrar el ecosistema Meta.",
+    badge: "Recomendado",
+  },
+  {
+    name: "React Bits",
+    url: "https://www.reactbits.dev",
+    desc: "#2 en JS Rising Stars 2025. Animaciones premium con CSS puro cuando es posible (más performante).",
+    fit: "Text effects, scroll reveals, animated backgrounds — los text effects son superiores a los demás.",
+    badge: "Top text effects",
+  },
+  {
+    name: "ogblocks",
+    url: "https://ogblocks.dev",
+    desc: "Premium library de bloques completos con framer-motion. Hero, pricing cards, bento grids interactivos.",
+    fit: "Bloques completos listos para SaaS premium. Animated pricing cards encajan perfecto con Aluminum.",
+  },
+  {
+    name: "Framer Marketplace",
+    url: "https://www.framer.com/marketplace",
+    desc: "2.000+ templates. Los SaaS templates premium tienen patrones que convierten 52% mejor (CRO incluido).",
+    fit: "Buscar templates con tag \"minimal + dark + premium\". Fram.AI y Saatosa son referencias.",
+  },
+  {
+    name: "Awwwards Scroll Collections",
+    url: "https://www.awwwards.com/inspiration/scroll-animations",
+    desc: "Curaduría diaria de las webs ganadoras. La sección \"minimal\" + \"GSAP\" tiene oro puro.",
+    fit: "Inspiración pura para hero scenes cinemáticas. Categoría \"product page\" para layouts.",
+  },
 ];
 
 type PalId = "obsidian" | "cupertino" | "aluminum";
 
 export default function BrandLab() {
-  const [activeTab, setActiveTab] = useState<"colors" | "names" | "motion">("colors");
-  const [activePal, setActivePal] = useState<PalId>("obsidian");
+  const [activeTab, setActiveTab] = useState<"colors" | "names" | "motion" | "templates">("templates");
+  const [activePal, setActivePal] = useState<PalId>("aluminum");
   const palette = PALETTES.find((p) => p.id === activePal)!;
 
   return (
@@ -260,7 +345,7 @@ export default function BrandLab() {
 
           {/* Tabs */}
           <div className="mt-8 inline-flex items-center gap-1 p-1 rounded-xl bg-zinc-100">
-            {(["colors", "names", "motion"] as const).map((t) => (
+            {(["templates", "colors", "names", "motion"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setActiveTab(t)}
@@ -268,9 +353,10 @@ export default function BrandLab() {
                   activeTab === t ? "bg-white shadow-sm text-zinc-950" : "text-zinc-500 hover:text-zinc-900"
                 }`}
               >
-                {t === "colors" && "1 · Colores"}
-                {t === "names" && "2 · Nombres"}
-                {t === "motion" && "3 · Animaciones"}
+                {t === "templates" && "★ Plantillas Hatch"}
+                {t === "colors" && "Colores"}
+                {t === "names" && "Nombres"}
+                {t === "motion" && "Animaciones"}
               </button>
             ))}
           </div>
@@ -278,6 +364,117 @@ export default function BrandLab() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-12">
+        {/* ═══════════════════════════════════════════════════════════
+             TAB ★ · PLANTILLAS HATCH (Aluminum Studio aplicado)
+             ═══════════════════════════════════════════════════════════ */}
+        {activeTab === "templates" && (
+          <div className="space-y-16">
+            <div>
+              <div className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-2">
+                Hatch · Aluminum Studio · live preview
+              </div>
+              <h2 className="text-2xl font-bold text-zinc-950 mb-2">Bloques completos listos para usar</h2>
+              <p className="text-sm text-zinc-600 max-w-2xl">
+                Cada bloque aplica el nombre <strong>Hatch</strong>, la paleta <strong>Aluminum Studio</strong> y las animaciones recomendadas.
+                Mira, interactúa, copia el patrón. Diseñados para encajar con el stack actual (Next.js + framer-motion + Tailwind).
+              </p>
+            </div>
+
+            <TemplateBlock id="01" title="Hero — oversized typography + magnetic CTA + spotlight">
+              <HatchHero />
+            </TemplateBlock>
+
+            <TemplateBlock id="02" title="Bento grid — 6 features con liquid glass + hover scale">
+              <HatchBento />
+            </TemplateBlock>
+
+            <TemplateBlock id="03" title="Stats strip — 4 number tickers con eyebrow aluminum">
+              <HatchStats />
+            </TemplateBlock>
+
+            <TemplateBlock id="04" title="Pricing — 3 tiers con tier central destacado (border beam)">
+              <HatchPricing />
+            </TemplateBlock>
+
+            <TemplateBlock id="05" title="Testimonios — marquee infinito, hover-pause, aluminum cards">
+              <HatchMarquee />
+            </TemplateBlock>
+
+            <TemplateBlock id="06" title="CTA final — magnetic + border beam aluminum">
+              <HatchFinalCTA />
+            </TemplateBlock>
+
+            <TemplateBlock id="07" title="Footer — minimal dark aluminum">
+              <HatchFooter />
+            </TemplateBlock>
+
+            {/* Sources */}
+            <div>
+              <h3 className="text-lg font-bold text-zinc-950 mb-1">Librerías recomendadas para componentes adicionales</h3>
+              <p className="text-sm text-zinc-600 mb-6">Sourced de los rankings 2026 — copy-paste compatible con tu stack actual.</p>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {TEMPLATE_SOURCES.map((s) => (
+                  <a
+                    key={s.name}
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-xl border border-zinc-200 bg-white p-5 hover:border-zinc-400 hover:shadow-sm transition-all"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="font-semibold text-zinc-950">{s.name}</div>
+                      {s.badge && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                          {s.badge}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-zinc-600 leading-relaxed mb-3">{s.desc}</p>
+                    {s.fit && (
+                      <div className="text-xs text-zinc-500 italic border-t border-zinc-100 pt-3">
+                        <strong className="not-italic text-zinc-700">Para Hatch:</strong> {s.fit}
+                      </div>
+                    )}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Decision summary */}
+            <div className="rounded-2xl border-2 border-zinc-900 bg-zinc-900 text-white p-8">
+              <div className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-3">
+                Decisión confirmada
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Hatch · Aluminum Studio</h3>
+              <div className="grid sm:grid-cols-3 gap-6 text-sm">
+                <div>
+                  <div className="text-[10px] font-semibold uppercase text-zinc-500 mb-2">Nombre</div>
+                  <div className="font-semibold mb-1">Hatch</div>
+                  <div className="text-zinc-400 text-xs">Drop a folder. Hatch a month.</div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-semibold uppercase text-zinc-500 mb-2">Paleta</div>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="h-4 w-4 rounded" style={{ background: "#1D1D1F" }} />
+                    <span className="h-4 w-4 rounded" style={{ background: "#F5F5F7" }} />
+                    <span className="h-4 w-4 rounded" style={{ background: "#86868B" }} />
+                    <span className="h-4 w-4 rounded" style={{ background: "#A8DADC" }} />
+                  </div>
+                  <div className="text-zinc-400 text-xs">Graphite · Athens · Silver · Cobalt glow</div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-semibold uppercase text-zinc-500 mb-2">Próximos pasos</div>
+                  <ul className="text-zinc-400 text-xs space-y-1">
+                    <li>1. Verificar dominios hatch.app / gethatch.com</li>
+                    <li>2. Refactor tokens tailwind.config.ts</li>
+                    <li>3. Aplicar plantillas a landing real</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ═══════════════════════════════════════════════════════════
              TAB 1 · COLORES
              ═══════════════════════════════════════════════════════════ */}
@@ -901,6 +1098,648 @@ function DemoCard({ title, desc, children }: { title: string; desc: string; chil
         <div className="text-xs text-zinc-500">{desc}</div>
       </div>
       <div className="p-4">{children}</div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   HATCH TEMPLATES — Aluminum Studio palette aplicada
+   ════════════════════════════════════════════════════════════════════ */
+
+const HATCH = {
+  graphite: "#1D1D1F",
+  graphiteAlt: "#2C2C2E",
+  athens: "#F5F5F7",
+  athensAlt: "#E8E8ED",
+  silver: "#86868B",
+  silverDark: "#48484A",
+  cobalt: "#A8DADC",
+  cobaltDeep: "#7DBCBE",
+  textOnDark: "#F5F5F7",
+  textSecondary: "#86868B",
+};
+
+function TemplateBlock({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <div className="flex items-baseline gap-3 mb-4">
+        <span className="text-xs font-mono text-zinc-400">{id}</span>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-700">{title}</h3>
+      </div>
+      <div className="rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+/* ─── 01 · Hero ───────────────────────────────────────────────────── */
+function HatchHero() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLButtonElement>(null);
+  const [mouse, setMouse] = useState({ x: 50, y: 50 });
+  const [ctaPos, setCtaPos] = useState({ x: 0, y: 0 });
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative overflow-hidden"
+      style={{ background: HATCH.athens }}
+      onMouseMove={(e) => {
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        setMouse({
+          x: ((e.clientX - rect.left) / rect.width) * 100,
+          y: ((e.clientY - rect.top) / rect.height) * 100,
+        });
+        if (ctaRef.current) {
+          const r = ctaRef.current.getBoundingClientRect();
+          const cx = r.left + r.width / 2;
+          const cy = r.top + r.height / 2;
+          const dx = e.clientX - cx;
+          const dy = e.clientY - cy;
+          const dist = Math.hypot(dx, dy);
+          if (dist < 200) {
+            setCtaPos({ x: dx * 0.15, y: dy * 0.15 });
+          } else {
+            setCtaPos({ x: 0, y: 0 });
+          }
+        }
+      }}
+      onMouseLeave={() => setCtaPos({ x: 0, y: 0 })}
+    >
+      {/* Aurora cobalt glow follower */}
+      <div
+        className="absolute inset-0 pointer-events-none transition-all duration-700"
+        style={{
+          background: `radial-gradient(800px circle at ${mouse.x}% ${mouse.y}%, ${HATCH.cobalt}26, transparent 60%)`,
+        }}
+      />
+      {/* Frosted nav */}
+      <nav
+        className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-4"
+        style={{
+          background: `rgba(245,245,247,0.72)`,
+          backdropFilter: "blur(24px) saturate(180%)",
+          WebkitBackdropFilter: "blur(24px) saturate(180%)",
+          borderBottom: "1px solid rgba(0,0,0,0.06)",
+        }}
+      >
+        <div className="flex items-center gap-2.5">
+          <div
+            className="h-7 w-7 rounded-md flex items-center justify-center"
+            style={{ background: HATCH.graphite }}
+          >
+            <Egg className="h-3.5 w-3.5" style={{ color: HATCH.cobalt }} />
+          </div>
+          <span className="font-bold text-base" style={{ color: HATCH.graphite, letterSpacing: "-0.01em" }}>
+            Hatch
+          </span>
+        </div>
+        <div className="flex items-center gap-5 text-sm">
+          <span style={{ color: HATCH.silverDark }}>Producto</span>
+          <span style={{ color: HATCH.silverDark }}>Precios</span>
+          <button
+            className="text-sm font-semibold px-4 py-2 rounded-full"
+            style={{ background: HATCH.graphite, color: HATCH.textOnDark }}
+          >
+            Probar gratis
+          </button>
+        </div>
+      </nav>
+
+      {/* Hero content */}
+      <div className="relative z-10 px-8 pt-32 pb-24 text-center">
+        <div
+          className="text-xs font-semibold uppercase tracking-[0.25em] mb-8 inline-block px-3 py-1 rounded-full"
+          style={{ color: HATCH.silverDark, background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}
+        >
+          Para social media managers
+        </div>
+        <h1
+          className="font-extrabold tracking-tight mb-8"
+          style={{
+            color: HATCH.graphite,
+            fontSize: "clamp(3rem, 9vw, 7rem)",
+            lineHeight: "0.92",
+            letterSpacing: "-0.045em",
+          }}
+        >
+          Drop a folder.<br />
+          <span style={{ color: HATCH.silver }}>Hatch a month.</span>
+        </h1>
+        <p className="text-base sm:text-lg max-w-md mx-auto mb-10 leading-relaxed" style={{ color: HATCH.silverDark }}>
+          Suelta tu carpeta. Hatch detecta carruseles, programa 30 días y publica.
+        </p>
+        <div className="flex items-center justify-center gap-4">
+          <button
+            ref={ctaRef}
+            style={{
+              transform: `translate(${ctaPos.x}px, ${ctaPos.y}px)`,
+              transition: "transform 250ms cubic-bezier(0.16, 1, 0.3, 1)",
+              background: HATCH.graphite,
+              color: HATCH.textOnDark,
+              boxShadow: `0 12px 32px -12px rgba(29,29,31,0.6), 0 0 0 1px ${HATCH.graphite}`,
+            }}
+            className="inline-flex items-center gap-2 text-sm font-semibold px-7 py-3.5 rounded-full hover:scale-[1.03] active:scale-[0.97]"
+          >
+            Probar Hatch — gratis
+            <ArrowRight className="h-4 w-4" />
+          </button>
+          <button
+            className="text-sm font-semibold px-6 py-3.5 rounded-full border hover:bg-white/40 transition-colors"
+            style={{ borderColor: "rgba(0,0,0,0.12)", color: HATCH.graphite }}
+          >
+            Ver demo de 90s
+          </button>
+        </div>
+        <div className="text-xs mt-6" style={{ color: HATCH.silver }}>
+          Plan gratis · Sin tarjeta · API oficial de Meta
+        </div>
+
+        {/* Product hero — calendar */}
+        <div className="mt-16 relative">
+          <div
+            className="rounded-2xl mx-auto max-w-2xl p-6 relative"
+            style={{
+              background: "rgba(255,255,255,0.7)",
+              backdropFilter: "blur(20px) saturate(180%)",
+              WebkitBackdropFilter: "blur(20px) saturate(180%)",
+              border: "1px solid rgba(255,255,255,0.6)",
+              boxShadow: "0 24px 64px -16px rgba(29,29,31,0.16), inset 0 1px 0 rgba(255,255,255,0.8)",
+            }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-sm font-semibold" style={{ color: HATCH.graphite }}>Abril 2026</div>
+              <div className="flex items-center gap-2 text-xs" style={{ color: HATCH.silverDark }}>
+                <span className="h-2 w-2 rounded-full" style={{ background: HATCH.cobaltDeep }} />
+                30 posts programados
+              </div>
+            </div>
+            <div className="grid grid-cols-7 gap-1.5">
+              {Array.from({ length: 30 }).map((_, i) => {
+                const filled = i < 27;
+                return (
+                  <div
+                    key={i}
+                    className="aspect-square rounded-md flex items-center justify-center text-[10px] font-medium"
+                    style={{
+                      background: filled ? `${HATCH.cobalt}33` : "transparent",
+                      border: filled ? `1px solid ${HATCH.cobalt}66` : `1px solid ${HATCH.silver}30`,
+                      color: filled ? HATCH.silverDark : HATCH.silver,
+                    }}
+                  >
+                    {i + 1}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── 02 · Bento grid ─────────────────────────────────────────────── */
+function HatchBento() {
+  const cells = [
+    { icon: <Folder className="h-5 w-5" />, title: "Detección de carpetas", desc: "Sube ZIP o carpeta. Hatch entiende la estructura.", size: "large" },
+    { icon: <Layers className="h-5 w-5" />, title: "Carruseles automáticos", desc: "Sin numerar fotos. Hatch agrupa.", size: "small" },
+    { icon: <Calendar className="h-5 w-5" />, title: "30 días en 1 click", desc: "Programación masiva.", size: "small" },
+    { icon: <Sparkles className="h-5 w-5" />, title: "Posts colaborativos", desc: "Aparece en dos feeds a la vez. Sin coordinación manual.", size: "large", highlight: true },
+    { icon: <Upload className="h-5 w-5" />, title: "Reels + fotos", desc: "Hasta 100MB.", size: "small" },
+  ];
+  return (
+    <div className="p-8" style={{ background: HATCH.athens }}>
+      <div className="text-xs font-semibold uppercase tracking-[0.25em] mb-3 text-center" style={{ color: HATCH.silverDark }}>
+        Lo que harás (y lo que ya nunca harás)
+      </div>
+      <h3
+        className="text-center font-extrabold tracking-tight mb-12"
+        style={{ color: HATCH.graphite, fontSize: "clamp(1.75rem, 4vw, 2.5rem)", letterSpacing: "-0.03em", lineHeight: "1.05" }}
+      >
+        Una carpeta. Un mes. Cero clicks.
+      </h3>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-4xl mx-auto">
+        {cells.map((cell, i) => (
+          <BentoCell key={i} {...cell} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BentoCell({ icon, title, desc, size, highlight }: any) {
+  const [hover, setHover] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className={`relative rounded-2xl p-6 transition-all duration-500 cursor-pointer ${size === "large" ? "sm:col-span-2 sm:row-span-1" : ""}`}
+      style={{
+        background: highlight
+          ? `linear-gradient(135deg, ${HATCH.graphite} 0%, ${HATCH.graphiteAlt} 100%)`
+          : "rgba(255,255,255,0.7)",
+        backdropFilter: "blur(16px) saturate(180%)",
+        WebkitBackdropFilter: "blur(16px) saturate(180%)",
+        border: highlight ? `1px solid ${HATCH.silver}40` : `1px solid rgba(255,255,255,0.6)`,
+        boxShadow: hover
+          ? `0 16px 40px -12px ${highlight ? "rgba(168,218,220,0.3)" : "rgba(29,29,31,0.18)"}, 0 0 0 1px ${highlight ? HATCH.cobalt + "40" : "rgba(0,0,0,0.06)"}`
+          : `0 4px 12px -4px rgba(29,29,31,0.06), inset 0 1px 0 rgba(255,255,255,0.8)`,
+        transform: hover ? "translateY(-2px)" : "translateY(0)",
+        color: highlight ? HATCH.textOnDark : HATCH.graphite,
+      }}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <div
+          className="h-9 w-9 rounded-lg flex items-center justify-center"
+          style={{
+            background: highlight ? `${HATCH.cobalt}22` : `${HATCH.graphite}10`,
+            color: highlight ? HATCH.cobalt : HATCH.graphite,
+          }}
+        >
+          {icon}
+        </div>
+        {highlight && (
+          <span
+            className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+            style={{ background: HATCH.cobalt, color: HATCH.graphite }}
+          >
+            ÚNICO
+          </span>
+        )}
+      </div>
+      <h4 className="font-semibold text-base mb-1.5" style={{ letterSpacing: "-0.01em" }}>
+        {title}
+      </h4>
+      <p className="text-sm leading-relaxed" style={{ color: highlight ? HATCH.textOnDark + "B0" : HATCH.silverDark }}>
+        {desc}
+      </p>
+    </div>
+  );
+}
+
+/* ─── 03 · Stats strip ────────────────────────────────────────────── */
+function HatchStats() {
+  const stats = [
+    { value: 12847, label: "posts publicados", suffix: "" },
+    { value: 47, label: "agencias activas", suffix: "" },
+    { value: 2.5, label: "millones de minutos ahorrados", suffix: "M" },
+    { value: 99.8, label: "uptime últimos 90 días", suffix: "%" },
+  ];
+  return (
+    <div className="px-8 py-16" style={{ background: HATCH.athens, borderTop: "1px solid rgba(0,0,0,0.06)", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
+        {stats.map((s, i) => (
+          <StatItem key={i} {...s} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StatItem({ value, label, suffix }: { value: number; label: string; suffix: string }) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    const start = performance.now();
+    const dur = 2000;
+    let raf: number;
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setN(value * eased);
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  const display = value < 100 && !Number.isInteger(value) ? n.toFixed(1) : Math.floor(n).toLocaleString("es-ES");
+  return (
+    <div className="text-center">
+      <div
+        className="text-4xl sm:text-5xl font-extrabold tabular-nums"
+        style={{ color: HATCH.graphite, letterSpacing: "-0.03em" }}
+      >
+        {display}
+        <span style={{ color: HATCH.cobaltDeep }}>{suffix}</span>
+      </div>
+      <div className="text-xs mt-2 uppercase tracking-wider" style={{ color: HATCH.silver }}>
+        {label}
+      </div>
+    </div>
+  );
+}
+
+/* ─── 04 · Pricing 3-tier ─────────────────────────────────────────── */
+function HatchPricing() {
+  return (
+    <div className="px-8 py-16" style={{ background: HATCH.athens }}>
+      <div className="text-center mb-12">
+        <div className="text-xs font-semibold uppercase tracking-[0.25em] mb-3" style={{ color: HATCH.silverDark }}>
+          Precios
+        </div>
+        <h3
+          className="font-extrabold tracking-tight"
+          style={{ color: HATCH.graphite, fontSize: "clamp(1.75rem, 4vw, 2.5rem)", letterSpacing: "-0.03em" }}
+        >
+          Empieza gratis. Crece a tu ritmo.
+        </h3>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+        <PricingCard
+          name="Free"
+          price="0"
+          desc="Para probar Hatch"
+          features={["1 cuenta IG", "10 posts/mes", "API oficial Meta", "Soporte comunidad"]}
+        />
+        <PricingCard
+          name="Pro"
+          price="19"
+          desc="Para creators activos"
+          features={["3 cuentas IG", "Posts ilimitados", "Carruseles automáticos", "Posts colaborativos", "Soporte prioritario"]}
+          highlight
+        />
+        <PricingCard
+          name="Agency"
+          price="79"
+          desc="Para agencias"
+          features={["20 cuentas IG", "Todo de Pro", "Multi-equipo", "API access", "Account manager"]}
+        />
+      </div>
+    </div>
+  );
+}
+
+function PricingCard({ name, price, desc, features, highlight }: any) {
+  const [hover, setHover] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className="relative rounded-2xl p-7 transition-all duration-500"
+      style={{
+        background: highlight ? HATCH.graphite : "rgba(255,255,255,0.85)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        border: highlight
+          ? `1px solid ${HATCH.silver}50`
+          : `1px solid rgba(0,0,0,0.06)`,
+        color: highlight ? HATCH.textOnDark : HATCH.graphite,
+        boxShadow: highlight
+          ? `0 24px 64px -16px rgba(168,218,220,0.25), 0 0 0 1px ${HATCH.cobalt}30, inset 0 1px 0 rgba(255,255,255,0.06)`
+          : hover
+            ? `0 12px 32px -8px rgba(29,29,31,0.12)`
+            : `0 2px 8px -2px rgba(29,29,31,0.04)`,
+        transform: hover && !highlight ? "translateY(-2px)" : "translateY(0)",
+      }}
+    >
+      {/* Animated border beam — only on highlighted */}
+      {highlight && (
+        <div
+          className="absolute inset-0 rounded-2xl pointer-events-none"
+          style={{
+            background: `conic-gradient(from 0deg, transparent 0%, ${HATCH.cobalt}40 25%, transparent 50%, ${HATCH.cobalt}40 75%, transparent 100%)`,
+            animation: "spin 8s linear infinite",
+            opacity: 0.6,
+            mask: "linear-gradient(#000, #000) content-box, linear-gradient(#000, #000)",
+            WebkitMask: "linear-gradient(#000, #000) content-box, linear-gradient(#000, #000)",
+            maskComposite: "exclude",
+            WebkitMaskComposite: "xor",
+            padding: "1px",
+          }}
+        />
+      )}
+      <div className="relative">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-sm font-semibold" style={{ letterSpacing: "-0.01em" }}>{name}</span>
+          {highlight && (
+            <span
+              className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+              style={{ background: HATCH.cobalt, color: HATCH.graphite }}
+            >
+              POPULAR
+            </span>
+          )}
+        </div>
+        <div className="text-xs mb-5" style={{ color: highlight ? HATCH.textOnDark + "80" : HATCH.silverDark }}>
+          {desc}
+        </div>
+        <div className="flex items-baseline gap-1 mb-6">
+          <span className="text-5xl font-extrabold tabular-nums" style={{ letterSpacing: "-0.04em" }}>
+            €{price}
+          </span>
+          <span className="text-xs" style={{ color: highlight ? HATCH.textOnDark + "70" : HATCH.silver }}>
+            /mes
+          </span>
+        </div>
+        <button
+          className="w-full text-sm font-semibold px-4 py-3 rounded-full mb-6 transition-all hover:scale-[1.02] active:scale-[0.97]"
+          style={{
+            background: highlight ? HATCH.cobalt : HATCH.graphite,
+            color: highlight ? HATCH.graphite : HATCH.textOnDark,
+            boxShadow: highlight ? `0 8px 20px -4px ${HATCH.cobalt}66` : "none",
+          }}
+        >
+          Empezar con {name}
+        </button>
+        <ul className="space-y-2 text-sm">
+          {features.map((f: string, i: number) => (
+            <li key={i} className="flex items-start gap-2">
+              <Check className="h-4 w-4 shrink-0 mt-0.5" style={{ color: highlight ? HATCH.cobalt : HATCH.silverDark }} />
+              <span style={{ color: highlight ? HATCH.textOnDark + "DD" : HATCH.graphite }}>{f}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+/* ─── 05 · Marquee testimonials ────────────────────────────────────── */
+function HatchMarquee() {
+  const testimonials = [
+    { quote: "Tres horas de trabajo en cinco minutos. No exagero.", name: "Marina L.", role: "Agencia Pulso" },
+    { quote: "Posts colaborativos automáticos. Game changer.", name: "Lucía M.", role: "BrandUp Studio" },
+    { quote: "Subí mi carpeta de Drive y se programó solo.", name: "Diego S.", role: "@diegoviaja" },
+    { quote: "Gestionamos 12 cuentas. Sin Hatch no podríamos.", name: "Carla F.", role: "SocialCraft" },
+    { quote: "El plan Agency se pagó solo el primer mes.", name: "Pablo T.", role: "@foodie.madrid" },
+  ];
+  const [paused, setPaused] = useState(false);
+  return (
+    <div className="py-16 overflow-hidden" style={{ background: HATCH.athens }}>
+      <div className="text-center mb-10 px-8">
+        <div className="text-xs font-semibold uppercase tracking-[0.25em] mb-3" style={{ color: HATCH.silverDark }}>
+          Testimonios
+        </div>
+        <h3 className="font-extrabold tracking-tight" style={{ color: HATCH.graphite, fontSize: "clamp(1.75rem, 4vw, 2.5rem)", letterSpacing: "-0.03em" }}>
+          Lo que dicen quienes ya usan Hatch
+        </h3>
+      </div>
+      <div
+        className="flex gap-4 w-max"
+        style={{
+          animation: `marquee 50s linear infinite`,
+          animationPlayState: paused ? "paused" : "running",
+        }}
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        {[...testimonials, ...testimonials].map((t, i) => (
+          <div
+            key={i}
+            className="rounded-2xl p-6 shrink-0"
+            style={{
+              width: 320,
+              background: "rgba(255,255,255,0.85)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid rgba(0,0,0,0.06)",
+              boxShadow: "0 4px 16px -4px rgba(29,29,31,0.06)",
+            }}
+          >
+            <p className="text-sm leading-relaxed mb-4" style={{ color: HATCH.graphite }}>
+              "{t.quote}"
+            </p>
+            <div className="flex items-center gap-3">
+              <div
+                className="h-9 w-9 rounded-full flex items-center justify-center text-xs font-bold"
+                style={{ background: HATCH.cobalt, color: HATCH.graphite }}
+              >
+                {t.name[0]}
+              </div>
+              <div>
+                <div className="text-xs font-semibold" style={{ color: HATCH.graphite }}>{t.name}</div>
+                <div className="text-xs" style={{ color: HATCH.silver }}>{t.role}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}} />
+    </div>
+  );
+}
+
+/* ─── 06 · Final CTA with border beam ─────────────────────────────── */
+function HatchFinalCTA() {
+  const [hover, setHover] = useState(false);
+  return (
+    <div className="px-8 py-24 flex items-center justify-center" style={{ background: HATCH.athens }}>
+      <div
+        className="relative rounded-3xl p-12 max-w-2xl w-full text-center overflow-hidden"
+        style={{
+          background: HATCH.graphite,
+          color: HATCH.textOnDark,
+          border: `1px solid ${HATCH.silver}30`,
+          boxShadow: `0 32px 64px -24px rgba(29,29,31,0.4), 0 0 0 1px ${HATCH.silver}20`,
+        }}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+      >
+        {/* Border beam */}
+        <div
+          className="absolute inset-0 rounded-3xl pointer-events-none"
+          style={{
+            background: `conic-gradient(from 0deg, transparent 0%, ${HATCH.cobalt} 15%, transparent 30%, transparent 65%, ${HATCH.silver} 85%, transparent 100%)`,
+            animation: "spin 6s linear infinite",
+            opacity: hover ? 0.8 : 0.4,
+            mask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+            WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+            maskComposite: "exclude",
+            WebkitMaskComposite: "xor",
+            padding: "1.5px",
+            transition: "opacity 400ms ease",
+          }}
+        />
+        {/* Aurora glow */}
+        <div
+          className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full pointer-events-none"
+          style={{
+            background: `radial-gradient(circle, ${HATCH.cobalt}40 0%, transparent 70%)`,
+            filter: "blur(60px)",
+          }}
+        />
+        <div className="relative">
+          <h3
+            className="font-extrabold tracking-tight mb-4"
+            style={{ fontSize: "clamp(1.75rem, 4.5vw, 2.75rem)", letterSpacing: "-0.035em", lineHeight: "1.05" }}
+          >
+            Drop a folder.<br />
+            <span style={{ color: HATCH.cobalt }}>Hatch a month.</span>
+          </h3>
+          <p className="text-sm mb-8 max-w-md mx-auto" style={{ color: HATCH.textOnDark + "B0" }}>
+            Mientras tú duermes, Hatch publica. Programa 30 días en 2 minutos.
+          </p>
+          <button
+            className="inline-flex items-center gap-2 text-sm font-semibold px-8 py-4 rounded-full hover:scale-[1.04] active:scale-[0.97] transition-all"
+            style={{
+              background: HATCH.cobalt,
+              color: HATCH.graphite,
+              boxShadow: `0 12px 32px -8px ${HATCH.cobalt}80`,
+            }}
+          >
+            Empezar gratis — primera carpeta incluida
+            <ArrowRight className="h-4 w-4" />
+          </button>
+          <div className="text-xs mt-4" style={{ color: HATCH.silver }}>
+            Sin tarjeta de crédito · Sin compromisos
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── 07 · Footer ─────────────────────────────────────────────────── */
+function HatchFooter() {
+  return (
+    <div style={{ background: HATCH.graphite, color: HATCH.textOnDark }}>
+      <div className="px-8 py-16">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 max-w-5xl mx-auto">
+          <div className="col-span-2 sm:col-span-1">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div
+                className="h-7 w-7 rounded-md flex items-center justify-center"
+                style={{ background: HATCH.cobalt }}
+              >
+                <Egg className="h-3.5 w-3.5" style={{ color: HATCH.graphite }} />
+              </div>
+              <span className="font-bold text-base" style={{ letterSpacing: "-0.01em" }}>Hatch</span>
+            </div>
+            <p className="text-xs leading-relaxed" style={{ color: HATCH.silver }}>
+              Hecho en Madrid para agencias hispanohablantes.
+            </p>
+          </div>
+          {[
+            { title: "Producto", links: ["Features", "Precios", "Demo", "Roadmap"] },
+            { title: "Recursos", links: ["Blog", "Templates", "Status", "Soporte"] },
+            { title: "Compañía", links: ["Sobre", "Privacidad", "Términos", "Contacto"] },
+          ].map((col) => (
+            <div key={col.title}>
+              <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: HATCH.silver }}>
+                {col.title}
+              </div>
+              <ul className="space-y-2 text-sm">
+                {col.links.map((l) => (
+                  <li key={l}>
+                    <a className="hover:text-white transition-colors" style={{ color: HATCH.textOnDark + "B0" }}>{l}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="border-t px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3" style={{ borderColor: HATCH.silver + "20" }}>
+        <span className="text-xs" style={{ color: HATCH.silver }}>© 2026 Hatch. Todos los derechos reservados.</span>
+        <span className="text-xs" style={{ color: HATCH.silver }}>API oficial de Meta · GDPR compliant · AES-256</span>
+      </div>
     </div>
   );
 }
