@@ -1,27 +1,25 @@
 "use client";
 
 /* ───────────────────────────────────────────────────────────────────
-   /hero-preview — sandbox aislado del nuevo HatchHero.
-   Permite validar mechanics y FPS antes de integrar en page.tsx principal.
+   /hero-preview — sandbox del nuevo HatchHero + sección How-It-Works.
+   Permite validar el flujo completo antes de integrar en page.tsx.
    ─────────────────────────────────────────────────────────────────── */
 
 import HatchHero from "@/components/landing/hatch-hero";
+import { HatchHowItWorks } from "@/components/landing/hatch-how-it-works";
 
 export default function HeroPreviewPage() {
   return (
     <main>
       <HatchHero />
+      <HatchHowItWorks />
 
-      {/* Banda visible al final del scroll para confirmar que termina el pinned */}
-      <section className="relative bg-zinc-950 text-white py-24 px-6 text-center">
-        <h2 className="text-2xl font-bold mb-2">Fin del hero pinned</h2>
+      {/* Marker visible al final del scroll para confirmar que termina el flow */}
+      <section className="relative bg-zinc-950 text-white py-20 px-6 text-center">
+        <h2 className="text-xl font-bold mb-2">— fin del preview —</h2>
         <p className="text-sm text-zinc-400 max-w-md mx-auto">
-          Si llegas a este punto y has visto los 4 actos transicionar suavemente al hacer scroll,
-          el mecanismo funciona. Esta sección es solo para confirmar que el sticky se libera correctamente.
+          Hero pinned (3 viewports) → How-It-Works (3 pasos) → diferencial strip.
         </p>
-        <div className="mt-6 inline-flex items-center gap-2 text-xs text-zinc-500">
-          <span>← scroll arriba para repetir</span>
-        </div>
       </section>
     </main>
   );

@@ -124,23 +124,30 @@ function Acts({ progress, mobile }: { progress: MotionValue<number>; mobile: boo
 /* ─── ACT 1 · Entrada ─────────────────────────────────────────────── */
 
 function Act1({ opacity, inner, mobile }: { opacity: MotionValue<number>; inner: MotionValue<number>; mobile: boolean }) {
-  const blur = useTransform(inner, [0, 1], [12, 8]);
-  const calOpacity = useTransform(inner, [0, 1], [0.25, 0.15]);
+  const blur = useTransform(inner, [0, 1], [14, 10]);
+  const calOpacity = useTransform(inner, [0, 1], [0.18, 0.10]);
   const calFilter = useTransform(blur, (v) => `blur(${v}px)`);
 
-  /* Headline visible desde p=0 (es lo primero que ve el usuario) */
-  const headlineY = useTransform(inner, [0, 0.8, 1], [0, 0, -20]);
-  const headlineOpacity = useTransform(inner, [0, 0.8, 1], [1, 1, 0.6]);
+  /* Headlines visible desde inicio — son lo primero que ve el usuario */
+  const badgeY = useTransform(inner, [0, 0.85, 1], [0, 0, -8]);
+  const badgeOpacity = useTransform(inner, [0, 0.85, 1], [1, 1, 0.4]);
 
-  const folderSize = mobile ? 180 : 260;
+  const headlineY = useTransform(inner, [0, 0.85, 1], [0, 0, -16]);
+  const headlineOpacity = useTransform(inner, [0, 0.85, 1], [1, 1, 0.55]);
+
+  const subY = useTransform(inner, [0, 0.85, 1], [0, 0, -8]);
+  const subOpacity = useTransform(inner, [0, 0.85, 1], [1, 1, 0.4]);
+
+  const folderRotate = useTransform(inner, [0, 1], [0, -2]);
+  const folderSize = mobile ? 200 : 280;
 
   return (
     <motion.div
       style={{ opacity }}
-      className="absolute inset-0 z-10 flex flex-col items-center justify-center"
+      className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6"
       data-act="1"
     >
-      {/* Background calendar (blurred) */}
+      {/* Background calendar (blurred, very subtle) */}
       <motion.div
         className="absolute inset-0 flex items-center justify-center pointer-events-none"
         style={{ opacity: calOpacity, filter: calFilter }}
@@ -148,9 +155,33 @@ function Act1({ opacity, inner, mobile }: { opacity: MotionValue<number>; inner:
         <CalendarGrid lit={0} mobile={mobile} showHeader={false} />
       </motion.div>
 
-      {/* Headline */}
+      {/* USP Badge — el factor diferencial visible AT FIRST GLANCE */}
+      <motion.div
+        className="relative z-30 mb-6"
+        style={{ y: badgeY, opacity: badgeOpacity, willChange: "transform, opacity" }}
+      >
+        <div
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] font-semibold tracking-wide backdrop-blur-md"
+          style={{
+            background: "rgba(29,29,31,0.06)",
+            border: "1px solid rgba(29,29,31,0.10)",
+            color: "#1D1D1F",
+          }}
+        >
+          <span className="relative flex h-1.5 w-1.5">
+            <span
+              className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping"
+              style={{ background: "#7DBCBE" }}
+            />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: "#A8DADC" }} />
+          </span>
+          El único scheduler que entiende carpetas
+        </div>
+      </motion.div>
+
+      {/* Headline — JUMBO oversized */}
       <motion.h1
-        className="relative z-20 text-center px-6 mb-12"
+        className="relative z-20 text-center"
         style={{
           y: headlineY,
           opacity: headlineOpacity,
@@ -159,19 +190,39 @@ function Act1({ opacity, inner, mobile }: { opacity: MotionValue<number>; inner:
           letterSpacing: "-0.045em",
           lineHeight: 0.92,
           color: "#1D1D1F",
-          fontSize: mobile ? "clamp(2.5rem, 8vw, 5rem)" : "clamp(4rem, 9vw, 9rem)",
+          fontSize: mobile ? "clamp(2.6rem, 9vw, 5rem)" : "clamp(4.2rem, 9.5vw, 9.5rem)",
           willChange: "transform, opacity",
         }}
       >
         Drop a <span style={{ color: "#7DBCBE" }}>folder.</span>
       </motion.h1>
 
-      {/* Folder centered with floating animation */}
+      {/* Sub copy — humor + claridad de qué hace el producto */}
+      <motion.p
+        className="relative z-20 text-center mt-7 mb-12 max-w-xl"
+        style={{
+          y: subY,
+          opacity: subOpacity,
+          color: "#48484A",
+          fontSize: mobile ? "clamp(0.95rem, 2.6vw, 1.1rem)" : "1.18rem",
+          lineHeight: 1.5,
+          fontWeight: 400,
+          willChange: "transform, opacity",
+        }}
+      >
+        Sí, una carpeta. La que ya tienes en Drive.
+        <br className="hidden sm:block" />
+        <span style={{ color: "#1D1D1F", fontWeight: 500 }}>
+          La sueltas y olvidas que existían los lunes.
+        </span>
+      </motion.p>
+
+      {/* Folder centered — float + ligero tilt al scroll */}
       <motion.div
         className="relative z-10"
-        animate={{ y: [0, -10, 0] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        style={{ willChange: "transform" }}
+        animate={{ y: [0, -12, 0] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+        style={{ rotate: folderRotate, willChange: "transform" }}
       >
         <FolderAsset state="closed" size={folderSize} />
       </motion.div>
@@ -182,27 +233,33 @@ function Act1({ opacity, inner, mobile }: { opacity: MotionValue<number>; inner:
 /* ─── ACT 2 · Apertura ────────────────────────────────────────────── */
 
 function Act2({ opacity, inner, mobile }: { opacity: MotionValue<number>; inner: MotionValue<number>; mobile: boolean }) {
-  const folderRotateY = useTransform(inner, [0, 0.6, 1], [-10, 0, 5]);
-  const folderScale = useTransform(inner, [0, 1], [1, 1.1]);
+  /* Folder breathing: rota suavemente y crece — premium feel */
+  const folderRotateY = useTransform(inner, [0, 0.5, 1], [-6, 2, 6]);
+  const folderRotateX = useTransform(inner, [0, 1], [3, -2]);
+  const folderScale = useTransform(inner, [0, 1], [0.96, 1.08]);
+  const folderY = useTransform(inner, [0, 1], [0, -8]);
 
-  const headlineY = useTransform(inner, [0, 0.3], [40, 0]);
-  const headlineOpacity = useTransform(inner, [0, 0.3], [0, 1]);
+  const headlineY = useTransform(inner, [0, 0.25], [28, 0]);
+  const headlineOpacity = useTransform(inner, [0, 0.25, 0.85, 1], [0, 1, 1, 0.6]);
 
-  const folderSize = mobile ? 200 : 300;
+  const subY = useTransform(inner, [0, 0.30], [20, 0]);
+  const subOpacity = useTransform(inner, [0, 0.30, 0.85, 1], [0, 1, 1, 0.4]);
 
-  /* Cross-fade entre closed y open en el 50% del acto */
-  const closedOpacity = useTransform(inner, [0.4, 0.55], [1, 0]);
-  const openOpacity = useTransform(inner, [0.4, 0.55], [0, 1]);
+  const folderSize = mobile ? 230 : 340;
+
+  /* Cross-fade closed→open en el 45-58% del acto (más suave que antes) */
+  const closedOpacity = useTransform(inner, [0.40, 0.58], [1, 0]);
+  const openOpacity = useTransform(inner, [0.40, 0.58], [0, 1]);
 
   return (
     <motion.div
       style={{ opacity }}
-      className="absolute inset-0 z-10 flex flex-col items-center justify-center"
+      className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6"
       data-act="2"
     >
       {/* Headline */}
       <motion.h1
-        className="relative z-20 text-center px-6 mb-12"
+        className="relative z-20 text-center mb-4"
         style={{
           y: headlineY,
           opacity: headlineOpacity,
@@ -211,20 +268,38 @@ function Act2({ opacity, inner, mobile }: { opacity: MotionValue<number>; inner:
           letterSpacing: "-0.045em",
           lineHeight: 0.92,
           color: "#1D1D1F",
-          fontSize: mobile ? "clamp(2.5rem, 8vw, 5rem)" : "clamp(4rem, 9vw, 9rem)",
+          fontSize: mobile ? "clamp(2.4rem, 8vw, 4.8rem)" : "clamp(3.8rem, 8.5vw, 8rem)",
           willChange: "transform, opacity",
         }}
       >
-        Watch it <span style={{ color: "#7DBCBE" }}>open.</span>
+        La <span style={{ color: "#7DBCBE" }}>abrimos</span> por ti.
       </motion.h1>
+
+      {/* Sub copy */}
+      <motion.p
+        className="relative z-20 text-center mb-10 max-w-md"
+        style={{
+          y: subY,
+          opacity: subOpacity,
+          color: "#48484A",
+          fontSize: mobile ? "1rem" : "1.1rem",
+          lineHeight: 1.5,
+          willChange: "transform, opacity",
+        }}
+      >
+        Detectamos carruseles, leemos los <code style={{ background: "rgba(29,29,31,0.06)", padding: "1px 6px", borderRadius: 4, fontSize: "0.92em", color: "#1D1D1F" }}>caption.txt</code>, ordenamos por fecha. Sin que toques nada.
+      </motion.p>
 
       {/* Folder transitioning */}
       <motion.div
         className="relative z-10"
         style={{
           rotateY: folderRotateY,
+          rotateX: folderRotateX,
           scale: folderScale,
-          transformPerspective: 1200,
+          y: folderY,
+          transformPerspective: 1400,
+          transformStyle: "preserve-3d",
           willChange: "transform",
         }}
       >
@@ -244,10 +319,10 @@ function Act2({ opacity, inner, mobile }: { opacity: MotionValue<number>; inner:
 function Act3({ opacity, inner, mobile }: { opacity: MotionValue<number>; inner: MotionValue<number>; mobile: boolean }) {
   const [lit, setLit] = useState(0);
 
-  /* Update lit count based on inner progress */
+  /* Update lit count based on inner progress — prev compare evita re-renders */
   useMotionValueEvent(inner, "change", (v) => {
-    const newLit = Math.min(30, Math.floor(v * 32));
-    setLit(newLit);
+    const newLit = Math.min(30, Math.max(0, Math.floor(v * 32)));
+    setLit((prev) => (prev === newLit ? prev : newLit));
   });
 
   const headlineY = useTransform(inner, [0, 0.3], [40, 0]);
@@ -273,12 +348,12 @@ function Act3({ opacity, inner, mobile }: { opacity: MotionValue<number>; inner:
   return (
     <motion.div
       style={{ opacity }}
-      className="absolute inset-0 z-10 flex flex-col items-center justify-center"
+      className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6"
       data-act="3"
     >
       {/* Headline */}
       <motion.h1
-        className="relative z-30 text-center px-6 mb-8"
+        className="relative z-30 text-center mb-3"
         style={{
           y: headlineY,
           opacity: headlineOpacity,
@@ -287,12 +362,20 @@ function Act3({ opacity, inner, mobile }: { opacity: MotionValue<number>; inner:
           letterSpacing: "-0.045em",
           lineHeight: 0.92,
           color: "#1D1D1F",
-          fontSize: mobile ? "clamp(2.5rem, 8vw, 5rem)" : "clamp(4rem, 9vw, 9rem)",
+          fontSize: mobile ? "clamp(2.4rem, 8vw, 4.8rem)" : "clamp(3.8rem, 8.5vw, 8rem)",
           willChange: "transform, opacity",
         }}
       >
-        <span style={{ color: "#7DBCBE" }}>Hatch</span> a month.
+        Un mes en <span style={{ color: "#7DBCBE" }}>30 segundos.</span>
       </motion.h1>
+
+      {/* Sub copy */}
+      <p
+        className="relative z-20 text-center mb-8"
+        style={{ color: "#48484A", fontSize: mobile ? "0.95rem" : "1.05rem", maxWidth: 480 }}
+      >
+        Cada post en su día, su hora y con su caption. Tú, mientras, estás haciendo otra cosa.
+      </p>
 
       {/* Calendar with progressive lit slots */}
       <div className="relative z-10">
@@ -345,10 +428,12 @@ function FlyingPost({
 /* ─── ACT 4 · Resultado ───────────────────────────────────────────── */
 
 function Act4({ opacity, inner, mobile }: { opacity: MotionValue<number>; inner: MotionValue<number>; mobile: boolean }) {
-  const headlineY = useTransform(inner, [0, 0.3], [40, 0]);
-  const headlineOpacity = useTransform(inner, [0, 0.3], [0, 1]);
-  const ctaY = useTransform(inner, [0.3, 0.6], [40, 0]);
-  const ctaOpacity = useTransform(inner, [0.3, 0.6], [0, 1]);
+  const headlineY = useTransform(inner, [0, 0.25], [28, 0]);
+  const headlineOpacity = useTransform(inner, [0, 0.25], [0, 1]);
+  const calY = useTransform(inner, [0, 0.4], [40, 0]);
+  const calOpacity = useTransform(inner, [0, 0.4], [0, 1]);
+  const ctaY = useTransform(inner, [0.35, 0.65], [40, 0]);
+  const ctaOpacity = useTransform(inner, [0.35, 0.65], [0, 1]);
 
   return (
     <motion.div
@@ -358,79 +443,105 @@ function Act4({ opacity, inner, mobile }: { opacity: MotionValue<number>; inner:
     >
       {/* Headline */}
       <motion.h1
-        className="relative z-30 text-center mb-8"
+        className="relative z-30 text-center mb-3"
         style={{
           y: headlineY,
           opacity: headlineOpacity,
           fontFamily: "Satoshi, Inter, system-ui, sans-serif",
           fontWeight: 800,
           letterSpacing: "-0.045em",
-          lineHeight: 0.92,
+          lineHeight: 0.95,
           color: "#1D1D1F",
-          fontSize: mobile ? "clamp(2.25rem, 7vw, 4.5rem)" : "clamp(3rem, 7vw, 6rem)",
+          fontSize: mobile ? "clamp(2.1rem, 7vw, 4.2rem)" : "clamp(2.8rem, 6.5vw, 5.6rem)",
           willChange: "transform, opacity",
         }}
       >
-        Done in <span style={{ color: "#7DBCBE" }}>2 minutes.</span>
+        Listo en <span style={{ color: "#7DBCBE" }}>2 minutos.</span>
       </motion.h1>
 
-      {/* Calendar lleno con BorderBeam */}
-      <div className="relative z-10 mb-10">
-        <BorderBeam size={mobile ? 200 : 320} duration={6} color="#A8DADC" colorTo="#7DBCBE" borderWidth={1.5}>
-          <CalendarGrid lit={30} mobile={mobile} glow />
-        </BorderBeam>
-      </div>
-
-      {/* Counter */}
-      <motion.div
-        className="relative z-20 mb-8 flex items-center gap-3 text-sm font-medium"
+      {/* Sub copy con humor */}
+      <motion.p
+        className="relative z-20 text-center mb-8 max-w-md"
         style={{
-          opacity: ctaOpacity,
+          opacity: headlineOpacity,
           color: "#48484A",
-          fontFamily: "Satoshi, Inter, system-ui, sans-serif",
+          fontSize: mobile ? "0.95rem" : "1.05rem",
         }}
       >
-        <span className="font-bold tabular-nums" style={{ color: "#1D1D1F" }}>
+        Lo que tu CM hacía un lunes entero. Sin pagar a nadie por el trauma.
+      </motion.p>
+
+      {/* Calendar lleno con BorderBeam */}
+      <motion.div
+        className="relative z-10 mb-7"
+        style={{ y: calY, opacity: calOpacity, willChange: "transform, opacity" }}
+      >
+        <BorderBeam size={mobile ? 220 : 360} duration={5} color="#A8DADC" colorTo="#7DBCBE" borderWidth={1.5}>
+          <CalendarGrid lit={30} mobile={mobile} glow />
+        </BorderBeam>
+      </motion.div>
+
+      {/* Counter — ticker con format exacto */}
+      <motion.div
+        className="relative z-20 mb-7 flex items-center gap-2.5 text-sm"
+        style={{ opacity: ctaOpacity, color: "#48484A" }}
+      >
+        <span className="font-bold tabular-nums text-base" style={{ color: "#1D1D1F" }}>
           <NumberTicker value={30} trigger="inView" />
         </span>
         <span>posts programados</span>
         <span style={{ color: "#86868B" }}>·</span>
-        <span>2 min</span>
-        <span className="font-bold tabular-nums" style={{ color: "#1D1D1F" }}>
-          <NumberTicker value={14} trigger="inView" delay={0.3} />
+        <span>en</span>
+        <span className="font-bold tabular-nums text-base" style={{ color: "#1D1D1F" }}>
+          2:14
         </span>
-        <span>s</span>
       </motion.div>
 
-      {/* CTA */}
+      {/* CTA dual */}
       <motion.div
         style={{ y: ctaY, opacity: ctaOpacity }}
-        className="relative z-20 flex flex-col sm:flex-row items-center gap-3"
+        className="relative z-20 flex flex-col sm:flex-row items-center gap-3 mb-5"
       >
-        <MotionMagnetic strength={0.12} scale>
+        <MotionMagnetic strength={0.14} scale>
           <Link
             href="/signup"
-            className="inline-flex items-center gap-2 text-sm font-semibold px-7 py-3.5 rounded-full transition-transform active:scale-[0.97]"
+            className="inline-flex items-center gap-2 text-sm font-semibold px-8 py-4 rounded-full transition-transform active:scale-[0.97]"
             style={{
               background: "#1D1D1F",
               color: "#F5F5F7",
-              boxShadow: "0 12px 32px -12px rgba(29,29,31,0.6), 0 0 0 1px #1D1D1F, 0 0 32px -8px rgba(168,218,220,0.3)",
+              boxShadow: "0 16px 40px -12px rgba(29,29,31,0.55), 0 0 0 1px #1D1D1F, 0 0 48px -10px rgba(168,218,220,0.40)",
             }}
           >
-            Empezar gratis
+            Probar con mi carpeta — gratis
             <ArrowRight className="h-4 w-4" />
           </Link>
         </MotionMagnetic>
         <Link
           href="#como-funciona"
-          className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3.5 rounded-full border transition-colors hover:bg-white/40"
-          style={{
-            borderColor: "rgba(0,0,0,0.12)",
-            color: "#1D1D1F",
-          }}
+          className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-4 rounded-full border transition-colors hover:bg-white/40"
+          style={{ borderColor: "rgba(0,0,0,0.14)", color: "#1D1D1F" }}
         >
           Ver demo de 90s
         </Link>
+      </motion.div>
+
+      {/* Trust microcopy bajo el CTA */}
+      <motion.div
+        style={{ opacity: ctaOpacity }}
+        className="relative z-20 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[11px] font-medium"
+      >
+        <span className="inline-flex items-center gap-1.5" style={{ color: "#86868B" }}>
+          <span className="h-1 w-1 rounded-full" style={{ background: "#16A34A" }} />
+          Sin tarjeta
+        </span>
+        <span className="inline-flex items-center gap-1.5" style={{ color: "#86868B" }}>
+          <span className="h-1 w-1 rounded-full" style={{ background: "#7DBCBE" }} />
+          API oficial de Meta
+        </span>
+        <span className="inline-flex items-center gap-1.5" style={{ color: "#86868B" }}>
+          <span className="h-1 w-1 rounded-full" style={{ background: "#86868B" }} />
+          Cifrado AES-256
+        </span>
       </motion.div>
     </motion.div>
   );
