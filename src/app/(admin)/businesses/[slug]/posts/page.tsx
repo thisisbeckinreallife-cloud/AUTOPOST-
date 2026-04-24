@@ -1,32 +1,31 @@
 import { db } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
-import { StatusBadge } from "@/components/ui/badge";
 import Link from "next/link";
-import { formatDateInTz } from "@/lib/utils";
-import { Image as ImageIcon, Film, Layers, Search, Clock } from "lucide-react";
+import { Search, List, CalendarRange } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { PostsListClient, type PostItem } from "./posts-list-client";
+import { CalendarView, type CalendarPost } from "./calendar-view";
 
 export const dynamic = "force-dynamic";
 
-const POST_TYPE_ICON: Record<string, React.ReactNode> = {
-  IMAGE: <ImageIcon className="h-3.5 w-3.5 text-emerald-700" />,
-  CAROUSEL: <Layers className="h-3.5 w-3.5 text-blue-700" />,
-  REEL: <Film className="h-3.5 w-3.5 text-purple-700" />,
-};
+type View = "list" | "calendar";
 
-const POST_TYPE_BG: Record<string, string> = {
-  IMAGE: "bg-emerald-100",
-  CAROUSEL: "bg-blue-100",
-  REEL: "bg-purple-100",
-};
+function parseMonth(m: string | undefined): { year: number; month: number } {
+  if (m && /^\d{4}-\d{2}$/.test(m)) {
+    const [y, mo] = m.split("-").map(Number);
+    return { year: y, month: mo - 1 };
+  }
+  const now = new Date();
+  return { year: now.getFullYear(), month: now.getMonth() };
+}
 
 export default async function PostsPage({
   params,
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { status?: string; page?: string };
+  searchParams: { status?: string; page?: string; view?: View; month?: string };
 }) {
   await requireSession();
 
@@ -35,6 +34,7 @@ export default async function PostsPage({
   });
   if (!business) notFound();
 
+  const view: View = searchParams.view === "calendar" ? "calendar" : "list";
   const page = parseInt(searchParams.page ?? "1", 10);
   const limit = 20;
   const statusFilter = searchParams.status;
@@ -44,12 +44,24 @@ export default async function PostsPage({
     ...(statusFilter ? { status: statusFilter as never } : {}),
   };
 
-  const [posts, total] = await Promise.all([
-    db.postDraft.findMany({
-      where,
+  const STATUS_OPTIONS = [
+    "DRAFT", "VALIDATED", "READY", "SCHEDULED",
+    "PUBLISHING", "PUBLISHED", "FAILED", "CANCELLED",
+  ];
+
+  // Calendar view: query month ± 1 to cover grid edges, no paging
+  let calendarPosts: CalendarPost[] = [];
+  let listPosts: PostItem[] = [];
+  let total = 0;
+  let pages = 0;
+
+  if (view === "calendar") {
+    const { year, month } = parseMonth(searchParams.month);
+    const rangeStart = new Date(year, month - 1, 20);
+    const rangeEnd = new Date(year, month + 2, 10);
+    const rows = await db.postDraft.findMany({
+      where: { ...where, publishAt: { gte: rangeStart, lt: rangeEnd } },
       orderBy: { publishAt: "asc" },
-      skip: (page - 1) * limit,
-      take: limit,
       include: {
         _count: { select: { mediaAssets: true } },
         mediaAssets: {
@@ -58,16 +70,68 @@ export default async function PostsPage({
           select: { storageUrl: true, mimeType: true },
         },
       },
-    }),
-    db.postDraft.count({ where }),
-  ]);
+    });
+    calendarPosts = rows.map((p) => ({
+      id: p.id,
+      postType: p.postType,
+      caption: p.caption,
+      publishAt: p.publishAt,
+      status: p.status,
+      mediaCount: p._count.mediaAssets,
+      firstMedia: p.mediaAssets[0]
+        ? { storageUrl: p.mediaAssets[0].storageUrl, mimeType: p.mediaAssets[0].mimeType }
+        : null,
+    }));
+    total = calendarPosts.length;
+  } else {
+    const [rows, t] = await Promise.all([
+      db.postDraft.findMany({
+        where,
+        orderBy: { publishAt: "asc" },
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          _count: { select: { mediaAssets: true } },
+          mediaAssets: {
+            take: 1,
+            orderBy: { sortOrder: "asc" },
+            select: { storageUrl: true, mimeType: true },
+          },
+        },
+      }),
+      db.postDraft.count({ where }),
+    ]);
+    total = t;
+    pages = Math.ceil(total / limit);
+    listPosts = rows.map((p) => ({
+      id: p.id,
+      postType: p.postType,
+      sourceFolderName: p.sourceFolderName,
+      caption: p.caption,
+      publishAt: p.publishAt.toISOString(),
+      status: p.status,
+      mediaCount: p._count.mediaAssets,
+      firstMedia: p.mediaAssets[0]
+        ? { storageUrl: p.mediaAssets[0].storageUrl, mimeType: p.mediaAssets[0].mimeType }
+        : null,
+    }));
+  }
 
-  const pages = Math.ceil(total / limit);
+  const slug = params.slug;
+  function urlWith(overrides: Partial<{ view: View; status: string | null; month: string }>): string {
+    const qp = new URLSearchParams();
+    const v = overrides.view ?? view;
+    if (v === "calendar") qp.set("view", "calendar");
+    const s = overrides.status === null ? null : overrides.status ?? statusFilter;
+    if (s) qp.set("status", s);
+    const m = overrides.month ?? searchParams.month;
+    if (m && v === "calendar") qp.set("month", m);
+    const qs = qp.toString();
+    return qs ? `/businesses/${slug}/posts?${qs}` : `/businesses/${slug}/posts`;
+  }
 
-  const STATUS_OPTIONS = [
-    "DRAFT", "VALIDATED", "READY", "SCHEDULED",
-    "PUBLISHING", "PUBLISHED", "FAILED", "CANCELLED",
-  ];
+  const preservedQuery = new URLSearchParams();
+  if (statusFilter) preservedQuery.set("status", statusFilter);
 
   return (
     <div className="space-y-6">
@@ -77,14 +141,41 @@ export default async function PostsPage({
         { label: "Posts" },
       ]} />
 
-      <div className="animate-fade-up">
-        <h1 className="font-display text-xl font-bold text-zinc-900">
-          {business.name} — Posts
-        </h1>
-        <p className="text-zinc-600 mt-1 text-sm">
-          <span className="text-zinc-900 font-semibold">{total}</span> post{total !== 1 ? "s" : ""}
-          {statusFilter && <> · filtrado por {statusFilter}</>}
-        </p>
+      <div className="flex items-start justify-between animate-fade-up gap-4">
+        <div>
+          <h1 className="font-display text-xl font-bold text-zinc-900">
+            {business.name} — Posts
+          </h1>
+          <p className="text-zinc-600 mt-1 text-sm">
+            <span className="text-zinc-900 font-semibold">{total}</span> post{total !== 1 ? "s" : ""}
+            {statusFilter && <> · filtrado por {statusFilter}</>}
+            {view === "calendar" && <> · vista calendario</>}
+          </p>
+        </div>
+
+        {/* View toggle */}
+        <div className="flex gap-1 bg-white border border-zinc-200 rounded-lg p-1" role="group" aria-label="Vista">
+          <Link
+            href={urlWith({ view: "list" })}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+              view === "list" ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900"
+            }`}
+            aria-pressed={view === "list"}
+          >
+            <List className="h-3.5 w-3.5" />
+            Lista
+          </Link>
+          <Link
+            href={urlWith({ view: "calendar" })}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+              view === "calendar" ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900"
+            }`}
+            aria-pressed={view === "calendar"}
+          >
+            <CalendarRange className="h-3.5 w-3.5" />
+            Calendario
+          </Link>
+        </div>
       </div>
 
       {/* Status filter */}
@@ -116,7 +207,15 @@ export default async function PostsPage({
         ))}
       </div>
 
-      {posts.length === 0 ? (
+      {view === "calendar" ? (
+        <CalendarView
+          posts={calendarPosts}
+          slug={params.slug}
+          timezone={business.timezone}
+          monthParam={searchParams.month}
+          preservedQuery={preservedQuery.toString()}
+        />
+      ) : listPosts.length === 0 ? (
         <div className="text-center py-20 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 animate-fade-up">
           <div className="w-14 h-14 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center mx-auto mb-4">
             <Search className="h-7 w-7 text-zinc-400" />
@@ -125,91 +224,12 @@ export default async function PostsPage({
           <p className="text-zinc-600 text-sm">Prueba cambiando los filtros</p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {posts.map((post) => {
-            const firstMedia = post.mediaAssets[0];
-            const mediaCount = post._count.mediaAssets;
-            return (
-              <Link
-                key={post.id}
-                href={`/businesses/${params.slug}/posts/${post.id}`}
-                className="group block rounded-xl border border-zinc-200 bg-white px-3.5 py-3 hover:border-zinc-300 hover:shadow-sm transition-all"
-              >
-                <div className="flex items-center gap-3.5">
-                  {/* Thumbnail */}
-                  <div className="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden border border-zinc-200 bg-zinc-100">
-                    {firstMedia?.mimeType.startsWith("image/") && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={firstMedia.storageUrl}
-                        alt=""
-                        className="absolute inset-0 w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    )}
-                    {firstMedia?.mimeType.startsWith("video/") && (
-                      <>
-                        <video
-                          src={firstMedia.storageUrl}
-                          className="absolute inset-0 w-full h-full object-cover"
-                          muted
-                          playsInline
-                          preload="metadata"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm">
-                            <Film className="h-2.5 w-2.5 text-white" />
-                          </div>
-                        </div>
-                      </>
-                    )}
-                    {!firstMedia && (
-                      <div className={`absolute inset-0 flex items-center justify-center ${POST_TYPE_BG[post.postType] ?? "bg-zinc-100"}`}>
-                        {POST_TYPE_ICON[post.postType]}
-                      </div>
-                    )}
-                    {mediaCount > 1 && (
-                      <div className="absolute top-0.5 right-0.5 px-1 rounded bg-black/60 text-white text-[9px] font-bold font-mono">
-                        +{mediaCount - 1}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Main */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold font-mono ${POST_TYPE_BG[post.postType] ?? "bg-zinc-100"} text-zinc-700`}>
-                        {POST_TYPE_ICON[post.postType]}
-                        {post.postType}
-                      </span>
-                      <p className="text-xs text-zinc-500 truncate font-mono">
-                        {post.sourceFolderName}
-                      </p>
-                    </div>
-                    <p className="text-sm text-zinc-900 truncate leading-snug">
-                      {post.caption.slice(0, 90)}
-                      {post.caption.length > 90 ? "…" : ""}
-                    </p>
-                    <p className="text-xs text-zinc-500 mt-0.5 tabular-nums flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {formatDateInTz(post.publishAt, business.timezone)}
-                    </p>
-                  </div>
-
-                  {/* Status */}
-                  <div className="shrink-0">
-                    <StatusBadge status={post.status} />
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+        <PostsListClient posts={listPosts} slug={params.slug} timezone={business.timezone} />
       )}
 
       {/* Pagination */}
-      {pages > 1 && (
-        <nav aria-label="Paginación" className="flex items-center gap-1 justify-center pt-4">
+      {view === "list" && pages > 1 && (
+        <nav aria-label="Paginación" className="flex items-center gap-1 justify-center pt-4 pb-24">
           {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
             <Link
               key={p}
