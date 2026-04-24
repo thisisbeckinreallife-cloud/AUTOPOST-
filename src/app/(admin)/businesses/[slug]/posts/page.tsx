@@ -4,15 +4,21 @@ import { notFound } from "next/navigation";
 import { StatusBadge } from "@/components/ui/badge";
 import Link from "next/link";
 import { formatDateInTz } from "@/lib/utils";
-import { Image, Film, Layers, Search } from "lucide-react";
+import { Image as ImageIcon, Film, Layers, Search, Clock } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export const dynamic = "force-dynamic";
 
 const POST_TYPE_ICON: Record<string, React.ReactNode> = {
-  IMAGE: <Image className="h-4 w-4 text-green-400" />,
-  CAROUSEL: <Layers className="h-4 w-4 text-blue-400" />,
-  REEL: <Film className="h-4 w-4 text-purple-400" />,
+  IMAGE: <ImageIcon className="h-3.5 w-3.5 text-emerald-700" />,
+  CAROUSEL: <Layers className="h-3.5 w-3.5 text-blue-700" />,
+  REEL: <Film className="h-3.5 w-3.5 text-purple-700" />,
+};
+
+const POST_TYPE_BG: Record<string, string> = {
+  IMAGE: "bg-emerald-100",
+  CAROUSEL: "bg-blue-100",
+  REEL: "bg-purple-100",
 };
 
 export default async function PostsPage({
@@ -46,6 +52,11 @@ export default async function PostsPage({
       take: limit,
       include: {
         _count: { select: { mediaAssets: true } },
+        mediaAssets: {
+          take: 1,
+          orderBy: { sortOrder: "asc" },
+          select: { storageUrl: true, mimeType: true },
+        },
       },
     }),
     db.postDraft.count({ where }),
@@ -67,94 +78,138 @@ export default async function PostsPage({
       ]} />
 
       <div className="animate-fade-up">
-        <h1 className="font-display text-xl font-bold text-white">
+        <h1 className="font-display text-xl font-bold text-zinc-900">
           {business.name} — Posts
         </h1>
-        <p className="text-zinc-500 mt-1">
-          <span className="text-zinc-300 font-semibold">{total}</span> post{total !== 1 ? "s" : ""}
+        <p className="text-zinc-600 mt-1 text-sm">
+          <span className="text-zinc-900 font-semibold">{total}</span> post{total !== 1 ? "s" : ""}
+          {statusFilter && <> · filtrado por {statusFilter}</>}
         </p>
       </div>
 
       {/* Status filter */}
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por estado">
-        <Link href={`/businesses/${params.slug}/posts`}>
-          <button
-            type="button"
-            className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all ${
-              !statusFilter
-                ? "bg-brand-500 text-white"
-                : "bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08] hover:text-zinc-200"
-            }`}
-            aria-pressed={!statusFilter}
-          >
-            Todos
-          </button>
+      <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar por estado">
+        <Link
+          href={`/businesses/${params.slug}/posts`}
+          className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
+            !statusFilter
+              ? "bg-zinc-900 text-white border-zinc-900"
+              : "bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
+          }`}
+          aria-pressed={!statusFilter}
+        >
+          Todos
         </Link>
         {STATUS_OPTIONS.map((s) => (
-          <Link key={s} href={`/businesses/${params.slug}/posts?status=${s}`}>
-            <button
-              type="button"
-              className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all ${
-                statusFilter === s
-                  ? "bg-brand-500 text-white"
-                  : "bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08] hover:text-zinc-200"
-              }`}
-              aria-pressed={statusFilter === s}
-            >
-              {s}
-            </button>
+          <Link
+            key={s}
+            href={`/businesses/${params.slug}/posts?status=${s}`}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border font-mono ${
+              statusFilter === s
+                ? "bg-zinc-900 text-white border-zinc-900"
+                : "bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
+            }`}
+            aria-pressed={statusFilter === s}
+          >
+            {s}
           </Link>
         ))}
       </div>
 
       {posts.length === 0 ? (
-        <div className="text-center py-20 rounded-2xl border border-dashed border-white/[0.06] bg-surface-card animate-fade-up">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-800/60 flex items-center justify-center mx-auto mb-4">
-            <Search className="h-7 w-7 text-zinc-500" />
+        <div className="text-center py-20 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 animate-fade-up">
+          <div className="w-14 h-14 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center mx-auto mb-4">
+            <Search className="h-7 w-7 text-zinc-400" />
           </div>
-          <h3 className="text-base font-semibold text-zinc-200 mb-1">No se encontraron posts</h3>
-          <p className="text-zinc-500 text-sm">Prueba cambiando los filtros</p>
+          <h3 className="text-base font-semibold text-zinc-900 mb-1">No se encontraron posts</h3>
+          <p className="text-zinc-600 text-sm">Prueba cambiando los filtros</p>
         </div>
       ) : (
-        <div className="space-y-1.5">
-          {posts.map((post) => (
-            <Link
-              key={post.id}
-              href={`/businesses/${params.slug}/posts/${post.id}`}
-            >
-              <div className="group flex items-start justify-between gap-4 rounded-xl border border-white/[0.04] bg-surface-card px-4 py-3.5 hover:border-white/[0.08] transition-all">
-                <div className="flex items-start gap-3 min-w-0">
-                  <div className="mt-0.5 h-8 w-8 rounded-lg bg-white/[0.04] flex items-center justify-center shrink-0">
-                    {POST_TYPE_ICON[post.postType]}
+        <div className="space-y-2">
+          {posts.map((post) => {
+            const firstMedia = post.mediaAssets[0];
+            const mediaCount = post._count.mediaAssets;
+            return (
+              <Link
+                key={post.id}
+                href={`/businesses/${params.slug}/posts/${post.id}`}
+                className="group block rounded-xl border border-zinc-200 bg-white px-3.5 py-3 hover:border-zinc-300 hover:shadow-sm transition-all"
+              >
+                <div className="flex items-center gap-3.5">
+                  {/* Thumbnail */}
+                  <div className="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden border border-zinc-200 bg-zinc-100">
+                    {firstMedia?.mimeType.startsWith("image/") && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={firstMedia.storageUrl}
+                        alt=""
+                        className="absolute inset-0 w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    )}
+                    {firstMedia?.mimeType.startsWith("video/") && (
+                      <>
+                        <video
+                          src={firstMedia.storageUrl}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          muted
+                          playsInline
+                          preload="metadata"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm">
+                            <Film className="h-2.5 w-2.5 text-white" />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    {!firstMedia && (
+                      <div className={`absolute inset-0 flex items-center justify-center ${POST_TYPE_BG[post.postType] ?? "bg-zinc-100"}`}>
+                        {POST_TYPE_ICON[post.postType]}
+                      </div>
+                    )}
+                    {mediaCount > 1 && (
+                      <div className="absolute top-0.5 right-0.5 px-1 rounded bg-black/60 text-white text-[9px] font-bold font-mono">
+                        +{mediaCount - 1}
+                      </div>
+                    )}
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-zinc-200 truncate group-hover:text-white transition-colors">
-                      {post.sourceFolderName}
+
+                  {/* Main */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold font-mono ${POST_TYPE_BG[post.postType] ?? "bg-zinc-100"} text-zinc-700`}>
+                        {POST_TYPE_ICON[post.postType]}
+                        {post.postType}
+                      </span>
+                      <p className="text-xs text-zinc-500 truncate font-mono">
+                        {post.sourceFolderName}
+                      </p>
+                    </div>
+                    <p className="text-sm text-zinc-900 truncate leading-snug">
+                      {post.caption.slice(0, 90)}
+                      {post.caption.length > 90 ? "…" : ""}
                     </p>
-                    <p className="text-xs text-zinc-600 truncate mt-0.5">
-                      {post.caption.slice(0, 120)}
-                      {post.caption.length > 120 ? "..." : ""}
-                    </p>
-                    <p className="text-xs text-brand-400 mt-1 font-medium">
+                    <p className="text-xs text-zinc-500 mt-0.5 tabular-nums flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
                       {formatDateInTz(post.publishAt, business.timezone)}
                     </p>
                   </div>
+
+                  {/* Status */}
+                  <div className="shrink-0">
+                    <StatusBadge status={post.status} />
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-xs text-zinc-600 bg-white/[0.04] px-2 py-0.5 rounded font-medium">
-                    {post._count.mediaAssets} media
-                  </span>
-                  <StatusBadge status={post.status} />
-                </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
 
       {/* Pagination */}
       {pages > 1 && (
-        <nav aria-label="Paginacion" className="flex items-center gap-2 justify-center pt-4">
+        <nav aria-label="Paginación" className="flex items-center gap-1 justify-center pt-4">
           {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
             <Link
               key={p}
@@ -162,16 +217,13 @@ export default async function PostsPage({
                 statusFilter ? `&status=${statusFilter}` : ""
               }`}
               aria-current={p === page ? "page" : undefined}
+              className={`inline-block px-3 py-1.5 rounded-md text-sm font-semibold transition-all ${
+                p === page
+                  ? "bg-zinc-900 text-white"
+                  : "bg-white text-zinc-600 hover:bg-zinc-100 border border-zinc-200"
+              }`}
             >
-              <span
-                className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
-                  p === page
-                    ? "bg-brand-500 text-white"
-                    : "bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08]"
-                }`}
-              >
-                {p}
-              </span>
+              {p}
             </Link>
           ))}
         </nav>

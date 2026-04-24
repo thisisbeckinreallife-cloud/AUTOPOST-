@@ -10,7 +10,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-xl border border-white/[0.06] bg-surface-card shadow-card transition-all",
+        "rounded-xl border border-zinc-200 bg-white shadow-sm transition-all",
         className
       )}
     >
@@ -41,7 +41,7 @@ export function CardTitle({
   className?: string;
 }) {
   return (
-    <h3 className={cn("text-lg font-display font-bold text-white", className)}>
+    <h3 className={cn("text-lg font-display font-bold text-zinc-900", className)}>
       {children}
     </h3>
   );
@@ -67,11 +67,10 @@ export function CardInteractive({
   return (
     <div
       className={cn(
-        "rounded-xl border border-white/[0.06] bg-surface-card shadow-card card-interactive relative overflow-hidden",
+        "rounded-xl border border-zinc-200 bg-white shadow-sm hover:shadow-md hover:border-zinc-300 transition-all relative overflow-hidden",
         className
       )}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 hover:opacity-100 transition-opacity pointer-events-none" />
       <div className="relative">{children}</div>
     </div>
   );
