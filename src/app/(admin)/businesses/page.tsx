@@ -17,12 +17,14 @@ export default async function BusinessesPage() {
   const businesses = await db.business.findMany({
     orderBy: { createdAt: "desc" },
     include: {
-      metaConnection: { select: { igUsername: true, status: true } },
+      metaConnection: { select: { igUsername: true, status: true, tokenExpiresAt: true } },
       postDrafts: {
         select: { status: true, publishAt: true },
       },
     },
   });
+
+  const now = new Date();
 
   const enriched = businesses.map((biz) => {
     const published = biz.postDrafts.filter((p) => p.status === "PUBLISHED").length;
@@ -34,6 +36,10 @@ export default async function BusinessesPage() {
     const total = biz.postDrafts.length;
     const connectionStatus = biz.metaConnection?.status ?? null;
     const igUsername = biz.metaConnection?.igUsername ?? null;
+    const tokenExpiresAt = biz.metaConnection?.tokenExpiresAt ?? null;
+    const tokenDaysLeft = tokenExpiresAt
+      ? Math.floor((tokenExpiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+      : null;
 
     return {
       ...biz,
@@ -44,8 +50,41 @@ export default async function BusinessesPage() {
       total,
       connectionStatus,
       igUsername,
+      tokenDaysLeft,
     };
   });
+
+  function tokenBadge(daysLeft: number | null) {
+    if (daysLeft === null) return null;
+    if (daysLeft < 7) {
+      return (
+        <span
+          className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-800 font-semibold border border-red-300"
+          title={`El token expira en ${daysLeft} ${daysLeft === 1 ? "día" : "días"}`}
+        >
+          Token: {daysLeft}d
+        </span>
+      );
+    }
+    if (daysLeft < 30) {
+      return (
+        <span
+          className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold border border-amber-300"
+          title={`El token expira en ${daysLeft} días`}
+        >
+          Token: {daysLeft}d
+        </span>
+      );
+    }
+    return (
+      <span
+        className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700 font-medium border border-zinc-300"
+        title={`Token válido ${daysLeft} días más`}
+      >
+        Token: {daysLeft > 90 ? "90d+" : `${daysLeft}d`}
+      </span>
+    );
+  }
 
   function connectionBadge(status: string | null) {
     if (status === "ACTIVE") {
@@ -132,6 +171,7 @@ export default async function BusinessesPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-semibold text-zinc-900">{biz.name}</p>
                       {connectionBadge(biz.connectionStatus)}
+                      {biz.connectionStatus === "ACTIVE" && tokenBadge(biz.tokenDaysLeft)}
                     </div>
                     {biz.igUsername ? (
                       <p className="text-sm text-zinc-600 flex items-center gap-1.5 mt-0.5">

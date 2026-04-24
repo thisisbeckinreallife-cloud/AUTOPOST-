@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import Link from "next/link";
 import { formatDateInTz } from "@/lib/utils";
-import { Upload, ArrowRight, Clock, AlertCircle, AlertTriangle } from "lucide-react";
+import { Upload, ArrowRight, Clock, AlertCircle, AlertTriangle, CheckCircle2, CalendarClock } from "lucide-react";
 import { getHealthReport } from "@/lib/health";
 
 export const dynamic = "force-dynamic";
@@ -20,25 +20,42 @@ export default async function DashboardPage() {
 
   const now = new Date();
   const weekAhead = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const endOfToday = new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000);
 
-  const upcomingPosts = await db.postDraft.findMany({
-    where: {
-      publishAt: { gte: now },
-      status: { in: ["SCHEDULED", "READY", "VALIDATED"] },
-    },
-    include: { business: true },
-    orderBy: { publishAt: "asc" },
-    take: 3,
-  });
+  const [upcomingPosts, scheduledThisWeek, failedPosts, publishedToday, nextPublication] = await Promise.all([
+    db.postDraft.findMany({
+      where: {
+        publishAt: { gte: now },
+        status: { in: ["SCHEDULED", "READY", "VALIDATED"] },
+      },
+      include: { business: true },
+      orderBy: { publishAt: "asc" },
+      take: 3,
+    }),
+    db.postDraft.count({
+      where: {
+        publishAt: { gte: now, lte: weekAhead },
+        status: { in: ["SCHEDULED", "READY", "VALIDATED"] },
+      },
+    }),
+    db.postDraft.count({ where: { status: "FAILED" } }),
+    db.postDraft.count({
+      where: {
+        status: "PUBLISHED",
+        updatedAt: { gte: startOfToday, lt: endOfToday },
+      },
+    }),
+    db.postDraft.findFirst({
+      where: {
+        publishAt: { gte: now },
+        status: { in: ["SCHEDULED", "READY", "VALIDATED"] },
+      },
+      include: { business: true },
+      orderBy: { publishAt: "asc" },
+    }),
+  ]);
 
-  const scheduledThisWeek = await db.postDraft.count({
-    where: {
-      publishAt: { gte: now, lte: weekAhead },
-      status: { in: ["SCHEDULED", "READY", "VALIDATED"] },
-    },
-  });
-
-  const failedPosts = await db.postDraft.count({ where: { status: "FAILED" } });
   const hasBusinesses = businesses.length > 0;
   const hasConnected = businesses.some((b) => b.metaConnection?.status === "ACTIVE");
   const primaryBiz = businesses.find((b) => b.metaConnection?.status === "ACTIVE") ?? businesses[0];
@@ -47,6 +64,10 @@ export default async function DashboardPage() {
     : "/businesses/new";
 
   const firstName = session.email?.split("@")[0] ?? "";
+
+  const nextPublicationLabel = nextPublication
+    ? formatCountdown(nextPublication.publishAt, now)
+    : null;
 
   const failedChecks = health && !health.ok
     ? Object.entries(health.checks).filter(([, c]) => !c.ok)
@@ -112,6 +133,70 @@ export default async function DashboardPage() {
           </Link>
         )}
       </div>
+
+      {/* ── 1b · KPI strip (live status) ───────────────────── */}
+      {(hasConnected || publishedToday > 0 || failedPosts > 0 || nextPublication) && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Link
+            href={primaryBiz ? `/businesses/${primaryBiz.slug}/posts?status=PUBLISHED` : "#"}
+            className="group rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-emerald-300 hover:shadow-md"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700" />
+              </div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600">Publicados hoy</p>
+            </div>
+            <p className="text-2xl font-bold text-zinc-900 tabular-nums" style={{ fontFamily: "Satoshi, Inter, system-ui, sans-serif" }}>
+              {publishedToday}
+            </p>
+          </Link>
+
+          <Link
+            href={primaryBiz ? `/businesses/${primaryBiz.slug}/posts?status=FAILED` : "#"}
+            className={`group rounded-xl border bg-white p-4 transition-all hover:shadow-md ${
+              failedPosts > 0 ? "border-red-300 hover:border-red-400" : "border-zinc-200 hover:border-zinc-300"
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${failedPosts > 0 ? "bg-red-100" : "bg-zinc-100"}`}>
+                <AlertCircle className={`h-3.5 w-3.5 ${failedPosts > 0 ? "text-red-700" : "text-zinc-500"}`} />
+              </div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600">Fallidos activos</p>
+            </div>
+            <p
+              className={`text-2xl font-bold tabular-nums ${failedPosts > 0 ? "text-red-700" : "text-zinc-900"}`}
+              style={{ fontFamily: "Satoshi, Inter, system-ui, sans-serif" }}
+            >
+              {failedPosts}
+            </p>
+          </Link>
+
+          <Link
+            href={nextPublication ? `/businesses/${nextPublication.business.slug}/posts/${nextPublication.id}` : "#"}
+            className="group rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-cyan-300 hover:shadow-md"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-100">
+                <CalendarClock className="h-3.5 w-3.5 text-cyan-700" />
+              </div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600">Próxima publicación</p>
+            </div>
+            {nextPublicationLabel ? (
+              <>
+                <p className="text-2xl font-bold text-zinc-900 tabular-nums" style={{ fontFamily: "Satoshi, Inter, system-ui, sans-serif" }}>
+                  {nextPublicationLabel}
+                </p>
+                <p className="text-[11px] text-zinc-500 truncate mt-0.5">
+                  {nextPublication?.business.name}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-zinc-500 mt-1">Ninguna programada</p>
+            )}
+          </Link>
+        </div>
+      )}
 
       {/* ── 2 · Acción principal única ─────────────────────── */}
       <Link
@@ -249,4 +334,17 @@ export default async function DashboardPage() {
       )}
     </div>
   );
+}
+
+function formatCountdown(target: Date, now: Date): string {
+  const diffMs = target.getTime() - now.getTime();
+  if (diffMs <= 0) return "Ya";
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 60) return `${diffMin} min`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr} h`;
+  const diffDays = Math.floor(diffHr / 24);
+  if (diffDays < 7) return `${diffDays} d`;
+  const diffWeeks = Math.floor(diffDays / 7);
+  return `${diffWeeks} sem`;
 }
