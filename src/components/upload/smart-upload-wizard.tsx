@@ -61,6 +61,11 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
   const [directFiles, setDirectFiles] = useState<File[]>([]);
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout>>();
 
+  function totalAnalyzingBytes(): number {
+    if (directFiles.length > 0) return directFiles.reduce((n, f) => n + f.size, 0);
+    return file?.size ?? 0;
+  }
+
   // Cleanup preview URLs on unmount
   useEffect(() => {
     return () => {
@@ -500,9 +505,9 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
     <div className="max-w-3xl space-y-6">
       {/* Header */}
       <div>
-        <h1 className="font-display text-xl font-bold text-white">{STEP_TITLES[step]}</h1>
+        <h1 className="font-display text-xl font-bold text-zinc-900">{STEP_TITLES[step]}</h1>
         {step === "drop" && (
-          <p className="text-zinc-500 text-sm mt-1">
+          <p className="text-zinc-600 text-sm mt-1">
             Sube un video, foto, carpeta o ZIP. Nosotros hacemos el resto.
           </p>
         )}
@@ -518,15 +523,15 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
             return (
               <div key={label} className="flex items-center gap-2">
                 {i > 0 && (
-                  <div className={`w-8 h-px ${isActive ? "bg-brand-400" : "bg-zinc-800"}`} />
+                  <div className={`w-8 h-px ${isActive ? "bg-zinc-900" : "bg-zinc-300"}`} />
                 )}
                 <div
-                  className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-all ${
+                  className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-all ${
                     isCurrent
-                      ? "bg-gradient-brand-vivid text-white shadow-glow-sm"
+                      ? "bg-zinc-900 text-white"
                       : isActive
-                        ? "bg-brand-500/15 text-brand-400"
-                        : "bg-zinc-800/60 text-zinc-600"
+                        ? "bg-zinc-200 text-zinc-900"
+                        : "bg-zinc-100 text-zinc-500"
                   }`}
                 >
                   <span>{i + 1}</span>
@@ -556,23 +561,10 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
           )}
 
           {step === "analyzing" && (
-            <div className="flex flex-col items-center justify-center py-16 space-y-5 animate-fade-up">
-              <div className="relative">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500/15 to-accent-orange/10 border border-brand-500/15 flex items-center justify-center">
-                  <Sparkles className="h-8 w-8 text-brand-400 animate-pulse-subtle" />
-                </div>
-                <Loader2 className="absolute -top-1 -right-1 h-5 w-5 text-brand-400 animate-spin" />
-              </div>
-              <div className="text-center">
-                <p className="font-semibold text-zinc-200">Analizando tu contenido...</p>
-                <p className="text-sm text-zinc-500 mt-1">
-                  Detectando fotos, videos y textos.
-                </p>
-              </div>
-              <div className="w-48 h-1 bg-zinc-800/60 rounded-full overflow-hidden">
-                <div className="h-full bg-brand-500 rounded-full animate-[progress_2s_ease-in-out_infinite]" />
-              </div>
-            </div>
+            <AnalyzingProgress
+              totalBytes={totalAnalyzingBytes()}
+              fileCount={directFiles.length || 1}
+            />
           )}
 
           {step === "review" && analysis && (
@@ -596,15 +588,15 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
 
           {step === "uploading" && (
             <div className="flex flex-col items-center justify-center py-16 space-y-5 animate-fade-up">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500/12 to-emerald-500/8 border border-green-500/15 flex items-center justify-center">
-                <Upload className="h-8 w-8 text-green-400 animate-pulse-subtle" />
+              <div className="w-16 h-16 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center">
+                <Upload className="h-8 w-8 text-emerald-700 animate-pulse-subtle" />
               </div>
               <div className="text-center">
-                <p className="font-semibold text-zinc-200">{uploadProgress}</p>
-                <p className="text-sm text-zinc-500 mt-1">No cierres esta pagina.</p>
+                <p className="font-semibold text-zinc-900">{uploadProgress}</p>
+                <p className="text-sm text-zinc-600 mt-1">No cierres esta página.</p>
               </div>
-              <div className="w-48 h-1 bg-zinc-800/60 rounded-full overflow-hidden">
-                <div className="h-full bg-green-500 rounded-full animate-[progress_1.5s_ease-in-out_infinite]" />
+              <div className="w-48 h-1 bg-zinc-200 rounded-full overflow-hidden">
+                <div className="h-full bg-emerald-500 rounded-full animate-[progress_1.5s_ease-in-out_infinite]" />
               </div>
             </div>
           )}
@@ -638,7 +630,7 @@ export function SmartUploadWizard({ businessSlug }: SmartUploadWizardProps) {
 
       {/* Navigation */}
       {navigableSteps.includes(step) && (
-        <div className="flex items-center justify-between pt-4 border-t border-white/[0.04]">
+        <div className="flex items-center justify-between pt-4 border-t border-zinc-200">
           <Button variant="ghost" onClick={goBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             {step === "review" ? "Cambiar archivo" : "Atras"}
@@ -682,6 +674,76 @@ function SummaryStat({ label, value, dot }: { label: string; value: number; dot?
         {label}
       </span>
       <span className="font-medium text-zinc-300 tabular-nums">{value}</span>
+    </div>
+  );
+}
+
+function estimateAnalyzingSeconds(bytes: number, fileCount: number): number {
+  // Empirical: ~2s base + ~0.8s per MB + ~0.1s per file
+  const mb = bytes / (1024 * 1024);
+  return Math.max(3, Math.round(2 + mb * 0.8 + fileCount * 0.1));
+}
+
+function formatSeconds(s: number): string {
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return r > 0 ? `${m}m ${r}s` : `${m}m`;
+}
+
+function formatMB(bytes: number): string {
+  const mb = bytes / (1024 * 1024);
+  if (mb < 1) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${mb.toFixed(1)} MB`;
+}
+
+function AnalyzingProgress({ totalBytes, fileCount }: { totalBytes: number; fileCount: number }) {
+  const [elapsed, setElapsed] = useState(0);
+  const estimateS = estimateAnalyzingSeconds(totalBytes, fileCount);
+
+  useEffect(() => {
+    const start = Date.now();
+    const timer = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - start) / 1000));
+    }, 500);
+    return () => clearInterval(timer);
+  }, []);
+
+  const progressPct = Math.min(95, Math.round((elapsed / estimateS) * 100));
+  const overBudget = elapsed > estimateS;
+
+  return (
+    <div className="flex flex-col items-center justify-center py-16 space-y-5 animate-fade-up">
+      <div className="relative">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-zinc-100 to-zinc-200 border border-zinc-300 flex items-center justify-center">
+          <Sparkles className="h-8 w-8 text-zinc-700 animate-pulse-subtle" />
+        </div>
+        <Loader2 className="absolute -top-1 -right-1 h-5 w-5 text-zinc-900 animate-spin" />
+      </div>
+      <div className="text-center">
+        <p className="font-semibold text-zinc-900">Analizando tu contenido...</p>
+        <p className="text-sm text-zinc-600 mt-1">
+          Detectando fotos, videos y captions de {formatMB(totalBytes)}
+        </p>
+      </div>
+
+      <div className="w-64 space-y-2">
+        <div className="flex items-center justify-between text-[11px] font-mono text-zinc-600 tabular-nums">
+          <span>{elapsed}s transcurridos</span>
+          <span>
+            {overBudget ? "casi listo..." : `~${formatSeconds(Math.max(1, estimateS - elapsed))} restante`}
+          </span>
+        </div>
+        <div className="h-1.5 bg-zinc-200 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-zinc-900 rounded-full transition-all duration-500"
+            style={{ width: `${overBudget ? 95 : progressPct}%` }}
+          />
+        </div>
+        <p className="text-[10px] text-center text-zinc-500">
+          Estimado: ~{formatSeconds(estimateS)} · {fileCount} {fileCount === 1 ? "archivo" : "archivos"}
+        </p>
+      </div>
     </div>
   );
 }
