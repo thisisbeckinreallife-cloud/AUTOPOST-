@@ -10,7 +10,7 @@ import {
   useReducedMotion,
   type MotionValue,
 } from "framer-motion";
-import { ArrowRight, Egg } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { FolderAsset } from "./hatch/folder-asset";
 import { PostTile } from "./hatch/post-tile";
 import { CalendarGrid } from "./hatch/calendar-grid";
@@ -608,9 +608,22 @@ function HatchNavbar() {
       <div className="flex items-center gap-2.5">
         <div
           className="h-7 w-7 rounded-md flex items-center justify-center"
-          style={{ background: "#1D1D1F" }}
+          style={{
+            background: "linear-gradient(135deg, #A8DADC 0%, #7DBCBE 100%)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 6px rgba(125,188,190,0.2)",
+          }}
+          aria-hidden="true"
         >
-          <Egg className="h-3.5 w-3.5" style={{ color: "#A8DADC" }} />
+          <span
+            className="font-black text-[12px] leading-none"
+            style={{
+              color: "#1D1D1F",
+              fontFamily: "Satoshi, Inter, system-ui, sans-serif",
+              letterSpacing: "-0.04em",
+            }}
+          >
+            A
+          </span>
         </div>
         <span
           className="font-bold text-base"
@@ -620,7 +633,7 @@ function HatchNavbar() {
             fontFamily: "Satoshi, Inter, system-ui, sans-serif",
           }}
         >
-          Hatch
+          Aluminum Studio
         </span>
       </div>
       <div className="flex items-center gap-5 text-sm">
@@ -687,7 +700,7 @@ function HatchHeroStatic({ mobile }: { mobile: boolean }) {
           }}
         >
           Drop a folder.<br />
-          <span style={{ color: "#7DBCBE" }}>Hatch a month.</span>
+          <span style={{ color: "#7DBCBE" }}>Publish a month.</span>
         </h1>
         <div className="mb-8">
           <CalendarGrid lit={30} mobile={mobile} glow />

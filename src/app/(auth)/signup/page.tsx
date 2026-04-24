@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Lock, Mail, ArrowRight, Egg } from "lucide-react";
+import { Lock, Mail, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 function SignupForm() {
@@ -144,17 +144,23 @@ export default function SignupPage() {
           <div
             className="relative mb-4 flex h-12 w-12 items-center justify-center rounded-xl"
             style={{
-              background: "#1D1D1F",
-              boxShadow: "0 8px 20px -6px rgba(29,29,31,0.30), 0 0 0 1px rgba(168,218,220,0.15)",
+              background: "linear-gradient(135deg, #A8DADC 0%, #7DBCBE 100%)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.45), 0 8px 20px -6px rgba(125,188,190,0.35)",
             }}
+            aria-hidden="true"
           >
-            <Egg className="h-5 w-5" style={{ color: "#A8DADC" }} />
+            <span
+              className="font-black text-xl leading-none"
+              style={{ color: "#1D1D1F", fontFamily: "Satoshi, Inter, system-ui, sans-serif", letterSpacing: "-0.04em" }}
+            >
+              A
+            </span>
           </div>
           <span
             className="font-bold text-lg tracking-tight"
             style={{ color: "#1D1D1F", letterSpacing: "-0.01em", fontFamily: "Satoshi, Inter, system-ui, sans-serif" }}
           >
-            Hatch
+            Aluminum Studio
           </span>
         </div>
 

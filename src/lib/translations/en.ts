@@ -20,7 +20,7 @@ export const en: Record<TranslationKey, string> = {
   "dashboard.uploadZip": "Upload a ZIP with your monthly posts",
   "dashboard.upcomingPosts": "Upcoming posts",
   "dashboard.emptyTitle": "Your calendar is empty",
-  "dashboard.emptyDesc": "Upload your monthly content and AutoPost will publish for you",
+  "dashboard.emptyDesc": "Upload your monthly content and Aluminum Studio will publish for you",
 
   // Businesses
   "businesses.title": "My accounts",
@@ -109,7 +109,7 @@ export const en: Record<TranslationKey, string> = {
   "connect.step": "Step",
   "connect.of": "of",
   "connect.professionalAccount": "Do you have a professional Instagram account?",
-  "connect.professionalDesc": "Instagram has two types of accounts. AutoPost requires a professional one (business or creator).",
+  "connect.professionalDesc": "Instagram has two types of accounts. Aluminum Studio requires a professional one (business or creator).",
   "connect.personal": "Personal",
   "connect.notCompatible": "Not compatible",
   "connect.professional": "Professional",
@@ -117,7 +117,7 @@ export const en: Record<TranslationKey, string> = {
   "connect.hasProfessional": "Yes, I have a professional account",
   "connect.facebookPage": "Do you have a linked Facebook page?",
   "connect.facebookDesc": "Professional Instagram needs to be connected to a Facebook page for automatic publishing.",
-  "connect.authorize": "Authorize AutoPost",
+  "connect.authorize": "Authorize Aluminum Studio",
   "connect.authorizeDesc": "Click the button below. A Facebook/Instagram window will open where you must accept the permissions.",
   "connect.connectIG": "Connect my Instagram",
   "connect.back": "Back",
@@ -147,5 +147,5 @@ export const en: Record<TranslationKey, string> = {
   // Common
   "common.loading": "Loading...",
   "common.networkError": "Network error. Check your connection.",
-  "common.poweredBy": "Powered by AutoPost",
+  "common.poweredBy": "Powered by Aluminum Studio",
 };

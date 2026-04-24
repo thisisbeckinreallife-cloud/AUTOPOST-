@@ -15,7 +15,6 @@ import {
   Globe,
   FileText,
   BarChart2,
-  Egg,
 } from "lucide-react";
 import { useLocale } from "@/lib/i18n";
 
@@ -65,23 +64,33 @@ export function Sidebar() {
         style={{ borderBottom: "1px solid rgba(168,218,220,0.08)" }}
       >
         <div
-          className="relative flex h-8 w-8 items-center justify-center rounded-lg"
+          className="relative flex h-8 w-8 items-center justify-center rounded-md"
           style={{
-            background: "rgba(168,218,220,0.10)",
-            border: "1px solid rgba(168,218,220,0.20)",
+            background: "linear-gradient(135deg, #A8DADC 0%, #7DBCBE 100%)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 6px rgba(168,218,220,0.18)",
           }}
+          aria-hidden="true"
         >
-          <Egg className="h-4 w-4" style={{ color: "#A8DADC" }} />
+          <span
+            className="font-black text-[13px] leading-none"
+            style={{
+              color: "#1D1D1F",
+              fontFamily: "Satoshi, Inter, system-ui, sans-serif",
+              letterSpacing: "-0.04em",
+            }}
+          >
+            A
+          </span>
         </div>
         <span
-          className="font-bold text-base tracking-tight"
+          className="font-bold text-sm tracking-tight"
           style={{
             color: "#F5F5F7",
             letterSpacing: "-0.01em",
             fontFamily: "Satoshi, Inter, system-ui, sans-serif",
           }}
         >
-          Hatch
+          Aluminum Studio
         </span>
       </div>
 
@@ -98,12 +107,12 @@ export function Sidebar() {
               style={{
                 background: isActive ? "rgba(168,218,220,0.10)" : "transparent",
                 border: isActive ? "1px solid rgba(168,218,220,0.22)" : "1px solid transparent",
-                color: isActive ? "#F5F5F7" : "#86868B",
+                color: isActive ? "#F5F5F7" : "#D1D1D6",
               }}
             >
               <Icon
                 className="h-[18px] w-[18px] transition-colors"
-                style={{ color: isActive ? "#A8DADC" : "#86868B" }}
+                style={{ color: isActive ? "#A8DADC" : "#D1D1D6" }}
               />
               {label}
               {isActive && (
@@ -128,7 +137,7 @@ export function Sidebar() {
         <button
           onClick={toggleLocale}
           className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-white/[0.04]"
-          style={{ color: "#86868B" }}
+          style={{ color: "#D1D1D6" }}
           title={locale === "es" ? "Switch to English" : "Cambiar a Espanol"}
         >
           <Globe className="h-[18px] w-[18px]" />
@@ -139,7 +148,7 @@ export function Sidebar() {
           target="_blank"
           rel="noopener noreferrer"
           className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-white/[0.04]"
-          style={{ color: "#86868B" }}
+          style={{ color: "#D1D1D6" }}
         >
           <HelpCircle className="h-[18px] w-[18px]" />
           {locale === "es" ? "Ayuda" : "Help"}
@@ -147,7 +156,7 @@ export function Sidebar() {
         <button
           onClick={handleLogout}
           className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-red-500/[0.08] hover:text-red-400"
-          style={{ color: "#86868B" }}
+          style={{ color: "#D1D1D6" }}
         >
           <LogOut className="h-[18px] w-[18px]" />
           {locale === "es" ? "Cerrar sesion" : "Log out"}

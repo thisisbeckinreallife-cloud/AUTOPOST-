@@ -7,18 +7,18 @@ interface BadgeProps {
 }
 
 const variantClass = {
-  default: "bg-zinc-500/15 text-zinc-400",
-  success: "bg-green-500/15 text-green-400",
-  warning: "bg-amber-500/15 text-amber-400",
-  error: "bg-red-500/15 text-red-400",
-  info: "bg-blue-500/15 text-blue-400",
+  default: "bg-zinc-100 text-zinc-800 border border-zinc-300",
+  success: "bg-green-100 text-green-800 border border-green-300",
+  warning: "bg-amber-100 text-amber-800 border border-amber-300",
+  error: "bg-red-100 text-red-800 border border-red-300",
+  info: "bg-blue-100 text-blue-800 border border-blue-300",
 };
 
 export function Badge({ children, className, variant = "default" }: BadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
         variantClass[variant],
         className
       )}

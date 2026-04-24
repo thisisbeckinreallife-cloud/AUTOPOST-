@@ -14,7 +14,7 @@ interface TourStep {
 const steps: TourStep[] = [
   {
     icon: <Zap className="h-6 w-6 text-brand-400" />,
-    title: "Bienvenido a AutoPost",
+    title: "Bienvenido a Aluminum Studio",
     description:
       "Programa un mes entero de posts en Instagram en menos de 2 minutos. Te guiamos paso a paso para que estés publicando hoy mismo.",
   },
@@ -28,13 +28,13 @@ const steps: TourStep[] = [
     icon: <Upload className="h-6 w-6 text-brand-400" />,
     title: "Sube tu primera carpeta",
     description:
-      "Desde la cuenta conectada, haz clic en «Subir contenido». Arrastra un ZIP con tus imágenes, vídeos y captions — AutoPost lo organiza todo solo.",
+      "Desde la cuenta conectada, haz clic en «Subir contenido». Arrastra un ZIP con tus imágenes, vídeos y captions — Aluminum Studio lo organiza todo solo.",
   },
   {
     icon: <CheckCircle className="h-6 w-6 text-brand-400" />,
     title: "Revisa y activa",
     description:
-      "Confirma los posts detectados y actívalos con un clic. AutoPost se encargará de publicarlos en el momento exacto que hayas configurado.",
+      "Confirma los posts detectados y actívalos con un clic. Aluminum Studio se encargará de publicarlos en el momento exacto que hayas configurado.",
   },
 ];
 

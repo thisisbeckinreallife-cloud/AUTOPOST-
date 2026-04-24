@@ -18,7 +18,7 @@ export const es = {
   "dashboard.uploadZip": "Sube un ZIP con tus posts del mes",
   "dashboard.upcomingPosts": "Proximas publicaciones",
   "dashboard.emptyTitle": "Tu calendario esta vacio",
-  "dashboard.emptyDesc": "Sube el contenido del mes y AutoPost se encarga de publicar por ti",
+  "dashboard.emptyDesc": "Sube el contenido del mes y Aluminum Studio se encarga de publicar por ti",
 
   // Businesses
   "businesses.title": "Mis cuentas",
@@ -107,7 +107,7 @@ export const es = {
   "connect.step": "Paso",
   "connect.of": "de",
   "connect.professionalAccount": "Tienes cuenta profesional en Instagram?",
-  "connect.professionalDesc": "Instagram tiene dos tipos de cuenta. Para usar AutoPost necesitas una profesional (empresa o creador).",
+  "connect.professionalDesc": "Instagram tiene dos tipos de cuenta. Para usar Aluminum Studio necesitas una profesional (empresa o creador).",
   "connect.personal": "Personal",
   "connect.notCompatible": "No compatible",
   "connect.professional": "Profesional",
@@ -115,7 +115,7 @@ export const es = {
   "connect.hasProfessional": "Si, tengo cuenta profesional",
   "connect.facebookPage": "Tienes pagina de Facebook vinculada?",
   "connect.facebookDesc": "Instagram profesional necesita estar conectado a una pagina de Facebook para publicar automaticamente.",
-  "connect.authorize": "Autoriza a AutoPost",
+  "connect.authorize": "Autoriza a Aluminum Studio",
   "connect.authorizeDesc": "Haz clic en el boton de abajo. Se abrira una ventana de Facebook/Instagram donde debes aceptar los permisos.",
   "connect.connectIG": "Conectar mi Instagram",
   "connect.back": "Volver",
@@ -145,7 +145,7 @@ export const es = {
   // Common
   "common.loading": "Cargando...",
   "common.networkError": "Error de red. Comprueba tu conexion.",
-  "common.poweredBy": "Powered by AutoPost",
+  "common.poweredBy": "Powered by Aluminum Studio",
 } as const;
 
 export type TranslationKey = keyof typeof es;

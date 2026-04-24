@@ -3,11 +3,11 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "Hatch — Drop a folder. Hatch a month.",
+  title: "Aluminum Studio — Drop a folder. Publish a month.",
   description:
     "El único scheduler de Instagram que entiende carpetas. Suéltala. Detectamos carruseles, programamos 30 días y publicamos vía API oficial de Meta.",
   openGraph: {
-    title: "Hatch — Drop a folder. Hatch a month.",
+    title: "Aluminum Studio — Drop a folder. Publish a month.",
     description:
       "El único scheduler que entiende carpetas. Un mes de Instagram programado en 2 minutos.",
     type: "website",
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Hatch — Drop a folder. Hatch a month.",
+    title: "Aluminum Studio — Drop a folder. Publish a month.",
     description:
       "El único scheduler que entiende carpetas. Un mes de Instagram programado en 2 minutos.",
   },

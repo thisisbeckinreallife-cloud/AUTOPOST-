@@ -2,17 +2,21 @@ import { db } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import Link from "next/link";
 import { formatDateInTz } from "@/lib/utils";
-import { Upload, ArrowRight, Clock, AlertCircle } from "lucide-react";
+import { Upload, ArrowRight, Clock, AlertCircle, AlertTriangle } from "lucide-react";
+import { getHealthReport } from "@/lib/health";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const session = await requireSession();
 
-  const businesses = await db.business.findMany({
-    include: { metaConnection: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const [businesses, health] = await Promise.all([
+    db.business.findMany({
+      include: { metaConnection: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    getHealthReport().catch(() => null),
+  ]);
 
   const now = new Date();
   const weekAhead = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -44,11 +48,40 @@ export default async function DashboardPage() {
 
   const firstName = session.email?.split("@")[0] ?? "";
 
+  const failedChecks = health && !health.ok
+    ? Object.entries(health.checks).filter(([, c]) => !c.ok)
+    : [];
+
   return (
     <div className="max-w-3xl space-y-10">
+      {/* ── 0 · Banner diagnóstico crítico ─────────────────── */}
+      {failedChecks.length > 0 && (
+        <Link
+          href="/settings"
+          className="group block rounded-xl border border-red-300 bg-red-50 px-5 py-4 transition-all hover:border-red-400 hover:shadow-md"
+        >
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-100">
+              <AlertTriangle className="h-4 w-4 text-red-700" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-red-900">
+                {failedChecks.length === 1
+                  ? "Falta 1 pieza de configuración para publicar"
+                  : `Faltan ${failedChecks.length} piezas de configuración para publicar`}
+              </p>
+              <p className="mt-0.5 text-xs text-red-800">
+                {failedChecks.map(([k]) => k.replace(/_/g, " ")).join(" · ")} — arreglar en Configuración
+              </p>
+            </div>
+            <ArrowRight className="h-4 w-4 shrink-0 text-red-700 transition-transform group-hover:translate-x-0.5" />
+          </div>
+        </Link>
+      )}
+
       {/* ── 1 · Stat hero ───────────────────────────────────── */}
       <div>
-        <p className="text-sm" style={{ color: "#86868B" }}>
+        <p className="text-sm" style={{ color: "#48484A" }}>
           Hola{firstName ? `, ${firstName}` : ""} 👋
         </p>
         <h1
@@ -62,11 +95,11 @@ export default async function DashboardPage() {
           }}
         >
           <span className="tabular-nums">{scheduledThisWeek}</span>{" "}
-          <span style={{ color: "#86868B" }}>
+          <span style={{ color: "#48484A" }}>
             {scheduledThisWeek === 1 ? "post programado" : "posts programados"}
           </span>
           <br />
-          <span style={{ color: "#86868B", fontWeight: 500 }}>esta semana.</span>
+          <span style={{ color: "#48484A", fontWeight: 500 }}>esta semana.</span>
         </h1>
         {failedPosts > 0 && (
           <Link
@@ -137,7 +170,7 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between mb-3">
             <h2
               className="text-xs font-bold uppercase tracking-widest"
-              style={{ color: "#86868B" }}
+              style={{ color: "#48484A" }}
             >
               Próximos
             </h2>
@@ -177,7 +210,7 @@ export default async function DashboardPage() {
                   >
                     {post.caption?.slice(0, 80) || "Sin texto"}
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: "#86868B" }}>
+                  <p className="text-xs mt-0.5" style={{ color: "#48484A" }}>
                     {post.business.name}
                   </p>
                 </div>
