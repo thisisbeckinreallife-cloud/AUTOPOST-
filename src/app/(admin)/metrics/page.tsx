@@ -46,7 +46,7 @@ async function getMetrics() {
     total: biz.postDrafts.length,
   }));
 
-  // Build 30-day trend
+  // Build 30-day trend — use PUBLISHED postDrafts where publishedAt falls in last 30d
   const dayMap: Record<string, number> = {};
   for (let i = 0; i < 30; i++) {
     const key = subDays(now, 29 - i).toISOString().slice(0, 10);
@@ -69,76 +69,118 @@ export default async function MetricsPage() {
   const { totalPublished, totalFailed, totalScheduled, totalDraft, successRate, businessStats, dailyTrend, maxDay } = await getMetrics();
 
   const kpis = [
-    { label: "Publicados", value: totalPublished, icon: CheckCircle, color: "text-green-400", bg: "bg-green-500/8 border-green-500/12" },
-    { label: "Fallidos", value: totalFailed, icon: XCircle, color: "text-red-400", bg: "bg-red-500/8 border-red-500/12" },
-    { label: "Programados", value: totalScheduled, icon: Clock, color: "text-blue-400", bg: "bg-blue-500/8 border-blue-500/12" },
-    { label: "Borradores", value: totalDraft, icon: FileText, color: "text-zinc-400", bg: "bg-zinc-500/8 border-zinc-500/12" },
+    {
+      label: "Publicados",
+      value: totalPublished,
+      icon: CheckCircle,
+      iconBg: "bg-emerald-100",
+      iconColor: "text-emerald-700",
+      valueColor: "text-emerald-700",
+      border: "border-emerald-200",
+    },
+    {
+      label: "Fallidos",
+      value: totalFailed,
+      icon: XCircle,
+      iconBg: totalFailed > 0 ? "bg-red-100" : "bg-zinc-100",
+      iconColor: totalFailed > 0 ? "text-red-700" : "text-zinc-500",
+      valueColor: totalFailed > 0 ? "text-red-700" : "text-zinc-900",
+      border: totalFailed > 0 ? "border-red-200" : "border-zinc-200",
+    },
+    {
+      label: "Programados",
+      value: totalScheduled,
+      icon: Clock,
+      iconBg: "bg-blue-100",
+      iconColor: "text-blue-700",
+      valueColor: "text-blue-700",
+      border: "border-blue-200",
+    },
+    {
+      label: "Borradores",
+      value: totalDraft,
+      icon: FileText,
+      iconBg: "bg-zinc-100",
+      iconColor: "text-zinc-700",
+      valueColor: "text-zinc-900",
+      border: "border-zinc-200",
+    },
   ];
 
   return (
     <div className="space-y-8 max-w-4xl animate-fade-up">
       {/* Header */}
       <div>
-        <h1 className="font-display text-2xl font-bold text-white tracking-tight">Métricas</h1>
-        <p className="text-zinc-500 mt-1 text-sm">Resumen de rendimiento de todas tus cuentas</p>
+        <h1 className="font-display text-2xl font-bold text-zinc-900 tracking-tight">Métricas</h1>
+        <p className="text-zinc-600 mt-1 text-sm">Resumen de rendimiento de todas tus cuentas</p>
       </div>
 
       {/* KPI strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {kpis.map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className={`rounded-xl border p-4 ${bg}`}>
+        {kpis.map(({ label, value, icon: Icon, iconBg, iconColor, valueColor, border }) => (
+          <div key={label} className={`rounded-xl border bg-white p-4 ${border} hover:shadow-md transition-shadow`}>
             <div className="flex items-center gap-2 mb-2">
-              <Icon className={`h-4 w-4 ${color}`} />
-              <span className="text-xs text-zinc-500 font-medium">{label}</span>
+              <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${iconBg}`}>
+                <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
+              </div>
+              <span className="text-xs text-zinc-600 font-semibold">{label}</span>
             </div>
-            <p className={`font-display font-bold text-3xl tabular-nums ${color}`}>{value}</p>
+            <p className={`font-display font-bold text-3xl tabular-nums ${valueColor}`}>{value}</p>
           </div>
         ))}
       </div>
 
       {/* Success rate */}
-      <div className="rounded-xl border border-brand-500/15 bg-brand-500/[0.04] p-5 flex items-center gap-4">
-        <TrendingUp className="h-6 w-6 text-brand-400 shrink-0" />
+      <div className="rounded-xl border border-zinc-200 bg-white p-5 flex items-center gap-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 shrink-0">
+          <TrendingUp className="h-5 w-5 text-emerald-700" />
+        </div>
         <div className="flex-1">
-          <p className="text-sm font-medium text-zinc-300 mb-1">Tasa de éxito global</p>
-          <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
+          <p className="text-sm font-semibold text-zinc-900 mb-1">Tasa de éxito global</p>
+          <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-brand-500 to-accent-orange rounded-full transition-all"
+              className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all"
               style={{ width: `${successRate}%` }}
             />
           </div>
         </div>
-        <span className="font-display font-bold text-2xl text-brand-300 tabular-nums shrink-0">{successRate}%</span>
+        <span className="font-display font-bold text-2xl text-emerald-700 tabular-nums shrink-0">{successRate}%</span>
       </div>
 
       {/* 30-day bar chart */}
-      <div className="rounded-xl border border-white/[0.06] bg-surface-card p-5">
-        <h2 className="text-sm font-semibold text-zinc-300 mb-4">Posts publicados — últimos 30 días</h2>
-        <div className="flex items-end gap-1 h-24">
+      <div className="rounded-xl border border-zinc-200 bg-white p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-zinc-900">Posts publicados — últimos 30 días</h2>
+          <p className="text-xs text-zinc-500 tabular-nums">
+            Max. diario: <span className="font-mono font-semibold text-zinc-900">{maxDay}</span>
+          </p>
+        </div>
+        <div className="flex items-end gap-1 h-28">
           {dailyTrend.map(({ date, count }) => {
             const heightPct = maxDay > 0 ? Math.round((count / maxDay) * 100) : 0;
             const isToday = date === new Date().toISOString().slice(0, 10);
+            const hasData = count > 0;
             return (
               <div
                 key={date}
-                title={`${date}: ${count} publicados`}
-                className="flex-1 flex flex-col justify-end group cursor-default"
+                title={`${date}: ${count} ${count === 1 ? "publicado" : "publicados"}`}
+                className="flex-1 flex flex-col justify-end group cursor-default min-w-0"
               >
                 <div
-                  className={`w-full rounded-sm transition-all group-hover:opacity-100 ${
-                    count === 0
-                      ? "bg-white/[0.04]"
+                  className={`w-full rounded-sm transition-all ${
+                    !hasData
+                      ? "bg-zinc-100"
                       : isToday
-                      ? "bg-brand-400"
-                      : "bg-brand-500/60 group-hover:bg-brand-500"
+                      ? "bg-zinc-900 group-hover:bg-black"
+                      : "bg-emerald-500 group-hover:bg-emerald-600"
                   }`}
-                  style={{ height: count === 0 ? "4px" : `${Math.max(heightPct, 8)}%` }}
+                  style={{ height: hasData ? `${Math.max(heightPct, 8)}%` : "6px" }}
                 />
               </div>
             );
           })}
         </div>
-        <div className="flex justify-between mt-2 text-[10px] text-zinc-700">
+        <div className="flex justify-between mt-2 text-[10px] text-zinc-500 font-mono tabular-nums">
           <span>{dailyTrend[0]?.date?.slice(5)}</span>
           <span>Hoy</span>
         </div>
@@ -146,42 +188,44 @@ export default async function MetricsPage() {
 
       {/* Per-business table */}
       {businessStats.length > 0 && (
-        <div className="rounded-xl border border-white/[0.06] bg-surface-card overflow-hidden">
-          <div className="px-5 py-4 border-b border-white/[0.04]">
-            <h2 className="text-sm font-semibold text-zinc-300">Por cuenta</h2>
+        <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden">
+          <div className="px-5 py-4 border-b border-zinc-200">
+            <h2 className="text-sm font-semibold text-zinc-900">Por cuenta</h2>
           </div>
-          <div className="divide-y divide-white/[0.04]">
+          <div className="divide-y divide-zinc-100">
             {businessStats.map((biz) => {
               const rate = biz.total > 0 ? Math.round((biz.published / Math.max(biz.published + biz.failed, 1)) * 100) : null;
               return (
-                <div key={biz.id} className="px-5 py-3.5 flex items-center gap-4 hover:bg-white/[0.02] transition-colors">
+                <div key={biz.id} className="px-5 py-3.5 flex items-center gap-4 hover:bg-zinc-50 transition-colors">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-zinc-200 truncate">{biz.name}</p>
+                    <p className="text-sm font-semibold text-zinc-900 truncate">{biz.name}</p>
                     {biz.igUsername ? (
-                      <p className="text-xs text-zinc-500 flex items-center gap-1 mt-0.5">
+                      <p className="text-xs text-zinc-600 flex items-center gap-1 mt-0.5">
                         <Instagram className="h-3 w-3" />@{biz.igUsername}
                       </p>
                     ) : (
-                      <p className="text-xs text-amber-400/70 mt-0.5">Sin conectar</p>
+                      <p className="text-xs text-amber-800 mt-0.5 font-medium">Sin conectar</p>
                     )}
                   </div>
                   <div className="flex items-center gap-5 shrink-0 text-center">
-                    <div>
-                      <p className="text-sm font-bold text-green-400 tabular-nums">{biz.published}</p>
-                      <p className="text-[10px] text-zinc-600">pub.</p>
+                    <div title="Publicados">
+                      <p className="text-sm font-bold text-emerald-700 tabular-nums">{biz.published}</p>
+                      <p className="text-[10px] text-zinc-500 font-medium">pub.</p>
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-red-400 tabular-nums">{biz.failed}</p>
-                      <p className="text-[10px] text-zinc-600">err.</p>
+                    <div title="Con errores">
+                      <p className={`text-sm font-bold tabular-nums ${biz.failed > 0 ? "text-red-700" : "text-zinc-400"}`}>
+                        {biz.failed}
+                      </p>
+                      <p className="text-[10px] text-zinc-500 font-medium">err.</p>
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-blue-400 tabular-nums">{biz.scheduled}</p>
-                      <p className="text-[10px] text-zinc-600">prog.</p>
+                    <div title="Programados">
+                      <p className="text-sm font-bold text-blue-700 tabular-nums">{biz.scheduled}</p>
+                      <p className="text-[10px] text-zinc-500 font-medium">prog.</p>
                     </div>
                     {rate !== null && (
-                      <div className="hidden sm:block">
-                        <p className="text-sm font-bold text-brand-400 tabular-nums">{rate}%</p>
-                        <p className="text-[10px] text-zinc-600">éxito</p>
+                      <div className="hidden sm:block" title="Tasa éxito">
+                        <p className="text-sm font-bold text-zinc-900 tabular-nums">{rate}%</p>
+                        <p className="text-[10px] text-zinc-500 font-medium">éxito</p>
                       </div>
                     )}
                   </div>
@@ -193,8 +237,8 @@ export default async function MetricsPage() {
       )}
 
       {businessStats.length === 0 && (
-        <div className="text-center py-12 border border-dashed border-white/[0.06] bg-surface-card/50 rounded-xl">
-          <p className="text-zinc-500 text-sm">Todavía no hay datos. Conecta una cuenta y sube tu primer batch.</p>
+        <div className="text-center py-12 border border-dashed border-zinc-300 bg-zinc-50 rounded-xl">
+          <p className="text-zinc-600 text-sm">Todavía no hay datos. Conecta una cuenta y sube tu primer batch.</p>
         </div>
       )}
     </div>

@@ -66,6 +66,52 @@ const config: Config = {
           glow:        "#A8DADC",
           cobalt:      "#7DBCBE",
         },
+        /* ══════════════════════════════════════════════════════════════
+           TOKENS SEMÁNTICOS — Aluminum Studio Ola 3
+           Usar success-/warning-/error-/info-/neutral- en vez de
+           green/amber/red/blue/zinc directos. Asegura contraste WCAG AA
+           y consistencia entre componentes.
+           ══════════════════════════════════════════════════════════════ */
+        success: {
+          50:  "#E8F5EE",
+          100: "#C6E8D2",
+          200: "#9DD5B0",
+          300: "#6FBC88",
+          500: "#34A35A",
+          700: "#2D8B55",  // bg pill text + border base
+          800: "#1F6B3F",  // text on light
+          900: "#13502E",  // text-strong
+        },
+        warning: {
+          50:  "#FBF5E5",
+          100: "#F5E6B7",
+          200: "#EFD584",
+          300: "#E3C16F",
+          500: "#D4A843",
+          700: "#B88E32",
+          800: "#8C6F1F",
+          900: "#5C4612",
+        },
+        error: {
+          50:  "#FDE8E8",
+          100: "#FACACA",
+          200: "#F2A0A0",
+          300: "#E97A7A",
+          500: "#D74C4C",
+          700: "#C93B3B",
+          800: "#A02A2A",
+          900: "#7A1F1F",
+        },
+        info: {
+          50:  "#E4F2F7",
+          100: "#BFDFEB",
+          200: "#90C8DC",
+          300: "#5FA9C2",
+          500: "#3690B4",
+          700: "#2A7B9B",
+          800: "#1E5F78",
+          900: "#16445A",
+        },
       },
       borderColor: {
         DEFAULT: "rgba(0,0,0,0.06)",

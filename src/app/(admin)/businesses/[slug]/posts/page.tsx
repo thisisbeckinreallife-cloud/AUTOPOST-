@@ -6,10 +6,21 @@ import { Search, List, CalendarRange } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { PostsListClient, type PostItem } from "./posts-list-client";
 import { CalendarView, type CalendarPost } from "./calendar-view";
+import type { Prisma, PostDraftStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
 type View = "list" | "calendar";
+
+const POST_STATUSES: readonly PostDraftStatus[] = [
+  "DRAFT", "VALIDATED", "READY", "SCHEDULED",
+  "PUBLISHING", "PUBLISHED", "FAILED", "CANCELLED",
+] as const;
+
+function parseStatus(s: string | undefined): PostDraftStatus | null {
+  if (!s) return null;
+  return (POST_STATUSES as readonly string[]).includes(s) ? (s as PostDraftStatus) : null;
+}
 
 function parseMonth(m: string | undefined): { year: number; month: number } {
   if (m && /^\d{4}-\d{2}$/.test(m)) {
@@ -37,17 +48,14 @@ export default async function PostsPage({
   const view: View = searchParams.view === "calendar" ? "calendar" : "list";
   const page = parseInt(searchParams.page ?? "1", 10);
   const limit = 20;
-  const statusFilter = searchParams.status;
+  const statusFilter = parseStatus(searchParams.status);
 
-  const where = {
+  const where: Prisma.PostDraftWhereInput = {
     businessId: business.id,
-    ...(statusFilter ? { status: statusFilter as never } : {}),
+    ...(statusFilter ? { status: statusFilter } : {}),
   };
 
-  const STATUS_OPTIONS = [
-    "DRAFT", "VALIDATED", "READY", "SCHEDULED",
-    "PUBLISHING", "PUBLISHED", "FAILED", "CANCELLED",
-  ];
+  const STATUS_OPTIONS = POST_STATUSES;
 
   // Calendar view: query month ± 1 to cover grid edges, no paging
   let calendarPosts: CalendarPost[] = [];

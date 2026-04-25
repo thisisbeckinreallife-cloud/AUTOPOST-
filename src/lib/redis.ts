@@ -9,6 +9,33 @@ export function isRedisAvailable(): boolean {
   return !!process.env.REDIS_URL;
 }
 
+/**
+ * Probe Redis with a short timeout to detect stale REDIS_URL (e.g. localhost
+ * with no Redis running in dev). Returns true only if PING succeeds within
+ * the timeout. Avoids the worker spamming ECONNREFUSED.
+ */
+export async function pingRedis(timeoutMs = 1500): Promise<boolean> {
+  const url = process.env.REDIS_URL;
+  if (!url) return false;
+  const probe = new Redis(url, {
+    maxRetriesPerRequest: 0,
+    enableReadyCheck: false,
+    lazyConnect: true,
+    connectTimeout: timeoutMs,
+  });
+  try {
+    const result = await Promise.race([
+      probe.ping(),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs)),
+    ]);
+    return result === "PONG";
+  } catch {
+    return false;
+  } finally {
+    probe.disconnect();
+  }
+}
+
 function createRedisClient() {
   const url = process.env.REDIS_URL;
   if (!url) throw new Error("REDIS_URL is not set. Background job queue is disabled.");

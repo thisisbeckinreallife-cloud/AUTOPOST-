@@ -25,7 +25,7 @@ function CopyButton({ text }: { text: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-500/10 hover:bg-brand-500/20 text-brand-400 text-xs font-semibold transition-colors"
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-brand-500/20 text-zinc-900 text-xs font-semibold transition-colors"
     >
       {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
       {copied ? "¡Copiado!" : "Copiar"}
@@ -38,11 +38,11 @@ function ProgressBar({ step, total }: { step: number; total: number }) {
   const pct = Math.round((step / total) * 100);
   return (
     <div className="space-y-1.5">
-      <div className="flex justify-between text-xs text-zinc-400">
+      <div className="flex justify-between text-xs text-zinc-600">
         <span>Paso {step} de {total}</span>
         <span>{pct}%</span>
       </div>
-      <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+      <div className="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
         <div
           className="h-2 bg-gradient-to-r from-brand-500 to-brand-400 rounded-full transition-all duration-500"
           style={{ width: `${pct}%` }}
@@ -56,10 +56,10 @@ function ProgressBar({ step, total }: { step: number; total: number }) {
 function Step({ n, text }: { n: number; text: React.ReactNode }) {
   return (
     <div className="flex gap-3">
-      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-500/10 text-brand-400 text-xs font-bold flex items-center justify-center mt-0.5">
+      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-zinc-100 text-zinc-900 text-xs font-bold flex items-center justify-center mt-0.5">
         {n}
       </span>
-      <p className="text-sm text-zinc-300 leading-relaxed">{text}</p>
+      <p className="text-sm text-zinc-900 leading-relaxed">{text}</p>
     </div>
   );
 }
@@ -67,12 +67,12 @@ function Step({ n, text }: { n: number; text: React.ReactNode }) {
 // ─── Mock UI screenshot ───────────────────────────────────────────────────────
 function MockScreen({ children }: { children: React.ReactNode }) {
   return (
-    <div className="border border-white/[0.08] rounded-xl overflow-hidden shadow-sm">
+    <div className="border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
       <div className="bg-zinc-100 px-3 py-2 flex items-center gap-1.5">
         <span className="w-2.5 h-2.5 rounded-full bg-red-400" />
         <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
         <span className="w-2.5 h-2.5 rounded-full bg-green-400" />
-        <span className="ml-2 text-xs text-zinc-400 font-mono">developers.facebook.com</span>
+        <span className="ml-2 text-xs text-zinc-600 font-mono">developers.facebook.com</span>
       </div>
       <div className="bg-white p-4">{children}</div>
     </div>
@@ -93,12 +93,12 @@ interface HealthCheck {
 function HealthPanel({ health, onClose }: { health: HealthCheck; onClose: () => void }) {
   if (health.ok) return null;
   return (
-    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-5 space-y-3">
+    <div className="bg-red-50 border border-red-300 rounded-2xl p-5 space-y-3">
       <div className="flex items-center justify-between">
-        <p className="font-semibold text-red-400 flex items-center gap-2">
+        <p className="font-semibold text-red-700 flex items-center gap-2">
           <XCircle className="h-4 w-4" /> Diagnóstico del servidor
         </p>
-        <button onClick={onClose} className="text-red-400 hover:text-red-400/70 text-xs">Ocultar</button>
+        <button onClick={onClose} className="text-red-700 hover:text-red-700/70 text-xs">Ocultar</button>
       </div>
       <div className="space-y-2">
         <HealthRow label="Clave de cifrado (ENCRYPTION_KEY)" check={health.checks.encryption_key} />
@@ -106,21 +106,21 @@ function HealthPanel({ health, onClose }: { health: HealthCheck; onClose: () => 
         <HealthRow label="Credenciales de Meta" check={health.checks.meta_credentials} />
       </div>
       {!health.checks.encryption_key.ok && (
-        <div className="bg-surface-primary border border-red-500/20 rounded-xl p-4 space-y-2">
-          <p className="text-xs font-bold text-red-400">Cómo arreglar ENCRYPTION_KEY en Railway:</p>
-          <ol className="text-xs text-red-400/70 space-y-1 list-decimal ml-4">
+        <div className="bg-surface-primary border border-red-300 rounded-xl p-4 space-y-2">
+          <p className="text-xs font-bold text-red-700">Cómo arreglar ENCRYPTION_KEY en Railway:</p>
+          <ol className="text-xs text-red-700/70 space-y-1 list-decimal ml-4">
             <li>Abre tu proyecto en Railway</li>
             <li>Haz clic en tu servicio web → <strong>Variables</strong></li>
-            <li>Añade la variable: <code className="bg-red-500/20 px-1 rounded font-mono">ENCRYPTION_KEY</code></li>
+            <li>Añade la variable: <code className="bg-red-100 px-1 rounded font-mono">ENCRYPTION_KEY</code></li>
             <li>Como valor, copia exactamente esto (64 caracteres):</li>
           </ol>
-          <div className="flex items-center gap-2 bg-red-500/20 rounded-lg px-3 py-2 mt-1">
-            <code className="flex-1 text-xs font-mono text-red-400 break-all">
+          <div className="flex items-center gap-2 bg-red-100 rounded-lg px-3 py-2 mt-1">
+            <code className="flex-1 text-xs font-mono text-red-700 break-all">
               {Array.from({ length: 32 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, "0")).join("")}
             </code>
             <CopyButton text={Array.from({ length: 32 }, (_, i) => ((i * 37 + 91) % 256).toString(16).padStart(2, "0")).join("")} />
           </div>
-          <p className="text-xs text-red-500">⚠️ Usa tu propio valor generado con: <code className="bg-red-500/20 px-1 rounded font-mono">openssl rand -hex 32</code></p>
+          <p className="text-xs text-red-500">⚠️ Usa tu propio valor generado con: <code className="bg-red-100 px-1 rounded font-mono">openssl rand -hex 32</code></p>
         </div>
       )}
     </div>
@@ -134,8 +134,8 @@ function HealthRow({ label, check }: { label: string; check: { ok: boolean; deta
         ? <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
         : <XCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />}
       <div>
-        <p className="text-xs font-semibold text-zinc-300">{label}</p>
-        {!check.ok && <p className="text-xs text-red-400/70 mt-0.5">{check.detail}</p>}
+        <p className="text-xs font-semibold text-zinc-900">{label}</p>
+        {!check.ok && <p className="text-xs text-red-700/70 mt-0.5">{check.detail}</p>}
       </div>
     </div>
   );
@@ -221,26 +221,26 @@ export default function SettingsPage() {
     return (
       <div className="max-w-lg space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-100">Configuración</h1>
+          <h1 className="text-2xl font-bold text-zinc-900">Configuración</h1>
           <p className="text-zinc-500 mt-1">Conexión con Meta</p>
         </div>
 
         {health && showHealth && <HealthPanel health={health} onClose={() => setShowHealth(false)} />}
 
-        <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-6 flex items-start gap-4">
-          <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
-            <CheckCircle className="h-5 w-5 text-green-400/70" />
+        <div className="bg-green-50 border border-green-300 rounded-2xl p-6 flex items-start gap-4">
+          <div className="w-10 h-10 rounded-full bg-green-100 border border-green-300 flex items-center justify-center shrink-0">
+            <CheckCircle className="h-5 w-5 text-green-700" />
           </div>
           <div>
-            <p className="font-semibold text-green-800">Todo está configurado</p>
-            <p className="text-sm text-green-400 mt-0.5">
-              AutoPost está conectado con tu app de Meta y listo para publicar.
+            <p className="font-semibold text-green-900">Todo está configurado</p>
+            <p className="text-sm text-green-800 mt-0.5">
+              Aluminum Studio está conectado con tu app de Meta y listo para publicar.
             </p>
           </div>
         </div>
 
-        <div className="bg-surface-card border border-white/[0.06] rounded-xl p-5 space-y-3">
-          <p className="text-sm font-semibold text-zinc-300">Credenciales guardadas</p>
+        <div className="bg-white border border-zinc-200 rounded-xl p-5 space-y-3">
+          <p className="text-sm font-semibold text-zinc-900">Credenciales guardadas</p>
           <Credential label="App ID" ok={status.META_APP_ID} />
           <Credential label="App Secret" ok={status.META_APP_SECRET} />
           <Credential label="URL de redirección" ok={status.META_REDIRECT_URI} />
@@ -262,12 +262,12 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => { setEditing(false); setSaveError(""); setSaveSuccess(false); }}
-            className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300"
+            className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-900"
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-zinc-100">Actualizar credenciales</h1>
+            <h1 className="text-2xl font-bold text-zinc-900">Actualizar credenciales</h1>
             <p className="text-zinc-500 text-sm mt-0.5">Cambia los datos de tu app de Meta</p>
           </div>
         </div>
@@ -292,8 +292,8 @@ export default function SettingsPage() {
   return (
     <div className="max-w-lg space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-100">Configuración</h1>
-        <p className="text-zinc-500 mt-1">Vamos a conectar AutoPost con Meta</p>
+        <h1 className="text-2xl font-bold text-zinc-900">Configuración</h1>
+        <p className="text-zinc-600 mt-1">Vamos a conectar Aluminum Studio con Meta</p>
       </div>
 
       {health && showHealth && <HealthPanel health={health} onClose={() => setShowHealth(false)} />}
@@ -303,9 +303,9 @@ export default function SettingsPage() {
       {/* ── Step 1: Intro ─────────────────────────────────────────── */}
       {wizardStep === 1 && (
         <WizardCard
-          icon={<Rocket className="h-6 w-6 text-brand-400" />}
-          title="Conectemos AutoPost con Meta"
-          subtitle="Necesitamos una app de Meta (gratis) para que AutoPost pueda publicar en Instagram. Te guiamos paso a paso."
+          icon={<Rocket className="h-6 w-6 text-zinc-900" />}
+          title="Conectemos Aluminum Studio con Meta"
+          subtitle="Necesitamos una app de Meta (gratis) para que Aluminum Studio pueda publicar en Instagram. Te guiamos paso a paso."
         >
           <div className="space-y-3">
             <div className="bg-surface-primary rounded-xl p-4 space-y-2.5">
@@ -314,7 +314,7 @@ export default function SettingsPage() {
               <WizardCheckItem text="Solo necesitas una cuenta de Facebook" />
               <WizardCheckItem text="Lo harás una sola vez" />
             </div>
-            <p className="text-xs text-zinc-400 text-center">
+            <p className="text-xs text-zinc-600 text-center">
               Si ya tienes una app de Meta, puedes saltar al paso 4.
             </p>
           </div>
@@ -352,7 +352,7 @@ export default function SettingsPage() {
               <Step n={1} text={<>Inicia sesión con tu cuenta de <strong>Facebook</strong> (la del negocio)</>} />
               <Step n={2} text={<>Haz clic en el botón verde <strong>"Crear app"</strong></>} />
               <Step n={3} text={<>Elige el tipo <strong>"Empresa"</strong> y haz clic en "Siguiente"</>} />
-              <Step n={4} text={<>Ponle un nombre (ej: <strong>AutoPost</strong>) y haz clic en <strong>"Crear app"</strong></>} />
+              <Step n={4} text={<>Ponle un nombre (ej: <strong>Aluminum Studio</strong>) y haz clic en <strong>"Crear app"</strong></>} />
             </div>
 
             <MockScreen>
@@ -388,19 +388,19 @@ export default function SettingsPage() {
 
             <MockScreen>
               <div className="space-y-2">
-                <p className="text-xs font-bold text-zinc-400">Agregar productos</p>
+                <p className="text-xs font-bold text-zinc-600">Agregar productos</p>
                 <div className="grid grid-cols-3 gap-2 mt-2">
-                  <div className="border-2 border-brand-500 bg-brand-500/10 rounded-lg p-2 text-center">
+                  <div className="border-2 border-brand-500 bg-zinc-100 rounded-lg p-2 text-center">
                     <div className="text-lg">📸</div>
-                    <p className="text-xs font-semibold text-brand-400 mt-1">Instagram</p>
+                    <p className="text-xs font-semibold text-zinc-900 mt-1">Instagram</p>
                     <p className="text-xs text-blue-500 underline">Configurar</p>
                   </div>
-                  <div className="border-2 border-brand-500 bg-brand-500/10 rounded-lg p-2 text-center">
+                  <div className="border-2 border-brand-500 bg-zinc-100 rounded-lg p-2 text-center">
                     <div className="text-lg">🔑</div>
-                    <p className="text-xs font-semibold text-brand-400 mt-1">Inicio sesión FB</p>
+                    <p className="text-xs font-semibold text-zinc-900 mt-1">Inicio sesión FB</p>
                     <p className="text-xs text-blue-500 underline">Configurar</p>
                   </div>
-                  <div className="border border-white/[0.08] rounded-lg p-2 text-center opacity-40">
+                  <div className="border border-zinc-200 rounded-lg p-2 text-center opacity-40">
                     <div className="text-lg">📘</div>
                     <p className="text-xs font-semibold text-zinc-500 mt-1">Messenger</p>
                     <p className="text-xs text-blue-400 underline">Configurar</p>
@@ -445,15 +445,15 @@ export default function SettingsPage() {
 
             <div className="bg-surface-primary rounded-xl p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono text-zinc-300">instagram_business_basic</span>
+                <span className="text-xs font-mono text-zinc-900">instagram_business_basic</span>
                 <span className="text-xs text-green-400/70 font-bold">Activar</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono text-zinc-300">instagram_business_content_publish</span>
+                <span className="text-xs font-mono text-zinc-900">instagram_business_content_publish</span>
                 <span className="text-xs text-green-400/70 font-bold">Activar</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono text-zinc-300">instagram_business_manage_comments</span>
+                <span className="text-xs font-mono text-zinc-900">instagram_business_manage_comments</span>
                 <span className="text-xs text-green-400/70 font-bold">Activar</span>
               </div>
             </div>
@@ -463,23 +463,23 @@ export default function SettingsPage() {
               <div className="flex gap-0 -m-4">
                 {/* Sidebar */}
                 <div className="w-[160px] bg-zinc-50 border-r border-zinc-200 p-3 space-y-1 shrink-0">
-                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-400">Panel</div>
-                  <div className="px-2 py-1.5 rounded text-[11px] font-bold text-brand-400 bg-brand-500/20 border border-brand-500/30">
+                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-600">Panel</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] font-bold text-zinc-900 bg-brand-500/20 border border-brand-500/30">
                     → Casos de uso
                   </div>
-                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-400">Instagram</div>
-                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-400">Inicio sesión FB</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-600">Instagram</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-600">Inicio sesión FB</div>
                 </div>
                 {/* Content */}
                 <div className="flex-1 p-4 space-y-3">
-                  <p className="text-xs font-bold text-zinc-300">Casos de uso</p>
-                  <div className="border border-white/[0.08] rounded-lg p-3">
+                  <p className="text-xs font-bold text-zinc-900">Casos de uso</p>
+                  <div className="border border-zinc-200 rounded-lg p-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-sm">📸</span>
                         <div>
-                          <p className="text-[11px] font-bold text-zinc-300">Administrar mensajes y contenido en Instagram</p>
-                          <p className="text-[10px] text-zinc-400">Publica, comenta, etc.</p>
+                          <p className="text-[11px] font-bold text-zinc-900">Administrar mensajes y contenido en Instagram</p>
+                          <p className="text-[10px] text-zinc-600">Publica, comenta, etc.</p>
                         </div>
                       </div>
                       <div className="bg-brand-500 text-white text-[10px] font-bold px-2 py-1 rounded">
@@ -518,11 +518,11 @@ export default function SettingsPage() {
         >
           <div className="space-y-4">
             {/* Big clear warning */}
-            <div className="bg-red-500/10 border-2 border-red-500/30 rounded-xl px-4 py-3">
-              <p className="text-sm font-bold text-red-400 mb-1">
+            <div className="bg-red-50 border-2 border-red-500/30 rounded-xl px-4 py-3">
+              <p className="text-sm font-bold text-red-700 mb-1">
                 CUIDADO: Ve a la página correcta
               </p>
-              <p className="text-xs text-red-400/70 leading-relaxed">
+              <p className="text-xs text-red-700/70 leading-relaxed">
                 Meta tiene muchas páginas con números parecidos. Solo hay <strong>UN lugar correcto</strong> para encontrar los datos que necesitas.
                 No vayas a "Casos de uso", ni a "API de Instagram", ni a "Productos".
                 Ve SOLO a donde te decimos abajo.
@@ -553,26 +553,26 @@ export default function SettingsPage() {
               <div className="flex gap-0 -m-4">
                 {/* Sidebar mock */}
                 <div className="w-[180px] bg-zinc-50 border-r border-zinc-200 p-3 space-y-1 shrink-0">
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase mb-2">Menú de tu app</p>
-                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-400">Panel</div>
-                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-400">Casos de uso</div>
-                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-400">Instagram</div>
+                  <p className="text-[10px] font-bold text-zinc-600 uppercase mb-2">Menú de tu app</p>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-600">Panel</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-600">Casos de uso</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-600">Instagram</div>
                   <div className="mt-2 border-t border-zinc-200 pt-2">
-                    <div className="px-2 py-1.5 rounded text-[11px] font-bold text-brand-400 bg-brand-500/20 border border-brand-500/30 flex items-center gap-1">
+                    <div className="px-2 py-1.5 rounded text-[11px] font-bold text-zinc-900 bg-brand-500/20 border border-brand-500/30 flex items-center gap-1">
                       ⚙️ Config. de la app
-                      <span className="text-brand-400 ml-auto">▼</span>
+                      <span className="text-zinc-900 ml-auto">▼</span>
                     </div>
                     <div className="ml-3 mt-1 space-y-0.5">
                       <div className="px-2 py-1 rounded text-[11px] font-bold text-white bg-brand-500 flex items-center gap-1">
                         → Info. básica
                       </div>
-                      <div className="px-2 py-1 rounded text-[11px] text-zinc-400">Avanzada</div>
+                      <div className="px-2 py-1 rounded text-[11px] text-zinc-600">Avanzada</div>
                     </div>
                   </div>
                 </div>
                 {/* Content area */}
                 <div className="flex-1 p-4 space-y-4">
-                  <p className="text-xs font-bold text-zinc-300">Información básica</p>
+                  <p className="text-xs font-bold text-zinc-900">Información básica</p>
 
                   {/* App ID field */}
                   <div className="relative">
@@ -600,10 +600,10 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Wrong fields */}
-                  <div className="border-t border-white/[0.06] pt-3 space-y-2">
+                  <div className="border-t border-zinc-200 pt-3 space-y-2">
                     <p className="text-[10px] font-bold text-red-500">Estos NO son los que necesitas:</p>
                     <div className="opacity-50">
-                      <div className="bg-red-500/10 border border-red-500/20 rounded px-2 py-1 text-[10px] text-red-400 line-through">
+                      <div className="bg-red-50 border border-red-300 rounded px-2 py-1 text-[10px] text-red-700 line-through">
                         Identificador de la app de Instagram: 9876543...
                       </div>
                     </div>
@@ -624,37 +624,37 @@ export default function SettingsPage() {
             {/* Input fields */}
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 mb-1">
-                  App ID <span className="text-brand-400">*</span>
-                  <span className="text-zinc-400 font-normal ml-1">(el número largo)</span>
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                  App ID <span className="text-zinc-900">*</span>
+                  <span className="text-zinc-600 font-normal ml-1">(el número largo)</span>
                 </label>
                 <input
                   type="text"
                   value={form.META_APP_ID}
                   onChange={(e) => setForm((f) => ({ ...f, META_APP_ID: e.target.value }))}
-                  className="w-full rounded-lg border border-white/[0.08] bg-surface-primary text-zinc-100 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className="w-full rounded-lg border border-zinc-200 bg-surface-primary text-zinc-900 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500"
                   placeholder="ej: 1234567890123456"
                   autoComplete="off"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 mb-1">
-                  App Secret <span className="text-brand-400">*</span>
-                  <span className="text-zinc-400 font-normal ml-1">(la clave secreta)</span>
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                  App Secret <span className="text-zinc-900">*</span>
+                  <span className="text-zinc-600 font-normal ml-1">(la clave secreta)</span>
                 </label>
                 <div className="relative">
                   <input
                     type={showSecret ? "text" : "password"}
                     value={form.META_APP_SECRET}
                     onChange={(e) => setForm((f) => ({ ...f, META_APP_SECRET: e.target.value }))}
-                    className="w-full rounded-lg border border-white/[0.08] bg-surface-primary text-zinc-100 px-3 py-2 pr-10 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full rounded-lg border border-zinc-200 bg-surface-primary text-zinc-900 px-3 py-2 pr-10 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500"
                     placeholder="Pega aquí el App Secret"
                     autoComplete="new-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowSecret((v) => !v)}
-                    className="absolute right-3 top-2.5 text-zinc-400 hover:text-zinc-400"
+                    className="absolute right-3 top-2.5 text-zinc-600 hover:text-zinc-600"
                   >
                     {showSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -681,8 +681,8 @@ export default function SettingsPage() {
           <div className="space-y-4">
             {/* URL to copy */}
             <div>
-              <p className="text-xs font-bold text-zinc-400 mb-2">Primero, copia esta dirección:</p>
-              <div className="flex items-center gap-2 bg-brand-500/10 border-2 border-brand-500/30 rounded-xl px-3 py-3">
+              <p className="text-xs font-bold text-zinc-600 mb-2">Primero, copia esta dirección:</p>
+              <div className="flex items-center gap-2 bg-zinc-100 border-2 border-brand-500/30 rounded-xl px-3 py-3">
                 <code className="flex-1 text-xs text-brand-300 break-all font-mono font-bold">
                   {redirectUri || "Cargando..."}
                 </code>
@@ -720,15 +720,15 @@ export default function SettingsPage() {
             <MockScreen>
               <div className="flex gap-0 -m-4">
                 <div className="w-[160px] bg-zinc-50 border-r border-zinc-200 p-3 space-y-1 shrink-0">
-                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-400">Panel</div>
-                  <div className="px-2 py-1.5 rounded text-[11px] font-bold text-brand-400 bg-brand-500/20 border border-brand-500/30">
+                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-600">Panel</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] font-bold text-zinc-900 bg-brand-500/20 border border-brand-500/30">
                     → Casos de uso
                   </div>
-                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-400">Instagram</div>
-                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-400">Inicio sesión FB</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-600">Instagram</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-600">Inicio sesión FB</div>
                 </div>
                 <div className="flex-1 p-4 space-y-3">
-                  <p className="text-xs font-bold text-zinc-300">Instagram → Personalizar → Configuración</p>
+                  <p className="text-xs font-bold text-zinc-900">Instagram → Personalizar → Configuración</p>
                   <div className="relative">
                     <p className="text-[10px] text-zinc-500 mb-1">URIs de redireccionamiento de OAuth válidos</p>
                     <div className="bg-green-50 border-2 border-green-400 rounded px-2 py-2 text-[10px] font-mono text-green-800 font-bold break-all">
@@ -771,8 +771,8 @@ export default function SettingsPage() {
           <div className="space-y-4">
             {/* URL reminder */}
             <div>
-              <p className="text-xs font-bold text-zinc-400 mb-2">La misma URL de antes:</p>
-              <div className="flex items-center gap-2 bg-brand-500/10 border-2 border-brand-500/30 rounded-xl px-3 py-3">
+              <p className="text-xs font-bold text-zinc-600 mb-2">La misma URL de antes:</p>
+              <div className="flex items-center gap-2 bg-zinc-100 border-2 border-brand-500/30 rounded-xl px-3 py-3">
                 <code className="flex-1 text-xs text-brand-300 break-all font-mono font-bold">
                   {redirectUri || "Cargando..."}
                 </code>
@@ -808,13 +808,13 @@ export default function SettingsPage() {
             <MockScreen>
               <div className="flex gap-0 -m-4">
                 <div className="w-[170px] bg-zinc-50 border-r border-zinc-200 p-3 space-y-1 shrink-0">
-                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-400">Panel</div>
-                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-400">Casos de uso</div>
-                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-400">Instagram</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-600">Panel</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-600">Casos de uso</div>
+                  <div className="px-2 py-1.5 rounded text-[11px] text-zinc-600">Instagram</div>
                   <div className="mt-2 border-t border-zinc-200 pt-2">
-                    <div className="px-2 py-1.5 rounded text-[11px] font-bold text-brand-400 bg-brand-500/20 border border-brand-500/30 flex items-center gap-1">
+                    <div className="px-2 py-1.5 rounded text-[11px] font-bold text-zinc-900 bg-brand-500/20 border border-brand-500/30 flex items-center gap-1">
                       f Inicio sesión FB
-                      <span className="text-brand-400 ml-auto">▼</span>
+                      <span className="text-zinc-900 ml-auto">▼</span>
                     </div>
                     <div className="ml-3 mt-1">
                       <div className="px-2 py-1 rounded text-[11px] font-bold text-white bg-brand-500">
@@ -824,7 +824,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="flex-1 p-4 space-y-3">
-                  <p className="text-xs font-bold text-zinc-300">Configuración de inicio de sesión con Facebook</p>
+                  <p className="text-xs font-bold text-zinc-900">Configuración de inicio de sesión con Facebook</p>
                   <div className="relative">
                     <p className="text-[10px] text-zinc-500 mb-1">URIs de redireccionamiento de OAuth válidos</p>
                     <div className="bg-green-50 border-2 border-green-400 rounded px-2 py-2 text-[10px] font-mono text-green-800 font-bold break-all">
@@ -843,7 +843,7 @@ export default function SettingsPage() {
             </MockScreen>
 
             {saveError && (
-              <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+              <div className="rounded-lg bg-red-50 border border-red-300 px-4 py-3 text-sm text-red-700">
                 {saveError}
               </div>
             )}
@@ -881,14 +881,14 @@ function WizardCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-surface-card border border-white/[0.06] rounded-2xl overflow-hidden animate-fade-in">
-      <div className="bg-gradient-to-br from-brand-500/5 to-transparent border-b border-white/[0.06] px-6 pt-6 pb-5">
+    <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden animate-fade-in">
+      <div className="bg-gradient-to-br from-brand-500/5 to-transparent border-b border-zinc-200 px-6 pt-6 pb-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-zinc-100 border border-brand-500/20 flex items-center justify-center shrink-0">
             {icon}
           </div>
           <div>
-            <h2 className="font-bold text-zinc-100 text-lg leading-tight">{title}</h2>
+            <h2 className="font-bold text-zinc-900 text-lg leading-tight">{title}</h2>
             <p className="text-sm text-zinc-500 mt-0.5">{subtitle}</p>
           </div>
         </div>
@@ -914,12 +914,12 @@ function WizardNav({
   loading?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-3 pt-2 border-t border-white/[0.06]">
+    <div className="flex items-center gap-3 pt-2 border-t border-zinc-200">
       {!hideBack && onBack && (
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-white/[0.08] text-sm font-medium text-zinc-400 hover:bg-zinc-800 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-800 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Atrás
@@ -942,7 +942,7 @@ function WizardCheckItem({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-2.5">
       <CheckCircle className="h-4 w-4 text-green-500 shrink-0" />
-      <p className="text-sm text-zinc-300">{text}</p>
+      <p className="text-sm text-zinc-900">{text}</p>
     </div>
   );
 }
@@ -950,7 +950,7 @@ function WizardCheckItem({ text }: { text: string }) {
 function Credential({ label, ok }: { label: string; ok: boolean }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-sm text-zinc-400">{label}</span>
+      <span className="text-sm text-zinc-600">{label}</span>
       {ok
         ? <span className="flex items-center gap-1 text-xs text-green-400/70 font-medium"><CheckCircle className="h-3.5 w-3.5" /> Configurado</span>
         : <span className="flex items-center gap-1 text-xs text-red-500 font-medium"><XCircle className="h-3.5 w-3.5" /> Falta</span>
@@ -975,14 +975,14 @@ function SimpleForm({
   onSave: () => void;
 }) {
   return (
-    <div className="bg-surface-card border border-white/[0.06] rounded-xl p-6 space-y-5">
+    <div className="bg-white border border-zinc-200 rounded-xl p-6 space-y-5">
       <div>
-        <label className="block text-sm font-semibold text-zinc-300 mb-1">App ID</label>
+        <label className="block text-sm font-semibold text-zinc-900 mb-1">App ID</label>
         <input
           type="text"
           value={form.META_APP_ID}
           onChange={(e) => setForm((f) => ({ ...f, META_APP_ID: e.target.value }))}
-          className="w-full rounded-lg border border-white/[0.08] bg-surface-primary text-zinc-100 px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500"
+          className="w-full rounded-lg border border-zinc-200 bg-surface-primary text-zinc-900 px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500"
           placeholder="ej: 1234567890123456"
           autoComplete="off"
         />
@@ -990,33 +990,33 @@ function SimpleForm({
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-zinc-300 mb-1">App Secret</label>
-        <p className="text-xs text-zinc-400 mb-2">Deja vacío para no cambiar el actual</p>
+        <label className="block text-sm font-semibold text-zinc-900 mb-1">App Secret</label>
+        <p className="text-xs text-zinc-600 mb-2">Deja vacío para no cambiar el actual</p>
         <div className="relative">
           <input
             type={showSecret ? "text" : "password"}
             value={form.META_APP_SECRET}
             onChange={(e) => setForm((f) => ({ ...f, META_APP_SECRET: e.target.value }))}
-            className="w-full rounded-lg border border-white/[0.08] bg-surface-primary text-zinc-100 px-3 py-2.5 pr-10 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full rounded-lg border border-zinc-200 bg-surface-primary text-zinc-900 px-3 py-2.5 pr-10 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500"
             placeholder={status?.META_APP_SECRET ? "••••••••••••••••" : "Pega aquí tu App Secret"}
             autoComplete="new-password"
           />
-          <button type="button" onClick={() => setShowSecret(!showSecret)} className="absolute right-3 top-2.5 text-zinc-400 hover:text-zinc-400">
+          <button type="button" onClick={() => setShowSecret(!showSecret)} className="absolute right-3 top-2.5 text-zinc-600 hover:text-zinc-600">
             {showSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-zinc-300 mb-1">URL de redirección</label>
-        <div className="flex items-center gap-2 bg-surface-primary border border-white/[0.08] rounded-lg px-3 py-2">
-          <code className="flex-1 text-xs text-zinc-300 font-mono break-all">{redirectUri}</code>
+        <label className="block text-sm font-semibold text-zinc-900 mb-1">URL de redirección</label>
+        <div className="flex items-center gap-2 bg-surface-primary border border-zinc-200 rounded-lg px-3 py-2">
+          <code className="flex-1 text-xs text-zinc-900 font-mono break-all">{redirectUri}</code>
           <CopyButton text={redirectUri} />
         </div>
       </div>
 
       {saveError && (
-        <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">⚠️ {saveError}</div>
+        <div className="rounded-lg bg-red-50 border border-red-300 px-4 py-3 text-sm text-red-700">⚠️ {saveError}</div>
       )}
       {saveSuccess && (
         <div className="rounded-lg bg-green-500/10 border border-green-500/20 px-4 py-3 text-sm text-green-400">✓ Guardado correctamente</div>

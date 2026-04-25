@@ -16,6 +16,18 @@ const nextConfig = {
       },
     ],
   },
+  // Suppress @react-three/drei warning about deprecated sRGBEncoding (removed
+  // in three ≥150). Drei v9 still imports the symbol; harmless for our use.
+  webpack(config) {
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings ?? []),
+      {
+        module: /node_modules\/@react-three\/drei/,
+        message: /sRGBEncoding/,
+      },
+    ];
+    return config;
+  },
   // Security headers
   async headers() {
     return [

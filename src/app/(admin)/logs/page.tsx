@@ -84,25 +84,31 @@ export default async function LogsPage({
   const range: Range = searchParams.range ?? "all";
   const q = (searchParams.q ?? "").trim();
 
-  // Build where clause
-  const where: Prisma.AuditLogWhereInput = {};
-  if (actionFilter) where.action = actionFilter;
+  // Build where clause — combine filters as AND of OR-groups when needed.
+  const andClauses: Prisma.AuditLogWhereInput[] = [];
+
+  if (actionFilter) andClauses.push({ action: actionFilter });
+
   if (category !== "all") {
     const cat = CATEGORIES.find((c) => c.key === category)!;
-    where.action = { in: undefined, ...where.action, startsWith: undefined } as Prisma.StringFilter;
-    // Prisma doesn't have OR-of-startsWith natively, so use OR
-    (where as Prisma.AuditLogWhereInput).OR = cat.prefixes.map((p) => ({ action: { startsWith: p } }));
-    delete where.action;
+    andClauses.push({
+      OR: cat.prefixes.map((p) => ({ action: { startsWith: p } })),
+    });
   }
+
   const start = rangeStart(range);
-  if (start) where.createdAt = { gte: start };
+  if (start) andClauses.push({ createdAt: { gte: start } });
+
   if (q) {
-    where.OR = [
-      ...(where.OR ?? []),
-      { entityId: { contains: q, mode: "insensitive" } },
-      { action: { contains: q.toUpperCase() } },
-    ];
+    andClauses.push({
+      OR: [
+        { entityId: { contains: q, mode: "insensitive" } },
+        { action: { contains: q.toUpperCase() } },
+      ],
+    });
   }
+
+  const where: Prisma.AuditLogWhereInput = andClauses.length > 0 ? { AND: andClauses } : {};
 
   const [logs, total, allActions] = await Promise.all([
     db.auditLog.findMany({
