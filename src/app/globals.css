@@ -3,6 +3,100 @@
 @tailwind utilities;
 
 /* ══════════════════════════════════════════════════════════════════════════════
+   AUTOPOST — EDITORIAL / PRINT-ZINE TOKENS  (namespaced bajo .ap-root)
+   Convive con el sistema Aluminum sin colisión: solo aplica dentro de
+   contenedores con la clase .ap-root.
+   ══════════════════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+.ap-root {
+  /* Off-bone canvas — not pure white. The signature move. */
+  --ap-paper:    #F1ECE2;
+  --ap-paper-2:  #E8E2D4;
+  --ap-ink:      #14110D;
+  --ap-ink-2:    #2A241D;
+  --ap-ink-3:    #5A4F40;
+  --ap-ink-4:    #8A7E6B;
+  --ap-rule:     #1F1B14;
+
+  /* Dark variants for night surfaces (editor, hero panels) */
+  --ap-night:    #14110D;
+  --ap-night-2:  #1C1813;
+  --ap-night-3:  #25201A;
+
+  /* The accent: tomato red — used like a stamp, never as fill */
+  --ap-stamp:    #E54B26;
+  --ap-stamp-2:  #C73C1B;
+  /* Olive — quiet, organic — for status/positive */
+  --ap-olive:    #6B7A2E;
+  /* Mustard — secondary highlight */
+  --ap-mustard:  #D4A627;
+
+  --ap-line:    rgba(20,17,13,0.10);
+  --ap-line-2:  rgba(20,17,13,0.20);
+
+  --ap-r-sm: 4px; --ap-r-md: 6px; --ap-r-lg: 10px;
+
+  --ap-font-display: "Instrument Serif", "Times New Roman", serif;
+  --ap-font-sans:    "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --ap-font-mono:    "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+
+  --ap-ease: cubic-bezier(.22,.61,.36,1);
+  --ap-spring: cubic-bezier(.34,1.56,.64,1);
+
+  font-family: var(--ap-font-sans);
+  color: var(--ap-ink);
+  background: var(--ap-paper);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01","cv11","tnum";
+}
+
+.ap-root .ap-display { font-family: var(--ap-font-display); font-weight: 400; letter-spacing: -0.02em; line-height: 0.92; }
+.ap-root .ap-mono    { font-family: var(--ap-font-mono); font-feature-settings: "tnum"; letter-spacing: 0.02em; }
+.ap-root .ap-num     { font-variant-numeric: tabular-nums; font-family: var(--ap-font-mono); }
+
+/* Paper texture — subtle grain that makes it feel printed */
+.ap-root .ap-paper-tex { position: relative; }
+.ap-root .ap-paper-tex::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.06 0 0 0 0 0.04 0 0 0 0.045 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* Stamp utility — stays diagonal, unique character */
+.ap-root .ap-stamp-chip {
+  display: inline-block; padding: 4px 10px;
+  border: 1.5px solid currentColor; color: var(--ap-stamp);
+  font-family: var(--ap-font-mono); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  transform: rotate(-3deg);
+}
+
+/* Index number — used for sections like a print magazine */
+.ap-root .ap-index {
+  font-family: var(--ap-font-display);
+  font-size: 64px; font-style: italic;
+  line-height: 0.8;
+  color: var(--ap-stamp);
+}
+
+/* Hairline rule */
+.ap-root .ap-rule { border: none; border-top: 1px solid var(--ap-rule); margin: 0; }
+
+/* Buttons */
+.ap-root .ap-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-radius: 0;
+  font-family: var(--ap-font-sans); font-weight: 500; font-size: 13.5px;
+  cursor: pointer; transition: all .14s var(--ap-ease);
+  background: var(--ap-ink); color: var(--ap-paper); border: 1.5px solid var(--ap-ink);
+}
+.ap-root .ap-btn:hover { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--ap-ink); }
+.ap-root .ap-btn--ghost { background: transparent; color: var(--ap-ink); }
+.ap-root .ap-btn--ghost:hover { background: var(--ap-ink); color: var(--ap-paper); }
+.ap-root .ap-btn--stamp { background: var(--ap-stamp); border-color: var(--ap-stamp); color: var(--ap-paper); }
+.ap-root .ap-btn--stamp:hover { box-shadow: 3px 3px 0 var(--ap-ink); }
+
+/* ══════════════════════════════════════════════════════════════════════════════
    FOCUS VISIBLE — WCAG AA
    Aplica un anillo claro a todo elemento interactivo cuando se navega por
    teclado. No afecta a clicks de ratón (gracias a :focus-visible).
