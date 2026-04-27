@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Search, List, CalendarRange } from "lucide-react";
+import { Search, List, CalendarRange, Download } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { PostsListClient, type PostItem } from "./posts-list-client";
 import { CalendarView, type CalendarPost } from "./calendar-view";
@@ -161,28 +161,38 @@ export default async function PostsPage({
           </p>
         </div>
 
-        {/* View toggle */}
-        <div className="flex gap-1 bg-white border border-zinc-200 rounded-lg p-1" role="group" aria-label="Vista">
-          <Link
-            href={urlWith({ view: "list" })}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-              view === "list" ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900"
-            }`}
-            aria-pressed={view === "list"}
+        <div className="flex items-center gap-2">
+          {/* View toggle */}
+          <div className="flex gap-1 bg-white border border-zinc-200 rounded-lg p-1" role="group" aria-label="Vista">
+            <Link
+              href={urlWith({ view: "list" })}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+                view === "list" ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900"
+              }`}
+              aria-pressed={view === "list"}
+            >
+              <List className="h-3.5 w-3.5" />
+              Lista
+            </Link>
+            <Link
+              href={urlWith({ view: "calendar" })}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+                view === "calendar" ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900"
+              }`}
+              aria-pressed={view === "calendar"}
+            >
+              <CalendarRange className="h-3.5 w-3.5" />
+              Calendario
+            </Link>
+          </div>
+          <a
+            href={`/api/exports/posts.csv?slug=${slug}${statusFilter ? `&status=${statusFilter}` : ""}`}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-semibold hover:border-zinc-300 hover:bg-zinc-50 transition-colors"
+            title="Descargar CSV con los posts filtrados"
           >
-            <List className="h-3.5 w-3.5" />
-            Lista
-          </Link>
-          <Link
-            href={urlWith({ view: "calendar" })}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-              view === "calendar" ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900"
-            }`}
-            aria-pressed={view === "calendar"}
-          >
-            <CalendarRange className="h-3.5 w-3.5" />
-            Calendario
-          </Link>
+            <Download className="h-3.5 w-3.5" />
+            CSV
+          </a>
         </div>
       </div>
 

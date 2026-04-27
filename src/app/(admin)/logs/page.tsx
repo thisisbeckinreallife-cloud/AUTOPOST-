@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
-import { FileText, Search, Calendar, X } from "lucide-react";
+import { FileText, Search, X, Download } from "lucide-react";
 import { CopyIdButton } from "@/components/admin/copy-id-button";
 import type { Prisma } from "@prisma/client";
 
@@ -151,17 +151,32 @@ export default async function LogsPage({
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center gap-3 animate-fade-up">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200">
-          <FileText className="h-5 w-5 text-zinc-700" />
+      <div className="flex items-center justify-between gap-3 animate-fade-up">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200">
+            <FileText className="h-5 w-5 text-zinc-700" />
+          </div>
+          <div>
+            <h1 className="font-display text-xl font-bold text-zinc-900">Actividad</h1>
+            <p className="text-zinc-600 text-sm mt-0.5">
+              {total} {total === 1 ? "registro" : "registros"}
+              {(actionFilter || category !== "all" || range !== "all" || q) && " (filtrado)"}
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="font-display text-xl font-bold text-zinc-900">Actividad</h1>
-          <p className="text-zinc-600 text-sm mt-0.5">
-            {total} {total === 1 ? "registro" : "registros"}
-            {(actionFilter || category !== "all" || range !== "all" || q) && " (filtrado)"}
-          </p>
-        </div>
+        <a
+          href={`/api/exports/logs.csv?${new URLSearchParams({
+            ...(actionFilter ? { action: actionFilter } : {}),
+            ...(category !== "all" ? { category } : {}),
+            ...(range !== "all" ? { range } : {}),
+            ...(q ? { q } : {}),
+          }).toString()}`}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-semibold hover:border-zinc-300 hover:bg-zinc-50 transition-colors shrink-0"
+          title="Descargar CSV con los filtros aplicados"
+        >
+          <Download className="h-3.5 w-3.5" />
+          CSV
+        </a>
       </div>
 
       {/* Search + Range */}
