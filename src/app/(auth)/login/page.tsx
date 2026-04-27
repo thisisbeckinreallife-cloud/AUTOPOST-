@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Lock, Mail, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { Logo } from "@/components/editorial/atoms";
 
 function LoginForm() {
   const router = useRouter();
@@ -45,44 +46,66 @@ function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-xs font-semibold mb-2" style={{ color: "#48484A", letterSpacing: "0.05em" }}>
+      <div className="space-y-2">
+        <label
+          className="ap-mono block"
+          style={{
+            fontSize: 10,
+            letterSpacing: "0.14em",
+            color: "var(--ap-ink-3)",
+          }}
+        >
           EMAIL
         </label>
         <div className="relative">
-          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#86868B" }} />
+          <Mail
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
+            style={{ color: "var(--ap-ink-4)" }}
+          />
           <input
             type="email"
             required
-            autoFocus
             value={form.email}
-            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-            className="w-full rounded-xl pl-11 pr-4 py-3.5 text-sm transition-all focus:outline-none"
-            style={{
-              background: "#FFFFFF",
-              border: "1px solid rgba(29,29,31,0.10)",
-              color: "#1D1D1F",
-            }}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
             placeholder="tu@email.com"
+            className="w-full pl-9 pr-3 py-3 text-sm transition-colors"
+            style={{
+              background: "var(--ap-paper-2)",
+              border: "1px solid var(--ap-line-2)",
+              color: "var(--ap-ink)",
+              borderRadius: 4,
+            }}
           />
         </div>
       </div>
-      <div>
-        <label className="block text-xs font-semibold mb-2" style={{ color: "#48484A", letterSpacing: "0.05em" }}>
+
+      <div className="space-y-2">
+        <label
+          className="ap-mono block"
+          style={{
+            fontSize: 10,
+            letterSpacing: "0.14em",
+            color: "var(--ap-ink-3)",
+          }}
+        >
           CONTRASEÑA
         </label>
         <div className="relative">
-          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#86868B" }} />
+          <Lock
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
+            style={{ color: "var(--ap-ink-4)" }}
+          />
           <input
             type="password"
             required
             value={form.password}
-            onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-            className="w-full rounded-xl pl-11 pr-4 py-3.5 text-sm transition-all focus:outline-none"
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            className="w-full pl-9 pr-3 py-3 text-sm transition-colors"
             style={{
-              background: "#FFFFFF",
-              border: "1px solid rgba(29,29,31,0.10)",
-              color: "#1D1D1F",
+              background: "var(--ap-paper-2)",
+              border: "1px solid var(--ap-line-2)",
+              color: "var(--ap-ink)",
+              borderRadius: 4,
             }}
           />
         </div>
@@ -90,11 +113,11 @@ function LoginForm() {
 
       {error && (
         <div
-          className="rounded-xl px-4 py-3 text-sm"
+          className="rounded-md p-3 text-xs"
           style={{
-            background: "rgba(220,38,38,0.06)",
-            border: "1px solid rgba(220,38,38,0.20)",
-            color: "#DC2626",
+            background: "rgba(229,75,38,0.06)",
+            border: "1px solid rgba(229,75,38,0.30)",
+            color: "var(--ap-stamp)",
           }}
         >
           {error}
@@ -104,11 +127,12 @@ function LoginForm() {
       <Button
         type="submit"
         loading={loading}
-        className="w-full h-12 text-sm font-semibold rounded-full gap-2 transition-all hover:scale-[1.01] active:scale-[0.98]"
+        className="w-full h-12 text-sm font-semibold gap-2 transition-all"
         style={{
-          background: "#1D1D1F",
-          color: "#F5F5F7",
-          boxShadow: "0 8px 24px -8px rgba(29,29,31,0.50), 0 0 0 1px #1D1D1F, 0 0 32px -10px rgba(168,218,220,0.35)",
+          background: "var(--ap-stamp)",
+          color: "var(--ap-paper)",
+          borderRadius: 4,
+          border: "1.5px solid var(--ap-stamp)",
         }}
       >
         Entrar
@@ -120,61 +144,56 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: "#F5F5F7" }}
-    >
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        {/* Logo minimal */}
-        <div className="flex flex-col items-center mb-8">
-          <div
-            className="relative mb-4 flex h-12 w-12 items-center justify-center rounded-xl"
+        {/* Masthead */}
+        <div className="flex flex-col items-center mb-10">
+          <p
+            className="ap-mono"
             style={{
-              background: "linear-gradient(135deg, #A8DADC 0%, #7DBCBE 100%)",
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.45), 0 8px 20px -6px rgba(125,188,190,0.35)",
+              fontSize: 10,
+              letterSpacing: "0.18em",
+              color: "var(--ap-ink-4)",
+              textTransform: "uppercase",
+              marginBottom: 14,
             }}
-            aria-hidden="true"
           >
-            <span
-              className="font-black text-xl leading-none"
-              style={{ color: "#1D1D1F", fontFamily: "Satoshi, Inter, system-ui, sans-serif", letterSpacing: "-0.04em" }}
-            >
-              A
-            </span>
-          </div>
-          <span
-            className="font-bold text-lg tracking-tight"
-            style={{ color: "#1D1D1F", letterSpacing: "-0.01em", fontFamily: "Satoshi, Inter, system-ui, sans-serif" }}
-          >
-            Aluminum Studio
-          </span>
+            VOL. 02 · ACCESO
+          </p>
+          <Logo size={20} />
         </div>
 
         {/* Card */}
         <div
-          className="rounded-2xl p-7"
+          className="p-8"
           style={{
-            background: "#FFFFFF",
-            border: "1px solid rgba(29,29,31,0.06)",
-            boxShadow: "0 24px 48px -16px rgba(29,29,31,0.10), inset 0 1px 0 rgba(255,255,255,0.8)",
+            background: "var(--ap-paper-2)",
+            border: "1px solid var(--ap-line-2)",
+            borderRadius: 4,
           }}
         >
-          <div className="text-center mb-6">
+          <div className="text-center mb-7">
             <h1
-              className="text-2xl font-bold"
-              style={{ color: "#1D1D1F", fontFamily: "Satoshi, Inter, system-ui, sans-serif", letterSpacing: "-0.02em" }}
+              className="ap-display"
+              style={{
+                fontSize: 30,
+                color: "var(--ap-ink)",
+                letterSpacing: "-0.02em",
+                lineHeight: 1.1,
+              }}
             >
-              Empieza donde lo dejaste.
+              Empieza donde lo{" "}
+              <span style={{ fontStyle: "italic" }}>dejaste.</span>
             </h1>
           </div>
           <Suspense fallback={<div className="h-48" />}>
             <LoginForm />
           </Suspense>
-          <div className="mt-4 text-center">
+          <div className="mt-5 text-center">
             <Link
               href="/forgot-password"
               className="text-xs transition-colors hover:underline"
-              style={{ color: "#86868B" }}
+              style={{ color: "var(--ap-ink-4)" }}
             >
               ¿Olvidaste tu contraseña?
             </Link>
@@ -182,30 +201,53 @@ export default function LoginPage() {
         </div>
 
         {/* Links */}
-        <div className="text-center mt-5 space-y-1.5">
-          <p className="text-sm" style={{ color: "#48484A" }}>
+        <div className="text-center mt-6 space-y-2">
+          <p className="text-sm" style={{ color: "var(--ap-ink-3)" }}>
             ¿Aún no tienes cuenta?{" "}
-            <Link href="/signup" className="font-semibold transition-colors hover:underline" style={{ color: "#7DBCBE" }}>
+            <Link
+              href="/signup"
+              className="transition-colors"
+              style={{
+                color: "var(--ap-stamp)",
+                borderBottom: "1px solid var(--ap-stamp)",
+                paddingBottom: 1,
+              }}
+            >
               Créala gratis
             </Link>
           </p>
           <Link
             href="/"
-            className="text-xs inline-block transition-colors hover:underline"
-            style={{ color: "#86868B" }}
+            className="text-xs inline-block transition-opacity hover:opacity-70"
+            style={{ color: "var(--ap-ink-4)" }}
           >
-            ← Volver a Aluminum Studio
+            ← Volver al inicio
           </Link>
         </div>
 
         {/* Trust microcopy */}
-        <div className="flex items-center justify-center gap-3 mt-6 text-[10px]" style={{ color: "#86868B" }}>
-          <span className="flex items-center gap-1">
-            <span className="h-1 w-1 rounded-full" style={{ background: "#16A34A" }} />
+        <div
+          className="ap-mono flex items-center justify-center gap-4 mt-7"
+          style={{
+            fontSize: 10,
+            color: "var(--ap-ink-4)",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+          }}
+        >
+          <span className="flex items-center gap-1.5">
+            <span
+              className="h-1 w-1"
+              style={{ background: "var(--ap-olive)" }}
+            />
             Sin tarjeta
           </span>
-          <span className="flex items-center gap-1">
-            <span className="h-1 w-1 rounded-full" style={{ background: "#7DBCBE" }} />
+          <span style={{ color: "var(--ap-line-2)" }}>·</span>
+          <span className="flex items-center gap-1.5">
+            <span
+              className="h-1 w-1"
+              style={{ background: "var(--ap-stamp)" }}
+            />
             API oficial de Meta
           </span>
         </div>

@@ -10,51 +10,51 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
-        display: ["Satoshi", "Inter", "system-ui", "sans-serif"],
-        headline: ["Satoshi", "Inter", "system-ui", "sans-serif"],
+        display: ['"Instrument Serif"', '"Times New Roman"', "serif"],
+        headline: ['"Instrument Serif"', '"Times New Roman"', "serif"],
+        mono: ['"JetBrains Mono"', '"SF Mono"', "ui-monospace", "monospace"],
       },
       colors: {
         /* ══════════════════════════════════════════════════════════════
-           brand.* y accent.* ahora son ALIASES a Aluminum Studio.
-           Los valores antiguos (gold/indigo AutoPost) se preservan como
-           comentarios para rollback. Esto permite rebrand instantáneo de
-           127+ clases en admin/auth sin tocar JSX.
+           brand.* / accent.* / surface.* — Editorial print-zine palette.
+           Off-bone paper, tomato stamp, olive, mustard. Ink in 4 tones.
+           Cualquier componente con estos tokens se rebrandea automáticamente.
            ══════════════════════════════════════════════════════════════ */
         brand: {
-          50:  "#FAFAFC",  // (was #FFF8E0 gold tint)
-          100: "#F5F5F7",  // Athens
-          200: "#E8E8ED",  // surfAlt
-          300: "#D1D1D6",
-          400: "#86868B",  // silver (was #FFC626 gold)
-          500: "#1D1D1F",  // graphite primary (was #FFAA00 gold)
-          600: "#0A0A0F",  // ink (was #CC8800)
-          700: "#48484A",
-          800: "#2C2C2E",
-          900: "#1D1D1F",
-          950: "#0A0A0F",
+          50:  "#F1ECE2",  // paper
+          100: "#E8E2D4",  // paper-2
+          200: "#D9D2C2",
+          300: "#B8B0A0",
+          400: "#5A4F40",  // ink-3 (mid)
+          500: "#14110D",  // ink primary
+          600: "#0E0B07",  // ink deep
+          700: "#2A241D",
+          800: "#1F1B14",
+          900: "#14110D",
+          950: "#0A0805",
         },
         accent: {
-          orange:  "#A8DADC",  // cobalt glow (was #FB923C orange)
-          indigo:  "#7DBCBE",  // cobalt deep (was #6366F1 indigo)
-          violet:  "#7DBCBE",
-          blue:    "#7DBCBE",
-          emerald: "#16A34A",  // true green preserved for success states
-          cyan:    "#A8DADC",
-          coral:   "#86868B",  // silver (was #F97066 coral)
-          red:     "#DC2626",  // error preserved
-          slate:   "#64748B",
+          orange:  "#E54B26",  // tomato stamp
+          indigo:  "#6B7A2E",  // olive
+          violet:  "#6B7A2E",
+          blue:    "#6B7A2E",
+          emerald: "#6B7A2E",  // olive (same family, success)
+          cyan:    "#E54B26",
+          coral:   "#D4A627",  // mustard
+          red:     "#C73C1B",  // stamp-2 (error)
+          slate:   "#8A7E6B",  // ink-4
         },
         surface: {
-          primary:   "#FFFFFF",
-          secondary: "#FAFAFA",
-          tertiary:  "#F5F5F7",
-          card:      "#FFFFFF",
-          hover:     "#F0F0F2",
-          elevated:  "#FFFFFF",
+          primary:   "#F1ECE2",  // paper
+          secondary: "#E8E2D4",  // paper-2
+          tertiary:  "#E8E2D4",
+          card:      "#F1ECE2",
+          hover:     "#E8E2D4",
+          elevated:  "#F1ECE2",
         },
         neutral: {
-          750: "#D1D1D6",
-          850: "#E5E5EA",
+          750: "#B8B0A0",
+          850: "#D9D2C2",
         },
         hatch: {
           graphite:    "#1D1D1F",
@@ -114,31 +114,35 @@ const config: Config = {
         },
       },
       borderColor: {
-        DEFAULT: "rgba(0,0,0,0.06)",
+        DEFAULT: "rgba(20,17,13,0.10)",
       },
       boxShadow: {
-        "card":         "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
-        "card-hover":   "0 8px 28px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)",
-        "elevated":     "0 12px 40px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.03)",
-        "glow-sm":      "0 0 15px rgba(168,218,220,0.10), 0 0 5px rgba(168,218,220,0.05)",
-        "glow":         "0 0 25px rgba(168,218,220,0.14), 0 0 10px rgba(168,218,220,0.08)",
-        "glow-md":      "0 0 40px rgba(168,218,220,0.18), 0 0 15px rgba(168,218,220,0.10)",
-        "glow-lg":      "0 0 60px rgba(168,218,220,0.22), 0 0 25px rgba(168,218,220,0.12)",
-        "glow-amber":   "0 0 30px rgba(168,218,220,0.14), 0 0 10px rgba(168,218,220,0.08)",
-        "glow-blue":    "0 0 30px rgba(59,130,246,0.12), 0 0 10px rgba(59,130,246,0.06)",
-        "glow-orange":  "0 0 20px rgba(168,218,220,0.18), 0 0 10px rgba(168,218,220,0.08)",
-        "glow-indigo":  "0 0 30px rgba(125,188,190,0.14), 0 0 10px rgba(125,188,190,0.08)",
-        "glow-violet":  "0 0 30px rgba(125,188,190,0.14), 0 0 10px rgba(125,188,190,0.08)",
-        "glow-emerald": "0 0 20px rgba(52,211,153,0.14), 0 0 10px rgba(52,211,153,0.08)",
-        "glow-cyan":    "0 0 20px rgba(52,211,153,0.14), 0 0 10px rgba(52,211,153,0.08)",
-        "glow-coral":   "0 0 20px rgba(134,134,139,0.14), 0 0 10px rgba(134,134,139,0.08)",
-        "inner-light":  "inset 0 1px 0 rgba(0,0,0,0.03)",
-        "inner-glow":   "inset 0 0 20px rgba(168,218,220,0.03)",
+        /* Editorial: hairline + leve drop. Sin glows. */
+        "card":         "0 1px 0 rgba(20,17,13,0.06)",
+        "card-hover":   "0 1px 0 rgba(20,17,13,0.08), 3px 3px 0 rgba(20,17,13,0.06)",
+        "elevated":     "0 30px 60px -20px rgba(20,17,13,0.18), 0 1px 0 rgba(20,17,13,0.06)",
+        "glow-sm":      "0 1px 0 rgba(20,17,13,0.06)",
+        "glow":         "0 1px 0 rgba(20,17,13,0.06)",
+        "glow-md":      "0 1px 0 rgba(20,17,13,0.06)",
+        "glow-lg":      "0 1px 0 rgba(20,17,13,0.06)",
+        "glow-amber":   "0 1px 0 rgba(212,166,39,0.30)",
+        "glow-blue":    "0 1px 0 rgba(107,122,46,0.30)",
+        "glow-orange":  "0 1px 0 rgba(229,75,38,0.20)",
+        "glow-indigo":  "0 1px 0 rgba(107,122,46,0.20)",
+        "glow-violet":  "0 1px 0 rgba(107,122,46,0.20)",
+        "glow-emerald": "0 1px 0 rgba(107,122,46,0.20)",
+        "glow-cyan":    "0 1px 0 rgba(229,75,38,0.20)",
+        "glow-coral":   "0 1px 0 rgba(212,166,39,0.20)",
+        "inner-light":  "inset 0 1px 0 rgba(20,17,13,0.04)",
+        "inner-glow":   "inset 0 0 0 0 transparent",
       },
       borderRadius: {
-        "2xl": "1rem",
-        "3xl": "1.25rem",
-        "4xl": "1.75rem",
+        /* Editorial: sin redondeos exagerados. Mantenemos hairlines rectos. */
+        "lg":  "4px",
+        "xl":  "4px",
+        "2xl": "6px",
+        "3xl": "6px",
+        "4xl": "8px",
       },
       animation: {
         "fade-in":       "fadeIn 0.5s ease-out both",
@@ -237,12 +241,17 @@ const config: Config = {
         },
       },
       backgroundImage: {
+        /* Editorial: degradados muy sutiles sobre papel. Casi imperceptibles. */
         "gradient-radial":  "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-subtle":  "linear-gradient(145deg, rgba(168,218,220,0.04) 0%, transparent 50%)",
-        "gradient-mesh":    "radial-gradient(at 40% 20%, rgba(168,218,220,0.08) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(168,218,220,0.05) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(125,188,190,0.04) 0px, transparent 50%)",
-        "gradient-hero":    "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(168,218,220,0.15) 0%, transparent 60%)",
-        "gradient-cta":     "linear-gradient(135deg, rgba(168,218,220,0.08) 0%, rgba(168,218,220,0.05) 50%, rgba(125,188,190,0.04) 100%)",
-        "gradient-spotlight": "radial-gradient(600px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(168,218,220,0.06), transparent 70%)",
+        "gradient-subtle":  "linear-gradient(145deg, rgba(229,75,38,0.025) 0%, transparent 50%)",
+        "gradient-mesh":    "radial-gradient(at 40% 20%, rgba(229,75,38,0.04) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(212,166,39,0.03) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(107,122,46,0.025) 0px, transparent 50%)",
+        "gradient-hero":    "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(229,75,38,0.06) 0%, transparent 60%)",
+        "gradient-cta":     "linear-gradient(135deg, rgba(229,75,38,0.04) 0%, rgba(212,166,39,0.03) 100%)",
+        "gradient-spotlight": "radial-gradient(600px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(229,75,38,0.04), transparent 70%)",
+        "gradient-brand-vivid": "linear-gradient(135deg, #14110D 0%, #2A241D 100%)",
+        "gradient-brand": "linear-gradient(135deg, #14110D 0%, #2A241D 100%)",
+        "gradient-magic": "linear-gradient(135deg, #14110D 0%, #E54B26 100%)",
+        "gradient-glow": "radial-gradient(600px circle, rgba(229,75,38,0.06), transparent 70%)",
       },
       spacing: {
         "18": "4.5rem",

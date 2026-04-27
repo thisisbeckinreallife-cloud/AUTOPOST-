@@ -5,5 +5,12 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <div
+      className="ap-root min-h-screen"
+      style={{ background: "var(--ap-paper)" }}
+    >
+      {children}
+    </div>
+  );
 }

@@ -7,7 +7,7 @@
    Convive con el sistema Aluminum sin colisión: solo aplica dentro de
    contenedores con la clase .ap-root.
    ══════════════════════════════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 .ap-root {
   /* Off-bone canvas — not pure white. The signature move. */
@@ -97,6 +97,225 @@
 .ap-root .ap-btn--stamp:hover { box-shadow: 3px 3px 0 var(--ap-ink); }
 
 /* ══════════════════════════════════════════════════════════════════════════════
+   EDITORIAL POLISH — aplicado a cualquier descendiente de .ap-root.
+   Suaviza/aplana clases Tailwind comunes para que componentes Aluminum
+   heredados (cards, buttons, pills) se lean editorialmente sin reescribir JSX.
+   Specificity baja (selectores simples) — usa !important con moderación.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Aplanar radios excesivos sobre superficies (mantiene sutil 4-6px) */
+.ap-root .rounded-2xl,
+.ap-root .rounded-3xl,
+.ap-root .rounded-xl {
+  border-radius: 6px;
+}
+
+/* Tipografía display tipo magazine */
+.ap-root .font-display,
+.ap-root .font-headline {
+  font-family: var(--ap-font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+.ap-root .font-display.italic,
+.ap-root .font-headline.italic {
+  font-style: italic;
+}
+
+/* Botones primarios oscuros → tinta editorial con vuelo de sello al hover */
+.ap-root .bg-zinc-900,
+.ap-root .bg-zinc-800 {
+  background-color: var(--ap-ink) !important;
+  color: var(--ap-paper);
+  border-radius: 0;
+}
+.ap-root .bg-gradient-to-r.from-zinc-900,
+.ap-root .bg-gradient-to-br.from-zinc-900 {
+  background-image: linear-gradient(135deg, var(--ap-ink) 0%, var(--ap-ink-2) 100%) !important;
+}
+
+/* Cards blancas → papel-2 con hairline */
+.ap-root .bg-white {
+  background-color: var(--ap-paper-2) !important;
+}
+.ap-root .border-zinc-100,
+.ap-root .border-zinc-200 {
+  border-color: var(--ap-line) !important;
+}
+.ap-root .border-zinc-300 {
+  border-color: var(--ap-line-2) !important;
+}
+
+/* Texto: escala de tinta editorial */
+.ap-root .text-zinc-900,
+.ap-root .text-black { color: var(--ap-ink) !important; }
+.ap-root .text-zinc-700,
+.ap-root .text-zinc-800 { color: var(--ap-ink-2) !important; }
+.ap-root .text-zinc-500,
+.ap-root .text-zinc-600 { color: var(--ap-ink-3) !important; }
+.ap-root .text-zinc-400 { color: var(--ap-ink-4) !important; }
+
+/* Pills semánticas: mapea a oliva/sello/mostaza */
+.ap-root .bg-emerald-50,
+.ap-root .bg-emerald-100,
+.ap-root .bg-green-50,
+.ap-root .bg-green-100,
+.ap-root .bg-success-50,
+.ap-root .bg-success-100,
+.ap-root .bg-cyan-50,
+.ap-root .bg-cyan-100 {
+  background-color: rgba(107,122,46,0.10) !important;
+}
+.ap-root .text-emerald-600,
+.ap-root .text-emerald-700,
+.ap-root .text-emerald-800,
+.ap-root .text-emerald-900,
+.ap-root .text-green-600,
+.ap-root .text-green-700,
+.ap-root .text-green-800,
+.ap-root .text-green-900,
+.ap-root .text-success-600,
+.ap-root .text-success-700,
+.ap-root .text-success-800,
+.ap-root .text-success-900,
+.ap-root .text-cyan-700 {
+  color: var(--ap-olive) !important;
+}
+.ap-root .border-emerald-200,
+.ap-root .border-emerald-300,
+.ap-root .border-green-200,
+.ap-root .border-green-300,
+.ap-root .border-success-200,
+.ap-root .border-success-300 {
+  border-color: rgba(107,122,46,0.30) !important;
+}
+
+.ap-root .bg-red-50,
+.ap-root .bg-red-100,
+.ap-root .bg-rose-50,
+.ap-root .bg-rose-100,
+.ap-root .bg-pink-50,
+.ap-root .bg-pink-100,
+.ap-root .bg-error-50,
+.ap-root .bg-error-100 {
+  background-color: rgba(229,75,38,0.08) !important;
+}
+.ap-root .text-red-600,
+.ap-root .text-red-700,
+.ap-root .text-red-800,
+.ap-root .text-red-900,
+.ap-root .text-rose-700,
+.ap-root .text-pink-700,
+.ap-root .text-error-600,
+.ap-root .text-error-700,
+.ap-root .text-error-800,
+.ap-root .text-error-900 {
+  color: var(--ap-stamp) !important;
+}
+.ap-root .border-red-200,
+.ap-root .border-red-300,
+.ap-root .border-red-400,
+.ap-root .border-error-200,
+.ap-root .border-error-300 {
+  border-color: rgba(229,75,38,0.30) !important;
+}
+
+.ap-root .bg-amber-50,
+.ap-root .bg-amber-100,
+.ap-root .bg-yellow-50,
+.ap-root .bg-yellow-100,
+.ap-root .bg-warning-50,
+.ap-root .bg-warning-100,
+.ap-root .bg-orange-50,
+.ap-root .bg-orange-100 {
+  background-color: rgba(212,166,39,0.12) !important;
+}
+.ap-root .text-amber-600,
+.ap-root .text-amber-700,
+.ap-root .text-amber-800,
+.ap-root .text-amber-900,
+.ap-root .text-yellow-700,
+.ap-root .text-yellow-800,
+.ap-root .text-orange-600,
+.ap-root .text-orange-700,
+.ap-root .text-warning-600,
+.ap-root .text-warning-700,
+.ap-root .text-warning-800,
+.ap-root .text-warning-900 {
+  color: #8C6F1F !important;
+}
+.ap-root .border-amber-200,
+.ap-root .border-amber-300,
+.ap-root .border-yellow-200,
+.ap-root .border-yellow-300,
+.ap-root .border-orange-200,
+.ap-root .border-orange-300,
+.ap-root .border-warning-200,
+.ap-root .border-warning-300 {
+  border-color: rgba(212,166,39,0.40) !important;
+}
+
+/* Info azul → oliva profundo */
+.ap-root .bg-blue-50,
+.ap-root .bg-blue-100,
+.ap-root .bg-info-50,
+.ap-root .bg-info-100,
+.ap-root .bg-indigo-50,
+.ap-root .bg-indigo-100 {
+  background-color: rgba(107,122,46,0.08) !important;
+}
+.ap-root .text-blue-600,
+.ap-root .text-blue-700,
+.ap-root .text-blue-800,
+.ap-root .text-info-600,
+.ap-root .text-info-700,
+.ap-root .text-info-800,
+.ap-root .text-indigo-600,
+.ap-root .text-indigo-700 {
+  color: var(--ap-olive) !important;
+}
+
+/* Sombras editoriales: minimal hairline drop */
+.ap-root .shadow-sm,
+.ap-root .shadow,
+.ap-root .shadow-md {
+  box-shadow: 0 1px 0 rgba(20,17,13,0.06) !important;
+}
+.ap-root .shadow-lg,
+.ap-root .shadow-xl,
+.ap-root .shadow-2xl {
+  box-shadow: 0 30px 60px -20px rgba(20,17,13,0.18), 0 1px 0 rgba(20,17,13,0.06) !important;
+}
+
+/* (brand-500/600 ya mapea a ink via tailwind config — no override !important
+   para que estilos inline puedan elegir stamp puntualmente) */
+
+/* Inputs: papel sutil con hairline ink */
+.ap-root input[type="text"],
+.ap-root input[type="email"],
+.ap-root input[type="password"],
+.ap-root input[type="search"],
+.ap-root input[type="url"],
+.ap-root input[type="tel"],
+.ap-root input[type="number"],
+.ap-root input[type="date"],
+.ap-root input[type="datetime-local"],
+.ap-root textarea,
+.ap-root select {
+  background-color: var(--ap-paper-2);
+  border: 1px solid var(--ap-line-2);
+  border-radius: 4px;
+  color: var(--ap-ink);
+}
+.ap-root input:focus,
+.ap-root textarea:focus,
+.ap-root select:focus {
+  outline: 2px solid var(--ap-stamp);
+  outline-offset: 1px;
+  border-color: var(--ap-stamp);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
    FOCUS VISIBLE — WCAG AA
    Aplica un anillo claro a todo elemento interactivo cuando se navega por
    teclado. No afecta a clicks de ratón (gracias a :focus-visible).
@@ -119,35 +338,35 @@
    ══════════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  --background: #FFFFFF;
-  --foreground: #1D1D1F;
-  --surface-card: #FFFFFF;
-  --surface-secondary: #FAFAFA;
-  --surface-tertiary: #F5F5F7;
-  --surface-elevated: #FFFFFF;
-  --border-primary: rgba(0,0,0,0.06);
-  --border-subtle: rgba(0,0,0,0.03);
-  --border-hover: rgba(0,0,0,0.12);
-  --text-primary: #1D1D1F;
-  --text-secondary: #86868B;
-  --text-muted: #AEAEB2;
-  /* Brand tokens — Aluminum Studio (overrides AutoPost gold legacy) */
-  --brand-500: #1D1D1F;  /* graphite */
-  --brand-400: #86868B;  /* silver */
-  --brand-600: #0A0A0F;  /* ink */
-  --accent-orange: #A8DADC;  /* cobalt glow */
-  --accent-indigo: #7DBCBE;  /* cobalt deep */
-  --accent-violet: #7DBCBE;
-  --accent-emerald: #16A34A;
-  --accent-cyan: #A8DADC;
-  --accent-coral: #86868B;
-  --accent-blue: #7DBCBE;
-  --radius: 0.75rem;
+  --background: #F1ECE2;
+  --foreground: #14110D;
+  --surface-card: #F1ECE2;
+  --surface-secondary: #E8E2D4;
+  --surface-tertiary: #E8E2D4;
+  --surface-elevated: #F1ECE2;
+  --border-primary: rgba(20,17,13,0.10);
+  --border-subtle: rgba(20,17,13,0.06);
+  --border-hover: rgba(20,17,13,0.20);
+  --text-primary: #14110D;
+  --text-secondary: #5A4F40;
+  --text-muted: #8A7E6B;
+  /* Brand tokens — Editorial Print-Zine */
+  --brand-500: #14110D;  /* ink */
+  --brand-400: #5A4F40;  /* ink-3 */
+  --brand-600: #0E0B07;  /* ink-deep */
+  --accent-orange: #E54B26;  /* tomato stamp */
+  --accent-indigo: #6B7A2E;  /* olive */
+  --accent-violet: #6B7A2E;
+  --accent-emerald: #6B7A2E;
+  --accent-cyan: #E54B26;
+  --accent-coral: #D4A627;  /* mustard */
+  --accent-blue: #6B7A2E;
+  --radius: 4px;
 
-  /* Gradient tokens — remapeados a Aluminum Studio */
-  --gradient-brand: linear-gradient(135deg, #1D1D1F 0%, #48484A 100%);
-  --gradient-magic: linear-gradient(135deg, #1D1D1F 0%, #7DBCBE 100%);
-  --gradient-glow: radial-gradient(600px circle, rgba(168,218,220,0.10), transparent 70%);
+  /* Gradient tokens — Editorial */
+  --gradient-brand: linear-gradient(135deg, #14110D 0%, #2A241D 100%);
+  --gradient-magic: linear-gradient(135deg, #14110D 0%, #E54B26 100%);
+  --gradient-glow: radial-gradient(600px circle, rgba(229,75,38,0.06), transparent 70%);
 }
 
 /* Rotating border angle property */
@@ -166,8 +385,10 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss01","cv11","tnum";
 }
 
 /* ─── Scrollbar ─── */
@@ -188,8 +409,8 @@ body {
 
 /* ─── Selection ─── */
 ::selection {
-  background: rgba(168,218,220, 0.35);
-  color: #1D1D1F;
+  background: rgba(229,75,38, 0.25);
+  color: #14110D;
 }
 
 /* ─── Focus ─── */
