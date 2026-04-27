@@ -3,6 +3,23 @@
 @tailwind utilities;
 
 /* ══════════════════════════════════════════════════════════════════════════════
+   FOCUS VISIBLE — WCAG AA
+   Aplica un anillo claro a todo elemento interactivo cuando se navega por
+   teclado. No afecta a clicks de ratón (gracias a :focus-visible).
+   ══════════════════════════════════════════════════════════════════════════════ */
+@layer base {
+  :where(button, [role="button"], a, input, select, textarea, summary):focus-visible {
+    outline: 2px solid #1D1D1F;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  /* Excepción: elementos que ya gestionan focus visualmente con clases tailwind */
+  [class*="focus-visible:ring"]:focus-visible {
+    outline: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
    AUTOPOST — Apple Premium Light Design System v2
    Cinema-grade motion & effects
    ══════════════════════════════════════════════════════════════════════════════ */

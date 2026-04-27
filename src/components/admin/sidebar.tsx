@@ -18,15 +18,55 @@ import {
 } from "lucide-react";
 import { useLocale } from "@/lib/i18n";
 
-const navItems = [
+type BadgeKind = "error" | "warning";
+
+interface SidebarStatus {
+  failed24h: number;
+  expiring: number;
+}
+
+const navItems: Array<{
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  badge?: (s: SidebarStatus) => { count: number; kind: BadgeKind; tooltip: string } | null;
+}> = [
   { href: "/dashboard", label: "Inicio", icon: LayoutDashboard },
-  { href: "/businesses", label: "Mis cuentas", icon: Building2 },
+  {
+    href: "/businesses",
+    label: "Mis cuentas",
+    icon: Building2,
+    badge: (s) =>
+      s.expiring > 0
+        ? {
+            count: s.expiring,
+            kind: "warning",
+            tooltip: `${s.expiring} ${s.expiring === 1 ? "token" : "tokens"} por expirar (<7 días)`,
+          }
+        : null,
+  },
   { href: "/metrics", label: "Métricas", icon: BarChart2 },
-  { href: "/logs", label: "Actividad", icon: FileText },
+  {
+    href: "/logs",
+    label: "Actividad",
+    icon: FileText,
+    badge: (s) =>
+      s.failed24h > 0
+        ? {
+            count: s.failed24h,
+            kind: "error",
+            tooltip: `${s.failed24h} ${s.failed24h === 1 ? "fallo" : "fallos"} en las últimas 24h`,
+          }
+        : null,
+  },
   { href: "/settings", label: "Configuracion", icon: Settings },
 ];
 
-export function Sidebar() {
+export function Sidebar({
+  status = { failed24h: 0, expiring: 0 },
+}: {
+  status?: SidebarStatus;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -96,32 +136,49 @@ export function Sidebar() {
 
       {/* Nav */}
       <nav aria-label="Navegacion principal" className="flex-1 px-3 py-4 space-y-0.5">
-        {navItems.map(({ href, label, icon: Icon }) => {
+        {navItems.map(({ href, label, icon: Icon, badge }) => {
           const isActive = pathname?.startsWith(href);
+          const b = badge ? badge(status) : null;
           return (
             <Link
               key={href}
               href={href}
               onClick={() => setMobileOpen(false)}
-              className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all"
+              className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900"
               style={{
                 background: isActive ? "rgba(168,218,220,0.10)" : "transparent",
                 border: isActive ? "1px solid rgba(168,218,220,0.22)" : "1px solid transparent",
                 color: isActive ? "#F5F5F7" : "#D1D1D6",
               }}
+              aria-current={isActive ? "page" : undefined}
             >
               <Icon
                 className="h-[18px] w-[18px] transition-colors"
                 style={{ color: isActive ? "#A8DADC" : "#D1D1D6" }}
+                aria-hidden="true"
               />
-              {label}
-              {isActive && (
+              <span className="flex-1">{label}</span>
+              {b && (
+                <span
+                  className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full text-[10px] font-bold tabular-nums ${
+                    b.kind === "error"
+                      ? "bg-red-500 text-white"
+                      : "bg-amber-400 text-zinc-900"
+                  }`}
+                  title={b.tooltip}
+                  aria-label={b.tooltip}
+                >
+                  {b.count > 99 ? "99+" : b.count}
+                </span>
+              )}
+              {isActive && !b && (
                 <div
-                  className="ml-auto h-1.5 w-1.5 rounded-full"
+                  className="h-1.5 w-1.5 rounded-full"
                   style={{
                     background: "#A8DADC",
                     boxShadow: "0 0 8px rgba(168,218,220,0.55)",
                   }}
+                  aria-hidden="true"
                 />
               )}
             </Link>

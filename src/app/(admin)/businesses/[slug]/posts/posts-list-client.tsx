@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { StatusBadge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { formatDateInTz } from "@/lib/utils";
 import {
   Image as ImageIcon, Film, Layers, Clock,
   CheckSquare, Square, X as XIcon, Calendar as CalendarIcon, XCircle,
+  Undo2, CheckCircle2,
 } from "lucide-react";
 
 export interface PostItem {
@@ -52,6 +53,19 @@ export function PostsListClient({
   const [error, setError] = useState<string | null>(null);
   const [offsetHours, setOffsetHours] = useState<number>(24);
   const [publishAt, setPublishAt] = useState<string>("");
+  const [toast, setToast] = useState<null | {
+    message: string;
+    kind: "success" | "info";
+    undo?: { ids: string[]; offsetHours: number };
+  }>(null);
+  const [undoing, setUndoing] = useState(false);
+
+  // Auto-dismiss toast after 8s
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 8000);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   const cancellableIds = useMemo(
     () => new Set(posts.filter((p) => CANCELLABLE.has(p.status)).map((p) => p.id)),
@@ -93,7 +107,6 @@ export function PostsListClient({
     } else if (action === "reschedule_relative") {
       body = { action: "reschedule_relative", ids, offsetHours };
     } else {
-      // reschedule (absolute)
       if (!publishAt) {
         setError("Elige una fecha y hora");
         setPending(false);
@@ -113,6 +126,28 @@ export function PostsListClient({
         setError(data.error ?? "Error al aplicar la acción");
         return;
       }
+
+      // Show toast with undo if applicable
+      const updated = data.updated ?? ids.length;
+      const skipped = data.skipped ?? 0;
+      if (action === "cancel") {
+        setToast({
+          message: `${updated} ${updated === 1 ? "post cancelado" : "posts cancelados"}${skipped > 0 ? ` · ${skipped} omitidos` : ""}`,
+          kind: "info",
+        });
+      } else if (action === "reschedule_relative") {
+        setToast({
+          message: `${updated} ${updated === 1 ? "post desplazado" : "posts desplazados"} ${offsetHours > 0 ? "+" : ""}${offsetHours}h`,
+          kind: "success",
+          undo: { ids, offsetHours: -offsetHours },
+        });
+      } else {
+        setToast({
+          message: `${updated} ${updated === 1 ? "post reprogramado" : "posts reprogramados"}`,
+          kind: "success",
+        });
+      }
+
       setSelected(new Set());
       setAction(null);
       router.refresh();
@@ -120,6 +155,30 @@ export function PostsListClient({
       setError("Error de red");
     } finally {
       setPending(false);
+    }
+  }
+
+  async function executeUndo() {
+    if (!toast?.undo) return;
+    setUndoing(true);
+    try {
+      const res = await fetch("/api/posts/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "reschedule_relative",
+          ids: toast.undo.ids,
+          offsetHours: toast.undo.offsetHours,
+        }),
+      });
+      if (res.ok) {
+        setToast({ message: "Cambio deshecho", kind: "info" });
+        router.refresh();
+      } else {
+        setToast({ message: "No se pudo deshacer", kind: "info" });
+      }
+    } finally {
+      setUndoing(false);
     }
   }
 
@@ -268,6 +327,50 @@ export function PostsListClient({
             })}
           </div>
         </>
+      )}
+
+      {/* Toast notification */}
+      {toast && (
+        <div
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4"
+          role="status"
+          aria-live="polite"
+        >
+          <div
+            className={`flex items-center gap-3 rounded-xl px-4 py-3 shadow-xl border ${
+              toast.kind === "success"
+                ? "bg-emerald-700 border-emerald-800 text-white"
+                : "bg-zinc-900 border-zinc-800 text-white"
+            }`}
+          >
+            {toast.kind === "success" ? (
+              <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+            ) : (
+              <CheckSquare className="h-4 w-4 shrink-0" aria-hidden="true" />
+            )}
+            <span className="text-sm font-semibold flex-1">{toast.message}</span>
+            {toast.undo && (
+              <button
+                type="button"
+                onClick={executeUndo}
+                disabled={undoing}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/15 hover:bg-white/25 text-xs font-bold disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                aria-label="Deshacer la acción"
+              >
+                <Undo2 className="h-3 w-3" />
+                {undoing ? "..." : "Deshacer"}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setToast(null)}
+              className="p-1 rounded hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              aria-label="Cerrar notificación"
+            >
+              <XIcon className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Sticky bulk action toolbar */}

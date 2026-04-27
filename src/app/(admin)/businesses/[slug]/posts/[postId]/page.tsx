@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
-import { AlertTriangle, RefreshCw, XCircle, ExternalLink, Film, Image as ImageIcon } from "lucide-react";
+import { AlertTriangle, RefreshCw, XCircle, ExternalLink, Film, Image as ImageIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { PostDetailSkeleton } from "@/components/ui/skeleton";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { useToast } from "@/components/ui/toast";
@@ -67,8 +67,48 @@ export default function PostDetailPage() {
   const [retrying, setRetrying] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState("");
-  const [lightboxAsset, setLightboxAsset] = useState<MediaAsset | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const { toast } = useToast();
+
+  const sortedAssets = post
+    ? post.mediaAssets.slice().sort((a, b) => a.sortOrder - b.sortOrder)
+    : [];
+  const lightboxAsset = lightboxIndex !== null ? sortedAssets[lightboxIndex] : null;
+
+  function openLightbox(asset: MediaAsset) {
+    const idx = sortedAssets.findIndex((a) => a.id === asset.id);
+    if (idx >= 0) setLightboxIndex(idx);
+  }
+  function closeLightbox() {
+    setLightboxIndex(null);
+  }
+  function lightboxPrev() {
+    if (lightboxIndex === null) return;
+    setLightboxIndex((i) => (i === null ? null : (i - 1 + sortedAssets.length) % sortedAssets.length));
+  }
+  function lightboxNext() {
+    if (lightboxIndex === null) return;
+    setLightboxIndex((i) => (i === null ? null : (i + 1) % sortedAssets.length));
+  }
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") closeLightbox();
+      else if (e.key === "ArrowLeft") lightboxPrev();
+      else if (e.key === "ArrowRight") lightboxNext();
+    }
+    document.addEventListener("keydown", onKey);
+    // Lock body scroll while lightbox open
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lightboxIndex, sortedAssets.length]);
 
   async function fetchPost() {
     try {
@@ -226,16 +266,13 @@ export default function PostDetailPage() {
                   : "grid-cols-2 sm:grid-cols-3"
               }`}
             >
-              {post.mediaAssets
-                .slice()
-                .sort((a, b) => a.sortOrder - b.sortOrder)
-                .map((asset) => (
-                  <MediaThumb
-                    key={asset.id}
-                    asset={asset}
-                    onOpen={() => setLightboxAsset(asset)}
-                  />
-                ))}
+              {sortedAssets.map((asset) => (
+                <MediaThumb
+                  key={asset.id}
+                  asset={asset}
+                  onOpen={() => openLightbox(asset)}
+                />
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -341,22 +378,50 @@ export default function PostDetailPage() {
       )}
 
       {/* Lightbox */}
-      {lightboxAsset && (
+      {lightboxAsset && lightboxIndex !== null && (
         <div
           className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 cursor-zoom-out"
-          onClick={() => setLightboxAsset(null)}
+          onClick={closeLightbox}
           role="dialog"
           aria-modal="true"
-          aria-label="Vista ampliada"
+          aria-label={`Vista ampliada — ${lightboxIndex + 1} de ${sortedAssets.length}`}
         >
           <button
             type="button"
-            onClick={() => setLightboxAsset(null)}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-            aria-label="Cerrar"
+            onClick={closeLightbox}
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+            aria-label="Cerrar (Escape)"
           >
             <XCircle className="h-6 w-6" />
           </button>
+
+          {sortedAssets.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); lightboxPrev(); }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                aria-label="Anterior (flecha izquierda)"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); lightboxNext(); }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                aria-label="Siguiente (flecha derecha)"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+              <div
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/60 text-white text-xs font-mono tabular-nums"
+                aria-live="polite"
+              >
+                {lightboxIndex + 1} / {sortedAssets.length}
+              </div>
+            </>
+          )}
+
           <div
             className="max-w-5xl max-h-[90vh] w-full h-full flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
@@ -370,6 +435,7 @@ export default function PostDetailPage() {
               />
             ) : lightboxAsset.mimeType.startsWith("video/") ? (
               <video
+                key={lightboxAsset.id}
                 src={lightboxAsset.storageUrl}
                 controls
                 autoPlay
