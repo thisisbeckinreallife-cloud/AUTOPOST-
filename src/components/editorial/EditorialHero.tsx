@@ -211,7 +211,9 @@ const FocalPiece: React.FC = () => {
 
 export const EditorialHero: React.FC = () => {
   const { t, lang } = useI18n();
-  const h1Size = H1_SIZE[lang] ?? 140;
+  const h1Max = H1_SIZE[lang] ?? 140;
+  const h1Min = 56;
+  const h1Size = `clamp(${h1Min}px, 11vw, ${h1Max}px)`;
 
   return (
     <div
@@ -219,18 +221,16 @@ export const EditorialHero: React.FC = () => {
       style={{
         position: "relative",
         width: "100%",
-        minHeight: 1200,
         background: "var(--ap-paper)",
         display: "flex",
         flexDirection: "column",
       }}
     >
-      <header style={{ display: "flex", alignItems: "center", padding: "24px 56px" }}>
+      <header className="flex items-center px-5 py-5 md:px-14 md:py-6 gap-3 md:gap-6">
         <Logo size={20} />
         <nav
+          className="hidden lg:flex ml-14"
           style={{
-            marginLeft: 56,
-            display: "flex",
             gap: 32,
             fontSize: 13,
             color: "var(--ap-ink-3)",
@@ -242,36 +242,36 @@ export const EditorialHero: React.FC = () => {
             </span>
           ))}
         </nav>
-        <div
-          style={{
-            marginLeft: "auto",
-            display: "flex",
-            gap: 18,
-            alignItems: "center",
-          }}
-        >
+        <div className="ml-auto flex items-center gap-3 md:gap-4">
           <LangSwitcher />
-          <span style={{ width: 1, height: 14, background: "var(--ap-line-2)" }} />
-          <span style={{ fontSize: 13, color: "var(--ap-ink-3)", cursor: "pointer" }}>
+          <span
+            className="hidden lg:inline-block"
+            style={{ width: 1, height: 14, background: "var(--ap-line-2)" }}
+          />
+          <span
+            className="hidden lg:inline"
+            style={{
+              fontSize: 13,
+              color: "var(--ap-ink-3)",
+              cursor: "pointer",
+            }}
+          >
             {t("nav.signin")}
           </span>
-          <button className="ap-btn ap-btn--stamp" style={{ padding: "9px 16px", fontSize: 13 }}>
+          <button
+            className="ap-btn ap-btn--stamp whitespace-nowrap"
+            style={{ padding: "9px 14px", fontSize: 13 }}
+          >
             {t("nav.try")}
           </button>
         </div>
       </header>
 
       <div
-        style={{
-          flex: 1,
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 0,
-          alignItems: "center",
-          padding: "80px 56px 56px",
-        }}
+        className="grid grid-cols-1 md:grid-cols-2 px-5 md:px-14 py-12 md:py-20 gap-12 md:gap-0 items-center"
+        style={{ flex: 1 }}
       >
-        <div style={{ maxWidth: 680, paddingRight: 48 }}>
+        <div className="md:pr-12 max-w-full md:max-w-[680px]">
           <h1
             className="ap-display"
             style={{
@@ -280,38 +280,45 @@ export const EditorialHero: React.FC = () => {
               margin: 0,
               color: "var(--ap-ink)",
               letterSpacing: "-0.025em",
+              wordBreak: "break-word",
+              overflowWrap: "break-word",
+              hyphens: "auto",
             }}
           >
             <RichText
               text={t("hero.h1")}
-              waveOffset={Math.round(h1Size * 0.1)}
-              waveThickness={Math.max(2, Math.round(h1Size * 0.018))}
+              waveOffset={Math.round(h1Max * 0.1)}
+              waveThickness={Math.max(2, Math.round(h1Max * 0.018))}
             />
           </h1>
           <p
+            className="mt-8 md:mt-10 max-w-[440px]"
             style={{
-              fontSize: 18,
+              fontSize: "clamp(15px, 2vw, 18px)",
               color: "var(--ap-ink-3)",
               lineHeight: 1.55,
-              margin: "40px 0 0",
-              maxWidth: 440,
+              margin: 0,
+              marginTop: "clamp(24px, 5vw, 40px)",
             }}
             dangerouslySetInnerHTML={{ __html: t("hero.lede") }}
           />
-          <div style={{ display: "flex", alignItems: "center", gap: 20, marginTop: 40 }}>
+          <div className="mt-8 md:mt-10 flex flex-wrap items-center gap-4 md:gap-5">
             <button
               className="ap-btn ap-btn--stamp"
               style={{ padding: "14px 22px", fontSize: 14 }}
             >
               {t("hero.cta.primary")}
             </button>
-            <span style={{ fontSize: 13, color: "var(--ap-ink-4)" }}>
+            <span
+              style={{ fontSize: 13, color: "var(--ap-ink-4)" }}
+              className="max-w-[260px]"
+            >
               {t("hero.cta.note")}
             </span>
           </div>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <div className="flex justify-center md:justify-center items-center w-full overflow-x-auto md:overflow-visible">
           <FocalPiece />
         </div>
       </div>
