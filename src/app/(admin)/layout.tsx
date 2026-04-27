@@ -34,17 +34,22 @@ export default async function AdminLayout({
   const status = await getSidebarStatus();
 
   return (
-    <div className="min-h-screen bg-surface-primary relative">
+    <div
+      className="ap-root min-h-screen relative"
+      style={{ background: "var(--ap-paper)" }}
+    >
       {/* Skip link for keyboard users (WCAG AA) */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-zinc-900 focus:text-white focus:font-semibold focus:text-sm focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-cyan-300"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:font-semibold focus:text-sm focus:shadow-xl focus:outline-none"
+        style={{
+          background: "var(--ap-ink)",
+          color: "var(--ap-paper)",
+        }}
       >
         Saltar al contenido principal
       </a>
 
-      {/* Subtle background atmosphere */}
-      <div className="fixed inset-0 bg-gradient-mesh pointer-events-none opacity-50" />
       <Sidebar status={status} />
       <main
         id="main-content"
