@@ -2,8 +2,13 @@
 /**
  * Production start script.
  * Runs Next.js server and BullMQ publish worker in the same process.
+ *
+ * Set DISABLE_WORKER=1 to skip the worker (e.g. for memory-constrained
+ * containers or when running a separate worker service).
  */
 const { execSync, spawn } = require("child_process");
+
+console.log("[start] Boot — node", process.version, "PORT=", process.env.PORT ?? "<unset>");
 
 // Start Next.js
 const next = spawn("npx", ["next", "start"], {
@@ -11,8 +16,11 @@ const next = spawn("npx", ["next", "start"], {
   env: process.env,
 });
 
-// Start the BullMQ worker if REDIS_URL is set
-if (process.env.REDIS_URL) {
+// Start the BullMQ worker unless explicitly disabled
+const workerDisabled = process.env.DISABLE_WORKER === "1";
+if (workerDisabled) {
+  console.warn("[start] DISABLE_WORKER=1 — publish worker NOT started");
+} else if (process.env.REDIS_URL) {
   console.log("[start] Starting BullMQ publish worker...");
   const worker = spawn("npx", ["tsx", "src/workers/publish.worker.ts"], {
     stdio: "inherit",
