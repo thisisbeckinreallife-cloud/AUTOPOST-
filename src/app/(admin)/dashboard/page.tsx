@@ -490,9 +490,9 @@ export default async function DashboardPage() {
                           ? "Ver post"
                           : "Subir carpeta"}
                 </Link>
-                {hasConnected && (
+                {hasConnected && primaryBiz && (
                   <Link
-                    href="/posts"
+                    href={`/businesses/${primaryBiz.slug}/posts`}
                     style={{ fontSize: 12, color: "var(--ap-ink-4)" }}
                   >
                     Ver todos

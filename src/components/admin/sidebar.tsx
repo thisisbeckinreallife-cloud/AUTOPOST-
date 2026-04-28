@@ -36,12 +36,11 @@ const navItems: NavItem[] = [
           }
         : null,
   },
-  { href: "/posts", label: "Calendario", index: "03" },
-  { href: "/metrics", label: "Métricas", index: "04" },
+  { href: "/metrics", label: "Métricas", index: "03" },
   {
     href: "/logs",
     label: "Bitácora",
-    index: "05",
+    index: "04",
     badge: (s) =>
       s.failed24h > 0
         ? {
@@ -51,7 +50,7 @@ const navItems: NavItem[] = [
           }
         : null,
   },
-  { href: "/settings", label: "Ajustes", index: "06" },
+  { href: "/settings", label: "Ajustes", index: "05" },
 ];
 
 export function Sidebar({
