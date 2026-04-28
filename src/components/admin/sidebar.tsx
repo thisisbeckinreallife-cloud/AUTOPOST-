@@ -3,9 +3,20 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  LayoutDashboard,
+  LogOut,
+  Settings,
+  HelpCircle,
+  Building2,
+  Menu,
+  X,
+  Globe,
+  FileText,
+  BarChart2,
+} from "lucide-react";
 import { useLocale } from "@/lib/i18n";
-import { Logo } from "@/components/editorial/atoms";
 
 type BadgeKind = "error" | "warning";
 
@@ -14,19 +25,17 @@ interface SidebarStatus {
   expiring: number;
 }
 
-interface NavItem {
+const navItems: Array<{
   href: string;
   label: string;
-  index: string;
+  icon: typeof LayoutDashboard;
   badge?: (s: SidebarStatus) => { count: number; kind: BadgeKind; tooltip: string } | null;
-}
-
-const navItems: NavItem[] = [
-  { href: "/dashboard", label: "Hoy", index: "01" },
+}> = [
+  { href: "/dashboard", label: "Inicio", icon: LayoutDashboard },
   {
     href: "/businesses",
-    label: "Negocios",
-    index: "02",
+    label: "Mis cuentas",
+    icon: Building2,
     badge: (s) =>
       s.expiring > 0
         ? {
@@ -36,21 +45,21 @@ const navItems: NavItem[] = [
           }
         : null,
   },
-  { href: "/metrics", label: "Métricas", index: "03" },
+  { href: "/metrics", label: "Métricas", icon: BarChart2 },
   {
     href: "/logs",
-    label: "Bitácora",
-    index: "04",
+    label: "Actividad",
+    icon: FileText,
     badge: (s) =>
       s.failed24h > 0
         ? {
             count: s.failed24h,
             kind: "error",
-            tooltip: `${s.failed24h} ${s.failed24h === 1 ? "fallo" : "fallos"} en 24h`,
+            tooltip: `${s.failed24h} ${s.failed24h === 1 ? "fallo" : "fallos"} en las últimas 24h`,
           }
         : null,
   },
-  { href: "/settings", label: "Ajustes", index: "05" },
+  { href: "/settings", label: "Configuracion", icon: Settings },
 ];
 
 export function Sidebar({
@@ -81,65 +90,53 @@ export function Sidebar({
 
   const sidebar = (
     <aside
-      className="ap-root fixed left-0 top-0 h-full w-64 flex flex-col z-40"
+      className="fixed left-0 top-0 h-full w-64 flex flex-col z-40"
       style={{
-        background: "var(--ap-paper)",
-        borderRight: "1px solid var(--ap-line-2)",
-        color: "var(--ap-ink)",
+        background: "#1D1D1F",
+        borderRight: "1px solid rgba(168,218,220,0.10)",
+        color: "#F5F5F7",
       }}
       onKeyDown={handleKeyDown}
     >
-      {/* Masthead */}
+      {/* Logo */}
       <div
-        className="flex items-center px-6"
-        style={{
-          height: 72,
-          borderBottom: "1px solid var(--ap-line)",
-        }}
+        className="flex items-center gap-2.5 px-5 h-16"
+        style={{ borderBottom: "1px solid rgba(168,218,220,0.08)" }}
       >
-        <Logo size={18} />
-      </div>
-
-      {/* Volume / Issue marker — magazine masthead-feel */}
-      <div
-        className="px-6 py-4"
-        style={{ borderBottom: "1px solid var(--ap-line)" }}
-      >
-        <p
-          className="ap-mono"
+        <div
+          className="relative flex h-8 w-8 items-center justify-center rounded-md"
           style={{
-            margin: 0,
-            fontSize: 9,
-            letterSpacing: "0.16em",
-            color: "var(--ap-ink-4)",
-            textTransform: "uppercase",
+            background: "linear-gradient(135deg, #A8DADC 0%, #7DBCBE 100%)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 6px rgba(168,218,220,0.18)",
+          }}
+          aria-hidden="true"
+        >
+          <span
+            className="font-black text-[13px] leading-none"
+            style={{
+              color: "#1D1D1F",
+              fontFamily: "Satoshi, Inter, system-ui, sans-serif",
+              letterSpacing: "-0.04em",
+            }}
+          >
+            A
+          </span>
+        </div>
+        <span
+          className="font-bold text-sm tracking-tight"
+          style={{
+            color: "#F5F5F7",
+            letterSpacing: "-0.01em",
+            fontFamily: "Satoshi, Inter, system-ui, sans-serif",
           }}
         >
-          Vol. 02 · Estudio
-        </p>
-        <p
-          className="ap-display"
-          style={{
-            margin: "4px 0 0",
-            fontSize: 13,
-            fontStyle: "italic",
-            color: "var(--ap-ink-3)",
-            lineHeight: 1.1,
-          }}
-        >
-          Drop a folder.
-          <br />
-          Publish a month.
-        </p>
+          Aluminum Studio
+        </span>
       </div>
 
-      {/* Nav — table of contents */}
-      <nav
-        aria-label="Navegación principal"
-        className="flex-1 px-6 py-6"
-        style={{ display: "flex", flexDirection: "column" }}
-      >
-        {navItems.map(({ href, label, index, badge }) => {
+      {/* Nav */}
+      <nav aria-label="Navegacion principal" className="flex-1 px-3 py-4 space-y-0.5">
+        {navItems.map(({ href, label, icon: Icon, badge }) => {
           const isActive = pathname?.startsWith(href);
           const b = badge ? badge(status) : null;
           return (
@@ -147,135 +144,80 @@ export function Sidebar({
               key={href}
               href={href}
               onClick={() => setMobileOpen(false)}
-              className="group transition-opacity hover:opacity-80"
+              className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900"
               style={{
-                display: "grid",
-                gridTemplateColumns: "28px 1fr auto",
-                alignItems: "baseline",
-                gap: 12,
-                padding: "10px 0",
-                borderBottom: "1px solid var(--ap-line)",
-                color: "var(--ap-ink)",
-                textDecoration: "none",
+                background: isActive ? "rgba(168,218,220,0.10)" : "transparent",
+                border: isActive ? "1px solid rgba(168,218,220,0.22)" : "1px solid transparent",
+                color: isActive ? "#F5F5F7" : "#D1D1D6",
               }}
               aria-current={isActive ? "page" : undefined}
             >
-              <span
-                className="ap-mono"
-                style={{
-                  fontSize: 10,
-                  letterSpacing: "0.1em",
-                  color: isActive ? "var(--ap-stamp)" : "var(--ap-ink-4)",
-                }}
-              >
-                {index}
-              </span>
-              <span
-                style={{
-                  fontSize: 14,
-                  color: isActive ? "var(--ap-ink)" : "var(--ap-ink-3)",
-                  fontWeight: isActive ? 500 : 400,
-                  borderBottom: isActive
-                    ? "1px solid var(--ap-stamp)"
-                    : "1px solid transparent",
-                  paddingBottom: 1,
-                  width: "fit-content",
-                }}
-              >
-                {label}
-              </span>
+              <Icon
+                className="h-[18px] w-[18px] transition-colors"
+                style={{ color: isActive ? "#A8DADC" : "#D1D1D6" }}
+                aria-hidden="true"
+              />
+              <span className="flex-1">{label}</span>
               {b && (
                 <span
-                  className="ap-mono"
+                  className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full text-[10px] font-bold tabular-nums ${
+                    b.kind === "error"
+                      ? "bg-red-500 text-white"
+                      : "bg-amber-400 text-zinc-900"
+                  }`}
                   title={b.tooltip}
                   aria-label={b.tooltip}
-                  style={{
-                    fontSize: 10,
-                    fontWeight: 600,
-                    letterSpacing: "0.06em",
-                    color:
-                      b.kind === "error"
-                        ? "var(--ap-stamp)"
-                        : "var(--ap-mustard)",
-                  }}
                 >
                   {b.count > 99 ? "99+" : b.count}
                 </span>
+              )}
+              {isActive && !b && (
+                <div
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{
+                    background: "#A8DADC",
+                    boxShadow: "0 0 8px rgba(168,218,220,0.55)",
+                  }}
+                  aria-hidden="true"
+                />
               )}
             </Link>
           );
         })}
       </nav>
 
-      {/* Colophon */}
+      {/* Bottom */}
       <div
-        className="px-6 py-4"
-        style={{
-          borderTop: "1px solid var(--ap-line-2)",
-          display: "flex",
-          flexDirection: "column",
-          gap: 6,
-        }}
+        className="px-3 py-3 space-y-0.5"
+        style={{ borderTop: "1px solid rgba(168,218,220,0.08)" }}
       >
         <button
           onClick={toggleLocale}
-          className="ap-mono text-left transition-opacity hover:opacity-70"
-          style={{
-            fontSize: 11,
-            letterSpacing: "0.1em",
-            color: "var(--ap-ink-3)",
-            background: "transparent",
-            border: 0,
-            padding: 0,
-            textTransform: "uppercase",
-            cursor: "pointer",
-          }}
-          title={locale === "es" ? "Switch to English" : "Cambiar a Español"}
+          className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-white/[0.04]"
+          style={{ color: "#D1D1D6" }}
+          title={locale === "es" ? "Switch to English" : "Cambiar a Espanol"}
         >
-          {locale === "es" ? "ES" : "EN"} ·{" "}
-          <span style={{ color: "var(--ap-ink-4)" }}>
-            {locale === "es" ? "switch en" : "switch es"}
-          </span>
+          <Globe className="h-[18px] w-[18px]" />
+          {locale === "es" ? "English" : "Espanol"}
         </button>
         <a
           href="https://help.instagram.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="transition-opacity hover:opacity-70"
-          style={{
-            fontSize: 12,
-            color: "var(--ap-ink-3)",
-            textDecoration: "none",
-          }}
+          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-white/[0.04]"
+          style={{ color: "#D1D1D6" }}
         >
+          <HelpCircle className="h-[18px] w-[18px]" />
           {locale === "es" ? "Ayuda" : "Help"}
         </a>
         <button
           onClick={handleLogout}
-          className="text-left transition-opacity hover:opacity-70"
-          style={{
-            fontSize: 12,
-            color: "var(--ap-ink-3)",
-            background: "transparent",
-            border: 0,
-            padding: 0,
-            cursor: "pointer",
-          }}
+          className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-red-500/[0.08] hover:text-red-400"
+          style={{ color: "#D1D1D6" }}
         >
-          {locale === "es" ? "Cerrar sesión" : "Log out"}
+          <LogOut className="h-[18px] w-[18px]" />
+          {locale === "es" ? "Cerrar sesion" : "Log out"}
         </button>
-        <span
-          className="ap-mono"
-          style={{
-            marginTop: 6,
-            fontSize: 9,
-            letterSpacing: "0.16em",
-            color: "var(--ap-ink-4)",
-            textTransform: "uppercase",
-          }}
-        >
-          ✦ MMXXVI
-        </span>
       </div>
     </aside>
   );
@@ -285,13 +227,8 @@ export function Sidebar({
       {/* Mobile hamburger */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="ap-root fixed top-3.5 left-4 z-50 md:hidden flex h-10 w-10 items-center justify-center"
-        style={{
-          background: "var(--ap-paper)",
-          border: "1px solid var(--ap-line-2)",
-          color: "var(--ap-ink)",
-        }}
-        aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
+        className="fixed top-3.5 left-4 z-50 md:hidden flex h-10 w-10 items-center justify-center rounded-lg border border-white/[0.06] bg-surface-card text-zinc-400 hover:text-white transition-all"
+        aria-label={mobileOpen ? "Cerrar menu" : "Abrir menu"}
         aria-expanded={mobileOpen}
         aria-controls="mobile-sidebar"
       >
@@ -305,13 +242,10 @@ export function Sidebar({
       {mobileOpen && (
         <>
           <div
-            className="fixed inset-0 z-30 md:hidden animate-fade-in"
-            style={{ background: "rgba(20,17,13,0.45)", backdropFilter: "blur(2px)" }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden animate-fade-in"
             onClick={() => setMobileOpen(false)}
           />
-          <div id="mobile-sidebar" className="md:hidden animate-fade-in">
-            {sidebar}
-          </div>
+          <div id="mobile-sidebar" className="md:hidden animate-fade-in">{sidebar}</div>
         </>
       )}
     </>
