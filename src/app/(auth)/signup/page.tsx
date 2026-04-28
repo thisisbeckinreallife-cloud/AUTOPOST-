@@ -31,20 +31,26 @@ function SignupForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
+        credentials: "same-origin",
       });
 
-      const data = await res.json();
+      let data: { ok?: boolean; error?: string } = {};
+      try {
+        data = await res.json();
+      } catch {
+        /* respuesta no-JSON */
+      }
 
       if (!res.ok) {
-        setError(data.error ?? "Error al crear la cuenta");
+        setError(data.error ?? `Error ${res.status}: no se pudo crear la cuenta`);
+        setLoading(false);
         return;
       }
 
-      router.push("/dashboard");
-      router.refresh();
-    } catch {
-      setError("Error de conexión");
-    } finally {
+      // Hard navigation — más fiable que router.push para flujos auth
+      window.location.assign("/dashboard");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error de red");
       setLoading(false);
     }
   }

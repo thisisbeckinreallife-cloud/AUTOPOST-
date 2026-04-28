@@ -25,20 +25,26 @@ function LoginForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
+        credentials: "same-origin",
       });
 
-      const data = await res.json();
+      let data: { ok?: boolean; error?: string } = {};
+      try {
+        data = await res.json();
+      } catch {
+        /* respuesta no-JSON */
+      }
 
       if (!res.ok) {
-        setError(data.error ?? "Login failed");
+        setError(data.error ?? `Error ${res.status}: no se pudo iniciar sesión`);
+        setLoading(false);
         return;
       }
 
-      router.push(from);
-      router.refresh();
-    } catch {
-      setError("Network error");
-    } finally {
+      // Hard navigation — más fiable que router.push para flujos auth
+      window.location.assign(from);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error de red");
       setLoading(false);
     }
   }
