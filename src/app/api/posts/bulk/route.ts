@@ -117,8 +117,9 @@ export async function POST(request: NextRequest) {
             })),
           }),
         ]);
-      } else {
-        const offsetMs = parsed.data.offsetHours * 60 * 60 * 1000;
+      } else if (parsed.data.action === "reschedule_relative") {
+        const offsetHours = parsed.data.offsetHours;
+        const offsetMs = offsetHours * 60 * 60 * 1000;
         // Per-post update (each keeps its relative shift)
         await db.$transaction(
           eligible.flatMap((d) => {
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
                 entityId: d.id,
                 detail: {
                   publishAt: newAt.toISOString(),
-                  offsetHours: parsed.data.offsetHours,
+                  offsetHours,
                   bulk: true,
                 } as Prisma.InputJsonValue,
               },

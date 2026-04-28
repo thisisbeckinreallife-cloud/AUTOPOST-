@@ -453,7 +453,7 @@ function KpiCard({
     neutral: { bg: "bg-zinc-100",   text: "text-zinc-600",   border: "border-zinc-200" },
   }[tone];
 
-  let sign = deltaSign ?? (delta === null ? null : delta === 0 ? 0 : delta > 0 ? 1 : -1);
+  let sign: number | null = deltaSign ?? (delta == null ? null : delta === 0 ? 0 : delta > 0 ? 1 : -1);
   if (deltaInverse && sign !== null && sign !== 0) sign = -sign;
   const Arrow = sign === null ? null : sign > 0 ? ArrowUpRight : sign < 0 ? ArrowDownRight : Minus;
   const deltaColor = sign === null ? "text-zinc-400" : sign > 0 ? "text-emerald-700" : sign < 0 ? "text-red-700" : "text-zinc-500";
