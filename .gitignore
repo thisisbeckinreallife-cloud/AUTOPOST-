@@ -6,3 +6,4 @@ node_modules/
 tsconfig.tsbuildinfo
 demo-data/
 *.log
+autopost-branding-plan.html

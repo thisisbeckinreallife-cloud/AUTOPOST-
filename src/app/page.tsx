@@ -44,6 +44,8 @@ import { PricingSectionNew } from "@/components/landing/pricing-section";
 import HeroScrollAnimation from "@/components/ui/hero-scroll-animation";
 import HatchHero from "@/components/landing/hatch-hero";
 import { HatchHowItWorks } from "@/components/landing/hatch-how-it-works";
+import { I18nProvider } from "@/components/editorial/i18n";
+import { EditorialHero } from "@/components/editorial/EditorialHero";
 import {
   MotionReveal,
   MotionStagger,
@@ -105,9 +107,11 @@ export default function LandingPage() {
       <ScrollProgress />
 
       {/* ═══════════════════════════════════════════════════════════════════
-           HERO HATCH — Pinned scroll cinematografico + How it works
+           HERO EDITORIAL — print-zine, Instrument Serif, FocalPiece animado
            ═══════════════════════════════════════════════════════════════════ */}
-      <HatchHero />
+      <I18nProvider defaultLang="es">
+        <EditorialHero />
+      </I18nProvider>
       <HatchHowItWorks />
 
 
