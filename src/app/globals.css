@@ -316,6 +316,106 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
+   EDITORIAL POLISH — segunda capa: tipografía display italic, gradientes
+   reemplazados por sello tomate, kickers y badges en paleta editorial.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Display headings → Instrument Serif italic (la voz editorial) */
+.ap-root .font-display,
+.ap-root .font-headline,
+.ap-root h1.font-display,
+.ap-root h2.font-display,
+.ap-root h3.font-display,
+.ap-root h2[class*="font-display"],
+.ap-root h1[class*="font-display"] {
+  font-family: var(--ap-font-display) !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.02em;
+}
+.ap-root h2.font-display,
+.ap-root h1.font-display {
+  font-style: italic;
+}
+
+/* Texto resaltado (palabras destacadas en headings) — antes silver/cobalt → ahora tomate */
+.ap-root .text-gradient,
+.ap-root .text-gradient-hero,
+.ap-root .text-gradient-brand,
+.ap-root .text-gradient-orange,
+.ap-root .text-gradient-gold-violet {
+  background: none !important;
+  -webkit-text-fill-color: var(--ap-stamp) !important;
+  color: var(--ap-stamp) !important;
+  font-style: italic;
+}
+
+/* Kicker eyebrow labels (text-brand-400) → sello tomate */
+.ap-root .text-brand-400 {
+  color: var(--ap-stamp) !important;
+}
+.ap-root .text-brand-500,
+.ap-root .text-brand-600,
+.ap-root .text-brand-700 {
+  color: var(--ap-ink) !important;
+}
+
+/* Pills y badges con brand-500 transparente → sello */
+.ap-root [class*="bg-brand-500/[0"],
+.ap-root .bg-brand-500\/15,
+.ap-root .bg-brand-500\/20,
+.ap-root .bg-brand-500\/25,
+.ap-root .bg-brand-500\/30 {
+  background-color: rgba(229, 75, 38, 0.10) !important;
+}
+.ap-root .border-brand-500\/15,
+.ap-root .border-brand-500\/20,
+.ap-root .border-brand-500\/30,
+.ap-root [class*="border-brand-500/[0"] {
+  border-color: rgba(229, 75, 38, 0.30) !important;
+}
+
+/* Card highlight (Bento) — bg-brand-500/[0.04] → tinge mostaza editorial */
+.ap-root .bg-brand-500\/\[0\.04\] {
+  background-color: rgba(212, 166, 39, 0.08) !important;
+}
+
+/* Card-shine, card-glow-hover, BorderBeam glow — eliminar effects flashy */
+.ap-root .card-shine::before,
+.ap-root .card-glow-hover::before,
+.ap-root .card-spotlight::before {
+  display: none !important;
+}
+
+/* Btn glow / btn pulse ring — quitar resplandores */
+.ap-root .btn-glow,
+.ap-root .btn-pulse-ring {
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+/* Section glow background — quitar */
+.ap-root .section-glow {
+  background: transparent !important;
+}
+
+/* Skeleton (loaders) → paper-2 */
+.ap-root .skeleton {
+  background-color: var(--ap-paper-2) !important;
+  background-image: none !important;
+}
+
+/* Marquee container (testimonios) — sin máscara borrosa Aluminum */
+.ap-root .marquee-container {
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+/* Footer borde superior */
+.ap-root footer {
+  border-top: 1px solid var(--ap-line) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
    FOCUS VISIBLE — WCAG AA
    Aplica un anillo claro a todo elemento interactivo cuando se navega por
    teclado. No afecta a clicks de ratón (gracias a :focus-visible).
