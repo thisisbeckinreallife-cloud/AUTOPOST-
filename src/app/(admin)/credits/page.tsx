@@ -1,11 +1,14 @@
 /**
- * /credits — panel de créditos del usuario.
- * Muestra:
- *   - Balance actual (mensual + addon + total)
- *   - Plan tier + alotamiento + reset
- *   - Packs add-on disponibles para comprar (placeholder hasta Stripe)
- *   - Historial: últimas 50 generaciones IA + últimas compras
+ * /credits — Estudio IA. Hub central de IA + balance + packs + historial.
+ *
+ * Layout:
+ *   1. Hero — balance y plan
+ *   2. ✦ Tus cuentas — cards de cada business con Brand DNA level y CTAs
+ *   3. Packs add-on
+ *   4. Equivalencias
+ *   5. Historial
  */
+import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { getBalance } from "@/lib/ai/credits";
@@ -18,7 +21,7 @@ export const dynamic = "force-dynamic";
 export default async function CreditsPage() {
   const session = await requireAuth();
 
-  const [balance, user, generations, purchases] = await Promise.all([
+  const [balance, user, generations, purchases, businesses] = await Promise.all([
     getBalance(session.adminUserId),
     db.adminUser.findUnique({
       where: { id: session.adminUserId },
@@ -53,7 +56,39 @@ export default async function CreditsPage() {
         paidAt: true,
       },
     }),
+    db.business.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: "desc" },
+      include: {
+        metaConnection: {
+          select: { igUsername: true, status: true },
+        },
+        brandProfile: {
+          select: { level: true, voiceLastTrained: true },
+        },
+        _count: {
+          select: {
+            postDrafts: true,
+          },
+        },
+      },
+    }),
   ]);
+
+  // Por cada business, encontramos primer post editable para CTA "Generar contenido"
+  const businessesWithEditable = await Promise.all(
+    businesses.map(async (b) => {
+      const editable = await db.postDraft.findFirst({
+        where: {
+          businessId: b.id,
+          status: { in: ["DRAFT", "VALIDATED", "READY"] },
+        },
+        select: { id: true },
+        orderBy: { createdAt: "desc" },
+      });
+      return { ...b, firstEditablePostId: editable?.id ?? null };
+    }),
+  );
 
   if (!user) return <div>Usuario no encontrado.</div>;
   const planConfig = PLAN_CONFIGS[user.plan];
@@ -180,6 +215,187 @@ export default async function CreditsPage() {
           )}
         </header>
 
+        {/* Tus cuentas — quick access AI por business */}
+        <section style={{ marginBottom: 48 }}>
+          <p
+            className="ap-mono"
+            style={{
+              fontSize: 11,
+              color: "var(--ap-ink-4)",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              margin: 0,
+            }}
+          >
+            01 · Tus cuentas
+          </p>
+          <h2
+            className="ap-display"
+            style={{
+              fontSize: "clamp(28px, 4vw, 40px)",
+              fontStyle: "italic",
+              lineHeight: 1,
+              margin: "10px 0 14px",
+              color: "var(--ap-ink)",
+            }}
+          >
+            Elige <i>una cuenta</i> para generar contenido
+          </h2>
+          <p
+            style={{
+              fontSize: 14,
+              color: "var(--ap-ink-3)",
+              margin: "0 0 24px",
+              maxWidth: 640,
+            }}
+          >
+            Cada cuenta entrena su propia IA. Click sobre una cuenta y luego generas
+            captions/imágenes con su voz específica — la IA no mezcla marcas.
+          </p>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gap: 14,
+            }}
+          >
+            {businessesWithEditable.map((b) => {
+              const lvlColor =
+                b.brandProfile?.level === "L4" || b.brandProfile?.level === "L5"
+                  ? "var(--ap-olive, #6B7A2E)"
+                  : b.brandProfile?.level === "L3"
+                    ? "var(--ap-mustard, #D4A627)"
+                    : b.brandProfile?.level === "L2"
+                      ? "var(--ap-mustard, #D4A627)"
+                      : "var(--ap-stamp)";
+              const lvlLabel = b.brandProfile?.level ?? "L1";
+              const lvlPct =
+                lvlLabel === "L1" ? "50%" :
+                lvlLabel === "L2" ? "70%" :
+                lvlLabel === "L3" ? "80%" :
+                lvlLabel === "L4" ? "90%+" : "95%+";
+              const igConnected = b.metaConnection?.status === "ACTIVE";
+
+              return (
+                <div
+                  key={b.id}
+                  style={{
+                    background: "var(--ap-paper-2)",
+                    border: "1px solid var(--ap-line-2)",
+                    padding: 20,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "baseline",
+                      justifyContent: "space-between",
+                      gap: 10,
+                    }}
+                  >
+                    <h3
+                      className="ap-display"
+                      style={{
+                        fontSize: 22,
+                        fontStyle: "italic",
+                        margin: 0,
+                        lineHeight: 1.1,
+                        color: "var(--ap-ink)",
+                      }}
+                    >
+                      {b.name}
+                    </h3>
+                    <span
+                      className="ap-mono"
+                      style={{
+                        fontSize: 9,
+                        color: lvlColor,
+                        letterSpacing: "0.16em",
+                        textTransform: "uppercase",
+                        border: `1px solid ${lvlColor}`,
+                        padding: "2px 7px",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {lvlLabel} · {lvlPct}
+                    </span>
+                  </div>
+
+                  <p
+                    className="ap-mono"
+                    style={{
+                      fontSize: 10,
+                      color: "var(--ap-ink-4)",
+                      letterSpacing: "0.1em",
+                      margin: 0,
+                    }}
+                  >
+                    {igConnected
+                      ? `@${b.metaConnection?.igUsername} · ${b._count.postDrafts} posts`
+                      : "Instagram NO conectado"}
+                  </p>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 6,
+                      marginTop: "auto",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <Link
+                      href={`/businesses/${b.slug}`}
+                      className="ap-btn ap-btn--ghost"
+                      style={{
+                        padding: "8px 12px",
+                        fontSize: 11,
+                        fontFamily: "var(--ap-font-mono)",
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Brand DNA
+                    </Link>
+                    {b.firstEditablePostId ? (
+                      <Link
+                        href={`/businesses/${b.slug}/posts/${b.firstEditablePostId}`}
+                        className="ap-btn ap-btn--stamp"
+                        style={{
+                          padding: "8px 12px",
+                          fontSize: 11,
+                          fontFamily: "var(--ap-font-mono)",
+                          letterSpacing: "0.12em",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        ✦ Generar
+                      </Link>
+                    ) : (
+                      <Link
+                        href={`/businesses/${b.slug}/upload`}
+                        className="ap-btn ap-btn--ghost"
+                        style={{
+                          padding: "8px 12px",
+                          fontSize: 11,
+                          fontFamily: "var(--ap-font-mono)",
+                          letterSpacing: "0.12em",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Subir contenido
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
         {/* Add-on packs */}
         <section style={{ marginBottom: 48 }}>
           <p
@@ -192,7 +408,7 @@ export default async function CreditsPage() {
               margin: 0,
             }}
           >
-            01 · Packs add-on
+            02 · Packs add-on
           </p>
           <h2
             className="ap-display"
@@ -302,7 +518,7 @@ export default async function CreditsPage() {
               margin: 0,
             }}
           >
-            02 · Cuánto cuesta cada acción
+            03 · Cuánto cuesta cada acción
           </p>
           <h2
             className="ap-display"
@@ -388,7 +604,7 @@ export default async function CreditsPage() {
               margin: 0,
             }}
           >
-            03 · Historial
+            04 · Historial
           </p>
           <h2
             className="ap-display"
