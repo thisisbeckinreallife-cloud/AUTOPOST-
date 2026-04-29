@@ -26,6 +26,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Public report views (magic-link, sin login).
+  // Sólo el view (GET) — la generación sigue siendo admin-only.
+  if (pathname.startsWith("/api/reports/")) {
+    return NextResponse.next();
+  }
+
   // Check session for admin routes and API routes
   if (
     pathname.startsWith("/dashboard") ||

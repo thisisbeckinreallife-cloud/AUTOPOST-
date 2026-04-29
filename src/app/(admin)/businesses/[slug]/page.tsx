@@ -6,6 +6,7 @@ import { formatDate } from "@/lib/utils";
 import { Instagram, Upload, CheckCircle, AlertCircle, Clock, ChevronRight, BarChart3, Shield } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { DeleteBusinessButton } from "@/components/delete-business-button";
+import { ReportsPanel } from "@/components/admin/ReportsPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -210,6 +211,12 @@ export default async function BusinessPage({
           </div>
         </div>
       )}
+
+      {/* Informes editoriales */}
+      <ReportsPanel
+        businessSlug={params.slug}
+        appUrl={process.env.NEXT_PUBLIC_APP_URL ?? "https://autopost.app"}
+      />
 
       {/* Danger zone */}
       <div className="pt-4 border-t border-zinc-200">

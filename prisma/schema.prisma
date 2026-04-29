@@ -44,6 +44,7 @@ model Business {
   postDrafts     PostDraft[]
   auditLogs      AuditLog[]
   aiUsage        AiUsage[]
+  reports        Report[]
 
   @@map("businesses")
 }
@@ -329,6 +330,48 @@ model AuditLog {
   adminUser  AdminUser?  @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
 
   @@map("audit_logs")
+}
+
+// ─────────────────────────────────────────
+// REPORT
+// Informe editorial imprimible (print-to-PDF) de un periodo de un negocio.
+// El admin genera el report → snapshot KPIs + lista de posts publicados
+// → URL pública /informe/[token] con CSS @media print, lista para Cmd+P.
+// El token expira por defecto a los 30 días (renovable).
+// ─────────────────────────────────────────
+model Report {
+  id         String   @id @default(cuid())
+  businessId String
+  token      String   @unique
+
+  periodStart DateTime
+  periodEnd   DateTime
+  expiresAt   DateTime
+
+  // Snapshot al momento de generar — para que el informe sea estable aunque
+  // los posts cambien de estado luego.
+  totalScheduled  Int
+  totalPublished  Int
+  totalFailed     Int
+  successRate     Float
+  // Detalle por día y por tipo guardado como JSON para evitar joins extra
+  // al renderizar.
+  daily      Json   // [{date, published, scheduled, failed}]
+  byType     Json   // {IMAGE: n, CAROUSEL: n, REEL: n}
+  topPosts   Json   // [{id, caption, type, publishedAt, permalink}]
+
+  // Para reportes accedidos desde un front anónimo que cuenta accesos.
+  viewCount  Int    @default(0)
+  lastViewedAt DateTime?
+
+  createdAt DateTime @default(now())
+  createdByAdminUserId String?
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, createdAt])
+  @@index([token])
+  @@map("reports")
 }
 
 // ─────────────────────────────────────────
