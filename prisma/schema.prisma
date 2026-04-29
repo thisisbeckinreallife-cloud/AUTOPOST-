@@ -43,6 +43,7 @@ model Business {
   uploadBatches  UploadBatch[]
   postDrafts     PostDraft[]
   auditLogs      AuditLog[]
+  aiUsage        AiUsage[]
 
   @@map("businesses")
 }
@@ -327,6 +328,35 @@ model AuditLog {
   adminUser  AdminUser?  @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
 
   @@map("audit_logs")
+}
+
+// ─────────────────────────────────────────
+// AI USAGE
+// Telemetría de uso de Anthropic API para tracking de costes y rate-limiting
+// por business. Cache hits dramáticamente reducen el coste — los tracked
+// como cacheReadTokens (10% del precio normal) y cacheCreationTokens
+// (125% del precio normal una sola vez).
+// ─────────────────────────────────────────
+model AiUsage {
+  id         String @id @default(cuid())
+  businessId String
+
+  type       String   // "caption" | "hashtags"
+  model      String   // "claude-sonnet-4-5", etc.
+
+  inputTokens         Int
+  outputTokens        Int
+  cacheReadTokens     Int @default(0)
+  cacheCreationTokens Int @default(0)
+
+  costUsd    Float    // Computed cost in USD
+
+  createdAt  DateTime @default(now())
+
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, createdAt])
+  @@map("ai_usage")
 }
 
 // ─────────────────────────────────────────

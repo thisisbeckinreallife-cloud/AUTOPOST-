@@ -10,6 +10,7 @@ import { AlertTriangle, RefreshCw, XCircle, ExternalLink, Film, Image as ImageIc
 import { PostDetailSkeleton } from "@/components/ui/skeleton";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { useToast } from "@/components/ui/toast";
+import { AiCaptionStudio } from "@/components/admin/AiCaptionStudio";
 
 interface PostDetail {
   id: string;
@@ -29,7 +30,7 @@ interface PostDetail {
   validationErrors: unknown[] | null;
   mediaAssets: MediaAsset[];
   publishJobs: PublishJobDetail[];
-  business: { name: string; slug: string; timezone: string };
+  business: { id: string; name: string; slug: string; timezone: string };
   batch: { id: string; originalFilename: string };
 }
 
@@ -289,6 +290,18 @@ export default function PostDetailPage() {
           </pre>
         </CardContent>
       </Card>
+
+      {/* Estudio editorial AI — sólo para posts editables */}
+      {["DRAFT", "VALIDATED", "READY"].includes(post.status) && (
+        <AiCaptionStudio
+          postId={post.id}
+          businessId={post.business.id}
+          currentCaption={post.caption}
+          onApplied={(newCaption) =>
+            setPost((p) => (p ? { ...p, caption: newCaption } : p))
+          }
+        />
+      )}
 
       {/* Details */}
       <Card>
