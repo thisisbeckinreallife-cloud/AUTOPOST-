@@ -17,6 +17,11 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { db } from "@/lib/db";
 import { getAnthropic, MODEL_CAPTION } from "@/lib/ai/anthropic";
+import {
+  isTogetherAvailable,
+  llamaChat,
+  MODEL_LLAMA_33_70B,
+} from "@/lib/ai/together";
 
 const MIN_POSTS_FOR_TRAINING = 10;
 const MAX_POSTS_TO_ANALYZE = 60;
@@ -69,8 +74,12 @@ export async function trainVoiceFingerprint(
   businessId: string,
 ): Promise<TrainResult> {
   const client = getAnthropic();
-  if (!client) {
-    return { ok: false, error: "ANTHROPIC_API_KEY no configurada" };
+  const useTogether = !client && isTogetherAvailable();
+  if (!client && !useTogether) {
+    return {
+      ok: false,
+      error: "Configura ANTHROPIC_API_KEY o TOGETHER_API_KEY",
+    };
   }
 
   const drafts = await db.postDraft.findMany({
@@ -158,17 +167,34 @@ ${captions.map((c, i) => `## ${i + 1}\n${c.slice(0, 800)}`).join("\n\n---\n\n")}
 
   let llmJson: Partial<VoiceProfile>;
   try {
-    const response = await client.messages.create({
-      model: MODEL_CAPTION,
-      max_tokens: 1500,
-      system: systemPrompt,
-      messages: [{ role: "user", content: userPrompt }],
-    });
-    const text = response.content
-      .filter((b): b is Anthropic.Messages.TextBlock => b.type === "text")
-      .map((b) => b.text)
-      .join("")
-      .trim();
+    let text: string;
+    if (client) {
+      const response = await client.messages.create({
+        model: MODEL_CAPTION,
+        max_tokens: 1500,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userPrompt }],
+      });
+      text = response.content
+        .filter((b): b is Anthropic.Messages.TextBlock => b.type === "text")
+        .map((b) => b.text)
+        .join("")
+        .trim();
+    } else {
+      // Fallback Together Llama 3.3 con json_object mode
+      const llamaResp = await llamaChat({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        model: MODEL_LLAMA_33_70B,
+        maxTokens: 1500,
+        temperature: 0.3, // más determinista para análisis estructural
+        jsonMode: true,
+      });
+      text = llamaResp.text.trim();
+    }
+
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       return { ok: false, error: "La IA no devolvió JSON parseable" };
@@ -177,7 +203,7 @@ ${captions.map((c, i) => `## ${i + 1}\n${c.slice(0, 800)}`).join("\n\n---\n\n")}
   } catch (err) {
     return {
       ok: false,
-      error: err instanceof Error ? err.message : "Anthropic call failed",
+      error: err instanceof Error ? err.message : "AI call failed",
     };
   }
 

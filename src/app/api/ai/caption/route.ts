@@ -1,25 +1,25 @@
 /**
  * POST /api/ai/caption
  *
- * Genera un caption editorial en streaming (SSE) usando Claude Sonnet 4.5
- * con el contexto de voz del negocio (últimos 30 captions publicados) cacheado
- * vía `cache_control: { type: "ephemeral" }`.
+ * Genera un caption editorial en streaming (SSE).
+ *
+ * Provider routing:
+ *   - Si ANTHROPIC_API_KEY presente → Claude Sonnet 4.5 con cache_control
+ *     ephemeral (calidad gold standard, regens 1.3×)
+ *   - Si solo TOGETHER_API_KEY → Llama 3.3 70B vía Together (6× más barato,
+ *     calidad 85% del Claude, regens 2×)
+ *   - Si ninguna → 503
  *
  * Body:
  *   {
  *     businessId: string,
- *     brief: string,             // descripción del post a generar
+ *     brief: string,
  *     channel?: "feed" | "reel" | "story",
  *     length?: "short" | "medium" | "long",
  *   }
  *
- * Respuesta: SSE con eventos
- *   event: chunk      → data: { text: string }
- *   event: usage      → data: { inputTokens, outputTokens, cacheReadTokens, cacheCreationTokens, costUsd }
- *   event: done       → data: { text: string }   // texto completo final
- *   event: error      → data: { error: string }
- *
- * Auth: requireSession (admin login).
+ * Respuesta: SSE con eventos chunk / usage / done / error.
+ * Auth: requireSession.
  * Rate limit: 10/min/business.
  */
 import { NextRequest } from "next/server";
@@ -33,6 +33,11 @@ import {
   extractUsage,
   MODEL_CAPTION,
 } from "@/lib/ai/anthropic";
+import {
+  isTogetherAvailable,
+  llamaChat,
+  MODEL_LLAMA_33_70B,
+} from "@/lib/ai/together";
 import {
   loadBrandVoiceContext,
   buildCaptionSystemBlocks,
@@ -76,11 +81,18 @@ export async function POST(request: NextRequest) {
 
   const { businessId, brief, channel, length } = parsed.data;
 
-  // 3. SDK availability
-  const client = getAnthropic();
-  if (!client) {
-    return jsonError("AI temporarily unavailable. Configure ANTHROPIC_API_KEY.", 503);
+  // 3. Provider routing — Anthropic preferido, Together como fallback
+  const anthropicClient = getAnthropic();
+  const useAnthropic = !!anthropicClient;
+  const useTogether = !useAnthropic && isTogetherAvailable();
+  if (!useAnthropic && !useTogether) {
+    return jsonError(
+      "AI no disponible. Configura ANTHROPIC_API_KEY o TOGETHER_API_KEY.",
+      503,
+    );
   }
+  const provider = useAnthropic ? "anthropic" : "together";
+  const model = useAnthropic ? MODEL_CAPTION : MODEL_LLAMA_33_70B;
 
   // 4. Business existence (no per-user ownership check yet — admin scope)
   const business = await db.business.findUnique({
@@ -112,8 +124,8 @@ export async function POST(request: NextRequest) {
     adminUserId: session.adminUserId,
     action: "caption",
     businessId,
-    provider: "anthropic",
-    model: MODEL_CAPTION,
+    provider,
+    model,
   });
   if (!credit.ok) {
     return new Response(
@@ -158,37 +170,80 @@ export async function POST(request: NextRequest) {
       };
 
       try {
-        const messageStream = client.messages.stream({
-          model: MODEL_CAPTION,
-          max_tokens: 600,
-          system,
-          messages: [{ role: "user", content: userMessage }],
-        });
+        let finalText = "";
+        let usage = {
+          inputTokens: 0,
+          outputTokens: 0,
+          cacheReadTokens: 0,
+          cacheCreationTokens: 0,
+        };
+        let costUsd = 0;
 
-        let fullText = "";
+        if (useAnthropic && anthropicClient) {
+          // Path A: Claude Sonnet con streaming + cache_control
+          const messageStream = anthropicClient.messages.stream({
+            model: MODEL_CAPTION,
+            max_tokens: 600,
+            system,
+            messages: [{ role: "user", content: userMessage }],
+          });
 
-        messageStream.on("text", (text) => {
-          fullText += text;
-          send("chunk", { text });
-        });
+          let fullText = "";
+          messageStream.on("text", (text) => {
+            fullText += text;
+            send("chunk", { text });
+          });
 
-        const final = await messageStream.finalMessage();
-
-        // Extract concatenated text from final blocks (defensive — also have fullText).
-        const finalText =
-          fullText ||
-          final.content
-            .filter((b): b is Anthropic.Messages.TextBlock => b.type === "text")
-            .map((b) => b.text)
-            .join("");
-
-        const usage = extractUsage(final.usage);
-        const costUsd = computeCostUsd(MODEL_CAPTION, usage);
+          const final = await messageStream.finalMessage();
+          finalText =
+            fullText ||
+            final.content
+              .filter((b): b is Anthropic.Messages.TextBlock => b.type === "text")
+              .map((b) => b.text)
+              .join("");
+          usage = extractUsage(final.usage);
+          costUsd = computeCostUsd(MODEL_CAPTION, usage);
+        } else {
+          // Path B: Llama 3.3 vía Together (sin streaming nativo en este SDK,
+          // emitimos chunks artificiales tras la respuesta para mantener UX).
+          const flatSystem = system
+            .map((b) => (b.type === "text" ? b.text : ""))
+            .filter(Boolean)
+            .join("\n\n");
+          const llamaResp = await llamaChat({
+            messages: [
+              { role: "system", content: flatSystem },
+              { role: "user", content: userMessage },
+            ],
+            model: MODEL_LLAMA_33_70B,
+            maxTokens: 600,
+            temperature: 0.7,
+          });
+          finalText = llamaResp.text;
+          // Stream artificial: enviar palabras una a una con micro-delay
+          // para que el typewriter del front no se sienta abrupto.
+          const words = finalText.split(/(\s+)/);
+          for (const w of words) {
+            if (w) {
+              send("chunk", { text: w });
+              // Yield al event loop sin bloquear demasiado
+              await new Promise((r) => setTimeout(r, 6));
+            }
+          }
+          usage = {
+            inputTokens: llamaResp.usage.inputTokens,
+            outputTokens: llamaResp.usage.outputTokens,
+            cacheReadTokens: 0,
+            cacheCreationTokens: 0,
+          };
+          costUsd = llamaResp.costUsd;
+        }
 
         send("usage", {
           ...usage,
           costUsd,
-          model: MODEL_CAPTION,
+          model,
+          provider,
           remainingCredits: credit.remaining,
           creditsCost: 1,
         });
