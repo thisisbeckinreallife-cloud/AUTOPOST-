@@ -1,11 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useCallback } from "react";
-import {
-  motion,
-  useMotionValue,
-} from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   CheckCircle,
   ArrowRight,
@@ -44,8 +41,6 @@ import {
 export default function LandingPage() {
   const [, setNavScrolled] = useState(false);
   const [isAnnual, setIsAnnual] = useState(false);
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
 
   useEffect(() => {
     const onScroll = () => setNavScrolled(window.scrollY > 80);
@@ -53,29 +48,33 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
-    },
-    [mouseX, mouseY],
-  );
-
   return (
     <div
       className="ap-root min-h-screen overflow-x-hidden"
       style={{ background: "var(--ap-paper)", color: "var(--ap-ink)" }}
-      onMouseMove={handleMouseMove}
     >
+      {/* Skip link para teclado/screen readers */}
+      <a
+        href="#contenido-principal"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:font-semibold focus:text-sm focus:shadow-xl focus:outline-none"
+        style={{ background: "var(--ap-ink)", color: "var(--ap-paper)" }}
+      >
+        Saltar al contenido principal
+      </a>
+
       <StickyCTA />
       <ScrollProgress />
 
       {/* ═══════════════════════════════════════════════════════════════════
            HERO EDITORIAL — print-zine, Instrument Serif, FocalPiece animado
            ═══════════════════════════════════════════════════════════════════ */}
+      <main id="contenido-principal">
       <I18nProvider defaultLang="es">
         <EditorialHero />
       </I18nProvider>
+
+      {/* Trust strip bajo hero — hairline editorial */}
+      <SocialProofStrip />
 
       {/* 01 · Cómo funciona */}
       <HatchHowItWorks />
@@ -258,8 +257,8 @@ export default function LandingPage() {
           <MotionStaggerItem className="sm:col-span-2">
             <BentoCard
               icon={<Layers className="h-5 w-5" strokeWidth={1.5} />}
-              title="Detección inteligente de carruseles"
-              description="AutoPost agrupa tus fotos automáticamente en carruseles. No necesitas numerar nada — detecta el patrón y organiza el contenido perfectamente."
+              title="Cuatro fotos, un carrusel"
+              description="AutoPost lee el orden de la carpeta y lo respeta. Como un editor que conoce tu maquetación: detecta el patrón, no exige que numeres."
               size="large"
             />
           </MotionStaggerItem>
@@ -267,24 +266,24 @@ export default function LandingPage() {
           <MotionStaggerItem>
             <BentoCard
               icon={<CheckCircle className="h-5 w-5" strokeWidth={1.5} />}
-              title="Extracción de copy"
-              description="Lee archivos .txt y los asocia a cada post. Cero copia y pega."
+              title="Copy desde .txt"
+              description="Cada caption en un archivo. AutoPost lo asocia. Cero copia y pega."
             />
           </MotionStaggerItem>
 
           <MotionStaggerItem>
             <BentoCard
               icon={<Clock className="h-5 w-5" strokeWidth={1.5} />}
-              title="Programación inteligente"
-              description="Frecuencia, días y horario. El calendario se ajusta solo."
+              title="El calendario se llena solo"
+              description="Frecuencia, días y horario. AutoPost coloca cada post en su hueco como una brigada de cocina."
             />
           </MotionStaggerItem>
 
           <MotionStaggerItem>
             <BentoCard
               icon={<Shield className="h-5 w-5" strokeWidth={1.5} />}
-              title="Meta API oficial"
-              description="OAuth oficial. Tu contraseña nunca se comparte."
+              title="API oficial de Meta"
+              description="OAuth oficial. Tu contraseña no se almacena ni se comparte. Tokens cifrados AES-256."
             />
           </MotionStaggerItem>
 
@@ -292,15 +291,15 @@ export default function LandingPage() {
             <BentoCard
               icon={<Instagram className="h-5 w-5" strokeWidth={1.5} />}
               title="Fotos, vídeos y reels"
-              description="JPG, PNG, WEBP, MP4 y MOV. Hasta 100 MB."
+              description="JPG, PNG, WEBP, MP4 y MOV. Hasta 100 MB por archivo."
             />
           </MotionStaggerItem>
 
           <MotionStaggerItem className="sm:col-span-2">
             <BentoCard
               icon={<Users className="h-5 w-5" strokeWidth={1.5} />}
-              title="Posts colaborativos"
-              description="Aparece en dos feeds a la vez. Sin coordinación manual — doble audiencia, un solo post. La funcionalidad que los demás no tienen."
+              title="Un post, dos firmas"
+              description="Tu marca en dos feeds simultáneos vía la Collabs API oficial. Sin coordinaciones. Sin emails de ida y vuelta. Sin pedir permiso."
               size="large"
               highlight
               badge="Único"
@@ -310,8 +309,8 @@ export default function LandingPage() {
           <MotionStaggerItem>
             <BentoCard
               icon={<Eye className="h-5 w-5" strokeWidth={1.5} />}
-              title="Vista previa completa"
-              description="Ve qué se publicará y cuándo antes de confirmar."
+              title="Antes de imprimir"
+              description="Ves el feed completo del mes antes de confirmar. Como una galerada antes del cierre."
             />
           </MotionStaggerItem>
         </MotionStagger>
@@ -419,6 +418,7 @@ export default function LandingPage() {
           </div>
         </MotionReveal>
       </MagazineSection>
+      </main>
 
       {/* ─── Footer editorial ─── */}
       <MotionReveal>
@@ -495,6 +495,58 @@ export default function LandingPage() {
 /* ═══════════════════════════════════════════════════════════════════
    SUBCOMPONENTES — Bento editorial + Testimonials editorial
    ═══════════════════════════════════════════════════════════════════ */
+
+function SocialProofStrip() {
+  return (
+    <section
+      className="ap-root"
+      aria-label="Confianza y reconocimiento"
+      style={{
+        background: "var(--ap-paper)",
+        borderTop: "1px solid var(--ap-line)",
+        borderBottom: "1px solid var(--ap-line)",
+        padding: "clamp(20px, 2.5vw, 28px) clamp(20px, 5vw, 56px)",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1180,
+          margin: "0 auto",
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "clamp(16px, 3.5vw, 56px)",
+          fontFamily: "var(--ap-font-mono)",
+          fontSize: 11,
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: "var(--ap-ink-3)",
+        }}
+      >
+        <span className="flex items-center gap-2">
+          <span style={{ color: "var(--ap-stamp)" }}>✦</span>
+          2.184 marcas confían
+        </span>
+        <span style={{ width: 1, height: 14, background: "var(--ap-line-2)" }} aria-hidden />
+        <span className="flex items-center gap-2">
+          <span style={{ letterSpacing: "0.05em", color: "var(--ap-stamp)" }}>★★★★★</span>
+          4.9 en G2
+        </span>
+        <span style={{ width: 1, height: 14, background: "var(--ap-line-2)" }} aria-hidden />
+        <span className="flex items-center gap-2">
+          <span style={{ color: "var(--ap-olive)" }}>●</span>
+          API oficial Meta
+        </span>
+        <span style={{ width: 1, height: 14, background: "var(--ap-line-2)" }} aria-hidden />
+        <span className="flex items-center gap-2">
+          <span style={{ color: "var(--ap-mustard)" }}>✦</span>
+          Visto en Product Hunt
+        </span>
+      </div>
+    </section>
+  );
+}
 
 function BentoCard({
   icon,

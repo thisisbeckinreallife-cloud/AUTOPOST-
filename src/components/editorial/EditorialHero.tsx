@@ -18,16 +18,69 @@ interface Slot {
 const FocalPiece: React.FC = () => {
   const { t } = useI18n();
   const [p, setP] = React.useState(0);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
+    // Respetar prefers-reduced-motion: estado final estático sin RAF.
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      setP(0.7); // muestra la mitad del loop como estado estático
+      return;
+    }
+
     let raf = 0;
-    const t0 = performance.now();
+    let visible = true;
+    let pageHidden = document.hidden;
+    let t0 = performance.now();
+    let pausedAt = 0;
+
     const loop = (now: number) => {
       setP(((now - t0) % 9000) / 9000);
       raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+    const start = () => {
+      if (raf) return;
+      // Reanudar manteniendo la fase: ajusta t0 para que la onda continúe.
+      if (pausedAt) {
+        t0 += performance.now() - pausedAt;
+        pausedAt = 0;
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    const stop = () => {
+      if (!raf) return;
+      cancelAnimationFrame(raf);
+      raf = 0;
+      pausedAt = performance.now();
+    };
+
+    // IntersectionObserver: pausar cuando off-screen.
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        if (visible && !pageHidden) start();
+        else stop();
+      },
+      { threshold: 0 },
+    );
+    if (containerRef.current) io.observe(containerRef.current);
+
+    // Pausar también cuando la pestaña no está visible.
+    const onVisibility = () => {
+      pageHidden = document.hidden;
+      if (visible && !pageHidden) start();
+      else stop();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    start();
+    return () => {
+      stop();
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, []);
 
   const slots: Array<Slot | null> = [
@@ -54,6 +107,9 @@ const FocalPiece: React.FC = () => {
 
   return (
     <div
+      ref={containerRef}
+      role="img"
+      aria-label="Vista previa de una semana de posts auto-programados en Instagram, LinkedIn, X y TikTok"
       style={{
         width: 460,
         position: "relative",

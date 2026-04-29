@@ -2,22 +2,49 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 
+const SITE_URL = "https://autopost-production-cd57.up.railway.app";
+
 export const metadata: Metadata = {
-  title: "Aluminum Studio — Drop a folder. Publish a month.",
+  metadataBase: new URL(SITE_URL),
+  title: "AutoPost — La carpeta es el calendario.",
   description:
-    "El único scheduler de Instagram que entiende carpetas. Suéltala. Detectamos carruseles, programamos 30 días y publicamos vía API oficial de Meta.",
+    "Una semana de posts, escrita antes del café. Sueltas la carpeta. AutoPost detecta carruseles, extrae el copy y programa 30 días en 2 minutos. Vía API oficial de Meta.",
+  applicationName: "AutoPost",
+  authors: [{ name: "AutoPost" }],
+  keywords: [
+    "scheduler instagram",
+    "programar posts instagram",
+    "automatización instagram",
+    "carruseles instagram",
+    "social media manager",
+    "agencia instagram",
+    "programar carrusel",
+    "API Meta oficial",
+  ],
   openGraph: {
-    title: "Aluminum Studio — Drop a folder. Publish a month.",
+    title: "AutoPost — La carpeta es el calendario.",
     description:
-      "El único scheduler que entiende carpetas. Un mes de Instagram programado en 2 minutos.",
+      "Sueltas la carpeta. AutoPost detecta carruseles, extrae el copy y programa 30 días. Una herramienta editorial para Instagram, hecha para agencias y creadores hispanohablantes.",
     type: "website",
-    url: "https://autopost-production-cd57.up.railway.app",
+    url: SITE_URL,
+    siteName: "AutoPost",
+    locale: "es_ES",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Aluminum Studio — Drop a folder. Publish a month.",
+    title: "AutoPost — La carpeta es el calendario.",
     description:
-      "El único scheduler que entiende carpetas. Un mes de Instagram programado en 2 minutos.",
+      "30 días de Instagram programados en 2 minutos. Detectamos carruseles, extraemos copy y publicamos vía API oficial de Meta.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
@@ -29,15 +56,17 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        <meta name="theme-color" content="#06080D" />
+        <meta name="theme-color" content="#F1ECE2" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Editorial display + body + mono — preload del display que es LCP */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
+          rel="preload"
+          as="style"
+          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
         />
         <link
-          href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,800,900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>

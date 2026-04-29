@@ -501,6 +501,8 @@ export const LangSwitcher: React.FC<{ dark?: boolean }> = ({ dark = false }) => 
           <button
             type="button"
             onClick={() => setLang(l)}
+            aria-label={`Cambiar idioma a ${l.toUpperCase()}`}
+            aria-pressed={l === lang}
             style={{
               cursor: "pointer",
               color: l === lang ? "var(--ap-stamp)" : muted,
@@ -508,7 +510,9 @@ export const LangSwitcher: React.FC<{ dark?: boolean }> = ({ dark = false }) => 
                 l === lang
                   ? "1px solid var(--ap-stamp)"
                   : "1px solid transparent",
-              paddingBottom: 1,
+              // Touch target ≥44×44 vía padding interno; visual mantiene espaciado tight
+              padding: "12px 6px 11px",
+              margin: "-12px -2px -11px",
               textTransform: "uppercase",
               background: "transparent",
               border: 0,
@@ -516,6 +520,8 @@ export const LangSwitcher: React.FC<{ dark?: boolean }> = ({ dark = false }) => 
               fontFamily: "inherit",
               fontSize: "inherit",
               letterSpacing: "inherit",
+              minWidth: 28,
+              textAlign: "center",
             }}
           >
             {l}

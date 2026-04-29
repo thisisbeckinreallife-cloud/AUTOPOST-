@@ -21,7 +21,7 @@ const pricingTiers = [
   {
     name: "Free",
     price: 0,
-    description: "Para empezar sin compromiso",
+    description: "Para hojear antes de suscribirse",
     features: [
       "1 cuenta de Instagram",
       "30 posts por mes",
@@ -35,7 +35,7 @@ const pricingTiers = [
   {
     name: "Pro",
     price: 19,
-    description: "Para creadores y freelancers",
+    description: "Para quien escribe la próxima edición",
     features: [
       "5 cuentas de Instagram",
       "Posts ilimitados",
@@ -49,7 +49,7 @@ const pricingTiers = [
   {
     name: "Agency",
     price: 49,
-    description: "Para agencias y equipos",
+    description: "Para casas editoriales con varias marcas",
     features: [
       "Cuentas ilimitadas",
       "Todo lo del plan Pro",

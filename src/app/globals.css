@@ -7,7 +7,7 @@
    Convive con el sistema Aluminum sin colisión: solo aplica dentro de
    contenedores con la clase .ap-root.
    ══════════════════════════════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* Fuentes cargadas via <link rel="stylesheet"> en app/layout.tsx (no @import — bloquea render). */
 
 .ap-root {
   /* Off-bone canvas — not pure white. The signature move. */
@@ -16,7 +16,7 @@
   --ap-ink:      #14110D;
   --ap-ink-2:    #2A241D;
   --ap-ink-3:    #5A4F40;
-  --ap-ink-4:    #8A7E6B;
+  --ap-ink-4:    #6F6452;  /* WCAG AA — antes #8A7E6B (3.6:1, falla en small text) → 4.9:1 */
   --ap-rule:     #1F1B14;
 
   /* Dark variants for night surfaces (editor, hero panels) */
