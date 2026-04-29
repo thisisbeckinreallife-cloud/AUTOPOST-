@@ -33,6 +33,7 @@ import {
   buildHashtagSystemBlocks,
 } from "@/lib/ai/brand-voice";
 import { checkAiRateLimit } from "@/lib/ai/rate-limit";
+import { consumeCredit, refundCredit } from "@/lib/ai/credits";
 
 const bodySchema = z.object({
   businessId: z.string().min(1),
@@ -100,6 +101,26 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Credit check + consumo (1 crédito por hashtags)
+  const credit = await consumeCredit({
+    adminUserId: session.adminUserId,
+    action: "hashtags",
+    businessId,
+    provider: "anthropic", // Sprint 2 lo cambiaremos a Together Llama 3.3
+    model: MODEL_HASHTAGS,
+  });
+  if (!credit.ok) {
+    return NextResponse.json(
+      {
+        error: credit.error,
+        errorCode: credit.errorCode,
+        remaining: credit.remaining,
+        availablePacks: credit.availablePacks,
+      },
+      { status: 402 },
+    );
+  }
+
   const ctx = await loadBrandVoiceContext(businessId);
   const system = buildHashtagSystemBlocks(ctx);
 
@@ -139,6 +160,12 @@ export async function POST(request: NextRequest) {
 
     const validated = hashtagResponseSchema.safeParse(parsedJson);
     if (!validated.success) {
+      // Refund — la respuesta no fue válida
+      if (credit.generationId) {
+        await refundCredit(credit.generationId, "AI returned invalid schema").catch(
+          () => {},
+        );
+      }
       return NextResponse.json(
         {
           error: "AI response failed schema validation",
@@ -187,8 +214,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ...validated.data,
       usage: { ...usage, costUsd, model: MODEL_HASHTAGS },
+      remainingCredits: credit.remaining,
+      creditsCost: 1,
     });
   } catch (err) {
+    // Refund: la API IA falló, devolvemos el crédito al usuario.
+    if (credit.generationId) {
+      await refundCredit(
+        credit.generationId,
+        err instanceof Error ? err.message : "Unknown error",
+      ).catch(() => {});
+    }
     if (err instanceof Anthropic.RateLimitError) {
       return NextResponse.json(
         { error: "Anthropic rate limit. Reintenta en unos segundos." },

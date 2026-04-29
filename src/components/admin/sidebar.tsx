@@ -17,6 +17,7 @@ import {
   BarChart2,
 } from "lucide-react";
 import { useLocale } from "@/lib/i18n";
+import { CreditsBadge } from "@/components/admin/CreditsBadge";
 
 type BadgeKind = "error" | "warning";
 
@@ -185,6 +186,14 @@ export function Sidebar({
           );
         })}
       </nav>
+
+      {/* Credits badge sticky */}
+      <div
+        className="px-3 py-3"
+        style={{ borderTop: "1px solid rgba(168,218,220,0.08)" }}
+      >
+        <CreditsBadge />
+      </div>
 
       {/* Bottom */}
       <div

@@ -38,6 +38,7 @@ import {
   buildCaptionSystemBlocks,
 } from "@/lib/ai/brand-voice";
 import { checkAiRateLimit } from "@/lib/ai/rate-limit";
+import { consumeCredit, refundCredit } from "@/lib/ai/credits";
 
 const bodySchema = z.object({
   businessId: z.string().min(1),
@@ -106,6 +107,29 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // 5b. Credit check + consumo (1 crédito por caption)
+  const credit = await consumeCredit({
+    adminUserId: session.adminUserId,
+    action: "caption",
+    businessId,
+    provider: "anthropic",
+    model: MODEL_CAPTION,
+  });
+  if (!credit.ok) {
+    return new Response(
+      JSON.stringify({
+        error: credit.error,
+        errorCode: credit.errorCode,
+        remaining: credit.remaining,
+        availablePacks: credit.availablePacks,
+      }),
+      {
+        status: 402,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  }
+
   // 6. Brand voice
   const ctx = await loadBrandVoiceContext(businessId);
   const system = buildCaptionSystemBlocks(ctx);
@@ -161,7 +185,13 @@ export async function POST(request: NextRequest) {
         const usage = extractUsage(final.usage);
         const costUsd = computeCostUsd(MODEL_CAPTION, usage);
 
-        send("usage", { ...usage, costUsd, model: MODEL_CAPTION });
+        send("usage", {
+          ...usage,
+          costUsd,
+          model: MODEL_CAPTION,
+          remainingCredits: credit.remaining,
+          creditsCost: 1,
+        });
         send("done", { text: finalText });
 
         // Persistencia paralela (no bloquea el cierre del stream del cliente).
@@ -208,6 +238,12 @@ export async function POST(request: NextRequest) {
           send("error", { error: message });
         }
         console.error("[ai/caption] stream failed:", err);
+        // Devolver el crédito al usuario porque la API falló.
+        if (credit.generationId) {
+          await refundCredit(credit.generationId, message).catch((e) =>
+            console.error("[ai/caption] refund failed:", e),
+          );
+        }
       } finally {
         controller.close();
       }

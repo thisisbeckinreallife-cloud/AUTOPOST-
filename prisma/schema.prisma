@@ -20,9 +20,29 @@ model AdminUser {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  auditLogs AuditLog[]
+  // Plan + créditos IA
+  plan             PlanTier  @default(FREE)
+  planExpiresAt    DateTime?
+  // Créditos del allotment mensual del plan (caducan al ciclo)
+  aiCreditsMonthly Int       @default(0)
+  // Créditos comprados como add-on (NO caducan)
+  aiCreditsAddon   Int       @default(0)
+  // Próximo reset del allotment mensual
+  aiCreditsResetAt DateTime?
+
+  auditLogs       AuditLog[]
+  generations     AiGeneration[]
+  purchases       CreditPurchase[]
 
   @@map("admin_users")
+}
+
+enum PlanTier {
+  FREE
+  PRO_SOLO
+  PRO
+  AGENCY
+  SCALE
 }
 
 // ─────────────────────────────────────────
@@ -45,6 +65,7 @@ model Business {
   auditLogs      AuditLog[]
   aiUsage        AiUsage[]
   reports        Report[]
+  brandProfile   BrandProfile?
 
   @@map("businesses")
 }
@@ -406,6 +427,113 @@ model ApprovalRequest {
 enum ApprovalDecision {
   APPROVED
   REJECTED
+}
+
+// ─────────────────────────────────────────
+// AI GENERATION
+// Registro de cada acción IA consumida (caption, hashtags, image, video, etc.)
+// Cada registro descuenta créditos del balance del AdminUser y guarda quién,
+// qué modelo, cuánto costó realmente. Ese es el ledger de uso del sistema.
+// ─────────────────────────────────────────
+model AiGeneration {
+  id           String   @id @default(cuid())
+  adminUserId  String
+  businessId   String?  // nullable: algunas acciones no son por business
+
+  type         String   // caption | hashtags | image_schnell | image_dev | image_pro |
+                        // quick_reel | pro_reel | cinematic_reel | chat_post |
+                        // chat_reel | organize_zip | remix_carousel | brand_lora_train
+  creditsCost  Int
+  source       String   // monthly | addon — de qué bucket se descontó
+
+  provider     String?  // anthropic | together | replicate
+  model        String?  // claude-sonnet-4-5 | flux-1-dev | kling-2.1 | ...
+  costUsd      Float    @default(0)  // coste real para tracking interno
+  resultUrl    String?  // URL del asset generado (R2)
+  refunded     Boolean  @default(false)
+  refundedAt   DateTime?
+  refundReason String?
+
+  createdAt    DateTime @default(now())
+
+  adminUser    AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId, createdAt])
+  @@index([businessId, createdAt])
+  @@map("ai_generations")
+}
+
+// ─────────────────────────────────────────
+// CREDIT PURCHASE
+// Compra de pack de créditos add-on (no caducan).
+// status PENDING hasta que Stripe webhook confirma → PAID.
+// ─────────────────────────────────────────
+model CreditPurchase {
+  id              String   @id @default(cuid())
+  adminUserId     String
+
+  pack            String   // sello | edicion | tirada | estudio_reels
+  credits         Int
+  amountUsd       Float
+
+  status          String   @default("PENDING")  // PENDING | PAID | FAILED | REFUNDED
+  stripeSessionId String?  @unique
+  paidAt          DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  adminUser       AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId, status, createdAt])
+  @@map("credit_purchases")
+}
+
+// ─────────────────────────────────────────
+// BRAND PROFILE (skeleton — se rellena en Sprint 2-4)
+// 1:1 con Business. Almacena la "Brand DNA" entrenada de cada cuenta:
+// bootstrap data del onboarding, voice fingerprint auto-trained,
+// visual LoRA fine-tuned, schedule patterns, chat memory namespace.
+// ─────────────────────────────────────────
+model BrandProfile {
+  id         String   @id @default(cuid())
+  businessId String   @unique
+
+  // Nivel actual de entrenamiento (L1-L5)
+  level      String   @default("L1") // L1 cold | L2 onboarded | L3 lite | L4 trained | L5 mature
+
+  // Bootstrap data (L2 — del questionnaire)
+  bootstrapTone        String?
+  bootstrapDescription String?
+  bootstrapExamples    Json?    // captions ejemplo
+  bootstrapImages      Json?    // URLs imágenes reference
+  bootstrapNiche       String?
+  bootstrapTaboos      Json?    // frases prohibidas
+
+  // Voice fingerprint (L3-L4 — auto)
+  voiceProfile     Json?
+  voiceLastTrained DateTime?
+  voicePostCount   Int      @default(0)
+
+  // Visual LoRA (L4)
+  visualLoraId        String?
+  visualLoraUrl       String?
+  visualLoraStatus    String?  // PENDING | TRAINING | READY | FAILED
+  visualLoraTrained   DateTime?
+  visualLoraImageCount Int     @default(0)
+
+  // Schedule patterns (L4)
+  bestPostingTimes Json?
+
+  // Chat memory namespace (L5)
+  chatMemoryNamespace String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("brand_profiles")
 }
 
 // ─────────────────────────────────────────

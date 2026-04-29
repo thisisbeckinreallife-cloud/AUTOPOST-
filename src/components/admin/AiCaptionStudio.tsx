@@ -83,6 +83,16 @@ export function AiCaptionStudio({
 
       if (!res.ok || !res.body) {
         const data = await res.json().catch(() => ({}));
+        // 402 = Payment Required = sin créditos
+        if (res.status === 402) {
+          setError(
+            `Sin créditos suficientes. Tienes ${data.remaining?.total ?? 0} y necesitas 1.`,
+          );
+          toast("Sin créditos — compra un pack", "info");
+          // Dispatch para que CreditsBadge se refresque
+          window.dispatchEvent(new CustomEvent("credits-updated"));
+          return;
+        }
         setError(data.error ?? `HTTP ${res.status}`);
         toast(data.error ?? "Error al generar", "error");
         return;
@@ -119,6 +129,8 @@ export function AiCaptionStudio({
               setStreamedText(accumulated);
             } else if (event === "usage") {
               setUsage(payload as UsageInfo);
+              // Notificar al CreditsBadge para que se refresque
+              window.dispatchEvent(new CustomEvent("credits-updated"));
             } else if (event === "done" && typeof payload.text === "string") {
               accumulated = payload.text;
               setStreamedText(accumulated);
@@ -182,11 +194,20 @@ export function AiCaptionStudio({
         body: JSON.stringify({ businessId, caption: captionForTags }),
       });
       const data = await res.json();
+      if (res.status === 402) {
+        toast("Sin créditos — compra un pack", "info");
+        setError(
+          `Sin créditos suficientes. Tienes ${data.remaining?.total ?? 0} y necesitas 1.`,
+        );
+        window.dispatchEvent(new CustomEvent("credits-updated"));
+        return;
+      }
       if (!res.ok) {
         toast(data.error ?? "No se pudieron generar hashtags", "error");
         return;
       }
       setHashtags(data as HashtagsResponse);
+      window.dispatchEvent(new CustomEvent("credits-updated"));
     } catch {
       toast("Error de red", "error");
     } finally {
@@ -386,9 +407,23 @@ export function AiCaptionStudio({
                   fontSize: 13,
                   opacity: brief.trim().length < 3 ? 0.5 : 1,
                   cursor: brief.trim().length < 3 ? "not-allowed" : "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
                 }}
               >
                 Generar caption
+                <span
+                  className="ap-mono"
+                  style={{
+                    fontSize: 9,
+                    opacity: 0.7,
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  −1 cred
+                </span>
               </button>
             )}
           </div>

@@ -39,6 +39,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/logs") ||
     pathname.startsWith("/metrics") ||
     pathname.startsWith("/settings") ||
+    pathname.startsWith("/credits") ||
     (pathname.startsWith("/api") && !pathname.startsWith("/api/auth"))
   ) {
     const response = NextResponse.next();
