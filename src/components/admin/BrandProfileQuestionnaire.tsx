@@ -61,6 +61,13 @@ interface Profile {
   bootstrapImages?: string[];
   bootstrapNiche?: string;
   bootstrapTaboos?: string[];
+  voicePostCount?: number;
+  voiceLastTrained?: string | null;
+  voiceProfile?: {
+    detectedTone?: string;
+    toneConfidence?: number;
+    postsAnalyzed?: number;
+  } | null;
 }
 
 export function BrandProfileQuestionnaire({ businessSlug, onSaved }: Props) {
@@ -68,6 +75,7 @@ export function BrandProfileQuestionnaire({ businessSlug, onSaved }: Props) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [training, setTraining] = useState(false);
 
   // Form state
   const [tone, setTone] = useState<string>("");
@@ -138,6 +146,43 @@ export function BrandProfileQuestionnaire({ businessSlug, onSaved }: Props) {
 
   function removeImage(index: number) {
     setImages(images.filter((_, i) => i !== index));
+  }
+
+  async function handleTrainVoice() {
+    setTraining(true);
+    try {
+      const res = await fetch(
+        `/api/businesses/${businessSlug}/brand-profile/train-voice`,
+        { method: "POST" },
+      );
+      const data = await res.json();
+      if (res.status === 422) {
+        toast(
+          data.reason ?? "Necesitas más posts publicados para entrenar la voz",
+          "info",
+        );
+        return;
+      }
+      if (!res.ok) {
+        toast(data.error ?? "No se pudo entrenar la voz", "error");
+        return;
+      }
+      toast(
+        `Voice fingerprint entrenado · L${data.level === "L3" ? "3" : "?"} activo`,
+        "success",
+      );
+      // Reload profile
+      const reload = await fetch(`/api/businesses/${businessSlug}/brand-profile`);
+      if (reload.ok) {
+        const reloadData = await reload.json();
+        setProfile(reloadData.profile);
+      }
+      onSaved?.(data.level);
+    } catch {
+      toast("Error de red", "error");
+    } finally {
+      setTraining(false);
+    }
   }
 
   async function handleSave() {
@@ -462,7 +507,7 @@ export function BrandProfileQuestionnaire({ businessSlug, onSaved }: Props) {
         </Section>
 
         {/* Save */}
-        <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+        <div style={{ display: "flex", gap: 10, marginTop: 8, flexWrap: "wrap" }}>
           <button
             type="button"
             onClick={handleSave}
@@ -476,7 +521,68 @@ export function BrandProfileQuestionnaire({ businessSlug, onSaved }: Props) {
           >
             {saving ? "Guardando…" : "Guardar Brand DNA"}
           </button>
+
+          {/* Train voice button — only if there are 10+ published posts */}
+          <button
+            type="button"
+            onClick={handleTrainVoice}
+            disabled={training}
+            className="ap-btn ap-btn--ghost"
+            style={{
+              padding: "12px 20px",
+              fontSize: 13,
+              opacity: training ? 0.5 : 1,
+            }}
+            title="Analiza tus captions publicados y sube a L3"
+          >
+            {training ? "Entrenando…" : "Entrenar voz (sube a L3)"}
+          </button>
         </div>
+
+        {/* Voice profile status */}
+        {profile?.voiceProfile && (
+          <div
+            style={{
+              marginTop: 14,
+              padding: "12px 14px",
+              background: "var(--ap-paper)",
+              borderLeft: "2px solid var(--ap-olive, #6B7A2E)",
+              fontSize: 12,
+              color: "var(--ap-ink-2)",
+              lineHeight: 1.55,
+            }}
+          >
+            <p
+              className="ap-mono"
+              style={{
+                fontSize: 10,
+                color: "var(--ap-olive, #6B7A2E)",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                margin: "0 0 6px",
+              }}
+            >
+              ✓ Voice fingerprint activo
+            </p>
+            <p style={{ margin: 0 }}>
+              Tono detectado:{" "}
+              <strong>{profile.voiceProfile.detectedTone}</strong>{" "}
+              (confianza{" "}
+              {((profile.voiceProfile.toneConfidence ?? 0) * 100).toFixed(0)}%) · {" "}
+              {profile.voiceProfile.postsAnalyzed} posts analizados
+              {profile.voiceLastTrained && (
+                <>
+                  {" "}
+                  · entrenado{" "}
+                  {new Date(profile.voiceLastTrained).toLocaleDateString("es-ES", {
+                    day: "numeric",
+                    month: "short",
+                  })}
+                </>
+              )}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

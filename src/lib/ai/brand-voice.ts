@@ -16,6 +16,10 @@
  */
 import { db } from "@/lib/db";
 import type { Anthropic } from "@anthropic-ai/sdk";
+import {
+  buildVoiceFingerprintBlock,
+  type VoiceProfile,
+} from "@/lib/ai/voice-trainer";
 
 const MAX_EXAMPLES = 30;
 const MAX_CHARS_PER_EXAMPLE = 1200;
@@ -24,6 +28,17 @@ export interface BrandVoiceContext {
   businessId: string;
   businessName: string;
   examples: string[];
+  /** L1-L5 — nivel actual de Brand DNA */
+  level: string;
+  /** Datos del questionnaire (L2 bootstrap) */
+  bootstrap?: {
+    tone?: string;
+    description?: string;
+    niche?: string;
+    taboos?: string[];
+  };
+  /** Voice fingerprint entrenado (L3+) */
+  voiceProfile?: VoiceProfile;
 }
 
 /**
@@ -36,7 +51,7 @@ export async function loadBrandVoiceContext(
 ): Promise<BrandVoiceContext> {
   const business = await db.business.findUnique({
     where: { id: businessId },
-    select: { id: true, name: true },
+    select: { id: true, name: true, brandProfile: true },
   });
   if (!business) throw new Error("Business not found");
 
@@ -55,10 +70,25 @@ export async function loadBrandVoiceContext(
     .map((d) => d.caption.slice(0, MAX_CHARS_PER_EXAMPLE).trim())
     .filter((c) => c.length > 20);
 
+  const bp = business.brandProfile;
   return {
     businessId: business.id,
     businessName: business.name,
     examples,
+    level: bp?.level ?? "L1",
+    bootstrap: bp
+      ? {
+          tone: bp.bootstrapTone ?? undefined,
+          description: bp.bootstrapDescription ?? undefined,
+          niche: bp.bootstrapNiche ?? undefined,
+          taboos: Array.isArray(bp.bootstrapTaboos)
+            ? (bp.bootstrapTaboos as string[])
+            : undefined,
+        }
+      : undefined,
+    voiceProfile: bp?.voiceProfile
+      ? (bp.voiceProfile as unknown as VoiceProfile)
+      : undefined,
   };
 }
 
@@ -81,32 +111,64 @@ Generas captions de Instagram que mantienen la voz, ritmo y léxico de la marca.
 
 # Reglas de oro
 - Devuelve SÓLO el caption en texto plano, sin etiquetas markdown ni comillas envolventes.
-- Imita el ritmo, longitud y tono de los ejemplos. No copies frases textuales.
-- Si los ejemplos usan emojis con moderación, tú igual; si no los usan, evítalos.
+- Imita el ritmo, longitud y tono del perfil de la marca.
+- Si el perfil indica emojis con moderación, tú igual; si no los usan, evítalos.
 - Termina con un CTA suave o pregunta cuando el patrón de la marca lo haga.
-- Idioma: español neutro o el que predomine en los ejemplos.
-- Longitud: aproximadamente la mediana de los ejemplos. Nunca pases de 2200 caracteres.
-- No incluyas hashtags al final salvo que los ejemplos lo hagan habitualmente.
+- Idioma: el detectado en el perfil de la marca.
+- Longitud: aproximadamente la mediana indicada en el perfil. Nunca pases de 2200 caracteres.
+- No incluyas hashtags al final salvo que el perfil lo haga habitualmente.
 
 # Cómo trabajar el brief
 - El usuario te pasará un brief breve y, opcionalmente, un canal (feed, reel, story).
 - Tu trabajo es traducir ese brief a la voz de la marca, no inventar hechos nuevos.
-- Si el brief es ambiguo, prioriza tono editorial y dejas el gancho abierto.`;
+- Si el brief es ambiguo, prioriza el tono detectado en el perfil.`;
 
+  // Bootstrap (L2): usa los datos del questionnaire
+  const bootstrapLines: string[] = [];
+  if (ctx.bootstrap) {
+    bootstrapLines.push(`# Bootstrap del onboarding`);
+    if (ctx.bootstrap.description)
+      bootstrapLines.push(`Descripción: ${ctx.bootstrap.description}`);
+    if (ctx.bootstrap.tone)
+      bootstrapLines.push(`Tono solicitado: ${ctx.bootstrap.tone}`);
+    if (ctx.bootstrap.niche)
+      bootstrapLines.push(`Nicho: ${ctx.bootstrap.niche}`);
+    if (ctx.bootstrap.taboos?.length)
+      bootstrapLines.push(
+        `Frases prohibidas: ${ctx.bootstrap.taboos.map((t) => `"${t}"`).join(", ")}`,
+      );
+  }
+
+  // Voice fingerprint (L3+): usa el JSON destilado del entrenamiento
+  let fingerprintBlock = "";
+  if (ctx.voiceProfile) {
+    fingerprintBlock = buildVoiceFingerprintBlock(ctx.voiceProfile);
+  }
+
+  // Examples (siempre que haya): contexto de last-30 captions reales
   const examplesBlock =
     ctx.examples.length === 0
-      ? `# Ejemplos publicados\n(Aún no hay captions publicados. Usa un tono editorial sobrio, italic-friendly, sin clichés de marketing.)`
+      ? ctx.voiceProfile || ctx.bootstrap
+        ? `# Ejemplos publicados\n(Aún no hay captions publicados. Usa el perfil entrenado/bootstrap como guía.)`
+        : `# Ejemplos publicados\n(Aún no hay captions publicados. Usa un tono editorial sobrio, italic-friendly, sin clichés de marketing.)`
       : `# Ejemplos publicados (${ctx.examples.length})
 
-Estos son captions REALES de la marca, ordenados de más reciente a más antiguo.
-Aprende su léxico, longitud y ritmo.
+Captions REALES de la marca (más reciente a más antiguo). Aprende su ritmo
+pero NO copies frases textualmente.
 
 ${ctx.examples
   .map((c, i) => `## Ejemplo ${i + 1}\n${c}`)
   .join("\n\n---\n\n")}`;
 
+  // Cache breakpoint al final del bloque más estable (examples).
+  // Bootstrap + fingerprint son estables también pero más cortos; los unimos
+  // al intro que también es estable.
+  const stableHead = [intro, bootstrapLines.join("\n"), fingerprintBlock]
+    .filter(Boolean)
+    .join("\n\n");
+
   return [
-    { type: "text", text: intro },
+    { type: "text", text: stableHead },
     {
       type: "text",
       text: examplesBlock,
