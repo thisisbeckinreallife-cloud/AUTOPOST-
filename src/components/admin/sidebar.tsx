@@ -15,6 +15,7 @@ import {
   Globe,
   FileText,
   BarChart2,
+  Sparkles,
 } from "lucide-react";
 import { useLocale } from "@/lib/i18n";
 import { CreditsBadge } from "@/components/admin/CreditsBadge";
@@ -46,6 +47,7 @@ const navItems: Array<{
           }
         : null,
   },
+  { href: "/credits", label: "Estudio IA", icon: Sparkles },
   { href: "/metrics", label: "Métricas", icon: BarChart2 },
   {
     href: "/logs",
