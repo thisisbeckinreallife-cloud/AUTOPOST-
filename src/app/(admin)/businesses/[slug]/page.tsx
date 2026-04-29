@@ -7,6 +7,7 @@ import { Instagram, Upload, CheckCircle, AlertCircle, Clock, ChevronRight, BarCh
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { DeleteBusinessButton } from "@/components/delete-business-button";
 import { ReportsPanel } from "@/components/admin/ReportsPanel";
+import { BrandProfileQuestionnaire } from "@/components/admin/BrandProfileQuestionnaire";
 
 export const dynamic = "force-dynamic";
 
@@ -211,6 +212,9 @@ export default async function BusinessPage({
           </div>
         </div>
       )}
+
+      {/* Brand DNA — questionnaire para entrenar la IA */}
+      <BrandProfileQuestionnaire businessSlug={params.slug} />
 
       {/* Informes editoriales */}
       <ReportsPanel

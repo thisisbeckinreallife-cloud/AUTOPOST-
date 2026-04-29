@@ -11,6 +11,7 @@ import { PostDetailSkeleton } from "@/components/ui/skeleton";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { useToast } from "@/components/ui/toast";
 import { AiCaptionStudio } from "@/components/admin/AiCaptionStudio";
+import { AiImageStudio } from "@/components/admin/AiImageStudio";
 import { RequestApprovalPanel } from "@/components/admin/RequestApprovalPanel";
 
 interface PostDetail {
@@ -296,14 +297,21 @@ export default function PostDetailPage() {
 
       {/* Estudio editorial AI — sólo para posts editables */}
       {["DRAFT", "VALIDATED", "READY"].includes(post.status) && (
-        <AiCaptionStudio
-          postId={post.id}
-          businessId={post.business.id}
-          currentCaption={post.caption}
-          onApplied={(newCaption) =>
-            setPost((p) => (p ? { ...p, caption: newCaption } : p))
-          }
-        />
+        <>
+          <AiCaptionStudio
+            postId={post.id}
+            businessId={post.business.id}
+            currentCaption={post.caption}
+            onApplied={(newCaption) =>
+              setPost((p) => (p ? { ...p, caption: newCaption } : p))
+            }
+          />
+          <AiImageStudio
+            businessId={post.business.id}
+            // onPickImage TODO en Sprint 2.5: descargar la URL de Together,
+            // subir a R2, crear MediaAsset asociado al PostDraft.
+          />
+        </>
       )}
 
       {/* Aprobación del cliente — magic-link */}
