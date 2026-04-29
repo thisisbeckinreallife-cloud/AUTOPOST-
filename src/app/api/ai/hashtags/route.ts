@@ -1,8 +1,10 @@
 /**
  * POST /api/ai/hashtags
  *
- * Genera hashtags categorizados (primary/secondary) usando Claude Haiku 4.5.
- * No es streaming — la respuesta es JSON one-shot.
+ * Genera hashtags categorizados (primary/secondary).
+ * Default backend: Llama 3.3 70B vía Together (4× más barato que Haiku).
+ * Fallback automático a Anthropic Haiku 4.5 si Together no está configurado
+ * (mantiene compatibilidad si TOGETHER_API_KEY no se ha añadido aún).
  *
  * Body:
  *   {
@@ -14,7 +16,8 @@
  *   {
  *     primary: string[],         // 8 hashtags de nicho
  *     secondary: string[],       // 12 hashtags de cola larga
- *     usage: { inputTokens, outputTokens, cacheReadTokens, cacheCreationTokens, costUsd }
+ *     usage: { ... },
+ *     provider: "together" | "anthropic"
  *   }
  */
 import { NextRequest, NextResponse } from "next/server";
@@ -28,6 +31,11 @@ import {
   extractUsage,
   MODEL_HASHTAGS,
 } from "@/lib/ai/anthropic";
+import {
+  llamaChat,
+  isTogetherAvailable,
+  MODEL_LLAMA_33_70B,
+} from "@/lib/ai/together";
 import {
   loadBrandVoiceContext,
   buildHashtagSystemBlocks,
@@ -72,10 +80,15 @@ export async function POST(request: NextRequest) {
 
   const { businessId, caption } = parsed.data;
 
-  const client = getAnthropic();
-  if (!client) {
+  // Verificar disponibilidad: preferir Together, fallback a Anthropic
+  const useTogether = isTogetherAvailable();
+  const useAnthropic = !useTogether && !!getAnthropic();
+  if (!useTogether && !useAnthropic) {
     return NextResponse.json(
-      { error: "AI temporarily unavailable. Configure ANTHROPIC_API_KEY." },
+      {
+        error:
+          "AI temporarily unavailable. Configure TOGETHER_API_KEY o ANTHROPIC_API_KEY.",
+      },
       { status: 503 },
     );
   }
@@ -101,13 +114,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Credit check + consumo (1 crédito por hashtags)
+  // Credit check + consumo (1 crédito)
+  const provider = useTogether ? "together" : "anthropic";
+  const model = useTogether ? MODEL_LLAMA_33_70B : MODEL_HASHTAGS;
   const credit = await consumeCredit({
     adminUserId: session.adminUserId,
     action: "hashtags",
     businessId,
-    provider: "anthropic", // Sprint 2 lo cambiaremos a Together Llama 3.3
-    model: MODEL_HASHTAGS,
+    provider,
+    model,
   });
   if (!credit.ok) {
     return NextResponse.json(
@@ -122,47 +137,87 @@ export async function POST(request: NextRequest) {
   }
 
   const ctx = await loadBrandVoiceContext(businessId);
-  const system = buildHashtagSystemBlocks(ctx);
+  const systemBlocks = buildHashtagSystemBlocks(ctx);
+  // Para Llama (no acepta cache_control), aplanamos los bloques a un único string.
+  const flatSystem = systemBlocks
+    .map((b) => (b.type === "text" ? b.text : ""))
+    .filter(Boolean)
+    .join("\n\n");
+
+  const userPrompt = `Caption del post:\n\n${caption}\n\nDevuélveme el JSON con primary y secondary.`;
 
   try {
-    const response = await client.messages.create({
-      model: MODEL_HASHTAGS,
-      max_tokens: 600,
-      system,
-      messages: [
-        {
-          role: "user",
-          content: `Caption del post:\n\n${caption}\n\nDevuélveme el JSON con primary y secondary.`,
-        },
-      ],
-    });
+    let responseText: string;
+    let costUsd: number;
+    let usage: {
+      inputTokens: number;
+      outputTokens: number;
+      cacheReadTokens: number;
+      cacheCreationTokens: number;
+    } = {
+      inputTokens: 0,
+      outputTokens: 0,
+      cacheReadTokens: 0,
+      cacheCreationTokens: 0,
+    };
 
-    const usage = extractUsage(response.usage);
-    const costUsd = computeCostUsd(MODEL_HASHTAGS, usage);
+    if (useTogether) {
+      const llamaResp = await llamaChat({
+        messages: [
+          { role: "system", content: flatSystem },
+          { role: "user", content: userPrompt },
+        ],
+        model: MODEL_LLAMA_33_70B,
+        maxTokens: 600,
+        temperature: 0.7,
+        jsonMode: true,
+      });
+      responseText = llamaResp.text;
+      usage = {
+        inputTokens: llamaResp.usage.inputTokens,
+        outputTokens: llamaResp.usage.outputTokens,
+        cacheReadTokens: 0,
+        cacheCreationTokens: 0,
+      };
+      costUsd = llamaResp.costUsd;
+    } else {
+      const client = getAnthropic()!;
+      const response = await client.messages.create({
+        model: MODEL_HASHTAGS,
+        max_tokens: 600,
+        system: systemBlocks,
+        messages: [{ role: "user", content: userPrompt }],
+      });
+      const ant = extractUsage(response.usage);
+      usage = ant;
+      costUsd = computeCostUsd(MODEL_HASHTAGS, ant);
+      responseText = response.content
+        .filter((b): b is Anthropic.Messages.TextBlock => b.type === "text")
+        .map((b) => b.text)
+        .join("")
+        .trim();
+    }
 
-    // Extract JSON from text blocks
-    const text = response.content
-      .filter((b): b is Anthropic.Messages.TextBlock => b.type === "text")
-      .map((b) => b.text)
-      .join("")
-      .trim();
-
-    const jsonText = extractJson(text);
+    const jsonText = extractJson(responseText);
     let parsedJson: unknown;
     try {
       parsedJson = JSON.parse(jsonText);
     } catch {
+      if (credit.generationId) {
+        await refundCredit(credit.generationId, "JSON parse failed").catch(
+          () => {},
+        );
+      }
       return NextResponse.json(
-        { error: "AI response was not valid JSON", raw: text },
+        { error: "AI response was not valid JSON", raw: responseText },
         { status: 502 },
       );
     }
 
     const validated = hashtagResponseSchema.safeParse(parsedJson);
     if (!validated.success) {
-      // Refund — la respuesta no fue válida
       if (credit.generationId) {
-        await refundCredit(credit.generationId, "AI returned invalid schema").catch(
+        await refundCredit(credit.generationId, "schema validation failed").catch(
           () => {},
         );
       }
@@ -176,13 +231,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Persist usage + audit (don't block response on failure)
+    // Persist usage + audit
     await Promise.allSettled([
       db.aiUsage.create({
         data: {
           businessId,
           type: "hashtags",
-          model: MODEL_HASHTAGS,
+          model,
           inputTokens: usage.inputTokens,
           outputTokens: usage.outputTokens,
           cacheReadTokens: usage.cacheReadTokens,
@@ -201,10 +256,8 @@ export async function POST(request: NextRequest) {
             captionLength: caption.length,
             primaryCount: validated.data.primary.length,
             secondaryCount: validated.data.secondary.length,
-            inputTokens: usage.inputTokens,
-            outputTokens: usage.outputTokens,
-            cacheReadTokens: usage.cacheReadTokens,
-            cacheCreationTokens: usage.cacheCreationTokens,
+            provider,
+            model,
             costUsd,
           },
         },
@@ -213,12 +266,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       ...validated.data,
-      usage: { ...usage, costUsd, model: MODEL_HASHTAGS },
+      usage: { ...usage, costUsd, model, provider },
       remainingCredits: credit.remaining,
       creditsCost: 1,
     });
   } catch (err) {
-    // Refund: la API IA falló, devolvemos el crédito al usuario.
     if (credit.generationId) {
       await refundCredit(
         credit.generationId,
@@ -238,7 +290,10 @@ export async function POST(request: NextRequest) {
       );
     }
     console.error("[ai/hashtags] failed:", err);
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Internal error" },
+      { status: 500 },
+    );
   }
 }
 
