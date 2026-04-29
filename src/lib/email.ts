@@ -120,6 +120,112 @@ export function publishedEmailHtml({
 </html>`;
 }
 
+/**
+ * Email editorial para solicitar aprobación de un post a un cliente.
+ * Estética print-zine: papel #F1ECE2, tinta #14110D, sello tomate #E54B26.
+ * Se renderiza en modo seguro para clientes de email — solo inline styles,
+ * sin web fonts (los clientes de email saltan a system-serif sin Instrument
+ * Serif, asumimos esa pérdida).
+ */
+export function approvalRequestEmailHtml({
+  businessName,
+  approvalUrl,
+  postType,
+  scheduledFor,
+  expiresInHours,
+  captionExcerpt,
+  mediaCount,
+}: {
+  businessName: string;
+  approvalUrl: string;
+  postType: string;
+  scheduledFor: string;
+  expiresInHours: number;
+  captionExcerpt: string;
+  mediaCount: number;
+}) {
+  const safeCaption = captionExcerpt.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const typeLabel =
+    postType === "CAROUSEL"
+      ? `Carrusel · ${mediaCount} piezas`
+      : postType === "REEL"
+        ? "Reel"
+        : "Post sencillo";
+  return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Solicitud de aprobación · ${businessName}</title>
+</head>
+<body style="margin:0;padding:0;background:#F1ECE2;font-family:Georgia,'Times New Roman',serif;color:#14110D;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F1ECE2;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#FFFFFF;border:1px solid #DCD3BF;">
+          <tr>
+            <td style="padding:32px 36px 8px;">
+              <p style="margin:0;font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#E54B26;">
+                ✦ Edición · Aprobación
+              </p>
+              <h1 style="margin:10px 0 6px;font-family:Georgia,serif;font-size:32px;font-style:italic;line-height:1.05;color:#14110D;">
+                Tu siguiente edición<br>
+                <span style="font-style:italic;">espera tu firma</span>.
+              </h1>
+              <p style="margin:8px 0 0;font-size:13px;color:#6F6452;font-style:italic;">
+                ${businessName} · ${typeLabel}
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 36px;">
+              <hr style="border:none;border-top:1px solid #DCD3BF;margin:18px 0;">
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 36px 8px;">
+              <p style="margin:0 0 6px;font-family:'Courier New',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#6F6452;">
+                Programado para
+              </p>
+              <p style="margin:0 0 16px;font-size:15px;color:#14110D;">
+                ${scheduledFor}
+              </p>
+              <p style="margin:0 0 6px;font-family:'Courier New',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#6F6452;">
+                Caption
+              </p>
+              <div style="background:#F1ECE2;border-left:2px solid #E54B26;padding:14px 16px;font-size:14px;line-height:1.55;color:#3D3528;font-style:italic;white-space:pre-wrap;">${safeCaption}</div>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:24px 36px 8px;">
+              <a href="${approvalUrl}" style="display:inline-block;background:#E54B26;color:#F1ECE2;text-decoration:none;font-family:'Courier New',monospace;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;padding:14px 28px;border:1.5px solid #14110D;">
+                Revisar y aprobar →
+              </a>
+              <p style="margin:14px 0 0;font-size:12px;color:#6F6452;font-style:italic;">
+                Sin necesidad de iniciar sesión.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 36px 32px;">
+              <hr style="border:none;border-top:1px solid #DCD3BF;margin:0 0 14px;">
+              <p style="margin:0;font-family:'Courier New',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#9C8E76;">
+                Este enlace expira en ${expiresInHours} h · uso único
+              </p>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:14px 0 0;font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:#9C8E76;">
+          ✦ AutoPost · Edición editorial
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
 export function failedEmailHtml({
   businessName,
   captionExcerpt,

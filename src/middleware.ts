@@ -21,6 +21,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Public approval endpoints (magic-link, sin login).
+  if (pathname.startsWith("/api/approval/")) {
+    return NextResponse.next();
+  }
+
   // Check session for admin routes and API routes
   if (
     pathname.startsWith("/dashboard") ||

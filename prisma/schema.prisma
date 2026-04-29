@@ -193,6 +193,7 @@ model PostDraft {
   batch         UploadBatch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
   mediaAssets   MediaAsset[]
   publishJobs   PublishJob[]
+  approvalRequests ApprovalRequest[]
 
   @@unique([businessId, contentHash])
   @@map("post_drafts")
@@ -328,6 +329,40 @@ model AuditLog {
   adminUser  AdminUser?  @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
 
   @@map("audit_logs")
+}
+
+// ─────────────────────────────────────────
+// APPROVAL REQUEST (magic-link)
+// Permite que un cliente apruebe/rechace un post desde un enlace mágico
+// recibido por email, sin necesidad de iniciar sesión. El token es de un
+// solo uso, expira en N horas (default 72) y se enlaza a un PostDraft.
+// ─────────────────────────────────────────
+model ApprovalRequest {
+  id          String   @id @default(cuid())
+  postDraftId String
+  token       String   @unique
+  email       String   // Email del cliente que debe aprobar
+
+  expiresAt   DateTime
+  respondedAt DateTime?
+  decision    ApprovalDecision?
+  feedback    String?  // Mensaje opcional del cliente (max 1000 chars)
+  ipAddress   String?
+  userAgent   String?
+
+  createdAt   DateTime @default(now())
+  createdByAdminUserId String?
+
+  postDraft   PostDraft @relation(fields: [postDraftId], references: [id], onDelete: Cascade)
+
+  @@index([postDraftId, createdAt])
+  @@index([token])
+  @@map("approval_requests")
+}
+
+enum ApprovalDecision {
+  APPROVED
+  REJECTED
 }
 
 // ─────────────────────────────────────────

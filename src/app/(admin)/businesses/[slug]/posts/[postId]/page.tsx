@@ -11,6 +11,7 @@ import { PostDetailSkeleton } from "@/components/ui/skeleton";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { useToast } from "@/components/ui/toast";
 import { AiCaptionStudio } from "@/components/admin/AiCaptionStudio";
+import { RequestApprovalPanel } from "@/components/admin/RequestApprovalPanel";
 
 interface PostDetail {
   id: string;
@@ -19,6 +20,8 @@ interface PostDetail {
   publishAt: string;
   timezone: string;
   status: string;
+  approvalStatus: string;
+  rejectionReason: string | null;
   firstComment: string | null;
   sourceFolderName: string;
   metaPermalink: string | null;
@@ -300,6 +303,15 @@ export default function PostDetailPage() {
           onApplied={(newCaption) =>
             setPost((p) => (p ? { ...p, caption: newCaption } : p))
           }
+        />
+      )}
+
+      {/* Aprobación del cliente — magic-link */}
+      {["DRAFT", "VALIDATED", "READY", "SCHEDULED"].includes(post.status) && (
+        <RequestApprovalPanel
+          postId={post.id}
+          approvalStatus={post.approvalStatus}
+          rejectionReason={post.rejectionReason}
         />
       )}
 
