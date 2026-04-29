@@ -308,8 +308,8 @@ export default function PostDetailPage() {
           />
           <AiImageStudio
             businessId={post.business.id}
-            // onPickImage TODO en Sprint 2.5: descargar la URL de Together,
-            // subir a R2, crear MediaAsset asociado al PostDraft.
+            postDraftId={post.id}
+            onAssetSaved={() => fetchPost()}
           />
         </>
       )}

@@ -39,8 +39,18 @@ const RATIO_CONFIG: Record<Ratio, { label: string; sub: string }> = {
 
 interface Props {
   businessId: string;
-  /** Callback cuando el usuario quiere usar una imagen generada como asset del post. */
+  /**
+   * Si se pasa, "Usar" llama a /api/ai/image/save y crea un MediaAsset
+   * asociado a este post — cierra el loop generar → publicar.
+   */
+  postDraftId?: string;
+  /**
+   * Callback opcional para customizar el flujo de "Usar imagen". Si no se
+   * pasa pero postDraftId está, el componente hace el save automático.
+   */
   onPickImage?: (url: string, width: number, height: number) => void;
+  /** Callback tras guardar exitosamente el asset (refresh post detail). */
+  onAssetSaved?: () => void;
 }
 
 interface GeneratedImage {
@@ -49,9 +59,15 @@ interface GeneratedImage {
   height: number;
 }
 
-export function AiImageStudio({ businessId, onPickImage }: Props) {
+export function AiImageStudio({
+  businessId,
+  postDraftId,
+  onPickImage,
+  onAssetSaved,
+}: Props) {
   const { toast } = useToast();
   const [prompt, setPrompt] = useState("");
+  const [savingIdx, setSavingIdx] = useState<number | null>(null);
   const [model, setModel] = useState<Model>("dev");
   const [aspectRatio, setAspectRatio] = useState<Ratio>("1:1");
   const [count, setCount] = useState<1 | 2 | 3 | 4>(1);
@@ -326,7 +342,45 @@ export function AiImageStudio({ businessId, onPickImage }: Props) {
               <ImageCard
                 key={i}
                 image={img}
-                onPick={onPickImage ? () => onPickImage(img.url, img.width, img.height) : undefined}
+                saving={savingIdx === i}
+                onPick={
+                  // Caso 1: callback custom
+                  onPickImage
+                    ? () => onPickImage(img.url, img.width, img.height)
+                    : // Caso 2: auto-save al post si postDraftId está
+                      postDraftId
+                      ? async () => {
+                          setSavingIdx(i);
+                          try {
+                            const res = await fetch("/api/ai/image/save", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                postDraftId,
+                                imageUrl: img.url,
+                                width: img.width,
+                                height: img.height,
+                                promptUsed: prompt.trim(),
+                              }),
+                            });
+                            const data = await res.json();
+                            if (!res.ok) {
+                              toast(
+                                data.error ?? "No se pudo guardar la imagen",
+                                "error",
+                              );
+                              return;
+                            }
+                            toast("Imagen añadida al post", "success");
+                            onAssetSaved?.();
+                          } catch {
+                            toast("Error de red al guardar", "error");
+                          } finally {
+                            setSavingIdx(null);
+                          }
+                        }
+                      : undefined
+                }
                 aspectRatio={aspectRatio}
               />
             ))}
@@ -369,10 +423,12 @@ function ImageCard({
   image,
   onPick,
   aspectRatio,
+  saving,
 }: {
   image: GeneratedImage;
   onPick?: () => void;
   aspectRatio: string;
+  saving?: boolean;
 }) {
   return (
     <div
@@ -421,6 +477,7 @@ function ImageCard({
             <button
               type="button"
               onClick={onPick}
+              disabled={saving}
               className="ap-btn ap-btn--stamp"
               style={{
                 padding: "6px 10px",
@@ -428,9 +485,11 @@ function ImageCard({
                 fontFamily: "var(--ap-font-mono)",
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
+                opacity: saving ? 0.5 : 1,
+                cursor: saving ? "wait" : "pointer",
               }}
             >
-              Usar
+              {saving ? "Guardando…" : "Usar"}
             </button>
           )}
           <a
