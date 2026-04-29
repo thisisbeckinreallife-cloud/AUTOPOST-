@@ -1,8 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Output standalone: bundle solo deps usadas por archivo → container 5-10×
+  // más pequeño. Necesario porque Railway image push se atascaba con el
+  // bundle completo de node_modules (~1GB con three.js + Together + AWS).
+  output: "standalone",
   experimental: {
     instrumentationHook: true,
-    serverComponentsExternalPackages: ["bullmq", "ioredis", "jszip", "sharp"],
+    serverComponentsExternalPackages: [
+      "bullmq",
+      "ioredis",
+      "jszip",
+      "sharp",
+      "together-ai", // SDK pesado con deps opcionales (parquetjs) que no usamos
+    ],
     // Allow large request bodies for ZIP uploads (default is ~4.5MB)
     serverActions: {
       bodySizeLimit: "100mb",
@@ -18,7 +28,7 @@ const nextConfig = {
   },
   // Suppress @react-three/drei warning about deprecated sRGBEncoding (removed
   // in three ≥150). Drei v9 still imports the symbol; harmless for our use.
-  webpack(config) {
+  webpack(config, { isServer }) {
     config.ignoreWarnings = [
       ...(config.ignoreWarnings ?? []),
       {
@@ -26,6 +36,14 @@ const nextConfig = {
         message: /sRGBEncoding/,
       },
     ];
+    // Together SDK declara `parquetjs` como opcional (sólo para fine-tuning)
+    // pero webpack lo trata como required. Lo marcamos como no-op.
+    if (isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        parquetjs: false,
+      };
+    }
     return config;
   },
   // Security + cache headers

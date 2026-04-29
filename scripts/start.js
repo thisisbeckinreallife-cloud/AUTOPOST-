@@ -3,18 +3,39 @@
  * Production start script.
  * Runs Next.js server and BullMQ publish worker in the same process.
  *
- * Set DISABLE_WORKER=1 to skip the worker (e.g. for memory-constrained
- * containers or when running a separate worker service).
+ * Modo standalone (next.config.mjs `output: 'standalone'`):
+ *   - .next/standalone/server.js es el entry point
+ *   - .next/standalone tiene sus propios node_modules (sólo deps usadas)
+ *   - public/ y .next/static/ se copian aparte (ver railway.toml)
+ *
+ * Fallback al modo clásico si el standalone build no existe (dev local).
+ *
+ * Set DISABLE_WORKER=1 to skip the worker.
  */
-const { execSync, spawn } = require("child_process");
+const { spawn } = require("child_process");
+const fs = require("fs");
+const path = require("path");
 
 console.log("[start] Boot — node", process.version, "PORT=", process.env.PORT ?? "<unset>");
 
-// Start Next.js
-const next = spawn("npx", ["next", "start"], {
-  stdio: "inherit",
-  env: process.env,
-});
+// Detectar standalone output
+const standaloneServer = path.resolve(__dirname, "..", ".next", "standalone", "server.js");
+const useStandalone = fs.existsSync(standaloneServer);
+
+let next;
+if (useStandalone) {
+  console.log("[start] Standalone mode →", standaloneServer);
+  next = spawn("node", [standaloneServer], {
+    stdio: "inherit",
+    env: process.env,
+  });
+} else {
+  console.log("[start] Classic mode (npx next start)");
+  next = spawn("npx", ["next", "start"], {
+    stdio: "inherit",
+    env: process.env,
+  });
+}
 
 // Start the BullMQ worker unless explicitly disabled
 const workerDisabled = process.env.DISABLE_WORKER === "1";
