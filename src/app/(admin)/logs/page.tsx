@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { requireSession } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { FileText, Search, X, Download } from "lucide-react";
@@ -75,7 +75,7 @@ export default async function LogsPage({
 }: {
   searchParams: { page?: string; action?: string; category?: Category; range?: Range; q?: string };
 }) {
-  await requireSession();
+  await requireAuth();
 
   const page = parseInt(searchParams.page ?? "1", 10);
   const limit = 50;

@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { requireSession } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Search, List, CalendarRange, Download } from "lucide-react";
@@ -38,7 +38,7 @@ export default async function PostsPage({
   params: { slug: string };
   searchParams: { status?: string; page?: string; view?: View; month?: string };
 }) {
-  await requireSession();
+  await requireAuth();
 
   const business = await db.business.findUnique({
     where: { slug: params.slug },

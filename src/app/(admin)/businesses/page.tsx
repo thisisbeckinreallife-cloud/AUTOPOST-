@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { requireSession } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import Link from "next/link";
 import {
   Plus, Instagram, CheckCircle, AlertCircle, ChevronRight,
@@ -17,7 +17,7 @@ export default async function BusinessesPage({
 }: {
   searchParams: { q?: string; sort?: SortKey; filter?: Filter };
 }) {
-  await requireSession();
+  await requireAuth();
 
   const monthStart = startOfMonth(new Date());
   const q = (searchParams.q ?? "").trim();

@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { requireSession } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { StatusBadge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -14,7 +14,7 @@ export default async function BatchesPage({
 }: {
   params: { slug: string };
 }) {
-  await requireSession();
+  await requireAuth();
 
   const business = await db.business.findUnique({
     where: { slug: params.slug },

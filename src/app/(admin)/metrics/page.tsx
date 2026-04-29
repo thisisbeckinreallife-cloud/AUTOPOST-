@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { requireSession } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import Link from "next/link";
 import { subDays, startOfDay, startOfYear } from "date-fns";
 import {
@@ -177,7 +177,7 @@ export default async function MetricsPage({
 }: {
   searchParams: { range?: Range; sort?: string };
 }) {
-  await requireSession();
+  await requireAuth();
   const range: Range = (["today", "7d", "30d", "ytd"] as const).includes(searchParams.range as Range)
     ? (searchParams.range as Range)
     : "30d";

@@ -7,7 +7,7 @@
  *   - Historial: últimas 50 generaciones IA + últimas compras
  */
 import { db } from "@/lib/db";
-import { requireSession } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import { getBalance } from "@/lib/ai/credits";
 import { PLAN_CONFIGS, ADDON_PACKS, CREDIT_COST } from "@/lib/ai/plan-config";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
@@ -16,7 +16,7 @@ import { BuyPackButton } from "./buy-pack-button";
 export const dynamic = "force-dynamic";
 
 export default async function CreditsPage() {
-  const session = await requireSession();
+  const session = await requireAuth();
 
   const [balance, user, generations, purchases] = await Promise.all([
     getBalance(session.adminUserId),

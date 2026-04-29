@@ -4,6 +4,7 @@
  */
 import { getIronSession, IronSession, SessionOptions } from "iron-session";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { compare, hash } from "bcryptjs";
 
@@ -29,6 +30,23 @@ export async function getSession(): Promise<IronSession<AdminSessionData>> {
   return getIronSession<AdminSessionData>(cookieStore, sessionOptions);
 }
 
+/**
+ * Para páginas server-rendered: redirige a /login si no hay sesión.
+ * Usar este helper en server components — produce un redirect limpio
+ * en vez de un 500 por error UNAUTHORIZED no capturado.
+ */
+export async function requireAuth(redirectTo = "/login"): Promise<AdminSessionData> {
+  const session = await getSession();
+  if (!session.isLoggedIn || !session.adminUserId) {
+    redirect(redirectTo);
+  }
+  return session;
+}
+
+/**
+ * Para route handlers (/api/*): lanza UNAUTHORIZED para que el handler
+ * lo capture y devuelva 401. NO usar en server components — usa requireAuth.
+ */
 export async function requireSession(): Promise<AdminSessionData> {
   const session = await getSession();
   if (!session.isLoggedIn || !session.adminUserId) {

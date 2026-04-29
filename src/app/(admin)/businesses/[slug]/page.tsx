@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { requireSession } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
@@ -17,7 +17,7 @@ export default async function BusinessPage({
   params: { slug: string };
   searchParams: { connected?: string; error?: string };
 }) {
-  await requireSession();
+  await requireAuth();
 
   const business = await db.business.findUnique({
     where: { slug: params.slug },

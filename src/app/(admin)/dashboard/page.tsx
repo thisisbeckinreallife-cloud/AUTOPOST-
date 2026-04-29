@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { requireSession } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import Link from "next/link";
 import { formatDateInTz } from "@/lib/utils";
 import { getHealthReport } from "@/lib/health";
@@ -42,7 +42,7 @@ function formatCountdown(target: Date, now: Date): string {
 }
 
 export default async function DashboardPage() {
-  const session = await requireSession();
+  const session = await requireAuth();
 
   const now = new Date();
   const weekAhead = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
