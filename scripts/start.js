@@ -25,9 +25,12 @@ const useStandalone = fs.existsSync(standaloneServer);
 let next;
 if (useStandalone) {
   console.log("[start] Standalone mode →", standaloneServer);
+  // CRÍTICO: standalone server.js bindea a HOSTNAME (default localhost).
+  // Railway proxy no puede llegar a localhost desde fuera del container.
+  // Forzamos 0.0.0.0 para que escuche todas las interfaces.
   next = spawn("node", [standaloneServer], {
     stdio: "inherit",
-    env: process.env,
+    env: { ...process.env, HOSTNAME: "0.0.0.0" },
   });
 } else {
   console.log("[start] Classic mode (npx next start)");
