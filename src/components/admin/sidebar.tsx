@@ -122,7 +122,7 @@ export function Sidebar({
               letterSpacing: "-0.04em",
             }}
           >
-            A
+            ✦
           </span>
         </div>
         <span
@@ -133,7 +133,7 @@ export function Sidebar({
             fontFamily: "Satoshi, Inter, system-ui, sans-serif",
           }}
         >
-          Aluminum Studio
+          AutoPost
         </span>
       </div>
 
