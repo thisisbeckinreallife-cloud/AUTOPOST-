@@ -180,43 +180,119 @@ function Step({
 /* ─── Mockups SVG redibujados ────────────────────────────────────── */
 
 function MockStep1() {
+  // Stack de 4 thumbnails fanned con líneas de hatch (representando fotos)
+  const thumbs = [
+    { rotate: -7, dx: -28, hatch: "diag-1", label: "01" },
+    { rotate: -2, dx: -12, hatch: "diag-2", label: "02" },
+    { rotate: 3, dx: 8, hatch: "diag-1", label: "03" },
+    { rotate: 7, dx: 28, hatch: "diag-2", label: "04", stamp: true },
+  ];
+
   return (
     <div
       style={{
         position: "relative",
-        height: 140,
+        height: 160,
         background: "var(--ap-paper-2)",
-        border: "1px solid var(--ap-line)",
-        padding: 16,
+        border: "1px dashed var(--ap-line-2)",
         overflow: "hidden",
       }}
     >
-      <motion.svg
-        viewBox="0 0 200 100"
-        style={{ width: "100%", height: "100%" }}
-        initial={{ y: -8, opacity: 0 }}
-        whileInView={{ y: 0, opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, ease: EASE_CINEMATIC }}
+      {/* Stack de fotos */}
+      <div
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%) translateY(-8px)",
+          width: 200,
+          height: 100,
+        }}
       >
-        <path
-          d="M40 30 L80 30 L88 38 L160 38 L160 78 L40 78 Z"
-          fill="var(--ap-ink)"
-          stroke="var(--ap-ink)"
-          strokeWidth="1.5"
-        />
-        <rect x="40" y="26" width="44" height="6" fill="var(--ap-ink-2)" />
-        <circle cx="148" cy="56" r="4" fill="var(--ap-stamp)" />
-      </motion.svg>
+        {thumbs.map((t, i) => (
+          <motion.div
+            key={i}
+            initial={{ y: -32, opacity: 0, rotate: t.rotate - 8 }}
+            whileInView={{
+              y: 0,
+              opacity: 1,
+              rotate: t.rotate,
+              x: t.dx,
+            }}
+            viewport={{ once: true }}
+            transition={{
+              delay: 0.15 + i * 0.12,
+              duration: 0.6,
+              ease: EASE_CINEMATIC,
+            }}
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              marginLeft: -32,
+              marginTop: -40,
+              width: 64,
+              height: 80,
+              background: "var(--ap-paper)",
+              border: "1px solid var(--ap-ink)",
+              boxShadow: "2px 2px 0 rgba(20,17,13,0.10)",
+              padding: 4,
+            }}
+          >
+            {/* "imagen" — bandas hatch alternas */}
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                background:
+                  t.hatch === "diag-1"
+                    ? "repeating-linear-gradient(45deg, var(--ap-ink-2) 0 1px, transparent 1px 4px)"
+                    : "repeating-linear-gradient(-45deg, var(--ap-ink-3) 0 1px, transparent 1px 5px)",
+                position: "relative",
+              }}
+            >
+              {t.stamp && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: 4,
+                    right: 4,
+                    width: 8,
+                    height: 8,
+                    background: "var(--ap-stamp)",
+                  }}
+                />
+              )}
+            </div>
+            <span
+              className="ap-mono"
+              style={{
+                position: "absolute",
+                bottom: 4,
+                left: 6,
+                fontSize: 7,
+                color: "var(--ap-ink-4)",
+                letterSpacing: "0.08em",
+              }}
+            >
+              {t.label}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Drop hint */}
       <p
         className="ap-mono"
         style={{
           position: "absolute",
-          bottom: 10,
-          left: 16,
+          bottom: 12,
+          left: 0,
+          right: 0,
+          textAlign: "center",
           fontSize: 9,
-          color: "var(--ap-ink-4)",
-          letterSpacing: "0.14em",
+          color: "var(--ap-stamp)",
+          letterSpacing: "0.18em",
           textTransform: "uppercase",
           margin: 0,
         }}
@@ -228,15 +304,32 @@ function MockStep1() {
 }
 
 function MockStep2() {
+  // Cada fila lleva una mini-visualización del contenido + filename + tag
   const rows = [
-    { label: "carrusel-ss26.jpg", tag: "CARRUSEL", stamp: true },
-    { label: "lanzamiento.txt", tag: "COPY", stamp: false },
-    { label: "reel-taller.mp4", tag: "REEL", stamp: false },
+    {
+      label: "carrusel-ss26",
+      tag: "CARRUSEL",
+      stamp: true,
+      preview: "carousel" as const,
+    },
+    {
+      label: "lanzamiento.txt",
+      tag: "COPY",
+      stamp: false,
+      preview: "text" as const,
+    },
+    {
+      label: "reel-taller.mp4",
+      tag: "REEL",
+      stamp: false,
+      preview: "video" as const,
+    },
   ];
+
   return (
     <div
       style={{
-        height: 140,
+        height: 160,
         background: "var(--ap-paper-2)",
         border: "1px solid var(--ap-line)",
         padding: "12px 14px",
@@ -246,12 +339,29 @@ function MockStep2() {
         overflow: "hidden",
       }}
     >
+      {/* Header tipo terminal */}
+      <div
+        className="ap-mono flex items-center justify-between"
+        style={{
+          fontSize: 8,
+          color: "var(--ap-ink-4)",
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          paddingBottom: 4,
+          borderBottom: "1px solid var(--ap-line)",
+          marginBottom: 4,
+        }}
+      >
+        <span>3 elementos detectados</span>
+        <span style={{ color: "var(--ap-stamp)" }}>● listo</span>
+      </div>
+
       {rows.map((row, i) => (
         <motion.div
           key={row.label}
-          className="flex items-center justify-between"
+          className="flex items-center gap-2.5"
           style={{
-            padding: "8px 10px",
+            padding: "5px 8px",
             background: "var(--ap-paper)",
             fontFamily: "var(--ap-font-mono)",
             fontSize: 9,
@@ -265,16 +375,92 @@ function MockStep2() {
             ease: EASE_CINEMATIC,
           }}
         >
-          <span style={{ color: "var(--ap-ink-3)" }}>{row.label}</span>
+          {/* Preview mini */}
+          <div style={{ flexShrink: 0, display: "flex", alignItems: "center" }}>
+            {row.preview === "carousel" && (
+              <div style={{ display: "flex", gap: 1.5 }}>
+                {[0, 1, 2, 3].map((j) => (
+                  <div
+                    key={j}
+                    style={{
+                      width: 10,
+                      height: 10,
+                      background:
+                        j === 0
+                          ? "var(--ap-ink)"
+                          : "repeating-linear-gradient(45deg, var(--ap-ink-3) 0 1px, transparent 1px 3px)",
+                      border: "0.5px solid var(--ap-ink)",
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+            {row.preview === "text" && (
+              <div
+                style={{
+                  width: 44,
+                  height: 10,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  border: "0.5px solid var(--ap-ink)",
+                  padding: "1.5px 2px",
+                  background: "var(--ap-paper)",
+                }}
+              >
+                <div style={{ height: 1, background: "var(--ap-ink-3)", width: "85%" }} />
+                <div style={{ height: 1, background: "var(--ap-ink-3)", width: "60%" }} />
+                <div style={{ height: 1, background: "var(--ap-ink-3)", width: "75%" }} />
+              </div>
+            )}
+            {row.preview === "video" && (
+              <div
+                style={{
+                  width: 18,
+                  height: 10,
+                  background: "var(--ap-ink)",
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  style={{
+                    width: 0,
+                    height: 0,
+                    borderLeft: "4px solid var(--ap-paper)",
+                    borderTop: "3px solid transparent",
+                    borderBottom: "3px solid transparent",
+                    marginLeft: 1,
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
           <span
             style={{
-              fontSize: 8,
+              flex: 1,
+              color: "var(--ap-ink-2)",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {row.label}
+          </span>
+
+          <span
+            style={{
+              fontSize: 7.5,
               padding: "2px 6px",
               background: row.stamp ? "var(--ap-stamp)" : "transparent",
               color: row.stamp ? "var(--ap-paper)" : "var(--ap-ink-3)",
               border: row.stamp ? "none" : "1px solid var(--ap-line-2)",
-              letterSpacing: "0.1em",
+              letterSpacing: "0.12em",
               fontWeight: 600,
+              flexShrink: 0,
             }}
           >
             {row.tag}
@@ -286,41 +472,151 @@ function MockStep2() {
 }
 
 function MockStep3() {
-  const cells = Array.from({ length: 21 });
-  const lit = new Set([0, 2, 4, 6, 8, 10, 13, 15, 17, 20]);
+  // Calendar magazine — semana de lunes a domingo, 4 filas. Días marcados
+  // tienen un dot stamp tomate al estilo de un planner impreso.
+  const weekdays = ["L", "M", "X", "J", "V", "S", "D"];
+  // Mes empieza un miércoles (offset 2). 28 días útiles visibles.
+  const offset = 2;
+  const totalCells = 28;
+  const scheduled = new Set([1, 3, 5, 8, 10, 12, 15, 17, 19, 22, 24, 26]);
+
   return (
     <div
       style={{
-        height: 140,
+        height: 160,
         background: "var(--ap-paper-2)",
         border: "1px solid var(--ap-line)",
-        padding: 16,
-        display: "grid",
-        gridTemplateColumns: "repeat(7, 1fr)",
-        gridTemplateRows: "repeat(3, 1fr)",
-        gap: 4,
+        padding: "12px 14px",
+        overflow: "hidden",
       }}
     >
-      {cells.map((_, i) => {
-        const isLit = lit.has(i);
-        return (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, scale: 0.5 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{
-              delay: 0.05 * i,
-              duration: 0.4,
-              ease: EASE_CINEMATIC,
-            }}
+      {/* Header tipo masthead */}
+      <div
+        className="flex items-baseline justify-between"
+        style={{
+          paddingBottom: 6,
+          borderBottom: "1px solid var(--ap-line)",
+          marginBottom: 8,
+        }}
+      >
+        <span
+          className="ap-display"
+          style={{
+            fontSize: 13,
+            fontStyle: "italic",
+            color: "var(--ap-ink)",
+            letterSpacing: "-0.01em",
+          }}
+        >
+          Mayo
+        </span>
+        <span
+          className="ap-mono"
+          style={{
+            fontSize: 8,
+            color: "var(--ap-stamp)",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+          }}
+        >
+          12 programados
+        </span>
+      </div>
+
+      {/* Weekday header */}
+      <div
+        className="grid grid-cols-7 gap-0"
+        style={{
+          marginBottom: 4,
+        }}
+      >
+        {weekdays.map((d) => (
+          <div
+            key={d}
+            className="ap-mono"
             style={{
-              background: isLit ? "var(--ap-ink)" : "transparent",
-              border: isLit ? "none" : "1px solid var(--ap-line-2)",
+              fontSize: 7,
+              color: "var(--ap-ink-4)",
+              textAlign: "center",
+              letterSpacing: "0.16em",
+              padding: "2px 0",
             }}
-          />
-        );
-      })}
+          >
+            {d}
+          </div>
+        ))}
+      </div>
+
+      {/* Day grid — 4 weeks */}
+      <div
+        className="grid grid-cols-7 gap-0"
+        style={{
+          borderTop: "1px solid var(--ap-line)",
+          borderLeft: "1px solid var(--ap-line)",
+        }}
+      >
+        {Array.from({ length: totalCells }).map((_, i) => {
+          const dayNum = i - offset + 1;
+          const isCurrentMonth = dayNum >= 1 && dayNum <= 26;
+          const isScheduled = isCurrentMonth && scheduled.has(dayNum);
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{
+                delay: 0.02 * i,
+                duration: 0.3,
+              }}
+              style={{
+                aspectRatio: "1.2 / 1",
+                position: "relative",
+                borderRight: "1px solid var(--ap-line)",
+                borderBottom: "1px solid var(--ap-line)",
+                padding: "2px 3px",
+                background: isScheduled ? "rgba(229,75,38,0.06)" : "transparent",
+              }}
+            >
+              {isCurrentMonth && (
+                <span
+                  className="ap-mono"
+                  style={{
+                    fontSize: 7,
+                    color: isScheduled ? "var(--ap-stamp)" : "var(--ap-ink-3)",
+                    fontWeight: isScheduled ? 600 : 400,
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  {dayNum}
+                </span>
+              )}
+              {isScheduled && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{
+                    delay: 0.6 + (dayNum * 0.04),
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 20,
+                  }}
+                  style={{
+                    position: "absolute",
+                    bottom: 2,
+                    right: 2,
+                    width: 4,
+                    height: 4,
+                    background: "var(--ap-stamp)",
+                    borderRadius: "50%",
+                  }}
+                />
+              )}
+            </motion.div>
+          );
+        })}
+      </div>
     </div>
   );
 }
