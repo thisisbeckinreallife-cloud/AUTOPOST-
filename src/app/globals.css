@@ -415,6 +415,66 @@
   border-top: 1px solid var(--ap-line) !important;
 }
 
+/* Slider editorial (ROI calculator) — track plano + thumb cuadrado tomate */
+.ap-root .ap-roi-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--ap-stamp);
+  border: 1.5px solid var(--ap-ink);
+  border-radius: 0;
+  cursor: pointer;
+  margin-top: -7px;
+  box-shadow: 2px 2px 0 var(--ap-ink);
+  transition: transform 0.15s var(--ap-ease);
+}
+.ap-root .ap-roi-slider::-webkit-slider-thumb:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ap-ink);
+}
+.ap-root .ap-roi-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: var(--ap-stamp);
+  border: 1.5px solid var(--ap-ink);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+/* Neutralización del border-rotating (PricingCard popular antiguo) */
+.ap-root .border-rotating {
+  border: 2px solid var(--ap-stamp) !important;
+  animation: none !important;
+}
+
+/* NumberTicker / PriceMorph fuente editorial */
+.ap-root [data-numberticker],
+.ap-root .price-morph {
+  font-family: var(--ap-font-display);
+  font-style: italic;
+}
+
+/* Cursor + scroll-progress recoloreados a stamp si quedan referencias */
+.ap-root .cursor-dot {
+  background: var(--ap-stamp) !important;
+  box-shadow: none !important;
+}
+.ap-root .cursor-trail {
+  background: var(--ap-ink) !important;
+  opacity: 0.3;
+}
+.ap-root .scroll-progress-bar {
+  background: var(--ap-stamp) !important;
+}
+
+/* ContainerScroll: la card interna no debe inyectar gradient azul */
+.ap-root .container-scroll-card {
+  background: var(--ap-paper-2) !important;
+  border: 1px solid var(--ap-line-2) !important;
+  box-shadow: none !important;
+}
+
 /* ══════════════════════════════════════════════════════════════════════════════
    FOCUS VISIBLE — WCAG AA
    Aplica un anillo claro a todo elemento interactivo cuando se navega por

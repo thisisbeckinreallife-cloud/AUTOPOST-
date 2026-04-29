@@ -1,472 +1,528 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowRight, FolderOpen, Sparkles, CalendarCheck } from "lucide-react";
+/* ──────────────────────────────────────────────────────────────────────
+   HatchHowItWorks — versión EDITORIAL (print-zine).
+   Tres pasos en grid magazine, mockups SVG redibujados en ink+stamp,
+   strip diferencial en bloque ink invertido. Copy preservado.
+   "Hatch" → "AutoPost" en todo el texto.
+   ────────────────────────────────────────────────────────────────────── */
+
 import Link from "next/link";
-
-/* ────────────────────────────────────────────────────────────────────
-   HatchHowItWorks — sección que aparece justo después del hero pinned.
-   3 pasos concretos: 1) Sueltas la carpeta · 2) Hatch entiende ·
-   3) 30 días programados. Layout cinemático con micro-mockups
-   reales (no abstracciones).
-   ──────────────────────────────────────────────────────────────────── */
-
-const HATCH = {
-  graphite: "#1D1D1F",
-  graphiteAlt: "#2C2C2E",
-  athens: "#F5F5F7",
-  surfAlt: "#E8E8ED",
-  silver: "#86868B",
-  silverDark: "#48484A",
-  glow: "#A8DADC",
-  cobalt: "#7DBCBE",
-  textOnDark: "#F5F5F7",
-};
+import { motion } from "framer-motion";
+import { ArrowRight, Folder, Calendar, Sparkles } from "lucide-react";
+import {
+  MotionReveal,
+  MotionStagger,
+  MotionStaggerItem,
+  EASE_CINEMATIC,
+} from "@/components/motion";
+import { MagazineSection } from "@/components/editorial/MagazineSection";
+import { Icon } from "@/components/editorial/atoms";
+import { RichText } from "@/components/editorial/RichText";
 
 export function HatchHowItWorks() {
   return (
-    <section
-      id="como-funciona"
-      className="relative overflow-hidden py-24 sm:py-32 px-6"
-      style={{ background: HATCH.athens }}
-    >
-      {/* Top transition divider — gradient from previous section */}
-      <div
-        className="absolute top-0 left-0 right-0 h-32 pointer-events-none"
-        style={{
-          background: `linear-gradient(180deg, transparent 0%, ${HATCH.athens} 100%)`,
-        }}
-      />
-
-      {/* Subtle grid background pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.025] pointer-events-none"
-        style={{
-          backgroundImage: `linear-gradient(${HATCH.graphite} 1px, transparent 1px), linear-gradient(90deg, ${HATCH.graphite} 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
-          maskImage: "radial-gradient(ellipse 60% 50% at 50% 30%, black 40%, transparent 80%)",
-          WebkitMaskImage: "radial-gradient(ellipse 60% 50% at 50% 30%, black 40%, transparent 80%)",
-        }}
-      />
-
-      <div className="relative max-w-6xl mx-auto">
-        {/* Section header */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center mb-16 sm:mb-20"
-        >
-          <div
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide mb-6"
-            style={{
-              background: "rgba(29,29,31,0.06)",
-              border: "1px solid rgba(29,29,31,0.10)",
-              color: HATCH.silverDark,
-            }}
-          >
-            CÓMO FUNCIONA
-          </div>
-          <h2
-            className="font-extrabold tracking-tight max-w-3xl mx-auto"
-            style={{
-              color: HATCH.graphite,
-              fontSize: "clamp(2rem, 5vw, 3.6rem)",
-              letterSpacing: "-0.035em",
-              lineHeight: 1.02,
-              fontFamily: "Satoshi, Inter, system-ui, sans-serif",
-            }}
-          >
-            Tres pasos.{" "}
-            <span style={{ color: HATCH.silver }}>
-              Cero clicks de más.
-            </span>
-          </h2>
-          <p
-            className="mt-5 max-w-xl mx-auto"
-            style={{ color: HATCH.silverDark, fontSize: "1.05rem", lineHeight: 1.55 }}
-          >
-            No hay setup, ni 17 tutoriales. Es lo que ya haces — meter posts en una carpeta — pero la programación la hacemos nosotros.
-          </p>
-        </motion.div>
-
-        {/* Three steps grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
-          <Step
-            n="01"
-            icon={<FolderOpen className="h-5 w-5" />}
-            title="Suelta la carpeta"
-            description="Drag&drop una carpeta o ZIP. Da igual cómo esté organizada — la entendemos."
-            mockup={<MockStep1 />}
-            delay={0}
-          />
-          <Step
-            n="02"
-            icon={<Sparkles className="h-5 w-5" />}
-            title="Hatch lee y agrupa"
-            description="Detecta carruseles, lee los caption.txt, ordena por fecha. Tú revisas, no construyes."
-            mockup={<MockStep2 />}
-            delay={0.1}
-            highlight
-          />
-          <Step
-            n="03"
-            icon={<CalendarCheck className="h-5 w-5" />}
-            title="Confirma y olvida"
-            description="Eliges horario y modo de publicación. Hatch publica directo vía API oficial de Meta."
-            mockup={<MockStep3 />}
-            delay={0.2}
-          />
-        </div>
-
-        {/* The differential strip */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="relative mt-20 sm:mt-24 rounded-3xl overflow-hidden"
+    <>
+      <MagazineSection
+        index="01"
+        kicker="CÓMO FUNCIONA"
+        title={
+          <>
+            Tres pasos. <i>Cero clicks de más.</i>
+          </>
+        }
+        lede="No hay setup ni 17 tutoriales. Sueltas la carpeta. AutoPost lee, agrupa y programa. Tú confirmas y vuelves a tu vida."
+        id="como-funciona"
+      >
+        <div
           style={{
-            background: `linear-gradient(135deg, ${HATCH.graphite} 0%, ${HATCH.graphiteAlt} 100%)`,
-            border: `1px solid rgba(168,218,220,0.18)`,
-            boxShadow: `0 32px 80px -24px rgba(15,15,20,0.45), 0 0 0 1px rgba(168,218,220,0.08), inset 0 1px 0 rgba(255,255,255,0.04)`,
+            borderTop: "1px solid var(--ap-rule)",
+            borderBottom: "1px solid var(--ap-rule)",
           }}
         >
-          {/* Aurora glow inside */}
-          <div
-            className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full pointer-events-none"
-            style={{
-              background: `radial-gradient(ellipse, ${HATCH.glow}33 0%, transparent 70%)`,
-              filter: "blur(60px)",
-            }}
-          />
+        <MotionStagger
+          stagger={0.12}
+          className="grid grid-cols-1 md:grid-cols-3"
+        >
+          <MotionStaggerItem>
+            <Step
+              n="01"
+              icon={Folder}
+              title="Suelta la carpeta"
+              description="Una carpeta con fotos, vídeos y .txt. AutoPost detecta el patrón sin que numeres nada."
+              mockup={<MockStep1 />}
+            />
+          </MotionStaggerItem>
+          <MotionStaggerItem>
+            <Step
+              n="02"
+              icon={Sparkles}
+              title="AutoPost lee y agrupa"
+              description="Carruseles, posts únicos, reels — cada uno con su copy asociado. Listo en segundos."
+              mockup={<MockStep2 />}
+              highlight
+              borderLeft
+            />
+          </MotionStaggerItem>
+          <MotionStaggerItem>
+            <Step
+              n="03"
+              icon={Calendar}
+              title="Confirma y olvida"
+              description="Eliges horario y modo de publicación. AutoPost publica directo vía API oficial de Meta."
+              mockup={<MockStep3 />}
+              borderLeft
+            />
+          </MotionStaggerItem>
+        </MotionStagger>
+        </div>
+      </MagazineSection>
 
-          <div className="relative px-8 sm:px-12 py-12 sm:py-16 grid md:grid-cols-[1.2fr,1fr] gap-10 items-center">
-            <div>
-              <div
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest mb-5"
-                style={{
-                  background: "rgba(168,218,220,0.14)",
-                  border: "1px solid rgba(168,218,220,0.30)",
-                  color: HATCH.glow,
-                }}
-              >
-                ÚNICO EN EL MERCADO
-              </div>
-              <h3
-                className="font-extrabold tracking-tight mb-4"
-                style={{
-                  color: HATCH.textOnDark,
-                  fontSize: "clamp(1.6rem, 3.5vw, 2.5rem)",
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1.1,
-                  fontFamily: "Satoshi, Inter, system-ui, sans-serif",
-                }}
-              >
-                Buffer programa post a post.<br />
-                <span style={{ color: HATCH.glow }}>Hatch programa carpeta a carpeta.</span>
-              </h3>
-              <p
-                className="mb-6"
-                style={{
-                  color: "rgba(245,245,247,0.70)",
-                  fontSize: "1rem",
-                  lineHeight: 1.55,
-                  maxWidth: 480,
-                }}
-              >
-                Es la única herramienta del mercado que detecta tus carruseles desde la estructura de archivos. Sin numerar fotos. Sin renombrar nada. Sin perder dos horas el lunes.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center justify-center gap-2 text-sm font-semibold px-6 py-3 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98]"
-                  style={{
-                    background: HATCH.glow,
-                    color: HATCH.graphite,
-                    boxShadow: `0 12px 32px -8px ${HATCH.glow}66, 0 0 0 1px ${HATCH.glow}80`,
-                  }}
-                >
-                  Probar gratis
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  href="#comparativa"
-                  className="inline-flex items-center justify-center gap-2 text-sm font-semibold px-6 py-3 rounded-full border transition-colors hover:bg-white/5"
-                  style={{ borderColor: "rgba(168,218,220,0.25)", color: "rgba(245,245,247,0.85)" }}
-                >
-                  Ver comparativa
-                </Link>
-              </div>
-            </div>
-
-            {/* Right side — comparison teaser */}
-            <CompareTeaser />
-          </div>
-        </motion.div>
-      </div>
-    </section>
+      <DifferentialStrip />
+    </>
   );
 }
 
-/* ─── Step Card ────────────────────────────────────────────────── */
-function Step({ n, icon, title, description, mockup, delay = 0, highlight = false }: {
-  n: string; icon: React.ReactNode; title: string; description: string; mockup: React.ReactNode; delay?: number; highlight?: boolean;
-}) {
+interface StepProps {
+  n: string;
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  mockup: React.ReactNode;
+  highlight?: boolean;
+  borderLeft?: boolean;
+}
+
+function Step({
+  n,
+  icon: StepIcon,
+  title,
+  description,
+  mockup,
+  highlight,
+  borderLeft,
+}: StepProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.65, delay, ease: [0.16, 1, 0.3, 1] }}
-      className="relative rounded-2xl p-6 sm:p-7 group"
+    <div
+      className="relative h-full flex flex-col"
       style={{
-        background: "rgba(255,255,255,0.65)",
-        backdropFilter: "blur(16px) saturate(160%)",
-        WebkitBackdropFilter: "blur(16px) saturate(160%)",
-        border: highlight ? `1px solid rgba(168,218,220,0.45)` : `1px solid rgba(29,29,31,0.06)`,
-        boxShadow: highlight
-          ? `0 12px 32px -8px rgba(168,218,220,0.20), 0 0 0 1px rgba(168,218,220,0.20), inset 0 1px 0 rgba(255,255,255,0.7)`
-          : `0 4px 20px -6px rgba(29,29,31,0.06), inset 0 1px 0 rgba(255,255,255,0.7)`,
+        padding: "clamp(28px, 3.5vw, 44px) clamp(24px, 3vw, 36px)",
+        borderLeft: borderLeft ? "1px solid var(--ap-line)" : "none",
+        background: highlight ? "var(--ap-paper-2)" : "var(--ap-paper)",
       }}
     >
-      {/* Mockup area */}
-      <div
-        className="relative mb-6 rounded-xl overflow-hidden h-40 sm:h-44 flex items-center justify-center"
-        style={{
-          background: highlight ? `linear-gradient(135deg, ${HATCH.athens} 0%, ${HATCH.surfAlt} 100%)` : HATCH.surfAlt,
-          border: `1px solid rgba(29,29,31,0.05)`,
-        }}
-      >
-        {mockup}
-      </div>
-
-      {/* Step number + icon */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2.5">
-          <div
-            className="h-9 w-9 rounded-lg flex items-center justify-center"
-            style={{
-              background: highlight ? `${HATCH.glow}22` : `${HATCH.graphite}10`,
-              color: highlight ? HATCH.cobalt : HATCH.graphite,
-              border: highlight ? `1px solid ${HATCH.glow}40` : "1px solid transparent",
-            }}
-          >
-            {icon}
-          </div>
-          <span
-            className="font-mono text-xs font-bold tracking-wider"
-            style={{ color: HATCH.silver }}
-          >
-            STEP {n}
-          </span>
+      <div className="flex items-baseline gap-4 mb-6">
+        <span
+          className="ap-display"
+          style={{
+            fontSize: 48,
+            fontStyle: "italic",
+            color: "var(--ap-stamp)",
+            letterSpacing: "-0.03em",
+            lineHeight: 0.85,
+          }}
+        >
+          {n}
+        </span>
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            border: "1px solid var(--ap-ink)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: highlight ? "var(--ap-stamp)" : "var(--ap-ink)",
+          }}
+        >
+          <StepIcon strokeWidth={1.5} className="h-4 w-4" />
         </div>
         {highlight && (
           <span
-            className="text-[9px] font-bold px-2 py-0.5 rounded-full"
-            style={{
-              background: HATCH.glow,
-              color: HATCH.graphite,
-            }}
+            className="ap-stamp-chip ml-auto"
+            style={{ transform: "rotate(-3deg)" }}
           >
-            ÚNICO
+            Núcleo
           </span>
         )}
       </div>
 
       <h3
-        className="font-bold mb-2"
+        className="ap-display"
         style={{
-          color: HATCH.graphite,
-          fontSize: "1.15rem",
+          fontSize: "clamp(20px, 1.8vw, 26px)",
+          fontStyle: "italic",
+          color: "var(--ap-ink)",
           letterSpacing: "-0.015em",
-          fontFamily: "Satoshi, Inter, system-ui, sans-serif",
+          lineHeight: 1.1,
+          margin: "0 0 12px",
         }}
       >
         {title}
       </h3>
       <p
         style={{
-          color: HATCH.silverDark,
-          fontSize: "0.92rem",
-          lineHeight: 1.55,
+          fontSize: 14,
+          color: "var(--ap-ink-3)",
+          lineHeight: 1.6,
+          margin: 0,
+          marginBottom: 24,
         }}
       >
         {description}
       </p>
-    </motion.div>
+
+      <div className="mt-auto">{mockup}</div>
+    </div>
   );
 }
 
-/* ─── Step Mockups (mini visuals) ─────────────────────────────── */
+/* ─── Mockups SVG redibujados ────────────────────────────────────── */
 
 function MockStep1() {
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
-      {/* Folder being dropped */}
-      <motion.div
-        animate={{ y: [0, -6, 0] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        className="relative"
+    <div
+      style={{
+        position: "relative",
+        height: 140,
+        background: "var(--ap-paper-2)",
+        border: "1px solid var(--ap-line)",
+        padding: 16,
+        overflow: "hidden",
+      }}
+    >
+      <motion.svg
+        viewBox="0 0 200 100"
+        style={{ width: "100%", height: "100%" }}
+        initial={{ y: -8, opacity: 0 }}
+        whileInView={{ y: 0, opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, ease: EASE_CINEMATIC }}
+      >
+        <path
+          d="M40 30 L80 30 L88 38 L160 38 L160 78 L40 78 Z"
+          fill="var(--ap-ink)"
+          stroke="var(--ap-ink)"
+          strokeWidth="1.5"
+        />
+        <rect x="40" y="26" width="44" height="6" fill="var(--ap-ink-2)" />
+        <circle cx="148" cy="56" r="4" fill="var(--ap-stamp)" />
+      </motion.svg>
+      <p
+        className="ap-mono"
         style={{
-          filter: "drop-shadow(0 8px 16px rgba(15,15,20,0.18))",
+          position: "absolute",
+          bottom: 10,
+          left: 16,
+          fontSize: 9,
+          color: "var(--ap-ink-4)",
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          margin: 0,
         }}
       >
-        <svg width="92" height="76" viewBox="0 0 92 76">
-          <defs>
-            <linearGradient id="m1body" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#3A3A3D" />
-              <stop offset="100%" stopColor="#1F1F22" />
-            </linearGradient>
-          </defs>
-          <path d="M 6 16 Q 6 12 10 12 L 32 12 Q 36 12 38 16 L 42 22 L 6 22 Z" fill="#36363A" />
-          <path d="M 4 22 L 88 22 Q 90 22 90 24 L 90 70 Q 90 74 86 74 L 8 74 Q 4 74 4 70 Z" fill="url(#m1body)" />
-          <rect x="4" y="73" width="86" height="1" fill="#A8DADC" opacity="0.5" />
-        </svg>
-      </motion.div>
-      {/* Drop indicator dashed */}
-      <div
-        className="absolute bottom-3 inset-x-3 h-px"
-        style={{
-          backgroundImage: `repeating-linear-gradient(to right, ${HATCH.silver} 0 6px, transparent 6px 12px)`,
-        }}
-      />
-      {/* Cursor */}
-      <motion.div
-        className="absolute top-2 right-3 text-xs"
-        animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 2, repeat: Infinity }}
-        style={{ color: HATCH.silver }}
-      >
-        ↓ drop here
-      </motion.div>
+        ↓ soltar aquí
+      </p>
     </div>
   );
 }
 
 function MockStep2() {
+  const rows = [
+    { label: "carrusel-ss26.jpg", tag: "CARRUSEL", stamp: true },
+    { label: "lanzamiento.txt", tag: "COPY", stamp: false },
+    { label: "reel-taller.mp4", tag: "REEL", stamp: false },
+  ];
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center px-3">
-      {/* File rows being detected */}
-      <div className="w-full max-w-[200px] space-y-1.5">
-        {[
-          { name: "post-mojito.jpg", tag: "POST" },
-          { name: "carrousel-01.jpg", tag: "CARRUSEL" },
-          { name: "carrousel-02.jpg", tag: "CARRUSEL" },
-          { name: "caption.txt", tag: "CAPTION" },
-        ].map((f, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, x: -8 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: i * 0.1, ease: "easeOut" }}
-            className="flex items-center justify-between text-[10px] px-2 py-1 rounded"
+    <div
+      style={{
+        height: 140,
+        background: "var(--ap-paper-2)",
+        border: "1px solid var(--ap-line)",
+        padding: "12px 14px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 6,
+        overflow: "hidden",
+      }}
+    >
+      {rows.map((row, i) => (
+        <motion.div
+          key={row.label}
+          className="flex items-center justify-between"
+          style={{
+            padding: "8px 10px",
+            background: "var(--ap-paper)",
+            fontFamily: "var(--ap-font-mono)",
+            fontSize: 9,
+          }}
+          initial={{ opacity: 0, x: -12 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{
+            delay: 0.2 + i * 0.15,
+            duration: 0.5,
+            ease: EASE_CINEMATIC,
+          }}
+        >
+          <span style={{ color: "var(--ap-ink-3)" }}>{row.label}</span>
+          <span
             style={{
-              background: "rgba(255,255,255,0.7)",
-              border: "1px solid rgba(29,29,31,0.05)",
-              fontFamily: "ui-monospace, SFMono-Regular, monospace",
+              fontSize: 8,
+              padding: "2px 6px",
+              background: row.stamp ? "var(--ap-stamp)" : "transparent",
+              color: row.stamp ? "var(--ap-paper)" : "var(--ap-ink-3)",
+              border: row.stamp ? "none" : "1px solid var(--ap-line-2)",
+              letterSpacing: "0.1em",
+              fontWeight: 600,
             }}
           >
-            <span style={{ color: HATCH.silverDark }}>{f.name}</span>
-            <span
-              className="text-[8px] font-bold px-1 py-0.5 rounded"
-              style={{
-                background: f.tag === "CARRUSEL" ? `${HATCH.glow}33` : `${HATCH.graphite}10`,
-                color: f.tag === "CARRUSEL" ? HATCH.cobalt : HATCH.silverDark,
-              }}
-            >
-              {f.tag}
-            </span>
-          </motion.div>
-        ))}
-      </div>
+            {row.tag}
+          </span>
+        </motion.div>
+      ))}
     </div>
   );
 }
 
 function MockStep3() {
-  const days = Array.from({ length: 21 });
+  const cells = Array.from({ length: 21 });
+  const lit = new Set([0, 2, 4, 6, 8, 10, 13, 15, 17, 20]);
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
-      <div className="grid grid-cols-7 gap-1">
-        {days.map((_, i) => {
-          const isLit = i < 18;
-          return (
-            <motion.div
-              key={i}
-              initial={{ scale: 0, opacity: 0 }}
-              whileInView={{ scale: 1, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: i * 0.025, ease: [0.34, 1.56, 0.64, 1] }}
-              className="h-4 w-4 rounded-sm"
-              style={{
-                background: isLit ? HATCH.glow : "rgba(29,29,31,0.06)",
-                border: isLit ? `0.5px solid ${HATCH.cobalt}80` : `0.5px solid rgba(29,29,31,0.10)`,
-                boxShadow: isLit ? `0 0 6px ${HATCH.glow}66` : "none",
-              }}
-            />
-          );
-        })}
-      </div>
+    <div
+      style={{
+        height: 140,
+        background: "var(--ap-paper-2)",
+        border: "1px solid var(--ap-line)",
+        padding: 16,
+        display: "grid",
+        gridTemplateColumns: "repeat(7, 1fr)",
+        gridTemplateRows: "repeat(3, 1fr)",
+        gap: 4,
+      }}
+    >
+      {cells.map((_, i) => {
+        const isLit = lit.has(i);
+        return (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, scale: 0.5 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{
+              delay: 0.05 * i,
+              duration: 0.4,
+              ease: EASE_CINEMATIC,
+            }}
+            style={{
+              background: isLit ? "var(--ap-ink)" : "transparent",
+              border: isLit ? "none" : "1px solid var(--ap-line-2)",
+            }}
+          />
+        );
+      })}
     </div>
   );
 }
 
-/* ─── Compare teaser (right side of differential strip) ──────────── */
+/* ─── Differential strip — bloque ink invertido ──────────────────── */
+
+function DifferentialStrip() {
+  return (
+    <section
+      className="ap-root relative overflow-hidden"
+      style={{
+        background: "var(--ap-ink)",
+        color: "var(--ap-paper)",
+        padding: "clamp(64px, 10vw, 128px) clamp(20px, 5vw, 56px)",
+      }}
+    >
+      <div style={{ maxWidth: 1180, margin: "0 auto" }}>
+        <MotionReveal direction="up" cinematic>
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 md:gap-16 items-center">
+            <div>
+              <span
+                className="ap-stamp-chip"
+                style={{
+                  background: "transparent",
+                  borderColor: "var(--ap-stamp)",
+                  color: "var(--ap-stamp)",
+                  marginBottom: 24,
+                  display: "inline-block",
+                }}
+              >
+                Único en el mercado
+              </span>
+              <h3
+                className="ap-display"
+                style={{
+                  fontSize: "clamp(28px, 4vw, 56px)",
+                  fontStyle: "italic",
+                  color: "var(--ap-paper)",
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.05,
+                  margin: 0,
+                  maxWidth: 720,
+                }}
+              >
+                Buffer programa{" "}
+                <s
+                  style={{
+                    textDecorationColor: "var(--ap-stamp)",
+                    textDecorationThickness: "2px",
+                  }}
+                >
+                  post a post
+                </s>
+                .
+                <br />
+                AutoPost programa{" "}
+                <RichText text="<wave>carpeta a carpeta</wave>" />.
+              </h3>
+              <p
+                style={{
+                  fontSize: "clamp(15px, 1.4vw, 17px)",
+                  color: "rgba(241, 236, 226, 0.70)",
+                  lineHeight: 1.55,
+                  margin: "20px 0 0",
+                  maxWidth: 540,
+                }}
+              >
+                Suelta una carpeta. Detectamos carruseles, asociamos copy y
+                programamos 30 días en un par de minutos. Sin numerar fotos.
+                Sin pegar capciones a mano.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row md:flex-col">
+              <Link
+                href="/signup"
+                className="ap-btn ap-btn--stamp"
+                style={{
+                  padding: "14px 22px",
+                  fontSize: 13,
+                  display: "inline-flex",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Probar gratis
+                <ArrowRight strokeWidth={1.5} className="h-4 w-4" />
+              </Link>
+              <Link
+                href="#precios"
+                className="ap-btn ap-btn--ghost"
+                style={{
+                  padding: "14px 22px",
+                  fontSize: 13,
+                  background: "transparent",
+                  color: "var(--ap-paper)",
+                  borderColor: "var(--ap-paper)",
+                  display: "inline-flex",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Ver precios
+              </Link>
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: 64,
+              borderTop: "1px solid rgba(241, 236, 226, 0.20)",
+              paddingTop: 32,
+            }}
+          >
+            <CompareTeaser />
+          </div>
+        </MotionReveal>
+      </div>
+    </section>
+  );
+}
 
 function CompareTeaser() {
   const rows = [
-    { label: "Carga por carpeta/ZIP", hatch: true, others: false },
-    { label: "Detección de carruseles", hatch: true, others: false },
-    { label: "Posts colaborativos auto", hatch: true, others: false },
-    { label: "Programación post a post", hatch: true, others: true },
-    { label: "Multi-cuenta", hatch: true, others: true },
+    { label: "Subes", autopost: "Una carpeta", others: "Cada post a mano" },
+    { label: "Carruseles", autopost: "Detectados", others: "Numera tú" },
+    { label: "Copy", autopost: "Extraído del .txt", others: "Copy/paste" },
+    { label: "Tiempo / cliente", autopost: "2 min", others: "2-3 horas" },
   ];
   return (
-    <div
-      className="relative rounded-2xl overflow-hidden"
-      style={{
-        background: "rgba(245,245,247,0.04)",
-        border: "1px solid rgba(168,218,220,0.12)",
-        backdropFilter: "blur(8px)",
-      }}
-    >
+    <div className="grid grid-cols-1 md:grid-cols-[120px_1fr_1fr] gap-4 md:gap-8">
       <div
-        className="grid grid-cols-[1fr,auto,auto] gap-3 px-5 py-3 text-[10px] font-bold tracking-wider"
-        style={{ borderBottom: "1px solid rgba(168,218,220,0.10)", color: HATCH.silver }}
+        className="ap-mono"
+        style={{
+          fontSize: 10,
+          color: "rgba(241, 236, 226, 0.50)",
+          letterSpacing: "0.16em",
+          textTransform: "uppercase",
+        }}
       >
-        <span>FEATURE</span>
-        <span style={{ color: HATCH.glow }} className="px-1">HATCH</span>
-        <span className="px-1">OTROS</span>
+        Comparativa
       </div>
-      {rows.map((row, i) => (
-        <div
-          key={i}
-          className="grid grid-cols-[1fr,auto,auto] gap-3 px-5 py-2.5 text-xs items-center"
+      <div>
+        <p
+          className="ap-mono"
           style={{
-            borderBottom: i < rows.length - 1 ? "1px solid rgba(168,218,220,0.08)" : "none",
-            color: "rgba(245,245,247,0.85)",
+            fontSize: 10,
+            color: "var(--ap-stamp)",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            margin: "0 0 12px",
           }}
         >
-          <span>{row.label}</span>
-          <span className="px-1 text-center">
-            {row.hatch ? (
-              <span style={{ color: HATCH.glow, fontSize: 14 }}>●</span>
-            ) : (
-              <span style={{ color: HATCH.silver, fontSize: 14, opacity: 0.4 }}>○</span>
-            )}
-          </span>
-          <span className="px-1 text-center">
-            {row.others ? (
-              <span style={{ color: HATCH.silver, fontSize: 14, opacity: 0.6 }}>●</span>
-            ) : (
-              <span style={{ color: HATCH.silver, fontSize: 14, opacity: 0.25 }}>—</span>
-            )}
-          </span>
-        </div>
-      ))}
+          AutoPost
+        </p>
+        <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+          {rows.map((r) => (
+            <li
+              key={r.label}
+              className="flex items-baseline gap-3"
+              style={{
+                padding: "10px 0",
+                borderTop: "1px solid rgba(241, 236, 226, 0.15)",
+                fontSize: 14,
+                color: "var(--ap-paper)",
+              }}
+            >
+              <Icon name="check" size={12} c="var(--ap-stamp)" sw={1.8} />
+              <span>{r.autopost}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <p
+          className="ap-mono"
+          style={{
+            fontSize: 10,
+            color: "rgba(241, 236, 226, 0.50)",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            margin: "0 0 12px",
+          }}
+        >
+          Otros schedulers
+        </p>
+        <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+          {rows.map((r) => (
+            <li
+              key={r.label}
+              className="flex items-baseline gap-3"
+              style={{
+                padding: "10px 0",
+                borderTop: "1px solid rgba(241, 236, 226, 0.15)",
+                fontSize: 14,
+                color: "rgba(241, 236, 226, 0.55)",
+              }}
+            >
+              <Icon name="x" size={12} c="rgba(241, 236, 226, 0.55)" sw={1.5} />
+              <s style={{ textDecorationColor: "var(--ap-stamp)" }}>{r.others}</s>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

@@ -2,30 +2,29 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Layers, Calendar, CheckCircle } from "lucide-react";
-import { MotionReveal, EASE_CINEMATIC, SPRING_SNAPPY } from "@/components/motion";
+import { Upload, Layers, Calendar } from "lucide-react";
+import { MotionReveal, EASE_CINEMATIC } from "@/components/motion";
+import { MagazineSection } from "@/components/editorial/MagazineSection";
+import { Icon } from "@/components/editorial/atoms";
 
 const steps = [
   {
     icon: Upload,
     title: "Sube tu carpeta",
-    description: "Arrastra tu ZIP o carpeta con fotos, videos y textos",
+    description: "Arrastra tu ZIP o carpeta con fotos, vídeos y textos",
     visual: DemoStep1,
-    accent: "brand",
   },
   {
     icon: Layers,
     title: "AutoPost lo analiza",
     description: "Detecta carruseles, extrae copies y organiza todo",
     visual: DemoStep2,
-    accent: "indigo",
   },
   {
     icon: Calendar,
-    title: "30 dias programados",
-    description: "Tu calendario se llena automaticamente",
+    title: "30 días programados",
+    description: "Tu calendario se llena automáticamente",
     visual: DemoStep3,
-    accent: "emerald",
   },
 ];
 
@@ -42,104 +41,175 @@ export function ProductDemo() {
   }, [isPaused]);
 
   return (
-    <section className="py-28 px-6 relative">
-      <div className="max-w-5xl mx-auto">
-        <MotionReveal cinematic>
-          <div className="text-center mb-16">
-            <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-4">
-              Demo en vivo
-            </p>
-            <h2 className="font-display font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight">
-              Mira como funciona <span className="text-gradient">en tiempo real</span>
-            </h2>
-          </div>
-        </MotionReveal>
-
-        <MotionReveal delay={0.2}>
-          <div
-            className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start"
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-          >
-            {/* Step selector */}
-            <div className="flex flex-row lg:flex-col gap-3">
-              {steps.map((step, i) => {
-                const Icon = step.icon;
-                const isActive = active === i;
-                return (
-                  <button
-                    key={i}
-                    onClick={() => setActive(i)}
-                    className={`relative flex items-start gap-3 p-4 rounded-xl text-left transition-all duration-300 w-full ${
-                      isActive
-                        ? "bg-brand-500/[0.08] border border-brand-500/20"
-                        : "border border-transparent hover:bg-zinc-50 hover:border-zinc-200"
-                    }`}
+    <MagazineSection
+      index="04"
+      kicker="DEMO EN VIVO"
+      title={
+        <>
+          Mira <i>cómo funciona</i> en tiempo real.
+        </>
+      }
+    >
+      <MotionReveal delay={0.1}>
+        <div
+          className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 items-start"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          {/* Step selector */}
+          <div className="flex flex-row lg:flex-col gap-0">
+            {steps.map((step, i) => {
+              const StepIcon = step.icon;
+              const isActive = active === i;
+              return (
+                <button
+                  key={i}
+                  onClick={() => setActive(i)}
+                  className="relative flex items-start gap-3 text-left transition-opacity w-full hover:opacity-80"
+                  style={{
+                    padding: "16px 18px",
+                    background: isActive ? "var(--ap-paper-2)" : "transparent",
+                    borderLeft: isActive
+                      ? "3px solid var(--ap-stamp)"
+                      : "3px solid transparent",
+                    borderTop: i === 0 ? "1px solid var(--ap-line)" : "none",
+                    borderBottom: "1px solid var(--ap-line)",
+                  }}
+                >
+                  <div
+                    style={{
+                      flexShrink: 0,
+                      width: 32,
+                      height: 32,
+                      border: "1px solid var(--ap-ink)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: isActive ? "var(--ap-stamp)" : "var(--ap-ink)",
+                    }}
                   >
-                    <motion.div
-                      className={`shrink-0 h-10 w-10 rounded-lg flex items-center justify-center ${
-                        isActive ? "bg-brand-500/15 text-brand-400" : "bg-zinc-100 text-zinc-500"
-                      }`}
-                      animate={isActive ? { scale: [1, 1.1, 1] } : { scale: 1 }}
-                      transition={{ duration: 0.4, ease: EASE_CINEMATIC }}
+                    <StepIcon strokeWidth={1.5} className="h-4 w-4" />
+                  </div>
+                  <div className="hidden lg:block">
+                    <p
+                      className="ap-mono"
+                      style={{
+                        fontSize: 10,
+                        color: isActive ? "var(--ap-stamp)" : "var(--ap-ink-4)",
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        margin: "0 0 4px",
+                      }}
                     >
-                      <Icon className="h-5 w-5" />
-                    </motion.div>
-                    <div className="hidden lg:block">
-                      <p className={`text-sm font-semibold transition-colors duration-300 ${isActive ? "text-zinc-900" : "text-zinc-500"}`}>
-                        {step.title}
-                      </p>
-                      <p className="text-xs text-zinc-500 mt-0.5">{step.description}</p>
-                    </div>
-                    {/* Progress bar */}
-                    {isActive && (
-                      <motion.div
-                        className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-brand-500 to-brand-400 rounded-full hidden lg:block"
-                        initial={{ width: "0%" }}
-                        animate={{ width: "100%" }}
-                        transition={{ duration: isPaused ? 999 : 5, ease: "linear" }}
-                        key={`progress-${i}-${active}`}
-                      />
-                    )}
-                  </button>
-                );
-              })}
+                      Paso 0{i + 1}
+                    </p>
+                    <p
+                      className="ap-display"
+                      style={{
+                        fontSize: 16,
+                        fontStyle: "italic",
+                        color: "var(--ap-ink)",
+                        letterSpacing: "-0.01em",
+                        margin: 0,
+                      }}
+                    >
+                      {step.title}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: 12,
+                        color: "var(--ap-ink-3)",
+                        margin: "4px 0 0",
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {step.description}
+                    </p>
+                  </div>
+                  {isActive && !isPaused && (
+                    <motion.div
+                      style={{
+                        position: "absolute",
+                        bottom: -1,
+                        left: 0,
+                        height: 2,
+                        background: "var(--ap-stamp)",
+                      }}
+                      initial={{ width: "0%" }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 5, ease: "linear" }}
+                      key={`progress-${i}-${active}`}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Demo visual */}
+          <div
+            className="relative overflow-hidden"
+            style={{
+              border: "1.5px solid var(--ap-ink)",
+              background: "var(--ap-paper)",
+              minHeight: 400,
+            }}
+          >
+            {/* Browser chrome editorial */}
+            <div
+              className="flex items-center gap-2"
+              style={{
+                padding: "12px 16px",
+                borderBottom: "1px solid var(--ap-line)",
+                background: "var(--ap-paper-2)",
+              }}
+            >
+              <div className="flex gap-1.5">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    style={{
+                      width: 8,
+                      height: 8,
+                      border: "1px solid var(--ap-ink)",
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="flex-1 text-center">
+                <span
+                  className="ap-mono"
+                  style={{
+                    fontSize: 11,
+                    color: "var(--ap-ink-4)",
+                    letterSpacing: "0.06em",
+                  }}
+                >
+                  app.autopost.io
+                </span>
+              </div>
             </div>
 
-            {/* Demo visual */}
-            <div className="relative rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden min-h-[400px] card-shine">
-              {/* Browser chrome */}
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-100 bg-surface-secondary">
-                <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/40" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/40" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500/40" />
-                </div>
-                <div className="flex-1 text-center">
-                  <span className="text-[10px] text-zinc-400 font-mono">app.autopost.io</span>
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="p-6 relative min-h-[350px]">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={active}
-                    initial={{ opacity: 0, y: 20, scale: 0.98, filter: "blur(4px)" }}
-                    animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                    exit={{ opacity: 0, y: -15, scale: 0.98, filter: "blur(4px)" }}
-                    transition={{ duration: 0.5, ease: EASE_CINEMATIC }}
-                    className="absolute inset-6"
-                  >
-                    {steps[active].visual()}
-                  </motion.div>
-                </AnimatePresence>
-              </div>
+            {/* Content */}
+            <div className="relative" style={{ padding: 24, minHeight: 350 }}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={active}
+                  initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, y: -15, filter: "blur(4px)" }}
+                  transition={{ duration: 0.5, ease: EASE_CINEMATIC }}
+                  className="absolute"
+                  style={{ inset: 24 }}
+                >
+                  {steps[active].visual()}
+                </motion.div>
+              </AnimatePresence>
             </div>
           </div>
-        </MotionReveal>
-      </div>
-    </section>
+        </div>
+      </MotionReveal>
+    </MagazineSection>
   );
 }
 
@@ -147,13 +217,16 @@ function DemoStep1() {
   return (
     <div className="flex flex-col items-center justify-center h-full gap-6">
       <motion.div
-        className="w-full max-w-md border-2 border-dashed rounded-2xl p-12 text-center relative overflow-hidden"
+        className="w-full max-w-md text-center relative overflow-hidden"
+        style={{
+          padding: 48,
+          border: "2px dashed var(--ap-ink-4)",
+        }}
         animate={{
-          borderColor: ["rgba(255,170,0,0.2)", "rgba(255,170,0,0.5)", "rgba(255,170,0,0.2)"],
-          boxShadow: [
-            "inset 0 0 30px rgba(255,170,0,0.02)",
-            "inset 0 0 30px rgba(255,170,0,0.06)",
-            "inset 0 0 30px rgba(255,170,0,0.02)",
+          borderColor: [
+            "var(--ap-ink-4)",
+            "var(--ap-stamp)",
+            "var(--ap-ink-4)",
           ],
         }}
         transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
@@ -163,19 +236,57 @@ function DemoStep1() {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
         >
-          <Upload className="h-10 w-10 text-brand-400/60 mx-auto mb-4" />
+          <Upload
+            strokeWidth={1.5}
+            className="h-10 w-10 mx-auto mb-4"
+            style={{ color: "var(--ap-ink-3)" }}
+          />
         </motion.div>
-        <p className="text-sm text-zinc-500">Arrastra tu carpeta aqui</p>
-        <p className="text-xs text-zinc-400 mt-1">JPG, PNG, MP4, MOV, TXT</p>
+        <p
+          className="ap-display"
+          style={{
+            fontSize: 18,
+            fontStyle: "italic",
+            color: "var(--ap-ink)",
+            margin: 0,
+          }}
+        >
+          Arrastra tu carpeta aquí
+        </p>
+        <p
+          className="ap-mono"
+          style={{
+            fontSize: 10,
+            color: "var(--ap-ink-4)",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            margin: "8px 0 0",
+          }}
+        >
+          JPG · PNG · MP4 · MOV · TXT
+        </p>
       </motion.div>
       <div className="flex gap-2 flex-wrap justify-center">
         {["foto_1.jpg", "foto_2.jpg", "copy.txt", "reel.mp4"].map((f, i) => (
           <motion.div
             key={f}
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            initial={{ opacity: 0, y: 12, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: 0.4 + i * 0.12, type: "spring", stiffness: 200, damping: 18 }}
-            className="text-[10px] px-2.5 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-500 font-mono"
+            transition={{
+              delay: 0.4 + i * 0.12,
+              type: "spring",
+              stiffness: 200,
+              damping: 18,
+            }}
+            className="ap-mono"
+            style={{
+              fontSize: 10,
+              padding: "6px 10px",
+              background: "var(--ap-paper-2)",
+              border: "1px solid var(--ap-line-2)",
+              color: "var(--ap-ink-3)",
+              letterSpacing: "0.04em",
+            }}
           >
             {f}
           </motion.div>
@@ -189,56 +300,112 @@ function DemoStep2() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3 mb-6">
-        <motion.div className="h-2.5 flex-1 rounded-full bg-surface-secondary overflow-hidden">
+        <motion.div
+          style={{
+            height: 2,
+            flex: 1,
+            background: "var(--ap-line-2)",
+            overflow: "hidden",
+          }}
+        >
           <motion.div
-            className="h-full bg-gradient-to-r from-brand-500 via-accent-indigo to-brand-400 rounded-full"
+            style={{ height: "100%", background: "var(--ap-stamp)" }}
             initial={{ width: "0%" }}
             animate={{ width: "100%" }}
             transition={{ duration: 2.5, ease: [0.16, 1, 0.3, 1] }}
           />
         </motion.div>
         <motion.span
-          className="text-xs text-brand-400 font-mono"
+          className="ap-mono"
+          style={{
+            fontSize: 10,
+            color: "var(--ap-stamp)",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+          }}
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >
-          Analizando...
+          Analizando…
         </motion.span>
       </div>
 
       {[
         { type: "Carrusel", items: "4 fotos", copy: "copy_1.txt", count: 4 },
-        { type: "Post unico", items: "1 foto", copy: "copy_2.txt", count: 1 },
-        { type: "Reel", items: "1 video", copy: "copy_3.txt", count: 1 },
+        { type: "Post único", items: "1 foto", copy: "copy_2.txt", count: 1 },
+        { type: "Reel", items: "1 vídeo", copy: "copy_3.txt", count: 1 },
       ].map((post, i) => (
         <motion.div
           key={post.type}
           initial={{ opacity: 0, x: -30, filter: "blur(4px)" }}
           animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-          transition={{ delay: 0.8 + i * 0.35, duration: 0.6, ease: EASE_CINEMATIC }}
-          className="flex items-center gap-4 p-3.5 rounded-xl border border-zinc-100 bg-zinc-50 hover:bg-zinc-100 transition-colors"
+          transition={{
+            delay: 0.8 + i * 0.35,
+            duration: 0.6,
+            ease: EASE_CINEMATIC,
+          }}
+          className="flex items-center gap-4"
+          style={{
+            padding: "12px 0",
+            borderBottom: "1px solid var(--ap-line)",
+          }}
         >
           <div className="flex gap-1">
             {Array.from({ length: post.count }).map((_, j) => (
               <motion.div
                 key={j}
-                className="w-10 h-10 rounded-lg bg-surface-tertiary"
+                style={{
+                  width: 32,
+                  height: 32,
+                  background: "var(--ap-paper-2)",
+                  border: "1px solid var(--ap-line)",
+                }}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: 1.2 + i * 0.35 + j * 0.08, type: "spring", stiffness: 300, damping: 20 }}
+                transition={{
+                  delay: 1.2 + i * 0.35 + j * 0.08,
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 20,
+                }}
               />
             ))}
           </div>
           <div className="flex-1">
-            <p className="text-xs font-semibold text-zinc-900">{post.type}</p>
-            <p className="text-[10px] text-zinc-500">{post.items} · {post.copy}</p>
+            <p
+              className="ap-display"
+              style={{
+                fontSize: 14,
+                fontStyle: "italic",
+                color: "var(--ap-ink)",
+                margin: 0,
+              }}
+            >
+              {post.type}
+            </p>
+            <p
+              className="ap-mono"
+              style={{
+                fontSize: 10,
+                color: "var(--ap-ink-4)",
+                letterSpacing: "0.08em",
+                margin: "2px 0 0",
+              }}
+            >
+              {post.items} · {post.copy}
+            </p>
           </div>
           <motion.div
             initial={{ scale: 0, rotate: -90 }}
             animate={{ scale: 1, rotate: 0 }}
-            transition={{ delay: 1.5 + i * 0.35, type: "spring", stiffness: 300, damping: 15 }}
+            transition={{
+              delay: 1.5 + i * 0.35,
+              type: "spring",
+              stiffness: 300,
+              damping: 15,
+            }}
           >
-            <CheckCircle className="h-4 w-4 text-brand-400" />
+            <Icon name="check" size={16} c="var(--ap-stamp)" sw={1.8} />
           </motion.div>
         </motion.div>
       ))}
@@ -253,9 +420,25 @@ function DemoStep3() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm font-semibold text-zinc-900">Mayo 2026</p>
+        <p
+          className="ap-display"
+          style={{
+            fontSize: 18,
+            fontStyle: "italic",
+            color: "var(--ap-ink)",
+            margin: 0,
+          }}
+        >
+          Mayo 2026
+        </p>
         <motion.p
-          className="text-xs text-brand-400 font-mono"
+          className="ap-mono"
+          style={{
+            fontSize: 10,
+            color: "var(--ap-stamp)",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+          }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
@@ -263,9 +446,21 @@ function DemoStep3() {
           16 posts programados
         </motion.p>
       </div>
-      <div className="grid grid-cols-7 gap-1.5">
+      <div className="grid grid-cols-7 gap-1">
         {["L", "M", "X", "J", "V", "S", "D"].map((d) => (
-          <div key={d} className="text-[10px] text-zinc-400 text-center py-1 font-medium">{d}</div>
+          <div
+            key={d}
+            className="ap-mono"
+            style={{
+              fontSize: 10,
+              color: "var(--ap-ink-4)",
+              textAlign: "center",
+              padding: "6px 0",
+              letterSpacing: "0.1em",
+            }}
+          >
+            {d}
+          </div>
         ))}
         {days.map((day, i) => {
           const isScheduled = scheduledDays.includes(day);
@@ -280,11 +475,18 @@ function DemoStep3() {
                 stiffness: 300,
                 damping: 18,
               }}
-              className={`aspect-square rounded-lg flex items-center justify-center text-xs transition-all ${
-                isScheduled
-                  ? "bg-brand-500/15 text-brand-400 border border-brand-500/20 font-semibold shadow-inner-glow"
-                  : "text-zinc-400 bg-zinc-50 hover:bg-zinc-100"
-              }`}
+              className="flex items-center justify-center"
+              style={{
+                aspectRatio: "1 / 1",
+                fontSize: 11,
+                fontFamily: isScheduled
+                  ? "var(--ap-font-mono)"
+                  : "var(--ap-font-sans)",
+                background: isScheduled ? "var(--ap-ink)" : "transparent",
+                color: isScheduled ? "var(--ap-paper)" : "var(--ap-ink-4)",
+                border: isScheduled ? "none" : "1px solid var(--ap-line)",
+                fontWeight: isScheduled ? 600 : 400,
+              }}
             >
               {day}
             </motion.div>

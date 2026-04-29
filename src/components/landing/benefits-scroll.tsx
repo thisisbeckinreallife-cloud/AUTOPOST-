@@ -9,146 +9,176 @@ import {
   Zap,
   Clock,
   Shield,
-  CheckCircle,
   Users,
   Instagram,
-  ArrowRight,
 } from "lucide-react";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
-import { cn } from "@/lib/utils";
+import { RichText } from "@/components/editorial/RichText";
 
 const benefits = [
   {
     icon: Upload,
     title: "Arrastra y listo",
-    desc: "Sube una carpeta o ZIP. Fotos, videos, textos — AutoPost lo organiza todo automaticamente.",
-    accent: "brand",
+    desc: "Sube una carpeta o ZIP. Fotos, vídeos, textos — AutoPost lo organiza todo automáticamente.",
+    highlight: false,
   },
   {
     icon: Layers,
     title: "Carruseles inteligentes",
     desc: "Detecta patrones y agrupa tus fotos en carruseles sin que numeres nada.",
-    accent: "indigo",
+    highlight: false,
   },
   {
     icon: Calendar,
-    title: "30 dias programados",
+    title: "30 días programados",
     desc: "Un mes completo de contenido listo en 2 minutos. Elige horario y olvida.",
-    accent: "orange",
+    highlight: false,
   },
   {
     icon: Users,
     title: "Posts colaborativos",
     desc: "Aparece en dos feeds a la vez. Doble audiencia con un solo post.",
-    accent: "indigo",
+    highlight: true,
   },
   {
     icon: Shield,
     title: "API oficial de Meta",
-    desc: "Conexion OAuth oficial. Tu contrasena nunca se comparte ni se almacena.",
-    accent: "emerald",
+    desc: "Conexión OAuth oficial. Tu contraseña nunca se comparte ni se almacena.",
+    highlight: false,
   },
   {
     icon: Clock,
-    title: "90x mas rapido",
+    title: "90× más rápido",
     desc: "Lo que antes tomaba 2-3 horas ahora toma 2 minutos por cliente.",
-    accent: "brand",
+    highlight: false,
   },
 ];
 
-const accentMap: Record<string, { icon: string; bg: string; border: string; glow: string }> = {
-  brand: {
-    icon: "text-brand-400",
-    bg: "bg-brand-500/10",
-    border: "border-brand-500/20",
-    glow: "shadow-sm",
-  },
-  indigo: {
-    icon: "text-accent-indigo",
-    bg: "bg-accent-indigo/10",
-    border: "border-accent-indigo/20",
-    glow: "shadow-sm",
-  },
-  orange: {
-    icon: "text-accent-orange",
-    bg: "bg-accent-orange/10",
-    border: "border-accent-orange/20",
-    glow: "shadow-sm",
-  },
-  emerald: {
-    icon: "text-accent-emerald",
-    bg: "bg-accent-emerald/10",
-    border: "border-accent-emerald/20",
-    glow: "shadow-sm",
-  },
-};
-
 export function BenefitsScroll() {
   return (
-    <section className="relative overflow-hidden">
-      {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-500/[0.015] to-transparent pointer-events-none" />
-
+    <section
+      className="ap-root relative overflow-hidden"
+      style={{ background: "var(--ap-paper)" }}
+    >
       <ContainerScroll
         titleComponent={
-          <div className="mb-4">
-            <motion.p
-              className="text-xs font-semibold text-brand-400 uppercase tracking-[0.25em] mb-5"
-              initial={{ opacity: 0, letterSpacing: "0.5em" }}
-              whileInView={{ opacity: 1, letterSpacing: "0.25em" }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          <div style={{ marginBottom: 16, textAlign: "center" }}>
+            <p
+              className="ap-mono"
+              style={{
+                fontSize: 11,
+                color: "var(--ap-ink-4)",
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                margin: "0 0 18px",
+              }}
             >
-              Por que AutoPost
-            </motion.p>
-            <h2 className="font-display font-bold text-3xl sm:text-4xl md:text-[3.5rem] tracking-tight text-zinc-900 leading-tight">
+              05 · POR QUÉ AUTOPOST
+            </p>
+            <h2
+              className="ap-display"
+              style={{
+                fontSize: "clamp(36px, 5.5vw, 80px)",
+                fontStyle: "italic",
+                color: "var(--ap-ink)",
+                letterSpacing: "-0.02em",
+                lineHeight: 0.95,
+                margin: 0,
+                maxWidth: 920,
+                marginInline: "auto",
+              }}
+            >
               Todo lo que necesitas para{" "}
-              <br className="hidden sm:block" />
-              <span className="bg-gradient-to-r from-brand-400 via-brand-300 to-accent-indigo bg-clip-text text-transparent">
-                automatizar Instagram
-              </span>
+              <RichText text="<wave>automatizar Instagram</wave>" />
             </h2>
-            <p className="text-zinc-500 text-base sm:text-lg mt-4 max-w-2xl mx-auto">
-              De carpeta de archivos a un mes de contenido programado.
-              Sin esfuerzo, sin errores, sin perder horas.
+            <p
+              style={{
+                fontSize: 17,
+                color: "var(--ap-ink-3)",
+                lineHeight: 1.55,
+                margin: "20px auto 0",
+                maxWidth: 560,
+              }}
+            >
+              De carpeta de archivos a un mes de contenido programado. Sin
+              esfuerzo, sin errores, sin perder horas.
             </p>
           </div>
         }
       >
-        {/* Benefits grid inside the scroll card */}
-        <div className="h-full w-full p-4 sm:p-8 overflow-y-auto scrollbar-hide">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        {/* Benefits grid */}
+        <div
+          className="h-full w-full overflow-y-auto"
+          style={{ padding: "clamp(16px, 3vw, 32px)" }}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {benefits.map((benefit, i) => {
-              const colors = accentMap[benefit.accent] || accentMap.brand;
               const Icon = benefit.icon;
               return (
                 <motion.div
                   key={benefit.title}
-                  className={cn(
-                    "group relative rounded-2xl border p-5 flex flex-col gap-3 transition-all duration-300",
-                    "bg-white/80 backdrop-blur-sm",
-                    colors.border,
-                    "hover:border-opacity-50",
-                    colors.glow
-                  )}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{
+                    delay: i * 0.07,
+                    duration: 0.5,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  style={{
+                    border: benefit.highlight
+                      ? "1.5px solid var(--ap-ink)"
+                      : "1px solid var(--ap-line)",
+                    background: benefit.highlight
+                      ? "rgba(212,166,39,0.08)"
+                      : "var(--ap-paper-2)",
+                    padding: "20px 22px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 12,
+                  }}
                 >
                   <div
-                    className={cn(
-                      "flex h-10 w-10 items-center justify-center rounded-xl border",
-                      colors.bg,
-                      colors.border
-                    )}
+                    style={{
+                      width: 36,
+                      height: 36,
+                      border: "1px solid var(--ap-ink)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
                   >
-                    <Icon className={cn("h-5 w-5", colors.icon)} aria-hidden="true" />
+                    <Icon
+                      strokeWidth={1.5}
+                      className="h-5 w-5"
+                      style={{
+                        color: benefit.highlight
+                          ? "var(--ap-stamp)"
+                          : "var(--ap-ink)",
+                      }}
+                      aria-hidden="true"
+                    />
                   </div>
-                  <h3 className="font-display font-semibold text-sm text-zinc-900">
+                  <h3
+                    className="ap-display"
+                    style={{
+                      fontSize: 16,
+                      fontStyle: "italic",
+                      color: "var(--ap-ink)",
+                      letterSpacing: "-0.01em",
+                      margin: 0,
+                    }}
+                  >
                     {benefit.title}
                   </h3>
-                  <p className="text-xs text-zinc-500 leading-relaxed">
+                  <p
+                    style={{
+                      fontSize: 13,
+                      color: "var(--ap-ink-3)",
+                      lineHeight: 1.55,
+                      margin: 0,
+                    }}
+                  >
                     {benefit.desc}
                   </p>
                 </motion.div>
@@ -156,15 +186,32 @@ export function BenefitsScroll() {
             })}
           </div>
 
-          {/* Bottom trust strip */}
-          <div className="flex flex-wrap items-center justify-center gap-6 mt-6 pt-5 border-t border-zinc-100">
+          {/* Trust strip — hairline footer */}
+          <div
+            className="flex flex-wrap items-center justify-center gap-8 mt-6 pt-5"
+            style={{ borderTop: "1px solid var(--ap-line)" }}
+          >
             {[
               { icon: Instagram, text: "JPG, PNG, WEBP, MP4, MOV" },
               { icon: Shield, text: "Cifrado AES-256" },
-              { icon: Zap, text: "Publicacion via API oficial" },
+              { icon: Zap, text: "Publicación vía API oficial" },
             ].map(({ icon: TrustIcon, text }) => (
-              <div key={text} className="flex items-center gap-2 text-xs text-zinc-500">
-                <TrustIcon className="h-3.5 w-3.5 text-brand-600/60" aria-hidden="true" />
+              <div
+                key={text}
+                className="flex items-center gap-2"
+                style={{
+                  fontSize: 11,
+                  color: "var(--ap-ink-4)",
+                  fontFamily: "var(--ap-font-mono)",
+                  letterSpacing: "0.06em",
+                }}
+              >
+                <TrustIcon
+                  strokeWidth={1.5}
+                  className="h-3.5 w-3.5"
+                  style={{ color: "var(--ap-ink-3)" }}
+                  aria-hidden="true"
+                />
                 {text}
               </div>
             ))}

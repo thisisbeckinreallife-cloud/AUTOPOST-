@@ -10,42 +10,67 @@ interface PricingToggleProps {
 
 export function PricingToggle({ isAnnual, onToggle }: PricingToggleProps) {
   return (
-    <div className="flex items-center justify-center gap-3 mb-12">
-      <span className={`text-sm font-medium transition-colors duration-300 ${!isAnnual ? "text-zinc-900" : "text-zinc-500"}`}>
+    <div className="flex items-center justify-center gap-4 mb-2">
+      <span
+        className="ap-mono"
+        style={{
+          fontSize: 11,
+          color: !isAnnual ? "var(--ap-ink)" : "var(--ap-ink-4)",
+          letterSpacing: "0.16em",
+          textTransform: "uppercase",
+          transition: "color 0.3s",
+        }}
+      >
         Mensual
       </span>
       <button
         onClick={onToggle}
-        className="relative w-14 h-7 rounded-full bg-zinc-100 border border-zinc-200 transition-colors hover:border-zinc-300 active:scale-95"
+        className="relative active:scale-95 transition-transform"
         aria-label="Toggle billing period"
+        style={{
+          width: 56,
+          height: 24,
+          background: "var(--ap-paper-2)",
+          border: "1px solid var(--ap-ink)",
+          borderRadius: 0,
+          padding: 0,
+          cursor: "pointer",
+        }}
       >
         <motion.div
-          className="absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-gradient-to-br from-brand-500 to-accent-indigo shadow-glow-sm"
-          animate={{ x: isAnnual ? 28 : 0 }}
+          style={{
+            position: "absolute",
+            top: 2,
+            left: 2,
+            width: 18,
+            height: 18,
+            background: "var(--ap-stamp)",
+            border: "1px solid var(--ap-ink)",
+          }}
+          animate={{ x: isAnnual ? 30 : 0 }}
           transition={SPRING_SNAPPY}
         />
-        {/* Glow effect behind the toggle */}
-        <motion.div
-          className="absolute inset-0 rounded-full pointer-events-none"
-          animate={{
-            boxShadow: isAnnual
-              ? "0 0 20px rgba(255,170,0,0.15)"
-              : "0 0 0 rgba(255,170,0,0)",
-          }}
-          transition={{ duration: 0.3 }}
-        />
       </button>
-      <span className={`text-sm font-medium transition-colors duration-300 ${isAnnual ? "text-zinc-900" : "text-zinc-500"}`}>
+      <span
+        className="ap-mono"
+        style={{
+          fontSize: 11,
+          color: isAnnual ? "var(--ap-ink)" : "var(--ap-ink-4)",
+          letterSpacing: "0.16em",
+          textTransform: "uppercase",
+          transition: "color 0.3s",
+        }}
+      >
         Anual
       </span>
       <AnimatePresence>
         {isAnnual && (
           <motion.span
-            initial={{ opacity: 0, scale: 0.5, x: -10 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
+            initial={{ opacity: 0, scale: 0.5, x: -10, rotate: -8 }}
+            animate={{ opacity: 1, scale: 1, x: 0, rotate: -3 }}
             exit={{ opacity: 0, scale: 0.5, x: -10 }}
             transition={SPRING_BOUNCE}
-            className="text-xs font-bold px-2.5 py-1 rounded-full bg-brand-500/15 text-brand-400 border border-brand-500/20"
+            className="ap-stamp-chip"
           >
             -20%
           </motion.span>

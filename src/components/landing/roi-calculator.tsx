@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Clock, Zap } from "lucide-react";
-import { MotionReveal, MotionCounter, EASE_CINEMATIC, SPRING_SNAPPY } from "@/components/motion";
+import { motion } from "framer-motion";
+import { MotionReveal, MotionCounter, EASE_CINEMATIC } from "@/components/motion";
+import { MagazineSection } from "@/components/editorial/MagazineSection";
+import { RichText } from "@/components/editorial/RichText";
 
 export function ROICalculator() {
   const [posts, setPosts] = useState(30);
@@ -13,52 +14,56 @@ export function ROICalculator() {
   const savedMin = traditionalMin - autopostMin;
   const savedHours = savedMin / 60;
   const savedDays = savedMin / 60 / 8;
+  const sliderPercent = ((posts - 5) / (120 - 5)) * 100;
 
   return (
-    <section className="py-20 px-6 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-500/[0.02] to-transparent pointer-events-none" />
+    <MagazineSection
+      index="06"
+      kicker="CALCULADORA DE TIEMPO"
+      title={
+        <>
+          ¿Cuánto tiempo <RichText text="<wave>ahorras al mes?</wave>" />
+        </>
+      }
+      align="center"
+    >
       <div className="max-w-2xl mx-auto relative">
-        <MotionReveal cinematic scale>
-          <div className="rounded-2xl border border-brand-500/20 bg-white shadow-lg p-8 sm:p-10 card-glow-hover group relative overflow-hidden">
-            {/* Border beam effect (inspired by Magic UI) */}
-            <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-              <motion.div
-                className="absolute w-20 h-20 rounded-full"
-                style={{
-                  background: "radial-gradient(circle, rgba(255,170,0,0.4), transparent 70%)",
-                  filter: "blur(15px)",
-                }}
-                animate={{
-                  top: ["0%", "0%", "100%", "100%", "0%"],
-                  left: ["0%", "100%", "100%", "0%", "0%"],
-                }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              />
-            </div>
-
-            {/* Header */}
-            <div className="text-center mb-8 relative">
-              <p className="text-xs font-semibold text-brand-400 uppercase tracking-[0.2em] mb-3">
-                Calculadora de tiempo
-              </p>
-              <h2 className="font-display font-bold text-2xl sm:text-3xl tracking-tight text-zinc-900">
-                ¿Cuanto tiempo{" "}
-                <span className="text-shimmer">ahorras al mes?</span>
-              </h2>
-            </div>
-
+        <MotionReveal cinematic>
+          <div
+            className="relative"
+            style={{
+              border: "1.5px solid var(--ap-ink)",
+              background: "var(--ap-paper)",
+              padding: "clamp(28px, 4vw, 48px)",
+            }}
+          >
             {/* Slider */}
-            <div className="mb-8 relative">
-              <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-medium text-zinc-700">
+            <div className="mb-10">
+              <div className="flex items-center justify-between mb-4">
+                <label
+                  className="ap-mono"
+                  style={{
+                    fontSize: 11,
+                    color: "var(--ap-ink-3)",
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                  }}
+                >
                   Posts por mes
                 </label>
                 <motion.span
-                  className="font-display font-bold text-2xl text-brand-600 tabular-nums"
+                  className="ap-display"
                   key={posts}
-                  initial={{ scale: 1.3, opacity: 0.5 }}
+                  initial={{ scale: 1.2, opacity: 0.5 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  transition={SPRING_SNAPPY}
+                  transition={{ duration: 0.25, ease: EASE_CINEMATIC }}
+                  style={{
+                    fontSize: 56,
+                    fontStyle: "italic",
+                    color: "var(--ap-stamp)",
+                    lineHeight: 1,
+                    letterSpacing: "-0.02em",
+                  }}
                 >
                   {posts}
                 </motion.span>
@@ -70,68 +75,174 @@ export function ROICalculator() {
                 step={5}
                 value={posts}
                 onChange={(e) => setPosts(Number(e.target.value))}
-                className="w-full h-2 rounded-full appearance-none cursor-pointer"
+                className="ap-roi-slider w-full appearance-none cursor-pointer"
                 style={{
-                  background: `linear-gradient(to right, #FFAA00 ${((posts - 5) / (120 - 5)) * 100}%, #E5E5EA ${((posts - 5) / (120 - 5)) * 100}%)`,
+                  height: 4,
+                  background: `linear-gradient(to right, var(--ap-ink) ${sliderPercent}%, var(--ap-line-2) ${sliderPercent}%)`,
+                  border: "none",
                 }}
               />
-              <div className="flex justify-between mt-2 text-xs text-zinc-400">
-                <span>5 posts</span>
-                <span>120 posts</span>
+              <div
+                className="ap-mono flex justify-between"
+                style={{
+                  fontSize: 10,
+                  color: "var(--ap-ink-4)",
+                  letterSpacing: "0.1em",
+                  marginTop: 10,
+                  textTransform: "uppercase",
+                }}
+              >
+                <span>5</span>
+                <span>120</span>
               </div>
             </div>
 
-            {/* Comparison */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <motion.div
-                className="rounded-xl border border-red-200 bg-red-50 p-4 text-center"
-                whileHover={{ scale: 1.02, borderColor: "rgba(239,68,68,0.25)" }}
-                transition={{ duration: 0.3 }}
+            {/* Comparison — dos paneles hairline-top */}
+            <div className="grid grid-cols-2 gap-0 mb-10">
+              <div
+                style={{
+                  borderTop: "1px solid var(--ap-line)",
+                  padding: "20px 0",
+                  textAlign: "center",
+                  borderRight: "1px solid var(--ap-line)",
+                }}
               >
-                <Clock className="h-5 w-5 text-red-500 mx-auto mb-2" />
-                <p className="text-xs text-zinc-500 mb-1">Forma tradicional</p>
-                <p className="font-display font-bold text-xl text-red-600 tabular-nums">
-                  <MotionCounter value={traditionalMin / 60} suffix="h" decimals={1} />
+                <p
+                  className="ap-mono"
+                  style={{
+                    fontSize: 10,
+                    color: "var(--ap-ink-4)",
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    margin: "0 0 12px",
+                  }}
+                >
+                  Forma tradicional
                 </p>
-                <p className="text-[10px] text-zinc-400 mt-0.5">
-                  ~5 min x {posts} posts
+                <p
+                  className="ap-display"
+                  style={{
+                    fontSize: 36,
+                    fontStyle: "italic",
+                    color: "var(--ap-ink-4)",
+                    letterSpacing: "-0.02em",
+                    margin: 0,
+                  }}
+                >
+                  <s
+                    style={{
+                      textDecorationColor: "var(--ap-stamp)",
+                      textDecorationThickness: "2px",
+                    }}
+                  >
+                    <MotionCounter value={traditionalMin / 60} suffix="h" decimals={1} />
+                  </s>
                 </p>
-              </motion.div>
-              <motion.div
-                className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center"
-                whileHover={{ scale: 1.02, borderColor: "rgba(255,170,0,0.3)" }}
-                transition={{ duration: 0.3 }}
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: "var(--ap-ink-4)",
+                    margin: "8px 0 0",
+                  }}
+                >
+                  ≈ 5 min × {posts} posts
+                </p>
+              </div>
+              <div
+                style={{
+                  borderTop: "1px solid var(--ap-line)",
+                  padding: "20px 0",
+                  textAlign: "center",
+                }}
               >
-                <Zap className="h-5 w-5 text-brand-400 mx-auto mb-2" />
-                <p className="text-xs text-zinc-500 mb-1">Con AutoPost</p>
-                <p className="font-display font-bold text-xl text-brand-600 tabular-nums">
+                <p
+                  className="ap-mono"
+                  style={{
+                    fontSize: 10,
+                    color: "var(--ap-stamp)",
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    margin: "0 0 12px",
+                  }}
+                >
+                  Con AutoPost
+                </p>
+                <p
+                  className="ap-display"
+                  style={{
+                    fontSize: 36,
+                    fontStyle: "italic",
+                    color: "var(--ap-stamp)",
+                    letterSpacing: "-0.02em",
+                    margin: 0,
+                  }}
+                >
                   2 min
                 </p>
-                <p className="text-[10px] text-zinc-400 mt-0.5">
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: "var(--ap-ink-4)",
+                    margin: "8px 0 0",
+                  }}
+                >
                   para todo el lote
                 </p>
-              </motion.div>
+              </div>
             </div>
 
-            {/* Result with animated gradient border */}
+            {/* Result */}
             <motion.div
-              className="rounded-xl border border-brand-500/25 bg-gradient-to-r from-amber-50 to-orange-50 p-5 text-center relative overflow-hidden"
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2, duration: 0.6, ease: EASE_CINEMATIC }}
+              className="text-center"
+              style={{
+                borderTop: "1px solid var(--ap-rule)",
+                borderBottom: "1px solid var(--ap-rule)",
+                padding: "28px 0 32px",
+              }}
             >
-              <p className="text-sm text-zinc-500 mb-1">Con {posts} posts al mes ahorras</p>
-              <p className="font-display font-extrabold text-4xl text-gradient tabular-nums">
+              <p
+                className="ap-mono"
+                style={{
+                  fontSize: 10,
+                  color: "var(--ap-ink-4)",
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  margin: "0 0 14px",
+                }}
+              >
+                Ahorras al mes
+              </p>
+              <p
+                className="ap-display"
+                style={{
+                  fontSize: "clamp(64px, 10vw, 96px)",
+                  fontStyle: "italic",
+                  color: "var(--ap-stamp)",
+                  letterSpacing: "-0.025em",
+                  lineHeight: 1,
+                  margin: 0,
+                }}
+              >
                 <MotionCounter value={savedHours} suffix="h" decimals={1} />
               </p>
-              <p className="text-sm text-zinc-500 mt-1">
-                ≈ {savedDays.toFixed(1)} dias de trabajo al mes
+              <p
+                style={{
+                  fontSize: 14,
+                  color: "var(--ap-ink-3)",
+                  fontStyle: "italic",
+                  margin: "14px 0 0",
+                }}
+              >
+                ≈ {savedDays.toFixed(1)} días de trabajo al mes
               </p>
             </motion.div>
           </div>
         </MotionReveal>
       </div>
-    </section>
+    </MagazineSection>
   );
 }
