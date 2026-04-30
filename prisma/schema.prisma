@@ -48,12 +48,13 @@ model Business {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  metaConnection MetaConnection?
-  uploadBatches  UploadBatch[]
-  postDrafts     PostDraft[]
-  auditLogs      AuditLog[]
-  reports        Report[]
-  brandProfile   BrandProfile?
+  metaConnection    MetaConnection?
+  uploadBatches     UploadBatch[]
+  postDrafts        PostDraft[]
+  auditLogs         AuditLog[]
+  reports           Report[]
+  brandProfile      BrandProfile?
+  socialConnections SocialConnection[]
 
   @@map("businesses")
 }
@@ -199,11 +200,12 @@ model PostDraft {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  batch         UploadBatch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  mediaAssets   MediaAsset[]
-  publishJobs   PublishJob[]
+  business         Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  batch            UploadBatch         @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  mediaAssets      MediaAsset[]
+  publishJobs      PublishJob[]
   approvalRequests ApprovalRequest[]
+  socialPublications SocialPublication[]
 
   @@unique([businessId, contentHash])
   @@map("post_drafts")
@@ -415,6 +417,97 @@ model ApprovalRequest {
 enum ApprovalDecision {
   APPROVED
   REJECTED
+}
+
+// ─────────────────────────────────────────
+// SOCIAL CONNECTION (multi-plataforma post-pivot)
+// 1:1 con (Business, SocialPlatform). Almacena tokens encrypted con
+// AES-256-GCM (mismo patrón que MetaConnection).
+// MetaConnection se mantiene como legacy para Instagram + Facebook que ya
+// funcionan; las nuevas plataformas usan SocialConnection unificada.
+// ─────────────────────────────────────────
+model SocialConnection {
+  id         String         @id @default(cuid())
+  businessId String
+  platform   SocialPlatform
+
+  externalUserId      String   // tiktok_open_id | linkedin_urn | youtube_channel_id
+  externalUsername    String?
+  externalDisplayName String?
+
+  // Tokens encrypted (AES-256-GCM)
+  accessTokenEnc  String
+  accessTokenIv   String
+  accessTokenTag  String
+  refreshTokenEnc String?
+  refreshTokenIv  String?
+  refreshTokenTag String?
+
+  scopes        String[]
+  expiresAt     DateTime?
+  status        ConnectionStatus @default(ACTIVE)
+  lastCheckedAt DateTime?
+  lastError     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business     Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  publications SocialPublication[]
+
+  @@unique([businessId, platform])
+  @@map("social_connections")
+}
+
+enum SocialPlatform {
+  TIKTOK
+  LINKEDIN
+  YOUTUBE
+  PINTEREST
+}
+
+enum ConnectionStatus {
+  ACTIVE
+  TOKEN_EXPIRED
+  REVOKED
+  ERROR
+}
+
+// ─────────────────────────────────────────
+// SOCIAL PUBLICATION (per-platform publish state)
+// 1:N con PostDraft. Permite ver "publicado en TikTok ✓ LinkedIn fail".
+// Los posts a Instagram + Facebook siguen usando los campos legacy
+// del PostDraft (metaPublicationId, metaPermalink) hasta migración futura.
+// ─────────────────────────────────────────
+model SocialPublication {
+  id           String         @id @default(cuid())
+  postDraftId  String
+  connectionId String
+  platform     SocialPlatform
+
+  externalPostId    String?
+  externalPermalink String?
+  status            PublishStatus @default(PENDING)
+  publishedAt       DateTime?
+  failedAt          DateTime?
+  errorMessage      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  postDraft  PostDraft        @relation(fields: [postDraftId], references: [id], onDelete: Cascade)
+  connection SocialConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([postDraftId])
+  @@index([status, createdAt])
+  @@map("social_publications")
+}
+
+enum PublishStatus {
+  PENDING
+  PUBLISHING
+  PUBLISHED
+  FAILED
 }
 
 // ─────────────────────────────────────────

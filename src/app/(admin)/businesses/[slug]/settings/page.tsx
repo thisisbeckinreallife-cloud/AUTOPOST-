@@ -1,37 +1,31 @@
 /**
- * Tab "Configuración" del business — conexiones de RRSS + zona peligrosa.
+ * Tab "Configuración" — datos del business + 6 cards de plataformas con
+ * conexión 2-clicks vía OAuth.
  *
- * Muestra una tarjeta por cada red social:
- *   - Instagram (vivo, vía Meta API oficial)
- *   - Facebook (incluido en la conexión Meta)
- *   - TikTok (próximamente Sprint 6)
- *   - LinkedIn (próximamente Sprint 6)
- *   - X / Twitter (próximamente Sprint 6)
+ * Plataformas:
+ *   - Instagram + Facebook → MetaConnection legacy (ya funciona)
+ *   - TikTok / LinkedIn / YouTube / Pinterest → SocialConnection nueva
  *
- * Plus: zona de borrar el business.
+ * Cada card muestra estado real (conectado/disponible/configurar/coming soon)
+ * y CTA correcta según el caso. Los OAuth flows abren en mismo tab vía Link.
  */
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { Instagram, Facebook, AlertCircle, Shield } from "lucide-react";
 import { DeleteBusinessButton } from "@/components/delete-business-button";
+import { SocialPlatformCard } from "@/components/admin/SocialPlatformCard";
+import { getPlatformConfigs } from "@/lib/social/platforms";
+import type { SocialPlatform } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
-interface SocialChannel {
-  key: string;
-  label: string;
-  icon: React.ReactNode;
-  status: "connected" | "available" | "coming_soon";
-  detail?: string;
-  connectHref?: string;
-}
-
 export default async function SettingsPage({
   params,
+  searchParams,
 }: {
   params: { slug: string };
+  searchParams: { connected?: string; error?: string };
 }) {
   await requireAuth();
 
@@ -52,6 +46,17 @@ export default async function SettingsPage({
           lastError: true,
         },
       },
+      socialConnections: {
+        select: {
+          id: true,
+          platform: true,
+          externalUsername: true,
+          externalDisplayName: true,
+          status: true,
+          expiresAt: true,
+          lastError: true,
+        },
+      },
     },
   });
   if (!business) notFound();
@@ -62,56 +67,13 @@ export default async function SettingsPage({
     meta?.tokenExpiresAt &&
     new Date(meta.tokenExpiresAt).getTime() < Date.now() + 7 * 24 * 60 * 60 * 1000;
 
-  const channels: SocialChannel[] = [
-    {
-      key: "instagram",
-      label: "Instagram",
-      icon: <Instagram className="h-5 w-5" />,
-      status: igConnected ? "connected" : "available",
-      detail: igConnected
-        ? `@${meta?.igUsername}${tokenExpiringSoon ? " · token expira pronto" : ""}`
-        : "Conecta vía Meta API oficial",
-      connectHref: `/businesses/${params.slug}/connect`,
-    },
-    {
-      key: "facebook",
-      label: "Facebook",
-      icon: <Facebook className="h-5 w-5" />,
-      status: meta?.fbPageName ? "connected" : "available",
-      detail: meta?.fbPageName
-        ? meta.fbPageName
-        : "Se conecta junto con Instagram",
-      connectHref: `/businesses/${params.slug}/connect`,
-    },
-    {
-      key: "tiktok",
-      label: "TikTok",
-      icon: <span style={{ fontSize: 16, lineHeight: 1 }}>🎵</span>,
-      status: "coming_soon",
-      detail: "Roadmap Sprint 6 · Q3",
-    },
-    {
-      key: "linkedin",
-      label: "LinkedIn",
-      icon: <span style={{ fontSize: 16, lineHeight: 1 }}>in</span>,
-      status: "coming_soon",
-      detail: "Roadmap Sprint 6 · Q3",
-    },
-    {
-      key: "x",
-      label: "X (Twitter)",
-      icon: <span style={{ fontSize: 16, lineHeight: 1 }}>𝕏</span>,
-      status: "coming_soon",
-      detail: "Roadmap Sprint 6 · Q3",
-    },
-    {
-      key: "youtube",
-      label: "YouTube Shorts",
-      icon: <span style={{ fontSize: 16, lineHeight: 1 }}>▶</span>,
-      status: "coming_soon",
-      detail: "Roadmap futuro",
-    },
-  ];
+  // Map de SocialConnection por plataforma
+  const socialByPlatform = new Map<SocialPlatform, (typeof business.socialConnections)[number]>();
+  for (const c of business.socialConnections) {
+    socialByPlatform.set(c.platform, c);
+  }
+
+  const platformConfigs = getPlatformConfigs();
 
   return (
     <div style={{ display: "grid", gap: 32, maxWidth: 900 }}>
@@ -141,6 +103,34 @@ export default async function SettingsPage({
           Conexiones y datos
         </h2>
       </div>
+
+      {/* Alerts */}
+      {searchParams.connected === "1" && (
+        <div
+          style={{
+            background: "var(--ap-paper-2)",
+            borderLeft: "3px solid #6B7A2E",
+            padding: "12px 16px",
+            fontSize: 14,
+            color: "#6B7A2E",
+          }}
+        >
+          ✓ Plataforma conectada correctamente
+        </div>
+      )}
+      {searchParams.error && (
+        <div
+          style={{
+            background: "var(--ap-paper-2)",
+            borderLeft: "3px solid var(--ap-stamp)",
+            padding: "12px 16px",
+            fontSize: 14,
+            color: "var(--ap-stamp)",
+          }}
+        >
+          {decodeURIComponent(searchParams.error)}
+        </div>
+      )}
 
       {/* Brand info */}
       <section>
@@ -199,7 +189,7 @@ export default async function SettingsPage({
             margin: "0 0 14px",
           }}
         >
-          Redes sociales conectadas
+          Redes sociales · 2 clicks para conectar
         </p>
         {meta?.lastError && (
           <div
@@ -214,9 +204,10 @@ export default async function SettingsPage({
             }}
           >
             <AlertCircle className="h-3.5 w-3.5 inline mr-2" />
-            Último error: {meta.lastError.slice(0, 200)}
+            Último error Meta: {meta.lastError.slice(0, 200)}
           </div>
         )}
+
         <div
           style={{
             display: "grid",
@@ -224,9 +215,48 @@ export default async function SettingsPage({
             gap: 10,
           }}
         >
-          {channels.map((c) => (
-            <ChannelCard key={c.key} channel={c} />
-          ))}
+          {/* Instagram (legacy MetaConnection) */}
+          <LegacyChannelCard
+            label="Instagram"
+            icon={<Instagram className="h-5 w-5" />}
+            connected={igConnected}
+            detail={
+              igConnected
+                ? `@${meta?.igUsername}${tokenExpiringSoon ? " · token expira pronto" : ""}`
+                : "Conecta vía Meta API oficial"
+            }
+            connectHref={`/businesses/${params.slug}/connect`}
+          />
+          <LegacyChannelCard
+            label="Facebook"
+            icon={<Facebook className="h-5 w-5" />}
+            connected={!!meta?.fbPageName}
+            detail={meta?.fbPageName ?? "Se conecta junto con Instagram"}
+            connectHref={`/businesses/${params.slug}/connect`}
+          />
+
+          {/* Plataformas nuevas via SocialConnection */}
+          {platformConfigs.map((cfg) => {
+            const conn = socialByPlatform.get(cfg.platform);
+            return (
+              <SocialPlatformCard
+                key={cfg.platform}
+                businessId={business.id}
+                config={cfg}
+                connection={
+                  conn
+                    ? {
+                        username: conn.externalUsername,
+                        displayName: conn.externalDisplayName,
+                        status: conn.status,
+                        expiresAt: conn.expiresAt?.toISOString() ?? null,
+                        lastError: conn.lastError,
+                      }
+                    : null
+                }
+              />
+            );
+          })}
         </div>
       </section>
 
@@ -272,7 +302,7 @@ export default async function SettingsPage({
                 fontStyle: "italic",
               }}
             >
-              Borra todos los posts, batches, brand DNA, y desconecta Instagram. Irreversible.
+              Borra todos los posts, batches, conexiones sociales. Irreversible.
             </p>
           </div>
           <DeleteBusinessButton slug={params.slug} name={business.name} />
@@ -282,22 +312,30 @@ export default async function SettingsPage({
   );
 }
 
-function ChannelCard({ channel }: { channel: SocialChannel }) {
-  const isConnected = channel.status === "connected";
-  const isComingSoon = channel.status === "coming_soon";
-
+function LegacyChannelCard({
+  label,
+  icon,
+  connected,
+  detail,
+  connectHref,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  connected: boolean;
+  detail: string;
+  connectHref: string;
+}) {
   return (
     <div
       style={{
         background: "var(--ap-paper-2)",
-        border: isConnected
+        border: connected
           ? "1px solid #6B7A2E"
           : "1px solid var(--ap-line-2)",
         padding: "14px 16px",
         display: "flex",
         alignItems: "center",
         gap: 12,
-        opacity: isComingSoon ? 0.55 : 1,
       }}
     >
       <div
@@ -311,43 +349,29 @@ function ChannelCard({ channel }: { channel: SocialChannel }) {
           justifyContent: "center",
           flexShrink: 0,
           color: "var(--ap-ink)",
-          fontFamily: "var(--ap-font-mono)",
-          fontWeight: 700,
         }}
       >
-        {channel.icon}
+        {icon}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p
-          style={{
-            margin: 0,
-            fontSize: 14,
-            color: "var(--ap-ink)",
-            fontWeight: 600,
-          }}
-        >
-          {channel.label}
+        <p style={{ margin: 0, fontSize: 14, color: "var(--ap-ink)", fontWeight: 600 }}>
+          {label}
         </p>
         <p
           className="ap-mono"
           style={{
             margin: "2px 0 0",
             fontSize: 10,
-            color: isConnected
-              ? "#6B7A2E"
-              : isComingSoon
-                ? "var(--ap-ink-4)"
-                : "var(--ap-ink-3)",
+            color: connected ? "#6B7A2E" : "var(--ap-ink-3)",
             letterSpacing: "0.1em",
           }}
         >
-          {channel.detail}
+          {detail}
         </p>
       </div>
-      {isConnected ? (
+      {connected ? (
         <span
           className="ap-mono"
-          title="Conectado"
           style={{
             fontSize: 9,
             color: "#6B7A2E",
@@ -360,21 +384,9 @@ function ChannelCard({ channel }: { channel: SocialChannel }) {
           <Shield className="h-3 w-3 inline mr-1" />
           OK
         </span>
-      ) : isComingSoon ? (
-        <span
-          className="ap-mono"
-          style={{
-            fontSize: 9,
-            color: "var(--ap-ink-4)",
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-          }}
-        >
-          PRÓX.
-        </span>
       ) : (
-        <Link
-          href={channel.connectHref ?? "#"}
+        <a
+          href={connectHref}
           className="ap-btn ap-btn--stamp"
           style={{
             padding: "8px 12px",
@@ -385,7 +397,7 @@ function ChannelCard({ channel }: { channel: SocialChannel }) {
           }}
         >
           Conectar
-        </Link>
+        </a>
       )}
     </div>
   );
