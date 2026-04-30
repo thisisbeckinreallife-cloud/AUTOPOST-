@@ -258,7 +258,30 @@ export const suggestScheduleHandler: ToolHandler<
     orderBy: { sourceFolderName: "asc" },
   });
 
-  const startDate = input.startDate ? new Date(input.startDate) : new Date(Date.now() + 24 * 3600 * 1000);
+  // Validación de fecha: si el LLM propone una fecha pasada (alucinación
+  // común porque no tiene acceso a la fecha real), forzamos próximo día válido.
+  let startDate: Date;
+  if (input.startDate) {
+    const parsed = new Date(input.startDate);
+    const minStart = new Date(Date.now() + 60 * 60 * 1000); // mínimo: en 1h
+    if (isNaN(parsed.getTime())) {
+      // Fecha inválida → mañana 10am
+      startDate = new Date(Date.now() + 24 * 3600 * 1000);
+      startDate.setHours(10, 0, 0, 0);
+    } else if (parsed < minStart) {
+      // Fecha pasada → mover al siguiente DÍA DE LA SEMANA + hora pedidos
+      // Si el LLM dijo "viernes 11am" y ya pasó, queremos el SIGUIENTE viernes 11am
+      startDate = new Date(parsed);
+      while (startDate < minStart) {
+        startDate.setDate(startDate.getDate() + 7);
+      }
+    } else {
+      startDate = parsed;
+    }
+  } else {
+    startDate = new Date(Date.now() + 24 * 3600 * 1000);
+    startDate.setHours(10, 0, 0, 0);
+  }
   const perDay = Math.min(3, Math.max(1, input.postsPerDay ?? 1));
   const platforms = input.platforms ?? ["instagram"];
 
@@ -840,12 +863,19 @@ export const confirmBatchScheduleHandler: ToolHandler<
         continue;
       }
 
-      const publishAt = new Date(item.proposedAt);
-      if (isNaN(publishAt.getTime()) || publishAt <= new Date()) {
+      let publishAt = new Date(item.proposedAt);
+      if (isNaN(publishAt.getTime())) {
         errors.push(
-          `Draft ${item.postDraftId}: fecha inválida o en el pasado (${item.proposedAt})`,
+          `Draft ${item.postDraftId}: fecha inválida (${item.proposedAt})`,
         );
         continue;
+      }
+      // Si la fecha es pasada, forzamos próxima ocurrencia +7 días.
+      // Esto previene los típicos casos donde el LLM propone "viernes 11am"
+      // pero el viernes ya pasó. NO falla — la pone para el próximo viernes.
+      const minFuture = new Date(Date.now() + 5 * 60 * 1000);
+      while (publishAt < minFuture) {
+        publishAt = new Date(publishAt.getTime() + 7 * 24 * 3600 * 1000);
       }
 
       const platforms = item.platforms.map((p) => p.toLowerCase());

@@ -97,11 +97,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const business = await db.business.findUnique({
+  const businessRecord = await db.business.findUnique({
     where: { id: businessId },
-    select: { id: true },
+    select: { id: true, timezone: true },
   });
-  if (!business) return jsonError("Business not found", 404);
+  if (!businessRecord) return jsonError("Business not found", 404);
 
   const rl = await checkAiRateLimit(businessId);
   if (!rl.allowed) {
@@ -152,7 +152,33 @@ export async function POST(request: NextRequest) {
 
   // Cargar contexto de marca
   const ctx = await loadBrandVoiceContext(businessId);
-  const systemPrompt = buildSystemPrompt(ctx, batchId);
+
+  // Cargar últimos batches para inyectar al system prompt
+  // (esto evita que el LLM invente batchIds inexistentes)
+  const recentBatches = await db.uploadBatch.findMany({
+    where: { businessId, status: { in: ["PARSED", "SCHEDULED", "PARTIALLY_SCHEDULED"] } },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+    select: {
+      id: true,
+      originalFilename: true,
+      status: true,
+      totalPosts: true,
+      validPosts: true,
+      createdAt: true,
+    },
+  });
+
+  const systemPrompt = buildSystemPrompt(ctx, batchId, {
+    timezone: businessRecord.timezone ?? "Europe/Madrid",
+    recentBatches: recentBatches.map((b) => ({
+      id: b.id,
+      filename: b.originalFilename,
+      status: b.status,
+      posts: b.validPosts ?? b.totalPosts ?? 0,
+      createdAt: b.createdAt.toISOString(),
+    })),
+  });
 
   // SDK OpenAI y Together son intercambiables — comparten interface
   // chat.completions.create. Elegimos uno u otro y guardamos el modelo.
@@ -203,6 +229,14 @@ export async function POST(request: NextRequest) {
 
         let finalAssistantText = "";
         const toolCallsLog: Array<{ name: string; input: unknown; output: unknown }> = [];
+        // Cache de tool calls de ESTE turno conversacional. Si el LLM
+        // intenta llamar al mismo tool con los mismos args, devolvemos
+        // el resultado cacheado en vez de re-ejecutar (ahorra coste +
+        // evita la cascada de "Analizando batch · Analizando batch · …").
+        const toolCallCache = new Map<string, unknown>();
+        // Counter de tokens del turn (para logging y alertas)
+        let totalInputTokens = 0;
+        let totalOutputTokens = 0;
 
         for (let turn = 0; turn < MAX_TURNS; turn++) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -213,6 +247,14 @@ export async function POST(request: NextRequest) {
             temperature: 0.7,
             max_tokens: 1500,
           });
+
+          // Acumular tokens si el provider los devuelve
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const usage = (response as any).usage;
+          if (usage) {
+            totalInputTokens += usage.prompt_tokens ?? 0;
+            totalOutputTokens += usage.completion_tokens ?? 0;
+          }
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const choice = (response as any).choices?.[0];
@@ -287,9 +329,27 @@ export async function POST(request: NextRequest) {
               continue;
             }
 
+            // 🚀 Cache anti-duplicate: si ya invocamos este tool con
+            // los mismos args en este turno, devolvemos el resultado
+            // cacheado SIN re-ejecutar. Ahorra tiempo + dinero.
+            const cacheKey = `${toolName}::${JSON.stringify(input)}`;
+            if (toolCallCache.has(cacheKey)) {
+              const cachedOutput = toolCallCache.get(cacheKey);
+              send("tool_call", { tool: toolName, input });
+              send("tool_result", { tool: toolName, output: cachedOutput, cached: true });
+              messages.push({
+                role: "tool",
+                tool_call_id: call.id ?? "",
+                content: JSON.stringify(cachedOutput),
+              });
+              console.log(`[ai/chat] cache HIT for ${toolName}`);
+              continue;
+            }
+
             send("tool_call", { tool: toolName, input });
             try {
               const output = await executeTool(toolName, input, toolCtx);
+              toolCallCache.set(cacheKey, output);
               send("tool_result", { tool: toolName, output });
               toolCallsLog.push({ name: toolName, input, output });
               messages.push({
@@ -307,6 +367,13 @@ export async function POST(request: NextRequest) {
               });
             }
           }
+        }
+
+        // Logging de tokens consumidos para alertar de waste
+        if (totalInputTokens > 0 || totalOutputTokens > 0) {
+          console.log(
+            `[ai/chat] turn complete · model=${model} · input_tokens=${totalInputTokens} · output_tokens=${totalOutputTokens} · tool_calls=${toolCallsLog.length} · cache_hits=${toolCallCache.size - toolCallsLog.length}`,
+          );
         }
 
         // Persistir respuesta del assistant
@@ -360,9 +427,47 @@ function jsonError(message: string, status: number): Response {
 function buildSystemPrompt(
   ctx: { businessName: string; profile?: { niche?: string; tone?: string; targetAudience?: string; taboos?: string[]; notes?: string }; examples: string[] },
   batchId?: string,
+  extra?: {
+    timezone: string;
+    recentBatches: Array<{
+      id: string;
+      filename: string;
+      status: string;
+      posts: number;
+      createdAt: string;
+    }>;
+  },
 ): string {
+  const tz = extra?.timezone ?? "Europe/Madrid";
+  const now = new Date();
+  // Formatos en castellano para el LLM
+  const todayFormatted = formatSpanishDate(now, tz);
+  const tomorrow = new Date(now.getTime() + 24 * 3600 * 1000);
+  const tomorrowFormatted = formatSpanishDate(tomorrow, tz);
+
+  // Próximos 7 días con fecha exacta para que el LLM no invente
+  const nextDays: string[] = [];
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(now.getTime() + i * 24 * 3600 * 1000);
+    nextDays.push(`  - ${dayLabel(i)}: ${formatSpanishDate(d, tz)}`);
+  }
+
   const lines = [
     `Eres el asistente editorial de ${ctx.businessName} en AutoPost.`,
+    "",
+    "# Fecha y hora actual (CRÍTICO — úsala para cualquier referencia temporal)",
+    `Hoy es: ${todayFormatted}`,
+    `Hora actual: ${formatSpanishTime(now, tz)} (${tz})`,
+    `Mañana: ${tomorrowFormatted}`,
+    "",
+    "Próximos 14 días con fecha real (úsalos cuando el user pida 'el viernes', 'el lunes', 'la semana que viene'):",
+    ...nextDays,
+    "",
+    "REGLAS DE FECHAS:",
+    "- NUNCA propongas una fecha en el pasado. Si el user pide 'el viernes a las 11' y el viernes de esta semana ya pasó, usa el SIGUIENTE viernes.",
+    "- NUNCA inventes años. Estamos en " + now.getFullYear() + ".",
+    "- Si el user dice 'mañana', es exactamente " + tomorrowFormatted + ".",
+    "- Cuando llames a tools con fechas, usa formato ISO 8601 con timezone: '" + tz + "'.",
     "",
     "# Quién eres",
     "Eres un editor senior con 15 años en agencias de social media. Hablas como un humano, no como un bot. Vas al grano. Das opiniones honestas — si una idea es mediocre, lo dices.",
@@ -449,7 +554,90 @@ function buildSystemPrompt(
     lines.push("Si menciona 'el batch' o 'la subida', refiere a ese ID.");
   }
 
+  // Listado de últimos batches reales del business — evita que el LLM
+  // invente IDs o se confunda con cuál es "el batch que acabo de subir"
+  if (extra?.recentBatches && extra.recentBatches.length > 0) {
+    lines.push("", "# Últimos batches reales de este business (úsalos cuando el user diga 'el batch', 'la subida', 'la última carpeta'):");
+    for (const b of extra.recentBatches) {
+      const minutesAgo = Math.round(
+        (Date.now() - new Date(b.createdAt).getTime()) / 60000,
+      );
+      const ago =
+        minutesAgo < 60
+          ? `hace ${minutesAgo} min`
+          : minutesAgo < 1440
+            ? `hace ${Math.round(minutesAgo / 60)}h`
+            : `hace ${Math.round(minutesAgo / 1440)}d`;
+      lines.push(
+        `  - batchId="${b.id}" · "${b.filename}" · ${b.posts} posts · ${b.status} · ${ago}`,
+      );
+    }
+    lines.push(
+      "",
+      "REGLA: NUNCA uses un batchId que no esté en esta lista. Si el user habla de un batch, mira esta lista y usa el ID real. Si no sabes cuál es, PREGUNTA.",
+    );
+  } else {
+    lines.push(
+      "",
+      "# Estado de batches",
+      "El business AÚN NO TIENE batches procesados. Si el user habla de 'el batch que subí', dile que no ves ningún batch en su cuenta y pídele que lo suba con el botón 📎.",
+    );
+  }
+
+  // Honestidad cuando los tools devuelven vacío
+  lines.push(
+    "",
+    "# Honestidad ante errores y resultados vacíos (CRÍTICO)",
+    "- Si analyze_batch devuelve `posts: []` o `totalFiles: 0`, NO inventes excusas tipo 'hubo un error con la subida'. Di la verdad: 'No veo posts en ese batch — ¿estás seguro del ID? Los batches que sí veo son: <listar arriba>'.",
+    "- Si suggest_schedule no devuelve schedule, dile al user 'el batch no tiene posts validados, sube primero el contenido'.",
+    "- Si confirm_batch_schedule devuelve errores, repórtalos uno por uno claramente.",
+    "- NUNCA digas 'parece que hubo un error' o 'es posible que' — si no sabes qué pasó, pregunta o admítelo.",
+  );
+
+  // Anti-loop: evitar repetir tool calls innecesarios
+  lines.push(
+    "",
+    "# Eficiencia (CRÍTICO — cada repetición cuesta dinero)",
+    "- Si ya llamaste a analyze_batch(batchId=X) en este turno, NO lo repitas — usa el resultado anterior.",
+    "- Si ya llamaste a analyze_format_compatibility(postId=Y), NO lo repitas para el mismo post.",
+    "- Antes de llamar un tool, verifica MENTALMENTE si ya tienes la información necesaria del histórico de esta conversación.",
+  );
+
   return lines.join("\n");
+}
+
+/**
+ * Formatea una fecha en castellano: "jueves 30 de abril de 2026"
+ */
+function formatSpanishDate(d: Date, tz: string): string {
+  return new Intl.DateTimeFormat("es-ES", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: tz,
+  }).format(d);
+}
+
+/**
+ * Formatea una hora en castellano: "19:06"
+ */
+function formatSpanishTime(d: Date, tz: string): string {
+  return new Intl.DateTimeFormat("es-ES", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: tz,
+  }).format(d);
+}
+
+/**
+ * Etiqueta natural para el día N (0=hoy, 1=mañana, etc.)
+ */
+function dayLabel(n: number): string {
+  if (n === 0) return "Hoy";
+  if (n === 1) return "Mañana";
+  if (n === 2) return "Pasado mañana";
+  return `Dentro de ${n} días`;
 }
 
 /**
