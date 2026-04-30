@@ -1,22 +1,19 @@
 "use client";
 
 /**
- * Chat IA — generador completo de posts dentro del business.
+ * Chat IA conversacional — UI principal del nuevo paradigma post-pivot.
  *
  * Flujo:
- *   1. Selector de formato: post / carrusel / reel / story (sólo reel/story
- *      aún no genera vídeo, llega en Sprint 4 con Kling)
- *   2. Aspect ratio derivado del formato (1:1 feed, 4:5 vertical, 9:16 reel)
- *   3. Drag-drop de imágenes de referencia (opcional, sirve para el visual
- *      style — Sprint 4 con FLUX Kontext + IP-Adapter)
- *   4. Prompt textarea
- *   5. Click "Generar" → llama paralelamente:
- *      - /api/ai/caption (Claude o Llama según providers configurados)
- *      - /api/ai/image (FLUX dev por defecto)
- *   6. Resultado con regenerate por elemento + "Programar este post" → upload page
+ *   - El usuario escribe mensajes en el textarea
+ *   - El front llama POST /api/ai/chat con SSE
+ *   - El stream emite eventos: text/tool_call/tool_result/done/error
+ *   - Cada mensaje se renderiza como burbuja editorial
+ *   - Tool calls aparecen como cards inline ("📊 Analizando batch...")
+ *
+ * Mantiene chatId entre turns para continuar conversación.
+ * Auto-scroll al fondo cuando llegan deltas.
  */
-import { useState, useCallback } from "react";
-import Link from "next/link";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useToast } from "@/components/ui/toast";
 
 interface Props {
@@ -27,48 +24,12 @@ interface Props {
   brandNiche: string | null;
 }
 
-type PostFormat = "feed" | "carousel" | "reel" | "story";
-type Quality = "schnell" | "dev" | "pro";
-
-interface FormatConfig {
-  label: string;
-  ratio: "1:1" | "4:5" | "9:16";
-  imagesCount: number;
-  description: string;
-  comingSoon?: boolean;
-}
-
-const FORMATS: Record<PostFormat, FormatConfig> = {
-  feed: {
-    label: "Post sencillo",
-    ratio: "4:5",
-    imagesCount: 1,
-    description: "1 imagen vertical 4:5 + caption + hashtags",
-  },
-  carousel: {
-    label: "Carrusel",
-    ratio: "1:1",
-    imagesCount: 4,
-    description: "4 imágenes 1:1 coordinadas + caption",
-  },
-  reel: {
-    label: "Reel / B-roll",
-    ratio: "9:16",
-    imagesCount: 1,
-    description: "Storyboard 9:16 (vídeo Kling llega Sprint 4)",
-  },
-  story: {
-    label: "Story",
-    ratio: "9:16",
-    imagesCount: 1,
-    description: "1 imagen 9:16 con texto overlay",
-  },
-};
-
-interface GeneratedImage {
-  url: string;
-  width: number;
-  height: number;
+interface Message {
+  id: string;
+  role: "user" | "assistant" | "tool";
+  content: string;
+  toolCalls?: Array<{ name: string; input: unknown; output?: unknown; error?: string }>;
+  pending?: boolean;
 }
 
 export function ChatStudio({
@@ -79,60 +40,69 @@ export function ChatStudio({
   brandNiche,
 }: Props) {
   const { toast } = useToast();
-  const [format, setFormat] = useState<PostFormat>("feed");
-  const [quality, setQuality] = useState<Quality>("dev");
-  const [prompt, setPrompt] = useState("");
-  const [referenceUrls, setReferenceUrls] = useState<string[]>([""]);
+  const [chatId, setChatId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "welcome",
+      role: "assistant",
+      content: `Hola. Soy tu asistente editorial para ${businessName}. Puedo:\n\n• Analizar batches que hayas subido\n• Sugerir captions y hashtags con la voz de tu marca\n• Recomendarte mejores horarios por plataforma\n• Proponerte un calendario completo de publicación\n\n¿En qué te ayudo?`,
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const messagesRef = useRef<HTMLDivElement>(null);
 
-  const [generatingCaption, setGeneratingCaption] = useState(false);
-  const [generatingImages, setGeneratingImages] = useState(false);
-  const [caption, setCaption] = useState("");
-  const [images, setImages] = useState<GeneratedImage[]>([]);
-  const [error, setError] = useState("");
+  // Auto-scroll cuando llegan mensajes
+  useEffect(() => {
+    if (!messagesRef.current) return;
+    messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+  }, [messages]);
 
-  const cfg = FORMATS[format];
-  const cost = (() => {
-    const captionC = 1;
-    const imgUnit = quality === "schnell" ? 1 : quality === "dev" ? 3 : 5;
-    return captionC + imgUnit * cfg.imagesCount;
-  })();
+  const sendMessage = useCallback(async () => {
+    const text = input.trim();
+    if (!text || sending) return;
 
-  const generateCaption = useCallback(async () => {
-    if (prompt.trim().length < 3) {
-      setError("Escribe un prompt más detallado.");
-      return;
-    }
-    setError("");
-    setGeneratingCaption(true);
-    setCaption("");
+    const userMsg: Message = {
+      id: `u-${Date.now()}`,
+      role: "user",
+      content: text,
+    };
+    const pendingMsg: Message = {
+      id: `a-${Date.now()}`,
+      role: "assistant",
+      content: "",
+      toolCalls: [],
+      pending: true,
+    };
+    setMessages((m) => [...m, userMsg, pendingMsg]);
+    setInput("");
+    setSending(true);
 
     try {
-      const res = await fetch("/api/ai/caption", {
+      const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          chatId,
           businessId,
-          brief: `${prompt.trim()}\n\nFormato: ${cfg.label}.${
-            referenceUrls.filter((u) => u.trim()).length > 0
-              ? `\nReferencias visuales: ${referenceUrls.filter((u) => u.trim()).length} imagen(es) adjuntas.`
-              : ""
-          }`,
-          channel: format === "story" ? "story" : format === "reel" ? "reel" : "feed",
-          length: format === "story" ? "short" : "medium",
+          message: text,
         }),
       });
 
       if (!res.ok || !res.body) {
-        const data = await res.json().catch(() => ({}));
-        if (res.status === 402) {
-          setError(`Sin créditos. Tienes ${data.remaining?.total ?? 0}.`);
-          return;
-        }
+        const err = await res.json().catch(() => ({}));
         if (res.status === 503) {
-          setError("AI no configurada. Pídele al admin que active TOGETHER_API_KEY.");
-          return;
+          updateLastAssistant(setMessages, () => ({
+            content: "AI no disponible. El admin debe configurar TOGETHER_API_KEY.",
+            pending: false,
+          }));
+        } else {
+          updateLastAssistant(setMessages, () => ({
+            content: err.error ?? `Error HTTP ${res.status}`,
+            pending: false,
+          }));
         }
-        setError(data.error ?? `HTTP ${res.status}`);
+        setSending(false);
         return;
       }
 
@@ -141,6 +111,8 @@ export function ChatStudio({
       const decoder = new TextDecoder();
       let buffer = "";
       let acc = "";
+      const accToolCalls: Message["toolCalls"] = [];
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -148,611 +120,308 @@ export function ChatStudio({
         const events = buffer.split("\n\n");
         buffer = events.pop() ?? "";
         for (const evt of events) {
-          let event = "", data = "";
+          let eventName = "";
+          let dataStr = "";
           for (const line of evt.split("\n")) {
-            if (line.startsWith("event:")) event = line.slice(6).trim();
-            else if (line.startsWith("data:")) data += line.slice(5).trim();
+            if (line.startsWith("event:")) eventName = line.slice(6).trim();
+            else if (line.startsWith("data:")) dataStr += line.slice(5).trim();
           }
-          if (!event) continue;
+          if (!eventName) continue;
+          let payload: Record<string, unknown> = {};
           try {
-            const payload = JSON.parse(data);
-            if (event === "chunk" && typeof payload.text === "string") {
-              acc += payload.text;
-              setCaption(acc);
-            } else if (event === "done" && typeof payload.text === "string") {
-              acc = payload.text;
-              setCaption(acc);
-            } else if (event === "error") {
-              setError(payload.error ?? "Error en streaming");
-            } else if (event === "usage") {
-              window.dispatchEvent(new CustomEvent("credits-updated"));
-            }
+            payload = JSON.parse(dataStr);
           } catch {}
+
+          if (eventName === "chat" && typeof payload.chatId === "string") {
+            setChatId(payload.chatId);
+          } else if (eventName === "text" && typeof payload.delta === "string") {
+            acc += payload.delta;
+            updateLastAssistant(setMessages, () => ({
+              content: acc,
+              pending: true,
+            }));
+          } else if (eventName === "tool_call") {
+            accToolCalls.push({
+              name: String(payload.tool ?? ""),
+              input: payload.input,
+            });
+            updateLastAssistant(setMessages, () => ({
+              toolCalls: [...accToolCalls],
+            }));
+          } else if (eventName === "tool_result") {
+            const idx = accToolCalls.findIndex(
+              (c) => c.name === payload.tool && !c.output && !c.error,
+            );
+            if (idx >= 0) {
+              accToolCalls[idx] = {
+                ...accToolCalls[idx],
+                output: payload.output,
+                error: payload.error as string | undefined,
+              };
+              updateLastAssistant(setMessages, () => ({
+                toolCalls: [...accToolCalls],
+              }));
+            }
+          } else if (eventName === "done") {
+            updateLastAssistant(setMessages, () => ({ pending: false }));
+          } else if (eventName === "error") {
+            updateLastAssistant(setMessages, (m) => ({
+              content:
+                (m.content || "") +
+                "\n\n❌ Error: " +
+                (typeof payload.error === "string" ? payload.error : "desconocido"),
+              pending: false,
+            }));
+          }
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error de red");
+      const msg = err instanceof Error ? err.message : "Error de red";
+      updateLastAssistant(setMessages, () => ({
+        content: `❌ ${msg}`,
+        pending: false,
+      }));
+      toast(msg, "error");
     } finally {
-      setGeneratingCaption(false);
+      setSending(false);
     }
-  }, [prompt, businessId, format, cfg, referenceUrls]);
+  }, [input, sending, chatId, businessId, toast]);
 
-  const generateImages = useCallback(async () => {
-    if (prompt.trim().length < 3) {
-      setError("Escribe un prompt más detallado.");
-      return;
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
     }
-    setError("");
-    setGeneratingImages(true);
-    setImages([]);
-
-    try {
-      const enrichedPrompt = (() => {
-        const refs = referenceUrls.filter((u) => u.trim()).length;
-        const lines = [prompt.trim()];
-        if (brandTone) lines.push(`Estilo de marca: ${brandTone.replace(/_/g, " ")}.`);
-        if (brandNiche) lines.push(`Nicho: ${brandNiche}.`);
-        if (refs > 0) lines.push(`Inspirado en ${refs} imagen(es) de referencia subidas.`);
-        return lines.join(" ");
-      })();
-
-      const res = await fetch("/api/ai/image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          businessId,
-          prompt: enrichedPrompt,
-          model: quality,
-          aspectRatio: cfg.ratio,
-          count: cfg.imagesCount,
-        }),
-      });
-      const data = await res.json();
-      if (res.status === 402) {
-        setError(`Sin créditos. Tienes ${data.remaining?.total ?? 0}.`);
-        return;
-      }
-      if (res.status === 503) {
-        setError(
-          "Generación de imagen no disponible. Configura TOGETHER_API_KEY en Railway.",
-        );
-        return;
-      }
-      if (!res.ok) {
-        setError(data.error ?? `HTTP ${res.status}`);
-        return;
-      }
-      setImages(data.images as GeneratedImage[]);
-      window.dispatchEvent(new CustomEvent("credits-updated"));
-      toast(
-        `${data.images.length} imagen${data.images.length > 1 ? "es" : ""} listas`,
-        "success",
-      );
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error de red");
-    } finally {
-      setGeneratingImages(false);
-    }
-  }, [prompt, businessId, quality, cfg, referenceUrls, brandTone, brandNiche, toast]);
-
-  const generateAll = useCallback(async () => {
-    await Promise.all([generateCaption(), generateImages()]);
-  }, [generateCaption, generateImages]);
-
-  function setRefUrl(i: number, v: string) {
-    setReferenceUrls((arr) => {
-      const next = [...arr];
-      next[i] = v;
-      return next;
-    });
-  }
-  function addRef() {
-    if (referenceUrls.length < 5) setReferenceUrls([...referenceUrls, ""]);
-  }
-  function removeRef(i: number) {
-    setReferenceUrls(referenceUrls.filter((_, idx) => idx !== i));
-  }
+  };
 
   return (
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "minmax(0, 1fr)",
-        gap: 24,
+        gridTemplateRows: "auto 1fr auto",
+        gap: 0,
+        height: "calc(100vh - 280px)",
+        minHeight: 500,
+      }}
+    >
+      {/* Header */}
+      <div style={{ marginBottom: 16 }}>
+        <p
+          className="ap-mono"
+          style={{
+            fontSize: 11,
+            color: "var(--ap-stamp)",
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            margin: 0,
+          }}
+        >
+          ✦ Asistente editorial
+        </p>
+        <p
+          style={{
+            fontSize: 12,
+            color: "var(--ap-ink-3)",
+            margin: "4px 0 0",
+            fontFamily: "var(--ap-font-mono)",
+            letterSpacing: "0.1em",
+          }}
+        >
+          {brandNiche ? `Nicho: ${brandNiche}` : "Sin nicho configurado"}
+          {brandTone ? ` · ${brandTone}` : ""}
+        </p>
+      </div>
+
+      {/* Mensajes */}
+      <div
+        ref={messagesRef}
+        style={{
+          overflowY: "auto",
+          background: "var(--ap-paper-2)",
+          border: "1px solid var(--ap-line-2)",
+          padding: "16px 20px",
+        }}
+      >
+        {messages.map((m) => (
+          <MessageBubble key={m.id} message={m} />
+        ))}
+      </div>
+
+      {/* Input */}
+      <div style={{ marginTop: 12, position: "relative" }}>
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={onKeyDown}
+          placeholder="Pregúntale lo que sea — análisis de batch, sugerencias de horario, captions..."
+          rows={2}
+          maxLength={4000}
+          disabled={sending}
+          style={{
+            width: "100%",
+            background: "var(--ap-paper)",
+            border: "1px solid var(--ap-line-2)",
+            padding: "12px 80px 12px 14px",
+            fontSize: 14,
+            fontFamily: "inherit",
+            color: "var(--ap-ink)",
+            lineHeight: 1.55,
+            resize: "vertical",
+            outline: "none",
+            boxSizing: "border-box",
+            minHeight: 60,
+          }}
+          onFocus={(e) => (e.currentTarget.style.borderColor = "var(--ap-ink)")}
+          onBlur={(e) =>
+            (e.currentTarget.style.borderColor = "var(--ap-line-2)")
+          }
+        />
+        <button
+          type="button"
+          onClick={sendMessage}
+          disabled={!input.trim() || sending}
+          className="ap-btn ap-btn--stamp"
+          style={{
+            position: "absolute",
+            bottom: 12,
+            right: 12,
+            padding: "8px 14px",
+            fontSize: 12,
+            opacity: !input.trim() || sending ? 0.4 : 1,
+          }}
+        >
+          {sending ? "..." : "Enviar"}
+        </button>
+      </div>
+
+      <p
+        style={{
+          fontSize: 10,
+          color: "var(--ap-ink-4)",
+          fontFamily: "var(--ap-font-mono)",
+          letterSpacing: "0.1em",
+          margin: "8px 0 0",
+          textTransform: "uppercase",
+        }}
+      >
+        Enter envía · Shift+Enter nueva línea · Negocio: {businessSlug}
+      </p>
+    </div>
+  );
+}
+
+function updateLastAssistant(
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
+  updater: (current: Message) => Partial<Message>,
+) {
+  setMessages((prev) => {
+    const arr = [...prev];
+    for (let i = arr.length - 1; i >= 0; i--) {
+      if (arr[i].role === "assistant") {
+        arr[i] = { ...arr[i], ...updater(arr[i]) };
+        break;
+      }
+    }
+    return arr;
+  });
+}
+
+function MessageBubble({ message }: { message: Message }) {
+  const isUser = message.role === "user";
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: isUser ? "flex-end" : "flex-start",
+        marginBottom: 16,
       }}
     >
       <p
         className="ap-mono"
         style={{
-          fontSize: 11,
+          fontSize: 9,
           color: "var(--ap-ink-4)",
-          letterSpacing: "0.18em",
+          letterSpacing: "0.16em",
           textTransform: "uppercase",
-          margin: 0,
-        }}
-      >
-        {brandNiche ? `Nicho: ${brandNiche}` : "Sin nicho configurado"}{brandTone ? ` · ${brandTone}` : ""}
-      </p>
-      <h2
-        className="ap-display"
-        style={{
-          fontSize: "clamp(28px, 4vw, 40px)",
-          fontStyle: "italic",
-          lineHeight: 1,
           margin: "0 0 4px",
-          color: "var(--ap-ink)",
         }}
       >
-        Genera un post completo
-      </h2>
-      <p style={{ fontSize: 14, color: "var(--ap-ink-3)", margin: "0 0 20px" }}>
-        Selecciona formato, da prompt + referencias opcionales, y la IA crea caption + imagen(es)
-        con la voz de <strong>{businessName}</strong>.
+        {isUser ? "Tú" : "✦ AutoPost"}
+        {message.pending ? " · escribiendo..." : ""}
       </p>
+      <div
+        style={{
+          maxWidth: "85%",
+          background: isUser ? "var(--ap-ink)" : "var(--ap-paper)",
+          color: isUser ? "var(--ap-paper)" : "var(--ap-ink)",
+          padding: "12px 16px",
+          fontSize: 14,
+          lineHeight: 1.55,
+          whiteSpace: "pre-wrap",
+          border: isUser ? "none" : "1px solid var(--ap-line)",
+        }}
+      >
+        {message.content || (message.pending ? "..." : "")}
+      </div>
 
-      {/* Form */}
-      <div style={{ display: "grid", gap: 22 }}>
-        {/* 1. Format selector */}
-        <Section number="01" title="Formato del post">
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-              gap: 8,
-            }}
-          >
-            {(Object.keys(FORMATS) as PostFormat[]).map((k) => {
-              const f = FORMATS[k];
-              const active = format === k;
-              return (
-                <button
-                  key={k}
-                  type="button"
-                  onClick={() => setFormat(k)}
-                  style={{
-                    textAlign: "left",
-                    padding: "12px 14px",
-                    background: active ? "var(--ap-paper)" : "transparent",
-                    border: active ? "2px solid var(--ap-stamp)" : "1px solid var(--ap-line-2)",
-                    cursor: "pointer",
-                    fontFamily: "inherit",
-                    color: "var(--ap-ink)",
-                  }}
-                >
-                  <p style={{ margin: 0, fontWeight: 600, fontSize: 14 }}>
-                    {f.label}{" "}
-                    <span
-                      className="ap-mono"
-                      style={{
-                        fontSize: 9,
-                        color: "var(--ap-ink-4)",
-                        marginLeft: 4,
-                        letterSpacing: "0.1em",
-                      }}
-                    >
-                      {f.ratio}
-                    </span>
-                  </p>
-                  <p
-                    style={{
-                      margin: "2px 0 0",
-                      fontSize: 11,
-                      color: "var(--ap-ink-3)",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    {f.description}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
-        </Section>
-
-        {/* 2. Calidad */}
-        <Section number="02" title="Calidad de imagen">
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {(["schnell", "dev", "pro"] as Quality[]).map((q) => {
-              const active = quality === q;
-              const credCost = q === "schnell" ? 1 : q === "dev" ? 3 : 5;
-              const labels = {
-                schnell: "Rápida",
-                dev: "Estándar",
-                pro: "Hero shot",
-              };
-              return (
-                <button
-                  key={q}
-                  type="button"
-                  onClick={() => setQuality(q)}
-                  className="ap-mono"
-                  style={{
-                    padding: "8px 14px",
-                    background: active ? "var(--ap-stamp)" : "transparent",
-                    border: active
-                      ? "1px solid var(--ap-stamp)"
-                      : "1px solid var(--ap-line-2)",
-                    color: active ? "var(--ap-paper)" : "var(--ap-ink-2)",
-                    fontSize: 11,
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    cursor: "pointer",
-                  }}
-                >
-                  {labels[q]} · {credCost} cred/img
-                </button>
-              );
-            })}
-          </div>
-        </Section>
-
-        {/* 3. Reference images (URL-based for now, drag-drop en Sprint 4) */}
-        <Section
-          number="03"
-          title="Imágenes de referencia (opcional)"
-          subtitle="Pega URLs de imágenes que reflejen el mood/estilo que quieres. La IA las usa como inspiración."
-        >
-          {referenceUrls.map((url, i) => (
-            <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-              <input
-                type="url"
-                value={url}
-                onChange={(e) => setRefUrl(i, e.target.value)}
-                placeholder="https://… (Pinterest, Instagram, tu sitio…)"
-                style={inputStyle}
-              />
-              {url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={url}
-                  alt=""
-                  style={{
-                    width: 40,
-                    height: 40,
-                    objectFit: "cover",
-                    border: "1px solid var(--ap-line-2)",
-                  }}
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-              )}
-              {referenceUrls.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeRef(i)}
-                  style={removeBtnStyle}
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          ))}
-          {referenceUrls.length < 5 && (
-            <button type="button" onClick={addRef} style={addBtnStyle}>
-              + Añadir referencia
-            </button>
-          )}
-        </Section>
-
-        {/* 4. Prompt */}
-        <Section
-          number="04"
-          title="Prompt"
-          subtitle="Describe el post: qué quieres comunicar, qué pasa en la imagen, palabras clave."
-        >
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            rows={4}
-            maxLength={2000}
-            placeholder="Ej: Anuncia el evento del sábado 22 a las 21h. Vibe nocturno editorial, gente bailando con luces tomate sobre fondo oscuro. Llamada a guardar plaza vía link en bio."
-            style={{ ...inputStyle, resize: "vertical" }}
-          />
-          <p
-            style={{
-              margin: "4px 0 0",
-              fontSize: 11,
-              color: "var(--ap-ink-4)",
-              fontStyle: "italic",
-            }}
-          >
-            {prompt.length}/2000
-          </p>
-        </Section>
-
-        {/* 5. Generate buttons */}
+      {/* Tool calls */}
+      {message.toolCalls && message.toolCalls.length > 0 && (
         <div
           style={{
+            marginTop: 6,
             display: "flex",
-            gap: 10,
-            flexWrap: "wrap",
-            alignItems: "center",
-            paddingTop: 6,
-            borderTop: "1px solid var(--ap-line)",
+            flexDirection: "column",
+            gap: 4,
+            maxWidth: "85%",
           }}
         >
-          <button
-            type="button"
-            onClick={generateAll}
-            disabled={generatingCaption || generatingImages || prompt.trim().length < 3}
-            className="ap-btn ap-btn--stamp"
-            style={{
-              padding: "12px 22px",
-              fontSize: 13,
-              opacity: generatingCaption || generatingImages || prompt.trim().length < 3 ? 0.5 : 1,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            ✦ Generar todo
-            <span
-              className="ap-mono"
-              style={{ fontSize: 9, opacity: 0.8, letterSpacing: "0.1em", textTransform: "uppercase" }}
-            >
-              −{cost} cred
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={generateCaption}
-            disabled={generatingCaption}
-            className="ap-btn ap-btn--ghost"
-            style={{ padding: "12px 18px", fontSize: 12, opacity: generatingCaption ? 0.5 : 1 }}
-          >
-            {generatingCaption ? "Generando…" : "Solo caption (−1 cred)"}
-          </button>
-          <button
-            type="button"
-            onClick={generateImages}
-            disabled={generatingImages}
-            className="ap-btn ap-btn--ghost"
-            style={{ padding: "12px 18px", fontSize: 12, opacity: generatingImages ? 0.5 : 1 }}
-          >
-            {generatingImages
-              ? "Generando…"
-              : `Solo imagen${cfg.imagesCount > 1 ? "es" : ""} (−${(quality === "schnell" ? 1 : quality === "dev" ? 3 : 5) * cfg.imagesCount} cred)`}
-          </button>
+          {message.toolCalls.map((tc, i) => (
+            <ToolCallChip key={i} call={tc} />
+          ))}
         </div>
-
-        {/* 6. Resultado */}
-        {(caption || images.length > 0 || generatingCaption || generatingImages) && (
-          <div
-            style={{
-              padding: 22,
-              background: "var(--ap-paper-2)",
-              border: "1px solid var(--ap-line-2)",
-              display: "grid",
-              gap: 18,
-            }}
-          >
-            <p
-              className="ap-mono"
-              style={{
-                fontSize: 11,
-                color: "var(--ap-stamp)",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                margin: 0,
-              }}
-            >
-              ✦ Resultado
-            </p>
-
-            {/* Caption */}
-            {(caption || generatingCaption) && (
-              <div>
-                <p
-                  className="ap-mono"
-                  style={{
-                    fontSize: 10,
-                    color: "var(--ap-ink-4)",
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    margin: "0 0 8px",
-                  }}
-                >
-                  Caption {generatingCaption ? "· escribiendo…" : ""}
-                </p>
-                <div
-                  aria-live="polite"
-                  style={{
-                    background: "var(--ap-paper)",
-                    border: "1px solid var(--ap-line)",
-                    padding: "14px 16px",
-                    fontSize: 14,
-                    lineHeight: 1.65,
-                    color: "var(--ap-ink-2)",
-                    whiteSpace: "pre-wrap",
-                    minHeight: 80,
-                  }}
-                >
-                  {caption || (generatingCaption && (
-                    <span style={{ color: "var(--ap-ink-4)", fontStyle: "italic" }}>
-                      Esperando…
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Images */}
-            {images.length > 0 && (
-              <div>
-                <p
-                  className="ap-mono"
-                  style={{
-                    fontSize: 10,
-                    color: "var(--ap-ink-4)",
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    margin: "0 0 8px",
-                  }}
-                >
-                  Imágenes generadas · {cfg.ratio}
-                </p>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: `repeat(auto-fit, minmax(180px, 1fr))`,
-                    gap: 8,
-                  }}
-                >
-                  {images.map((img, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        position: "relative",
-                        aspectRatio: cfg.ratio.replace(":", " / "),
-                        background: "var(--ap-paper)",
-                        border: "1px solid var(--ap-line-2)",
-                        overflow: "hidden",
-                      }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={img.url}
-                        alt={`Imagen generada ${i + 1}`}
-                        style={{
-                          position: "absolute",
-                          inset: 0,
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Action: programar este post */}
-            {(caption || images.length > 0) && !generatingCaption && !generatingImages && (
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                <button
-                  type="button"
-                  onClick={generateAll}
-                  className="ap-btn ap-btn--ghost"
-                  style={{ padding: "10px 16px", fontSize: 12 }}
-                >
-                  ↻ Regenerar todo
-                </button>
-                <Link
-                  href={`/businesses/${businessSlug}/upload`}
-                  className="ap-btn ap-btn--stamp"
-                  style={{ padding: "10px 16px", fontSize: 12 }}
-                >
-                  Programar este post →
-                </Link>
-                <p
-                  style={{
-                    margin: "10px 0 0",
-                    fontSize: 11,
-                    color: "var(--ap-ink-4)",
-                    fontStyle: "italic",
-                    flex: "1 0 100%",
-                  }}
-                >
-                  Tip: copia caption + descarga imágenes y súbelas en el calendario para programar la publicación.
-                  Sprint 4 hará este flujo automático.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {error && (
-          <div
-            role="alert"
-            style={{
-              padding: "10px 14px",
-              background: "var(--ap-paper-2)",
-              borderLeft: "2px solid var(--ap-stamp)",
-              fontSize: 13,
-              color: "var(--ap-ink-2)",
-            }}
-          >
-            {error}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Section({
-  number,
-  title,
-  subtitle,
-  children,
-}: {
-  number: string;
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <p
-        className="ap-mono"
-        style={{
-          fontSize: 10,
-          color: "var(--ap-ink-4)",
-          letterSpacing: "0.18em",
-          textTransform: "uppercase",
-          margin: "0 0 4px",
-        }}
-      >
-        {number} · {title}
-      </p>
-      {subtitle && (
-        <p
-          style={{
-            margin: "0 0 10px",
-            fontSize: 12,
-            color: "var(--ap-ink-3)",
-            fontStyle: "italic",
-          }}
-        >
-          {subtitle}
-        </p>
       )}
-      {children}
     </div>
   );
 }
 
-const inputStyle: React.CSSProperties = {
-  background: "var(--ap-paper)",
-  border: "1px solid var(--ap-line-2)",
-  padding: "10px 12px",
-  fontSize: 14,
-  fontFamily: "inherit",
-  color: "var(--ap-ink)",
-  lineHeight: 1.55,
-  outline: "none",
-  width: "100%",
-  boxSizing: "border-box",
-};
-const addBtnStyle: React.CSSProperties = {
-  background: "transparent",
-  border: "1px dashed var(--ap-line-2)",
-  padding: "8px 14px",
-  fontSize: 11,
-  color: "var(--ap-ink-3)",
-  letterSpacing: "0.14em",
-  textTransform: "uppercase",
-  cursor: "pointer",
-  fontFamily: "var(--ap-font-mono)",
-};
-const removeBtnStyle: React.CSSProperties = {
-  background: "transparent",
-  border: "1px solid var(--ap-line-2)",
-  padding: "8px 12px",
-  fontSize: 14,
-  color: "var(--ap-ink-3)",
-  cursor: "pointer",
-  minWidth: 40,
-};
+function ToolCallChip({
+  call,
+}: {
+  call: { name: string; input: unknown; output?: unknown; error?: string };
+}) {
+  const labels: Record<string, string> = {
+    analyze_batch: "📊 Analizando batch",
+    suggest_schedule: "📅 Proponiendo calendario",
+    confirm_schedule: "✓ Confirmando programación",
+    recommend_posting_time: "⏰ Calculando mejor hora",
+    update_brand_profile: "✦ Guardando perfil de marca",
+    suggest_caption: "✏ Sugiriendo caption",
+    suggest_hashtags: "# Sugiriendo hashtags",
+  };
+  const label = labels[call.name] ?? call.name;
+  const finished = call.output !== undefined || call.error !== undefined;
+
+  return (
+    <div
+      style={{
+        background: "var(--ap-paper-2)",
+        border: "1px solid var(--ap-line)",
+        padding: "8px 12px",
+        fontSize: 12,
+        color: "var(--ap-ink-2)",
+        fontFamily: "var(--ap-font-mono)",
+        letterSpacing: "0.04em",
+      }}
+    >
+      <span style={{ color: call.error ? "var(--ap-stamp)" : "var(--ap-ink-2)" }}>
+        {label} {finished ? "✓" : "..."}
+      </span>
+      {call.error && (
+        <span style={{ color: "var(--ap-stamp)", marginLeft: 8 }}>
+          {call.error}
+        </span>
+      )}
+    </div>
+  );
+}
