@@ -4,10 +4,13 @@
  * Card de plataforma social con OAuth 2-clicks.
  *
  * Estados visuales:
- *   - Connected (verde) — username + botón "Desconectar"
+ *   - Connected (verde oliva) — username + botón "Desconectar"
  *   - Available (default) — botón "Conectar" (redirect OAuth)
- *   - Token expired (amarillo) — "Reconectar"
- *   - Error (rojo) — muestra error + "Reintentar"
+ *   - In review (mostaza) — productionMode=false: "Beta · sólo testers".
+ *     El OAuth funciona, pero solo si el founder añadió tu email
+ *     en el dashboard del provider.
+ *   - Token expired (mostaza) — "Reconectar"
+ *   - Error (tomate) — muestra error + "Reintentar"
  *   - Coming soon (gris dashed) — env vars no configuradas
  */
 import { useState } from "react";
@@ -36,6 +39,10 @@ export function SocialPlatformCard({ businessId, config, connection }: Props) {
   const tokenExpired = connection?.status === "TOKEN_EXPIRED";
   const hasError = connection?.status === "ERROR";
   const comingSoon = !config.available;
+  // En review: env vars configuradas pero la app developer aún
+  // está en test mode (review pendiente). El OAuth funciona pero
+  // solo para emails añadidos manualmente por el founder.
+  const inReview = config.available && !config.productionMode && !isConnected;
 
   const tokenExpiringSoon =
     connection?.expiresAt &&
@@ -80,14 +87,17 @@ export function SocialPlatformCard({ businessId, config, connection }: Props) {
             ? "1px solid #D4A627"
             : hasError
               ? "1px solid var(--ap-stamp)"
-              : comingSoon
-                ? "1px dashed var(--ap-line-2)"
-                : "1px solid var(--ap-line-2)",
+              : inReview
+                ? "1px solid #D4A627"
+                : comingSoon
+                  ? "1px dashed var(--ap-line-2)"
+                  : "1px solid var(--ap-line-2)",
         padding: "14px 16px",
         display: "flex",
         alignItems: "center",
         gap: 12,
         opacity: comingSoon ? 0.6 : 1,
+        position: "relative",
       }}
     >
       <div
@@ -134,10 +144,26 @@ export function SocialPlatformCard({ businessId, config, connection }: Props) {
               ? "Token expirado · reconecta"
               : hasError
                 ? `Error: ${connection?.lastError?.slice(0, 60) ?? "desconocido"}`
-                : comingSoon
-                  ? config.unavailableReason ?? "Próximamente"
-                  : "No conectado"}
+                : inReview
+                  ? "Beta · sólo testers invitados"
+                  : comingSoon
+                    ? config.unavailableReason ?? "Próximamente"
+                    : "No conectado"}
         </p>
+        {inReview && (
+          <p
+            style={{
+              margin: "4px 0 0",
+              fontSize: 11,
+              color: "var(--ap-ink-3)",
+              fontStyle: "italic",
+              lineHeight: 1.4,
+            }}
+          >
+            Pide al equipo de AutoPost que añada tu email al dashboard
+            de {config.displayName} antes de conectar.
+          </p>
+        )}
       </div>
 
       {isConnected ? (
@@ -177,7 +203,7 @@ export function SocialPlatformCard({ businessId, config, connection }: Props) {
       ) : (
         <a
           href={startOAuthHref}
-          className="ap-btn ap-btn--stamp"
+          className={inReview ? "ap-btn ap-btn--ghost" : "ap-btn ap-btn--stamp"}
           style={{
             padding: "8px 12px",
             fontSize: 10,
@@ -187,7 +213,11 @@ export function SocialPlatformCard({ businessId, config, connection }: Props) {
             whiteSpace: "nowrap",
           }}
         >
-          {tokenExpired || hasError ? "Reconectar" : "Conectar"}
+          {tokenExpired || hasError
+            ? "Reconectar"
+            : inReview
+              ? "Conectar (beta)"
+              : "Conectar"}
         </a>
       )}
     </div>

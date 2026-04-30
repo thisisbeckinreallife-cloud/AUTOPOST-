@@ -23,10 +23,27 @@ export interface PlatformConfig {
   authBaseUrl: string;
   /** Qué app review se requiere para uso producción */
   appReview?: string;
+  /**
+   * Si false, la plataforma está en test mode → solo emails añadidos
+   * manualmente como testers en el dashboard del provider pueden
+   * conectarse. Se controla con ENV {PLATFORM}_PRODUCTION_MODE.
+   * Default: false (asumimos test mode hasta que el founder
+   * flippe la flag tras pasar review).
+   *
+   * Cuando es false, la UI muestra "Esperando review — invitar tester"
+   * en vez de dejar al usuario intentar OAuth y fallar.
+   */
+  productionMode: boolean;
 }
 
 function envFlag(...keys: string[]): boolean {
   return keys.every((k) => Boolean(process.env[k]));
+}
+
+function envProductionMode(platform: string, defaultValue = false): boolean {
+  const v = process.env[`${platform}_PRODUCTION_MODE`];
+  if (v === undefined) return defaultValue;
+  return v === "1" || v === "true" || v === "yes";
 }
 
 export function getPlatformConfigs(): PlatformConfig[] {
@@ -42,6 +59,7 @@ export function getPlatformConfigs(): PlatformConfig[] {
         : undefined,
       authBaseUrl: "https://www.tiktok.com/v2/auth/authorize/",
       appReview: "TikTok Content Posting API requires app review",
+      productionMode: envProductionMode("TIKTOK"),
     },
     {
       platform: "LINKEDIN",
@@ -53,6 +71,7 @@ export function getPlatformConfigs(): PlatformConfig[] {
         ? "Configura LINKEDIN_CLIENT_ID y LINKEDIN_CLIENT_SECRET en Railway"
         : undefined,
       authBaseUrl: "https://www.linkedin.com/oauth/v2/authorization",
+      productionMode: envProductionMode("LINKEDIN"),
     },
     {
       platform: "YOUTUBE",
@@ -68,6 +87,7 @@ export function getPlatformConfigs(): PlatformConfig[] {
         : undefined,
       authBaseUrl: "https://accounts.google.com/o/oauth2/v2/auth",
       appReview: "YouTube quota inicial baja — pedir aumento desde inicio",
+      productionMode: envProductionMode("YOUTUBE"),
     },
     {
       platform: "PINTEREST",
@@ -79,6 +99,7 @@ export function getPlatformConfigs(): PlatformConfig[] {
         ? "Configura PINTEREST_CLIENT_ID y PINTEREST_CLIENT_SECRET en Railway"
         : undefined,
       authBaseUrl: "https://www.pinterest.com/oauth/",
+      productionMode: envProductionMode("PINTEREST"),
     },
   ];
 }
