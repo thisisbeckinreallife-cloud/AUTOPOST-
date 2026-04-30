@@ -34,6 +34,7 @@ import {
   isTogetherAvailable,
   MODEL_LLAMA_33_70B,
 } from "@/lib/ai/together";
+import { getOpenAI, isOpenAIAvailable, MODEL_CHAT } from "@/lib/ai/openai";
 import { loadBrandVoiceContext } from "@/lib/ai/brand-voice";
 import { checkAiRateLimit } from "@/lib/ai/rate-limit";
 import {
@@ -86,8 +87,14 @@ export async function POST(request: NextRequest) {
   const batchId: string | undefined = parsed.data.batchId ?? undefined;
   let chatId: string | undefined = parsed.data.chatId ?? undefined;
 
-  if (!isTogetherAvailable()) {
-    return jsonError("AI no disponible. Configura TOGETHER_API_KEY.", 503);
+  // Preferimos OpenAI gpt-4o-mini (más barato + tool calling fiable).
+  // Fallback a Llama 3.3 70B vía Together si OpenAI no está configurado.
+  const useOpenAI = isOpenAIAvailable();
+  if (!useOpenAI && !isTogetherAvailable()) {
+    return jsonError(
+      "AI no disponible. Configura OPENAI_API_KEY o TOGETHER_API_KEY.",
+      503,
+    );
   }
 
   const business = await db.business.findUnique({
@@ -147,8 +154,11 @@ export async function POST(request: NextRequest) {
   const ctx = await loadBrandVoiceContext(businessId);
   const systemPrompt = buildSystemPrompt(ctx, batchId);
 
-  const client = getTogether();
-  if (!client) return jsonError("Together no configurado", 503);
+  // SDK OpenAI y Together son intercambiables — comparten interface
+  // chat.completions.create. Elegimos uno u otro y guardamos el modelo.
+  const client = useOpenAI ? getOpenAI() : getTogether();
+  const model = useOpenAI ? MODEL_CHAT : MODEL_LLAMA_33_70B;
+  if (!client) return jsonError("Cliente IA no inicializado", 503);
 
   const toolCtx: ToolContext = {
     adminUserId: session.adminUserId,
@@ -195,16 +205,27 @@ export async function POST(request: NextRequest) {
         const toolCallsLog: Array<{ name: string; input: unknown; output: unknown }> = [];
 
         for (let turn = 0; turn < MAX_TURNS; turn++) {
-          const response = await client.chat.completions.create({
-            model: MODEL_LLAMA_33_70B,
-            messages: messages as Parameters<typeof client.chat.completions.create>[0]["messages"],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const response = await (client as any).chat.completions.create({
+            model,
+            messages,
             tools,
             temperature: 0.7,
             max_tokens: 1500,
           });
 
-          const choice = response.choices?.[0];
-          const msg = choice?.message;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const choice = (response as any).choices?.[0];
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const msg = choice?.message as
+            | {
+                content?: string | null;
+                tool_calls?: Array<{
+                  id?: string;
+                  function: { name: string; arguments: string };
+                }>;
+              }
+            | undefined;
           if (!msg) {
             send("error", { error: "No assistant response" });
             break;
