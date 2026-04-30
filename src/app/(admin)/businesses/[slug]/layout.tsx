@@ -13,6 +13,7 @@ import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { BusinessTabs } from "@/components/admin/BusinessTabs";
+import { BusinessSwitcher } from "@/components/admin/BusinessSwitcher";
 
 export const dynamic = "force-dynamic";
 
@@ -25,17 +26,37 @@ export default async function BusinessLayout({
 }) {
   await requireAuth();
 
-  const business = await db.business.findUnique({
-    where: { slug: params.slug },
-    include: {
-      metaConnection: {
-        select: { igUsername: true, status: true },
+  const [business, allBusinesses] = await Promise.all([
+    db.business.findUnique({
+      where: { slug: params.slug },
+      include: {
+        metaConnection: {
+          select: { igUsername: true, status: true },
+        },
       },
-    },
-  });
+    }),
+    db.business.findMany({
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        metaConnection: {
+          select: { igUsername: true, status: true },
+        },
+      },
+    }),
+  ]);
   if (!business) notFound();
 
   const igConnected = business.metaConnection?.status === "ACTIVE";
+  const switcherOptions = allBusinesses.map((b) => ({
+    id: b.id,
+    name: b.name,
+    slug: b.slug,
+    igUsername: b.metaConnection?.igUsername ?? null,
+    igConnected: b.metaConnection?.status === "ACTIVE",
+  }));
 
   return (
     <div className="ap-root" style={{ background: "var(--ap-paper)", minHeight: "100vh" }}>
@@ -47,23 +68,7 @@ export default async function BusinessLayout({
         }}
       >
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-          <p
-            className="ap-mono"
-            style={{
-              fontSize: 10,
-              color: "var(--ap-ink-4)",
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              margin: 0,
-            }}
-          >
-            <a
-              href="/businesses"
-              style={{ color: "inherit", textDecoration: "none" }}
-            >
-              ← Cuentas
-            </a>
-          </p>
+          <BusinessSwitcher currentSlug={params.slug} businesses={switcherOptions} />
 
           <div
             style={{

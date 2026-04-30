@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/toast";
 import { AiCaptionStudio } from "@/components/admin/AiCaptionStudio";
 import { RequestApprovalPanel } from "@/components/admin/RequestApprovalPanel";
 import { PlatformPicker } from "@/components/admin/PlatformPicker";
+import { InstagramMockup } from "@/components/admin/InstagramMockup";
 import type { SocialPlatform } from "@prisma/client";
 
 interface PostDetail {
@@ -337,6 +338,29 @@ export default function PostDetailPage() {
           </pre>
         </CardContent>
       </Card>
+
+      {/* Vista previa del feed — cómo se vería en Instagram */}
+      {post.mediaAssets.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Vista previa en Instagram</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <InstagramMockup
+              username={meta.username ?? post.business.name.toLowerCase().replace(/\s/g, "")}
+              caption={post.caption}
+              postType={post.postType}
+              mediaAssets={post.mediaAssets.map((a) => ({
+                id: a.id,
+                storageUrl: a.storageUrl,
+                mimeType: a.mimeType,
+                sortOrder: a.sortOrder,
+              }))}
+              publishAt={post.publishAt}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Sugerir caption con IA — solo para posts editables */}
       {["DRAFT", "VALIDATED", "READY"].includes(post.status) && (

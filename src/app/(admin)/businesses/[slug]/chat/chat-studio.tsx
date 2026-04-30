@@ -15,6 +15,7 @@
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useToast } from "@/components/ui/toast";
+import { Paperclip, Loader2, Check } from "lucide-react";
 
 interface Props {
   businessId: string;
@@ -22,6 +23,14 @@ interface Props {
   businessSlug: string;
   brandTone: string | null;
   brandNiche: string | null;
+}
+
+interface UploadProgress {
+  phase: "presigning" | "uploading" | "processing" | "done" | "error";
+  fileName: string;
+  pct: number;
+  batchId?: string;
+  error?: string;
 }
 
 interface Message {
@@ -50,13 +59,236 @@ export function ChatStudio({
   ]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [upload, setUpload] = useState<UploadProgress | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-scroll cuando llegan mensajes
   useEffect(() => {
     if (!messagesRef.current) return;
     messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
   }, [messages]);
+
+  /**
+   * Sube un ZIP directo desde el chat. Tras procesar el batch,
+   * envía un mensaje pre-fabricado al LLM para que lo analice
+   * y haga clarifying questions sobre lo que detecte.
+   */
+  const uploadFolder = useCallback(
+    async (file: File) => {
+      if (sending || upload) return;
+
+      const isZip = file.name.toLowerCase().endsWith(".zip");
+      if (!isZip) {
+        toast("Solo carpetas comprimidas .zip por ahora", "error");
+        return;
+      }
+      if (file.size > 100 * 1024 * 1024) {
+        toast("El ZIP supera los 100 MB", "error");
+        return;
+      }
+
+      setUpload({ phase: "presigning", fileName: file.name, pct: 0 });
+
+      try {
+        // 1. Presign
+        const presignRes = await fetch("/api/batches/presign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            businessSlug,
+            fileName: file.name,
+            fileSize: file.size,
+            contentType: "application/zip",
+          }),
+        });
+        if (!presignRes.ok) {
+          const err = await presignRes.json().catch(() => ({}));
+          throw new Error(err.error ?? `Presign falló (${presignRes.status})`);
+        }
+        const { data: presignData } = await presignRes.json();
+
+        // 2. PUT a R2 con progress
+        setUpload({ phase: "uploading", fileName: file.name, pct: 0 });
+        await uploadWithProgress(presignData.uploadUrl, file, (pct) =>
+          setUpload((u) => (u ? { ...u, pct } : u)),
+        );
+
+        // 3. POST /api/batches con storageKey
+        setUpload({
+          phase: "processing",
+          fileName: file.name,
+          pct: 100,
+          batchId: presignData.batchId,
+        });
+        const batchRes = await fetch("/api/batches", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            batchId: presignData.batchId,
+            businessId: presignData.businessId,
+            storageKey: presignData.storageKey,
+            fileName: file.name,
+            fileSize: file.size,
+          }),
+        });
+        if (!batchRes.ok) {
+          const err = await batchRes.json().catch(() => ({}));
+          throw new Error(err.error ?? `Procesado falló (${batchRes.status})`);
+        }
+
+        setUpload({
+          phase: "done",
+          fileName: file.name,
+          pct: 100,
+          batchId: presignData.batchId,
+        });
+
+        // 4. Insertar mensaje "subido" en chat
+        const uploadMsg: Message = {
+          id: `u-upload-${Date.now()}`,
+          role: "user",
+          content: `📦 He subido la carpeta "${file.name}". Analízala y dime qué detectas.`,
+        };
+        const pendingMsg: Message = {
+          id: `a-${Date.now()}`,
+          role: "assistant",
+          content: "",
+          toolCalls: [],
+          pending: true,
+        };
+        setMessages((m) => [...m, uploadMsg, pendingMsg]);
+
+        // 5. Auto-llamar al chat con el batchId — el LLM debería invocar
+        // analyze_batch + suggest_schedule + hacer clarifying questions
+        await streamChat(
+          `Acabo de subir un batch nuevo con ID "${presignData.batchId}". Llama a analyze_batch con ese ID, después a suggest_schedule. Si detectas ambigüedades en los meta.json, captions o tipos de post, hazme las preguntas necesarias para clarificarlas antes de proponer un plan final.`,
+        );
+
+        // Reset upload state después de 3s para no taparlo
+        setTimeout(() => setUpload(null), 3000);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Error de red";
+        setUpload({
+          phase: "error",
+          fileName: file.name,
+          pct: 0,
+          error: msg,
+        });
+        toast(msg, "error");
+        setTimeout(() => setUpload(null), 5000);
+      }
+    },
+    [sending, upload, businessSlug, toast],
+  );
+
+  /**
+   * Streamea una respuesta del chat con un mensaje arbitrario.
+   * Usado tanto por sendMessage (input user) como por uploadFolder
+   * (mensaje sintético post-upload).
+   */
+  const streamChat = useCallback(
+    async (text: string) => {
+      setSending(true);
+      try {
+        const res = await fetch("/api/ai/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chatId, businessId, message: text }),
+        });
+
+        if (!res.ok || !res.body) {
+          const err = await res.json().catch(() => ({}));
+          updateLastAssistant(setMessages, () => ({
+            content:
+              res.status === 503
+                ? "AI no disponible. El admin debe configurar TOGETHER_API_KEY."
+                : err.error ?? `Error HTTP ${res.status}`,
+            pending: false,
+          }));
+          return;
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let acc = "";
+        const accToolCalls: Message["toolCalls"] = [];
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const events = buffer.split("\n\n");
+          buffer = events.pop() ?? "";
+          for (const evt of events) {
+            let eventName = "";
+            let dataStr = "";
+            for (const line of evt.split("\n")) {
+              if (line.startsWith("event:")) eventName = line.slice(6).trim();
+              else if (line.startsWith("data:")) dataStr += line.slice(5).trim();
+            }
+            if (!eventName) continue;
+            let payload: Record<string, unknown> = {};
+            try {
+              payload = JSON.parse(dataStr);
+            } catch {}
+
+            if (eventName === "chat" && typeof payload.chatId === "string") {
+              setChatId(payload.chatId);
+            } else if (eventName === "text" && typeof payload.delta === "string") {
+              acc += payload.delta;
+              updateLastAssistant(setMessages, () => ({
+                content: acc,
+                pending: true,
+              }));
+            } else if (eventName === "tool_call") {
+              accToolCalls.push({
+                name: String(payload.tool ?? ""),
+                input: payload.input,
+              });
+              updateLastAssistant(setMessages, () => ({
+                toolCalls: [...accToolCalls],
+              }));
+            } else if (eventName === "tool_result") {
+              const idx = accToolCalls.findIndex(
+                (c) => c.name === payload.tool && !c.output && !c.error,
+              );
+              if (idx >= 0) {
+                accToolCalls[idx] = {
+                  ...accToolCalls[idx],
+                  output: payload.output,
+                  error: payload.error as string | undefined,
+                };
+                updateLastAssistant(setMessages, () => ({
+                  toolCalls: [...accToolCalls],
+                }));
+              }
+            } else if (eventName === "done") {
+              updateLastAssistant(setMessages, () => ({ pending: false }));
+            } else if (eventName === "error") {
+              updateLastAssistant(setMessages, (m) => ({
+                content:
+                  (m.content || "") +
+                  "\n\n❌ Error: " +
+                  (typeof payload.error === "string" ? payload.error : "desconocido"),
+                pending: false,
+              }));
+            }
+          }
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Error de red";
+        updateLastAssistant(setMessages, () => ({
+          content: `❌ ${msg}`,
+          pending: false,
+        }));
+      } finally {
+        setSending(false);
+      }
+    },
+    [chatId, businessId],
+  );
 
   const sendMessage = useCallback(async () => {
     const text = input.trim();
@@ -76,116 +308,9 @@ export function ChatStudio({
     };
     setMessages((m) => [...m, userMsg, pendingMsg]);
     setInput("");
-    setSending(true);
 
-    try {
-      const res = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chatId,
-          businessId,
-          message: text,
-        }),
-      });
-
-      if (!res.ok || !res.body) {
-        const err = await res.json().catch(() => ({}));
-        if (res.status === 503) {
-          updateLastAssistant(setMessages, () => ({
-            content: "AI no disponible. El admin debe configurar TOGETHER_API_KEY.",
-            pending: false,
-          }));
-        } else {
-          updateLastAssistant(setMessages, () => ({
-            content: err.error ?? `Error HTTP ${res.status}`,
-            pending: false,
-          }));
-        }
-        setSending(false);
-        return;
-      }
-
-      // Parse SSE
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      let acc = "";
-      const accToolCalls: Message["toolCalls"] = [];
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const events = buffer.split("\n\n");
-        buffer = events.pop() ?? "";
-        for (const evt of events) {
-          let eventName = "";
-          let dataStr = "";
-          for (const line of evt.split("\n")) {
-            if (line.startsWith("event:")) eventName = line.slice(6).trim();
-            else if (line.startsWith("data:")) dataStr += line.slice(5).trim();
-          }
-          if (!eventName) continue;
-          let payload: Record<string, unknown> = {};
-          try {
-            payload = JSON.parse(dataStr);
-          } catch {}
-
-          if (eventName === "chat" && typeof payload.chatId === "string") {
-            setChatId(payload.chatId);
-          } else if (eventName === "text" && typeof payload.delta === "string") {
-            acc += payload.delta;
-            updateLastAssistant(setMessages, () => ({
-              content: acc,
-              pending: true,
-            }));
-          } else if (eventName === "tool_call") {
-            accToolCalls.push({
-              name: String(payload.tool ?? ""),
-              input: payload.input,
-            });
-            updateLastAssistant(setMessages, () => ({
-              toolCalls: [...accToolCalls],
-            }));
-          } else if (eventName === "tool_result") {
-            const idx = accToolCalls.findIndex(
-              (c) => c.name === payload.tool && !c.output && !c.error,
-            );
-            if (idx >= 0) {
-              accToolCalls[idx] = {
-                ...accToolCalls[idx],
-                output: payload.output,
-                error: payload.error as string | undefined,
-              };
-              updateLastAssistant(setMessages, () => ({
-                toolCalls: [...accToolCalls],
-              }));
-            }
-          } else if (eventName === "done") {
-            updateLastAssistant(setMessages, () => ({ pending: false }));
-          } else if (eventName === "error") {
-            updateLastAssistant(setMessages, (m) => ({
-              content:
-                (m.content || "") +
-                "\n\n❌ Error: " +
-                (typeof payload.error === "string" ? payload.error : "desconocido"),
-              pending: false,
-            }));
-          }
-        }
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Error de red";
-      updateLastAssistant(setMessages, () => ({
-        content: `❌ ${msg}`,
-        pending: false,
-      }));
-      toast(msg, "error");
-    } finally {
-      setSending(false);
-    }
-  }, [input, sending, chatId, businessId, toast]);
+    await streamChat(text);
+  }, [input, sending, streamChat]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -247,13 +372,16 @@ export function ChatStudio({
         ))}
       </div>
 
+      {/* Upload progress */}
+      {upload && <UploadProgressBanner upload={upload} />}
+
       {/* Input */}
       <div style={{ marginTop: 12, position: "relative" }}>
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="Pregúntale lo que sea — análisis de batch, sugerencias de horario, captions..."
+          placeholder="Pregúntale lo que sea — sube tu carpeta con 📎 o pídele un calendario, captions, horarios..."
           rows={2}
           maxLength={4000}
           disabled={sending}
@@ -261,7 +389,7 @@ export function ChatStudio({
             width: "100%",
             background: "var(--ap-paper)",
             border: "1px solid var(--ap-line-2)",
-            padding: "12px 80px 12px 14px",
+            padding: "12px 150px 12px 14px",
             fontSize: 14,
             fontFamily: "inherit",
             color: "var(--ap-ink)",
@@ -276,6 +404,45 @@ export function ChatStudio({
             (e.currentTarget.style.borderColor = "var(--ap-line-2)")
           }
         />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".zip"
+          style={{ display: "none" }}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) uploadFolder(file);
+            e.target.value = ""; // reset para poder re-seleccionar mismo archivo
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={sending || !!upload}
+          title="Subir carpeta .zip"
+          aria-label="Subir carpeta"
+          style={{
+            position: "absolute",
+            bottom: 12,
+            right: 86,
+            background: "transparent",
+            border: "1px solid var(--ap-line-2)",
+            padding: "8px 10px",
+            cursor: sending || !!upload ? "not-allowed" : "pointer",
+            color: "var(--ap-ink-3)",
+            opacity: sending || !!upload ? 0.4 : 1,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            fontSize: 11,
+            fontFamily: "var(--ap-font-mono)",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+          }}
+        >
+          <Paperclip strokeWidth={1.8} style={{ width: 12, height: 12 }} />
+          ZIP
+        </button>
         <button
           type="button"
           onClick={sendMessage}
@@ -304,10 +471,114 @@ export function ChatStudio({
           textTransform: "uppercase",
         }}
       >
-        Enter envía · Shift+Enter nueva línea · Negocio: {businessSlug}
+        Enter envía · Shift+Enter nueva línea · ZIP: arrastra o click 📎 · Negocio: {businessSlug}
       </p>
     </div>
   );
+}
+
+function UploadProgressBanner({ upload }: { upload: UploadProgress }) {
+  const labels: Record<UploadProgress["phase"], string> = {
+    presigning: "Pidiendo permiso...",
+    uploading: `Subiendo a R2 — ${upload.pct}%`,
+    processing: "Procesando ZIP en servidor...",
+    done: "✓ Carpeta subida — la IA está analizándola",
+    error: `✗ Error: ${upload.error ?? "desconocido"}`,
+  };
+
+  const isDone = upload.phase === "done";
+  const isError = upload.phase === "error";
+
+  return (
+    <div
+      style={{
+        marginTop: 12,
+        padding: "10px 14px",
+        background: "var(--ap-paper-2)",
+        border: `1px solid ${
+          isDone ? "#6B7A2E" : isError ? "var(--ap-stamp)" : "var(--ap-line-2)"
+        }`,
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
+      {isDone ? (
+        <Check strokeWidth={2} style={{ width: 14, height: 14, color: "#6B7A2E" }} />
+      ) : isError ? (
+        <span style={{ fontSize: 14, color: "var(--ap-stamp)" }}>!</span>
+      ) : (
+        <Loader2 className="animate-spin" style={{ width: 14, height: 14, color: "var(--ap-ink-3)" }} />
+      )}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p
+          className="ap-mono"
+          style={{
+            margin: 0,
+            fontSize: 11,
+            color: "var(--ap-ink-2)",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+          }}
+        >
+          {upload.fileName}
+        </p>
+        <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--ap-ink-3)" }}>
+          {labels[upload.phase]}
+        </p>
+      </div>
+      {upload.phase === "uploading" && (
+        <div
+          style={{
+            width: 60,
+            height: 4,
+            background: "var(--ap-line-2)",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              bottom: 0,
+              width: `${upload.pct}%`,
+              background: "var(--ap-stamp)",
+              transition: "width 0.2s",
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Sube un blob a una URL prefirmada con progress callback usando XHR
+ * (fetch nativo no expone progress en uploads). Resuelve cuando 2xx.
+ */
+function uploadWithProgress(
+  url: string,
+  file: File,
+  onProgress: (pct: number) => void,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", url);
+    xhr.setRequestHeader("Content-Type", "application/zip");
+    xhr.upload.onprogress = (evt) => {
+      if (evt.lengthComputable) {
+        onProgress(Math.round((evt.loaded / evt.total) * 100));
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve();
+      else reject(new Error(`Upload failed: ${xhr.status} ${xhr.statusText}`));
+    };
+    xhr.onerror = () => reject(new Error("Network error during upload"));
+    xhr.send(file);
+  });
 }
 
 function updateLastAssistant(
