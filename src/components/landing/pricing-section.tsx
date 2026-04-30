@@ -19,45 +19,48 @@ import { Icon } from "@/components/editorial/atoms";
 
 const pricingTiers = [
   {
-    name: "Free",
-    price: 0,
-    description: "Para hojear antes de suscribirse",
+    name: "Solo",
+    price: 5,
+    period: "semana",
+    description: "Una marca · menos que un café al día",
     features: [
-      "1 cuenta de Instagram",
-      "30 posts por mes",
-      "Detección de carruseles",
-      "Extracción de copy",
-      "Publicación vía API oficial",
+      "1 cuenta de cada plataforma",
+      "Chat IA editorial sin límite",
+      "Sugerencias de captions y hashtags",
+      "Folder analysis con IA",
+      "Multi-plataforma (IG, TikTok, LinkedIn, YouTube, Pinterest)",
     ],
-    cta: "Empezar gratis",
+    cta: "Empezar Solo",
     popular: false,
   },
   {
     name: "Pro",
-    price: 19,
-    description: "Para quien escribe la próxima edición",
+    price: 7,
+    period: "semana",
+    description: "Dos marcas · todo desbloqueado",
     features: [
-      "5 cuentas de Instagram",
-      "Posts ilimitados",
-      "Posts colaborativos (Collabs)",
-      "Flujo de aprobación",
+      "Hasta 2 cuentas de cada plataforma",
+      "Todo lo de Solo",
+      "Aprobación de cliente vía magic-link",
+      "Reportes editoriales imprimibles",
       "Soporte prioritario",
     ],
-    cta: "Empezar con Pro",
+    cta: "Empezar Pro",
     popular: true,
   },
   {
     name: "Agency",
-    price: 49,
-    description: "Para casas editoriales con varias marcas",
+    price: 10,
+    period: "semana",
+    description: "Hasta 5 marcas · perfecto para agencias pequeñas",
     features: [
-      "Cuentas ilimitadas",
-      "Todo lo del plan Pro",
+      "Hasta 5 cuentas de cada plataforma",
+      "Todo lo de Pro",
       "Panel multi-cliente",
       "Logs de auditoría",
       "Soporte directo prioritario",
     ],
-    cta: "Empezar con Agency",
+    cta: "Empezar Agency",
     popular: false,
   },
 ];
@@ -152,13 +155,13 @@ function PricingCard({
   tier: (typeof pricingTiers)[0];
   isAnnual: boolean;
 }) {
-  const annualPrice = tier.price > 0 ? Math.round(tier.price * 0.8) : 0;
+  // Facturación semanal — sin descuento anual por simplicidad post-pivot.
+  // Toggle isAnnual ahora muestra equivalente mensual (~4.33×) si está activo.
   const displayPrice =
     isAnnual && tier.price > 0
-      ? `$${annualPrice}`
-      : tier.price === 0
-        ? "Gratis"
-        : `$${tier.price}`;
+      ? `€${Math.round(tier.price * 4.33)}`
+      : `€${tier.price}`;
+  const periodLabel = isAnnual ? "/mes equivalente" : `/${tier.period ?? "semana"}`;
 
   return (
     <div
@@ -216,38 +219,18 @@ function PricingCard({
               value={displayPrice}
               className="ap-display"
             />
-            {tier.price > 0 && (
-              <span
-                className="ap-mono"
-                style={{
-                  fontSize: 12,
-                  color: "var(--ap-ink-4)",
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                }}
-              >
-                /mes
-              </span>
-            )}
-          </div>
-          {isAnnual && tier.price > 0 && (
-            <p
+            <span
+              className="ap-mono"
               style={{
                 fontSize: 12,
                 color: "var(--ap-ink-4)",
-                margin: "6px 0 0",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
               }}
             >
-              <s
-                style={{
-                  textDecorationColor: "var(--ap-stamp)",
-                  textDecorationThickness: "1.5px",
-                }}
-              >
-                ${tier.price}/mes
-              </s>
-            </p>
-          )}
+              {periodLabel}
+            </span>
+          </div>
           <p
             style={{
               fontSize: 14,

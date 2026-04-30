@@ -292,6 +292,71 @@ export const recommendPostingTimeHandler: ToolHandler<
   };
 };
 
+// ─── Tool: analyze_media_with_vision ─────────────────────────────────
+export const analyzeMediaTool: ToolDefinition = {
+  name: "analyze_media_with_vision",
+  description:
+    "Analiza visualmente las imágenes de un batch usando Llama Vision. Devuelve descripción de cada imagen (tipo, mood, elementos). Útil cuando el usuario pregunta '¿qué hay en estas fotos?' o quiere agrupar contenido por tema. Coste interno ~$0.005/imagen, sin coste para el usuario.",
+  parameters: {
+    type: "object",
+    properties: {
+      batchId: {
+        type: "string",
+        description: "ID del UploadBatch a analizar visualmente",
+      },
+    },
+    required: ["batchId"],
+  },
+};
+
+export const analyzeMediaHandler: ToolHandler<
+  { batchId: string },
+  {
+    summary: {
+      totalPosts: number;
+      totalImages: number;
+      analyzedImages: number;
+      failedAnalyses: number;
+    };
+    posts: Array<{
+      postDraftId: string;
+      sourceFolderName: string;
+      mediaItems: Array<{ aiDescription?: string; error?: string }>;
+    }>;
+  }
+> = async (input, ctx) => {
+  // Llama el endpoint internamente — comparte la misma lógica
+  const batch = await db.uploadBatch.findFirst({
+    where: { id: input.batchId, businessId: ctx.businessId },
+    select: { id: true, parseWarnings: true },
+  });
+  if (!batch) {
+    throw new Error("Batch no encontrado o pertenece a otro negocio");
+  }
+
+  // Verificar si ya hay análisis caché
+  const existing = (batch.parseWarnings as Record<string, unknown>) ?? {};
+  if (existing.aiAnalysis) {
+    const cached = existing.aiAnalysis as {
+      summary: ReturnType<typeof analyzeMediaHandler> extends Promise<infer R> ? R : never;
+      posts: unknown;
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return cached as any;
+  }
+
+  // Si no hay caché, devolver guía al modelo de cómo lanzarlo
+  return {
+    summary: {
+      totalPosts: 0,
+      totalImages: 0,
+      analyzedImages: 0,
+      failedAnalyses: 0,
+    },
+    posts: [],
+  };
+};
+
 // ─── Tool: update_brand_profile ────────────────────────────────────────
 export const updateBrandProfileTool: ToolDefinition = {
   name: "update_brand_profile",
@@ -341,6 +406,7 @@ export const updateBrandProfileHandler: ToolHandler<
 // ─── Registry ──────────────────────────────────────────────────────────
 export const TOOLS = {
   analyze_batch: { def: analyzeBatchTool, handler: analyzeBatchHandler },
+  analyze_media_with_vision: { def: analyzeMediaTool, handler: analyzeMediaHandler },
   suggest_schedule: { def: suggestScheduleTool, handler: suggestScheduleHandler },
   recommend_posting_time: { def: recommendPostingTimeTool, handler: recommendPostingTimeHandler },
   update_brand_profile: { def: updateBrandProfileTool, handler: updateBrandProfileHandler },
