@@ -312,9 +312,11 @@ export async function POST(request: NextRequest) {
   return new Response(stream, {
     headers: {
       "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache, no-transform",
+      "Cache-Control": "no-store, no-cache, no-transform, must-revalidate",
       Connection: "keep-alive",
       "X-Accel-Buffering": "no",
+      Pragma: "no-cache",
+      Expires: "0",
     },
   });
 }

@@ -33,6 +33,21 @@ interface UploadProgress {
   error?: string;
 }
 
+// Whitelist de tool names válidos. Si el LLM alucina otros (como
+// "Validation"), los ignoramos en lugar de mostrar chips falsos.
+const VALID_TOOL_NAMES = new Set([
+  "analyze_batch",
+  "analyze_media_with_vision",
+  "suggest_schedule",
+  "recommend_posting_time",
+  "update_brand_profile",
+  "analyze_format_compatibility",
+  // legacy / planned
+  "suggest_caption",
+  "suggest_hashtags",
+  "confirm_schedule",
+]);
+
 interface Message {
   id: string;
   role: "user" | "assistant" | "tool";
@@ -248,14 +263,24 @@ export function ChatStudio({
                 pending: true,
               }));
             } else if (eventName === "tool_call") {
+              const toolName = String(payload.tool ?? "");
+              // 🛡 Si el nombre no está en la whitelist, ignorar evento
+              // (Llama 3.3 alucina nombres como "Validation" — no chips falsos)
+              if (!VALID_TOOL_NAMES.has(toolName)) {
+                console.warn("[chat] ignored unknown tool:", toolName);
+                continue;
+              }
               accToolCalls.push({
-                name: String(payload.tool ?? ""),
+                name: toolName,
                 input: payload.input,
               });
               updateLastAssistant(setMessages, () => ({
                 toolCalls: [...accToolCalls],
               }));
             } else if (eventName === "tool_result") {
+              if (!VALID_TOOL_NAMES.has(String(payload.tool ?? ""))) {
+                continue;
+              }
               const idx = accToolCalls.findIndex(
                 (c) => c.name === payload.tool && !c.output && !c.error,
               );
