@@ -200,6 +200,18 @@ export default function SignupPage() {
           </p>
         </div>
 
+        <p className="text-center mt-4 text-[11px] leading-relaxed" style={{ color: "#86868B" }}>
+          Al crear tu cuenta aceptas los{" "}
+          <Link href="/legal/terms" className="underline hover:text-zinc-700">
+            términos
+          </Link>{" "}
+          y la{" "}
+          <Link href="/legal/privacy" className="underline hover:text-zinc-700">
+            política de privacidad
+          </Link>
+          .
+        </p>
+
         <div className="flex items-center justify-center gap-3 mt-6 text-[10px]" style={{ color: "#86868B" }}>
           <span className="flex items-center gap-1">
             <span className="h-1 w-1 rounded-full" style={{ background: "#16A34A" }} />

@@ -446,11 +446,11 @@ export default function LandingPage() {
               Hecho para agencias e influencers hispanohablantes
             </p>
             <div
-              className="flex items-center gap-5"
+              className="flex items-center gap-5 flex-wrap justify-center"
               style={{ fontSize: 12, color: "var(--ap-ink-3)" }}
             >
               <Link
-                href="/privacidad"
+                href="/legal/privacy"
                 style={{
                   borderBottom: "1px solid transparent",
                   paddingBottom: 1,
@@ -458,10 +458,10 @@ export default function LandingPage() {
                 }}
                 className="hover:border-current"
               >
-                Política de privacidad
+                Privacidad
               </Link>
               <Link
-                href="/terminos"
+                href="/legal/terms"
                 style={{
                   borderBottom: "1px solid transparent",
                   paddingBottom: 1,
@@ -469,7 +469,18 @@ export default function LandingPage() {
                 }}
                 className="hover:border-current"
               >
-                Términos de uso
+                Términos
+              </Link>
+              <Link
+                href="/legal/cookies"
+                style={{
+                  borderBottom: "1px solid transparent",
+                  paddingBottom: 1,
+                  transition: "border-color 0.2s",
+                }}
+                className="hover:border-current"
+              >
+                Cookies
               </Link>
             </div>
           </div>

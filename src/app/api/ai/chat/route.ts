@@ -328,13 +328,30 @@ function buildSystemPrompt(
     "- Cuando propongas un schedule, llama suggest_schedule y luego pregunta si confirmar",
   ];
 
-  if (ctx.profile) {
+  // Detectar si el perfil está "vacío" (sin nicho ni tono ni audiencia) — caso primer uso
+  const profileHasContent =
+    ctx.profile &&
+    (ctx.profile.niche || ctx.profile.tone || ctx.profile.targetAudience);
+
+  if (profileHasContent && ctx.profile) {
     lines.push("", "# Perfil de la marca");
     if (ctx.profile.niche) lines.push(`Nicho: ${ctx.profile.niche}`);
     if (ctx.profile.tone) lines.push(`Tono: ${ctx.profile.tone}`);
     if (ctx.profile.targetAudience) lines.push(`Audiencia: ${ctx.profile.targetAudience}`);
     if (ctx.profile.taboos?.length) lines.push(`Tabús: ${ctx.profile.taboos.join(", ")}`);
     if (ctx.profile.notes) lines.push(`Notas: ${ctx.profile.notes}`);
+  } else {
+    // Sin perfil: pedirle al modelo que sea proactivo y ofrezca configurarlo
+    lines.push(
+      "",
+      "# Perfil de la marca: vacío",
+      "El usuario AÚN NO HA configurado su perfil de marca. En tu primera respuesta sustantiva (especialmente si es la primera del chat o si pide cualquier ayuda con captions/calendario/horarios):",
+      "1. Pregúntale por su nicho concreto (ej: gastronomía mediterránea, fitness funcional, moda sostenible)",
+      "2. Su tono de voz (ej: cercano, técnico, irreverente, premium)",
+      "3. Su audiencia objetivo (edad, intereses, plataforma principal)",
+      "4. Frases o palabras que NO quiere usar (tabús)",
+      "Cuando te lo diga, llama update_brand_profile inmediatamente para guardarlo. No insistas si dice que no o que prefiere ir post a post — respeta su preferencia.",
+    );
   }
 
   if (ctx.examples.length > 0) {
