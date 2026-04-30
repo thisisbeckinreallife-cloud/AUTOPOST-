@@ -379,11 +379,11 @@ export default async function BusinessesPage({
                     </Link>
                   ) : (
                     <Link
-                      href={`/businesses/${biz.slug}/upload`}
+                      href={`/businesses/${biz.slug}/chat`}
                       className="flex items-center gap-1.5 text-xs font-semibold text-zinc-900 hover:text-black px-3 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors"
                     >
                       <Upload className="h-3.5 w-3.5" />
-                      Subir contenido
+                      Subir con IA
                     </Link>
                   )}
                   <Link

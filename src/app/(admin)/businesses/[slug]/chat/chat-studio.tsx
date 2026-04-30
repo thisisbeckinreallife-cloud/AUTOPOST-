@@ -39,6 +39,7 @@ const VALID_TOOL_NAMES = new Set([
   "analyze_batch",
   "analyze_media_with_vision",
   "suggest_schedule",
+  "confirm_batch_schedule",
   "recommend_posting_time",
   "update_brand_profile",
   "analyze_format_compatibility",
@@ -244,13 +245,13 @@ export function ChatStudio({
         setMessages((m) => [...m, uploadMsg, pendingMsg]);
 
         await streamChat(
-          `Acabo de subir un batch nuevo con ID "${presignData.batchId}" (un ZIP con varios archivos). Por favor:\n` +
-            `1. Llama a analyze_batch con ese batchId.\n` +
-            `2. Mira los resultados: si detectas muchos posts tipo IMAGE sueltos con nombres parecidos o que parezcan parte del mismo set/campaña, AVÍSAME y propón llamar a regroup_batch_with_ai (Vision IA) para agruparlos correctamente como carrusel. Pídeme confirmación antes de llamarlo (cuesta ~$0.01).\n` +
-            `3. Para los posts más relevantes (max 3), llama a analyze_format_compatibility con su postId para ver en qué plataformas encajarán bien y en cuáles NO.\n` +
-            `4. Resume en lenguaje natural qué encontraste: número de posts, tipos detectados, problemas de formato (imágenes horizontales en TikTok, videos largos para Shorts, ratios subóptimos, etc.). Sé honesto — si algo no encaja con una plataforma, desaconséjala explícitamente.\n` +
-            `5. Hazme las preguntas que necesites para clarificar ambigüedades antes de proponer calendario.\n` +
-            `Después espera mi confirmación para llamar suggest_schedule.`,
+          `He subido un ZIP nuevo. batchId: "${presignData.batchId}". Por favor sigue el flow del producto:\n` +
+            `1. analyze_batch con ese batchId.\n` +
+            `2. Si la respuesta tiene recommendsRegrouping=true, llama AUTOMÁTICAMENTE a regroup_batch_with_ai sin preguntarme — solo avísame: "voy a reagrupar visualmente porque...".\n` +
+            `3. Tras (re)agrupar, llama analyze_format_compatibility para 1-3 posts representativos.\n` +
+            `4. Resume en lenguaje natural: cuántos posts, tipos, qué carruseles detectaste y por qué, problemas de formato por plataforma.\n` +
+            `5. Si tengo brand profile sin configurar, pregunta lo esencial (nicho, tono, audiencia) antes de proponer calendario.\n` +
+            `6. Propón calendario con suggest_schedule y enséñamelo. Espera mi confirmación expresa antes de llamar confirm_batch_schedule.`,
         );
 
         setTimeout(() => setUpload(null), 3000);
@@ -1068,6 +1069,7 @@ function ToolCallChip({
   const labels: Record<string, string> = {
     analyze_batch: "📊 Analizando batch",
     suggest_schedule: "📅 Proponiendo calendario",
+    confirm_batch_schedule: "✅ Programando publicación",
     confirm_schedule: "✓ Confirmando programación",
     recommend_posting_time: "⏰ Calculando mejor hora",
     update_brand_profile: "✦ Guardando perfil de marca",

@@ -47,11 +47,11 @@ export default async function BatchesPage({
           </p>
         </div>
         <Link
-          href={`/businesses/${params.slug}/upload`}
+          href={`/businesses/${params.slug}/chat`}
           className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:-translate-y-px hover:shadow-lg"
         >
           <Plus className="h-4 w-4" />
-          Subir ZIP
+          Subir con IA
         </Link>
       </div>
 
@@ -61,13 +61,13 @@ export default async function BatchesPage({
             <Upload className="h-8 w-8 text-zinc-700" />
           </div>
           <h3 className="text-lg font-semibold text-zinc-900 mb-2">Aún no has subido contenido</h3>
-          <p className="text-zinc-600 text-sm mb-6 max-w-xs mx-auto">Sube un archivo ZIP con tus posts organizados por carpetas</p>
+          <p className="text-zinc-600 text-sm mb-6 max-w-xs mx-auto">Sube tu contenido en el chat — la IA agrupa carruseles, propone calendario y publica</p>
           <Link
-            href={`/businesses/${params.slug}/upload`}
+            href={`/businesses/${params.slug}/chat`}
             className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:-translate-y-px hover:shadow-lg"
           >
             <Plus className="h-4 w-4" />
-            Subir ZIP
+            Subir con IA
           </Link>
         </div>
       ) : (

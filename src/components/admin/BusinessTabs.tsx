@@ -17,11 +17,12 @@ export function BusinessTabs({ slug }: { slug: string }) {
   const pathname = usePathname() ?? "";
   const base = `/businesses/${slug}`;
 
+  // Nota: el tab "Subir" se eliminó. Toda subida pasa ahora por el Chat IA
+  // (usa el botón 📎 del chat). Las URLs antiguas /upload redirigen a /chat.
   const tabs: Tab[] = [
     { href: base, label: "Resumen", icon: "◯" },
     { href: `${base}/chat`, label: "Chat IA", icon: "✦" },
     { href: `${base}/posts`, label: "Calendario", icon: "◰" },
-    { href: `${base}/upload`, label: "Subir", icon: "↑" },
     { href: `${base}/settings`, label: "Configuración", icon: "⚙" },
   ];
 

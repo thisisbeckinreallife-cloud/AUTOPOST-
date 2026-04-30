@@ -117,7 +117,7 @@ export default async function DashboardPage() {
   const hasConnected = activeBusinesses.length > 0;
   const primaryBiz = activeBusinesses[0] ?? businesses[0];
   const uploadHref = primaryBiz
-    ? `/businesses/${primaryBiz.slug}/upload`
+    ? `/businesses/${primaryBiz.slug}/chat`
     : "/businesses/new";
 
   const firstName = session.email?.split("@")[0] ?? "";

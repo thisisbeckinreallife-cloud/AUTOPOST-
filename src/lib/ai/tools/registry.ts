@@ -75,19 +75,27 @@ export const analyzeBatchHandler: ToolHandler<
       hasCaption: boolean;
     }>;
     suggestions: string[];
+    /**
+     * Indica que la heurística inicial parece haber agrupado mal.
+     * El LLM debe llamar a regroup_batch_with_ai automáticamente
+     * (sin preguntar al user) si este flag es true.
+     */
+    recommendsRegrouping: boolean;
+    regroupingReason?: string;
   }
 > = async (input, ctx) => {
   const batch = await db.uploadBatch.findFirst({
     where: { id: input.batchId, businessId: ctx.businessId },
     include: {
       postDrafts: {
+        where: { status: { in: ["DRAFT", "VALIDATED", "READY"] } },
         select: {
           id: true,
           sourceFolderName: true,
           postType: true,
           caption: true,
           mediaAssets: {
-            select: { mimeType: true },
+            select: { mimeType: true, originalFilename: true },
           },
         },
       },
@@ -128,6 +136,33 @@ export const analyzeBatchHandler: ToolHandler<
     );
   }
 
+  // ───────────────────────────────────────────
+  // DETECCIÓN AUTOMÁTICA DE AGRUPAMIENTO MALO
+  // ───────────────────────────────────────────
+  // Heurísticas para detectar que la inicial agrupó mal:
+  //  - 5+ posts tipo IMAGE sueltos (single-asset): el user probablemente
+  //    quería carruseles pero la heurística no detectó patrón
+  //  - 5+ posts cuyos nombres comparten un prefijo común no detectado
+  //    (e.g. todos empiezan con "campana_" o "marketing_")
+  //  - El batch tiene >= 6 imágenes en total Y la mayoría son posts IMAGE sueltos
+  let recommendsRegrouping = false;
+  let regroupingReason: string | undefined;
+
+  const imagePosts = posts.filter((p) => p.type === "IMAGE" && p.mediaCount === 1);
+  if (imagePosts.length >= 5 && images >= 6) {
+    // Buscar prefijos comunes en sourceFolderName
+    const folderNames = imagePosts.map((p) => p.sourceFolderName);
+    const commonPrefix = findCommonPrefix(folderNames);
+    if (commonPrefix.length >= 3) {
+      recommendsRegrouping = true;
+      regroupingReason = `Detecté ${imagePosts.length} posts tipo IMAGE sueltos cuyos nombres empiezan por "${commonPrefix}*" — probablemente forman parte de carruseles. Voy a reagrupar con visión IA.`;
+    } else if (imagePosts.length >= 8) {
+      // Muchos sueltos sin prefijo común claro: igual sospechoso
+      recommendsRegrouping = true;
+      regroupingReason = `Detecté ${imagePosts.length} posts tipo IMAGE sueltos sin estructura clara. Reagrupo con visión IA para detectar carruseles por coherencia visual.`;
+    }
+  }
+
   return {
     totalFiles: batch.totalPosts ?? posts.length,
     images,
@@ -135,8 +170,28 @@ export const analyzeBatchHandler: ToolHandler<
     captions,
     posts,
     suggestions,
+    recommendsRegrouping,
+    regroupingReason,
   };
 };
+
+/**
+ * Encuentra el prefijo común más largo de un array de strings.
+ * Útil para detectar agrupamientos no obvios (e.g. todos los nombres
+ * empiezan por "campana_" pero salieron como posts separados).
+ */
+function findCommonPrefix(strs: string[]): string {
+  if (strs.length === 0) return "";
+  if (strs.length === 1) return strs[0];
+  let prefix = strs[0];
+  for (const s of strs.slice(1)) {
+    let i = 0;
+    while (i < prefix.length && i < s.length && prefix[i] === s[i]) i++;
+    prefix = prefix.slice(0, i);
+    if (prefix.length === 0) return "";
+  }
+  return prefix;
+}
 
 // ─── Tool: suggest_schedule ────────────────────────────────────────────
 export const suggestScheduleTool: ToolDefinition = {
@@ -687,11 +742,170 @@ export const regroupBatchHandler: ToolHandler<
   };
 };
 
+// ─── Tool: confirm_batch_schedule ──────────────────────────────────────
+export const confirmBatchScheduleTool: ToolDefinition = {
+  name: "confirm_batch_schedule",
+  description:
+    "Aplica un calendario de publicación a un batch: actualiza publishAt, targetPlatforms y captions de cada PostDraft, y crea los jobs en BullMQ para que se publiquen automáticamente. Llámalo SOLO cuando el user haya confirmado expresamente que quiere publicar (ej. 'sí, programa', 'adelante', 'dale, publica'). Recibe el schedule propuesto por suggest_schedule (modificado o no por el user). Tras llamarlo, los posts pasan a SCHEDULED y se publican solos cuando llegue su hora — el user no tiene que hacer nada más.",
+  parameters: {
+    type: "object",
+    properties: {
+      batchId: { type: "string" },
+      schedule: {
+        type: "array",
+        description:
+          "Array con la programación final (puede ser el resultado de suggest_schedule o ajustado por el user)",
+        items: {
+          type: "object",
+          properties: {
+            postDraftId: { type: "string" },
+            proposedAt: {
+              type: "string",
+              description: "ISO 8601 datetime con tz cuando publicar",
+            },
+            platforms: {
+              type: "array",
+              items: {
+                type: "string",
+                enum: ["instagram", "facebook", "tiktok", "linkedin", "youtube", "pinterest"],
+              },
+              description: "Plataformas en las que publicar este post",
+            },
+            caption: {
+              type: "string",
+              description:
+                "(opcional) Caption final si el user lo aprobó o lo modificó",
+            },
+          },
+          required: ["postDraftId", "proposedAt", "platforms"],
+        },
+      },
+    },
+    required: ["batchId", "schedule"],
+  },
+};
+
+export const confirmBatchScheduleHandler: ToolHandler<
+  {
+    batchId: string;
+    schedule: Array<{
+      postDraftId: string;
+      proposedAt: string;
+      platforms: string[];
+      caption?: string;
+    }>;
+  },
+  {
+    scheduled: number;
+    failed: number;
+    errors: string[];
+  }
+> = async (input, ctx) => {
+  const { confirmBatch } = await import("@/services/scheduler/batch-processor");
+  const { hashSHA256 } = await import("@/lib/crypto");
+
+  // Verificar batch + ownership
+  const batch = await db.uploadBatch.findFirst({
+    where: { id: input.batchId, businessId: ctx.businessId },
+    select: { id: true, status: true },
+  });
+  if (!batch) throw new Error(`Batch ${input.batchId} no encontrado`);
+
+  const errors: string[] = [];
+
+  // Mapear plataformas social vs Meta
+  const META_PLATFORMS = new Set(["instagram", "facebook"]);
+  const SOCIAL_PLATFORMS = new Set([
+    "tiktok",
+    "linkedin",
+    "youtube",
+    "pinterest",
+  ]);
+
+  // Aplicar cambios a cada draft
+  for (const item of input.schedule) {
+    try {
+      const draft = await db.postDraft.findFirst({
+        where: { id: item.postDraftId, businessId: ctx.businessId },
+        select: { id: true, status: true },
+      });
+      if (!draft) {
+        errors.push(`Draft ${item.postDraftId} no encontrado`);
+        continue;
+      }
+      if (!["DRAFT", "VALIDATED", "READY"].includes(draft.status)) {
+        errors.push(
+          `Draft ${item.postDraftId} ya está en estado ${draft.status} — no se puede reprogramar`,
+        );
+        continue;
+      }
+
+      const publishAt = new Date(item.proposedAt);
+      if (isNaN(publishAt.getTime()) || publishAt <= new Date()) {
+        errors.push(
+          `Draft ${item.postDraftId}: fecha inválida o en el pasado (${item.proposedAt})`,
+        );
+        continue;
+      }
+
+      const platforms = item.platforms.map((p) => p.toLowerCase());
+      const publishToMeta = platforms.some((p) => META_PLATFORMS.has(p));
+      const targetPlatforms = platforms
+        .filter((p) => SOCIAL_PLATFORMS.has(p))
+        .map((p) => p.toUpperCase()) as (
+        | "TIKTOK"
+        | "LINKEDIN"
+        | "YOUTUBE"
+        | "PINTEREST"
+      )[];
+
+      const updates: Record<string, unknown> = {
+        publishAt,
+        publishToMeta,
+        targetPlatforms,
+      };
+      if (item.caption !== undefined) {
+        updates.caption = item.caption;
+        updates.captionHash = hashSHA256(item.caption);
+      }
+
+      await db.postDraft.update({
+        where: { id: item.postDraftId },
+        data: updates,
+      });
+    } catch (err) {
+      errors.push(
+        `Draft ${item.postDraftId}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+
+  // Lanzar confirmBatch para crear los jobs en BullMQ
+  let scheduled = 0;
+  let failed = 0;
+  try {
+    const result = await confirmBatch(input.batchId);
+    scheduled = result.scheduled;
+    failed = result.failed;
+  } catch (err) {
+    errors.push(
+      `Error al confirmar batch: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    failed = input.schedule.length;
+  }
+
+  return { scheduled, failed, errors };
+};
+
 // ─── Registry ──────────────────────────────────────────────────────────
 export const TOOLS = {
   analyze_batch: { def: analyzeBatchTool, handler: analyzeBatchHandler },
   analyze_media_with_vision: { def: analyzeMediaTool, handler: analyzeMediaHandler },
   suggest_schedule: { def: suggestScheduleTool, handler: suggestScheduleHandler },
+  confirm_batch_schedule: {
+    def: confirmBatchScheduleTool,
+    handler: confirmBatchScheduleHandler,
+  },
   recommend_posting_time: {
     def: recommendPostingTimeTool,
     handler: recommendPostingTimeHandler,

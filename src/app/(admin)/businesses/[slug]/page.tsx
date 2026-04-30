@@ -119,15 +119,9 @@ export default async function BusinessOverviewPage({
           <QuickAction
             href={`/businesses/${params.slug}/chat`}
             icon={<Sparkles className="h-4 w-4" />}
-            label="Generar con IA"
-            sub="Chat → caption + imagen + reel"
+            label="Subir con IA"
+            sub="Chat: ZIP, imágenes o video → IA agrupa y propone"
             primary
-          />
-          <QuickAction
-            href={`/businesses/${params.slug}/upload`}
-            icon={<Upload className="h-4 w-4" />}
-            label="Subir contenido"
-            sub="ZIP del mes con tus assets"
           />
           <QuickAction
             href={`/businesses/${params.slug}/posts`}
