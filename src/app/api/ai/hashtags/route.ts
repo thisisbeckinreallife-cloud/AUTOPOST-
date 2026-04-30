@@ -41,7 +41,6 @@ import {
   buildHashtagSystemBlocks,
 } from "@/lib/ai/brand-voice";
 import { checkAiRateLimit } from "@/lib/ai/rate-limit";
-import { consumeCredit, refundCredit } from "@/lib/ai/credits";
 
 const bodySchema = z.object({
   businessId: z.string().min(1),
@@ -114,28 +113,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Credit check + consumo (1 crédito)
   const provider = useTogether ? "together" : "anthropic";
   const model = useTogether ? MODEL_LLAMA_33_70B : MODEL_HASHTAGS;
-  const credit = await consumeCredit({
-    adminUserId: session.adminUserId,
-    action: "hashtags",
-    businessId,
-    provider,
-    model,
-  });
-  if (!credit.ok) {
-    return NextResponse.json(
-      {
-        error: credit.error,
-        errorCode: credit.errorCode,
-        remaining: credit.remaining,
-        availablePacks: credit.availablePacks,
-      },
-      { status: 402 },
-    );
-  }
-
   const ctx = await loadBrandVoiceContext(businessId);
   const systemBlocks = buildHashtagSystemBlocks(ctx);
   // Para Llama (no acepta cache_control), aplanamos los bloques a un único string.
@@ -203,11 +182,6 @@ export async function POST(request: NextRequest) {
     try {
       parsedJson = JSON.parse(jsonText);
     } catch {
-      if (credit.generationId) {
-        await refundCredit(credit.generationId, "JSON parse failed").catch(
-          () => {},
-        );
-      }
       return NextResponse.json(
         { error: "AI response was not valid JSON", raw: responseText },
         { status: 502 },
@@ -216,11 +190,6 @@ export async function POST(request: NextRequest) {
 
     const validated = hashtagResponseSchema.safeParse(parsedJson);
     if (!validated.success) {
-      if (credit.generationId) {
-        await refundCredit(credit.generationId, "schema validation failed").catch(
-          () => {},
-        );
-      }
       return NextResponse.json(
         {
           error: "AI response failed schema validation",
@@ -231,21 +200,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Persist usage + audit
-    await Promise.allSettled([
-      db.aiUsage.create({
-        data: {
-          businessId,
-          type: "hashtags",
-          model,
-          inputTokens: usage.inputTokens,
-          outputTokens: usage.outputTokens,
-          cacheReadTokens: usage.cacheReadTokens,
-          cacheCreationTokens: usage.cacheCreationTokens,
-          costUsd,
-        },
-      }),
-      db.auditLog.create({
+    // Audit log (sin AiUsage — esa tabla se eliminó en el pivot)
+    await db.auditLog
+      .create({
         data: {
           businessId,
           adminUserId: session.adminUserId,
@@ -261,22 +218,14 @@ export async function POST(request: NextRequest) {
             costUsd,
           },
         },
-      }),
-    ]);
+      })
+      .catch(() => {});
 
     return NextResponse.json({
       ...validated.data,
       usage: { ...usage, costUsd, model, provider },
-      remainingCredits: credit.remaining,
-      creditsCost: 1,
     });
   } catch (err) {
-    if (credit.generationId) {
-      await refundCredit(
-        credit.generationId,
-        err instanceof Error ? err.message : "Unknown error",
-      ).catch(() => {});
-    }
     if (err instanceof Anthropic.RateLimitError) {
       return NextResponse.json(
         { error: "Anthropic rate limit. Reintenta en unos segundos." },

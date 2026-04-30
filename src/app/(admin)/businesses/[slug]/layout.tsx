@@ -31,23 +31,11 @@ export default async function BusinessLayout({
       metaConnection: {
         select: { igUsername: true, status: true },
       },
-      brandProfile: {
-        select: { level: true },
-      },
     },
   });
   if (!business) notFound();
 
   const igConnected = business.metaConnection?.status === "ACTIVE";
-  const brandLevel = business.brandProfile?.level ?? "L1";
-  const lvlColor =
-    brandLevel === "L4" || brandLevel === "L5"
-      ? "#6B7A2E"
-      : brandLevel === "L3"
-        ? "#D4A627"
-        : brandLevel === "L2"
-          ? "#D4A627"
-          : "#E54B26";
 
   return (
     <div className="ap-root" style={{ background: "var(--ap-paper)", minHeight: "100vh" }}>
@@ -115,21 +103,22 @@ export default async function BusinessLayout({
               </p>
             </div>
 
-            <span
-              className="ap-mono"
-              style={{
-                fontSize: 10,
-                color: lvlColor,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                border: `1px solid ${lvlColor}`,
-                padding: "5px 10px",
-                whiteSpace: "nowrap",
-              }}
-              title="Nivel de Brand DNA — cuanto más alto, mejor escribe la IA en tu voz"
-            >
-              ✦ Brand DNA · {brandLevel}
-            </span>
+            {igConnected && (
+              <span
+                className="ap-mono"
+                style={{
+                  fontSize: 10,
+                  color: "#6B7A2E",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  border: "1px solid #6B7A2E",
+                  padding: "5px 10px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                ✓ Activo
+              </span>
+            )}
           </div>
 
           <BusinessTabs slug={params.slug} />

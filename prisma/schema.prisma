@@ -20,29 +20,18 @@ model AdminUser {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  // Plan + créditos IA
-  plan             PlanTier  @default(FREE)
-  planExpiresAt    DateTime?
-  // Créditos del allotment mensual del plan (caducan al ciclo)
-  aiCreditsMonthly Int       @default(0)
-  // Créditos comprados como add-on (NO caducan)
-  aiCreditsAddon   Int       @default(0)
-  // Próximo reset del allotment mensual
-  aiCreditsResetAt DateTime?
+  // Plan tier — sin créditos, solo metadata para gating de features.
+  // Stripe gestiona la facturación semanal aparte.
+  plan          String    @default("FREE")  // FREE | SOLO | PRO | AGENCY
+  planExpiresAt DateTime?
+  // ID de Stripe customer/subscription para webhook lookups
+  stripeCustomerId      String? @unique
+  stripeSubscriptionId  String? @unique
 
-  auditLogs       AuditLog[]
-  generations     AiGeneration[]
-  purchases       CreditPurchase[]
+  auditLogs AuditLog[]
+  chats     AiChat[]
 
   @@map("admin_users")
-}
-
-enum PlanTier {
-  FREE
-  PRO_SOLO
-  PRO
-  AGENCY
-  SCALE
 }
 
 // ─────────────────────────────────────────
@@ -63,7 +52,6 @@ model Business {
   uploadBatches  UploadBatch[]
   postDrafts     PostDraft[]
   auditLogs      AuditLog[]
-  aiUsage        AiUsage[]
   reports        Report[]
   brandProfile   BrandProfile?
 
@@ -430,103 +418,22 @@ enum ApprovalDecision {
 }
 
 // ─────────────────────────────────────────
-// AI GENERATION
-// Registro de cada acción IA consumida (caption, hashtags, image, video, etc.)
-// Cada registro descuenta créditos del balance del AdminUser y guarda quién,
-// qué modelo, cuánto costó realmente. Ese es el ledger de uso del sistema.
-// ─────────────────────────────────────────
-model AiGeneration {
-  id           String   @id @default(cuid())
-  adminUserId  String
-  businessId   String?  // nullable: algunas acciones no son por business
-
-  type         String   // caption | hashtags | image_schnell | image_dev | image_pro |
-                        // quick_reel | pro_reel | cinematic_reel | chat_post |
-                        // chat_reel | organize_zip | remix_carousel | brand_lora_train
-  creditsCost  Int
-  source       String   // monthly | addon — de qué bucket se descontó
-
-  provider     String?  // anthropic | together | replicate
-  model        String?  // claude-sonnet-4-5 | flux-1-dev | kling-2.1 | ...
-  costUsd      Float    @default(0)  // coste real para tracking interno
-  resultUrl    String?  // URL del asset generado (R2)
-  refunded     Boolean  @default(false)
-  refundedAt   DateTime?
-  refundReason String?
-
-  createdAt    DateTime @default(now())
-
-  adminUser    AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
-
-  @@index([adminUserId, createdAt])
-  @@index([businessId, createdAt])
-  @@map("ai_generations")
-}
-
-// ─────────────────────────────────────────
-// CREDIT PURCHASE
-// Compra de pack de créditos add-on (no caducan).
-// status PENDING hasta que Stripe webhook confirma → PAID.
-// ─────────────────────────────────────────
-model CreditPurchase {
-  id              String   @id @default(cuid())
-  adminUserId     String
-
-  pack            String   // sello | edicion | tirada | estudio_reels
-  credits         Int
-  amountUsd       Float
-
-  status          String   @default("PENDING")  // PENDING | PAID | FAILED | REFUNDED
-  stripeSessionId String?  @unique
-  paidAt          DateTime?
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  adminUser       AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
-
-  @@index([adminUserId, status, createdAt])
-  @@map("credit_purchases")
-}
-
-// ─────────────────────────────────────────
-// BRAND PROFILE (skeleton — se rellena en Sprint 2-4)
-// 1:1 con Business. Almacena la "Brand DNA" entrenada de cada cuenta:
-// bootstrap data del onboarding, voice fingerprint auto-trained,
-// visual LoRA fine-tuned, schedule patterns, chat memory namespace.
+// BRAND PROFILE (simplificado post-pivot)
+// 1:1 con Business. Datos básicos de la marca para enriquecer el chat IA.
+// Sin niveles L1-L5, sin LoRAs, sin voice training. Solo metadata simple
+// que el user actualiza conversacionalmente desde el chat o el panel.
 // ─────────────────────────────────────────
 model BrandProfile {
   id         String   @id @default(cuid())
   businessId String   @unique
 
-  // Nivel actual de entrenamiento (L1-L5)
-  level      String   @default("L1") // L1 cold | L2 onboarded | L3 lite | L4 trained | L5 mature
-
-  // Bootstrap data (L2 — del questionnaire)
-  bootstrapTone        String?
-  bootstrapDescription String?
-  bootstrapExamples    Json?    // captions ejemplo
-  bootstrapImages      Json?    // URLs imágenes reference
-  bootstrapNiche       String?
-  bootstrapTaboos      Json?    // frases prohibidas
-
-  // Voice fingerprint (L3-L4 — auto)
-  voiceProfile     Json?
-  voiceLastTrained DateTime?
-  voicePostCount   Int      @default(0)
-
-  // Visual LoRA (L4)
-  visualLoraId        String?
-  visualLoraUrl       String?
-  visualLoraStatus    String?  // PENDING | TRAINING | READY | FAILED
-  visualLoraTrained   DateTime?
-  visualLoraImageCount Int     @default(0)
-
-  // Schedule patterns (L4)
-  bestPostingTimes Json?
-
-  // Chat memory namespace (L5)
-  chatMemoryNamespace String?
+  niche             String?       // "gastronomia" | "moda" | "fitness" | etc
+  tone              String?       // descripción libre del tono
+  targetAudience    String?       // a quién le habla
+  taboos            Json?         // frases/palabras a evitar
+  preferredPostingDays Json?      // ["mon", "wed", "fri"]
+  preferredPlatforms Json?        // ["instagram", "tiktok"]
+  notes             String?       // notas libres del user
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -537,32 +444,47 @@ model BrandProfile {
 }
 
 // ─────────────────────────────────────────
-// AI USAGE
-// Telemetría de uso de Anthropic API para tracking de costes y rate-limiting
-// por business. Cache hits dramáticamente reducen el coste — los tracked
-// como cacheReadTokens (10% del precio normal) y cacheCreationTokens
-// (125% del precio normal una sola vez).
+// AI CHAT
+// Sesión de chat conversacional entre user y la IA editorial.
+// Cada chat puede estar vinculado a un business + opcionalmente a un batch
+// específico. Persiste para que el user pueda volver a la conversación.
 // ─────────────────────────────────────────
-model AiUsage {
-  id         String @id @default(cuid())
-  businessId String
+model AiChat {
+  id          String   @id @default(cuid())
+  adminUserId String
+  businessId  String?
+  batchId     String?  // opcional: chat sobre un batch específico
 
-  type       String   // "caption" | "hashtags"
-  model      String   // "claude-sonnet-4-5", etc.
+  title       String?
+  totalTokens Int      @default(0)
+  totalCostUsd Float   @default(0)
 
-  inputTokens         Int
-  outputTokens        Int
-  cacheReadTokens     Int @default(0)
-  cacheCreationTokens Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  costUsd    Float    // Computed cost in USD
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  messages  AiChatMessage[]
 
-  createdAt  DateTime @default(now())
-
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-
+  @@index([adminUserId, createdAt])
   @@index([businessId, createdAt])
-  @@map("ai_usage")
+  @@map("ai_chats")
+}
+
+model AiChatMessage {
+  id        String   @id @default(cuid())
+  chatId    String
+
+  role      String   // "user" | "assistant" | "tool"
+  content   String   // texto plano del mensaje
+  toolCalls Json?    // [{name, input, output}] cuando assistant invoca tools
+  attachments Json?  // URLs de imágenes adjuntas, archivos, etc.
+
+  createdAt DateTime @default(now())
+
+  chat AiChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@index([chatId, createdAt])
+  @@map("ai_chat_messages")
 }
 
 // ─────────────────────────────────────────

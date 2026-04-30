@@ -30,7 +30,7 @@ export default async function ChatPage({
       id: true,
       name: true,
       brandProfile: {
-        select: { level: true, bootstrapTone: true, bootstrapNiche: true },
+        select: { tone: true, niche: true },
       },
     },
   });
@@ -41,9 +41,8 @@ export default async function ChatPage({
       businessId={business.id}
       businessName={business.name}
       businessSlug={params.slug}
-      brandLevel={business.brandProfile?.level ?? "L1"}
-      brandTone={business.brandProfile?.bootstrapTone ?? null}
-      brandNiche={business.brandProfile?.bootstrapNiche ?? null}
+      brandTone={business.brandProfile?.tone ?? null}
+      brandNiche={business.brandProfile?.niche ?? null}
     />
   );
 }

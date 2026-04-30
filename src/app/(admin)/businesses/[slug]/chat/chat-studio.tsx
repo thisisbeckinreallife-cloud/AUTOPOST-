@@ -23,7 +23,6 @@ interface Props {
   businessId: string;
   businessName: string;
   businessSlug: string;
-  brandLevel: string;
   brandTone: string | null;
   brandNiche: string | null;
 }
@@ -76,7 +75,6 @@ export function ChatStudio({
   businessId,
   businessName,
   businessSlug,
-  brandLevel,
   brandTone,
   brandNiche,
 }: Props) {
@@ -273,7 +271,7 @@ export function ChatStudio({
           margin: 0,
         }}
       >
-        Brand DNA · {brandLevel} {brandTone ? `· ${brandTone.replace(/_/g, " ")}` : ""}{brandNiche ? ` · ${brandNiche}` : ""}
+        {brandNiche ? `Nicho: ${brandNiche}` : "Sin nicho configurado"}{brandTone ? ` · ${brandTone}` : ""}
       </p>
       <h2
         className="ap-display"

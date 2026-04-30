@@ -11,7 +11,6 @@ import { PostDetailSkeleton } from "@/components/ui/skeleton";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { useToast } from "@/components/ui/toast";
 import { AiCaptionStudio } from "@/components/admin/AiCaptionStudio";
-import { AiImageStudio } from "@/components/admin/AiImageStudio";
 import { RequestApprovalPanel } from "@/components/admin/RequestApprovalPanel";
 
 interface PostDetail {
@@ -295,23 +294,16 @@ export default function PostDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Estudio editorial AI — sólo para posts editables */}
+      {/* Sugerir caption con IA — solo para posts editables */}
       {["DRAFT", "VALIDATED", "READY"].includes(post.status) && (
-        <>
-          <AiCaptionStudio
-            postId={post.id}
-            businessId={post.business.id}
-            currentCaption={post.caption}
-            onApplied={(newCaption) =>
-              setPost((p) => (p ? { ...p, caption: newCaption } : p))
-            }
-          />
-          <AiImageStudio
-            businessId={post.business.id}
-            postDraftId={post.id}
-            onAssetSaved={() => fetchPost()}
-          />
-        </>
+        <AiCaptionStudio
+          postId={post.id}
+          businessId={post.business.id}
+          currentCaption={post.caption}
+          onApplied={(newCaption) =>
+            setPost((p) => (p ? { ...p, caption: newCaption } : p))
+          }
+        />
       )}
 
       {/* Aprobación del cliente — magic-link */}

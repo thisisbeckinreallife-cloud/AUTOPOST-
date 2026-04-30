@@ -21,7 +21,6 @@ export function BusinessTabs({ slug }: { slug: string }) {
     { href: base, label: "Resumen", icon: "◯" },
     { href: `${base}/chat`, label: "Chat IA", icon: "✦" },
     { href: `${base}/posts`, label: "Calendario", icon: "◰" },
-    { href: `${base}/studio`, label: "Estudio IA", icon: "✸" },
     { href: `${base}/upload`, label: "Subir", icon: "↑" },
     { href: `${base}/settings`, label: "Configuración", icon: "⚙" },
   ];

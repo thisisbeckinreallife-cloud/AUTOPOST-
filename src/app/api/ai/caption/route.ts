@@ -43,7 +43,6 @@ import {
   buildCaptionSystemBlocks,
 } from "@/lib/ai/brand-voice";
 import { checkAiRateLimit } from "@/lib/ai/rate-limit";
-import { consumeCredit, refundCredit } from "@/lib/ai/credits";
 
 const bodySchema = z.object({
   businessId: z.string().min(1),
@@ -115,29 +114,6 @@ export async function POST(request: NextRequest) {
           "Content-Type": "application/json",
           "Retry-After": Math.ceil((rl.resetAt - Date.now()) / 1000).toString(),
         },
-      },
-    );
-  }
-
-  // 5b. Credit check + consumo (1 crédito por caption)
-  const credit = await consumeCredit({
-    adminUserId: session.adminUserId,
-    action: "caption",
-    businessId,
-    provider,
-    model,
-  });
-  if (!credit.ok) {
-    return new Response(
-      JSON.stringify({
-        error: credit.error,
-        errorCode: credit.errorCode,
-        remaining: credit.remaining,
-        availablePacks: credit.availablePacks,
-      }),
-      {
-        status: 402,
-        headers: { "Content-Type": "application/json" },
       },
     );
   }
@@ -244,26 +220,12 @@ export async function POST(request: NextRequest) {
           costUsd,
           model,
           provider,
-          remainingCredits: credit.remaining,
-          creditsCost: 1,
         });
         send("done", { text: finalText });
 
-        // Persistencia paralela (no bloquea el cierre del stream del cliente).
-        await Promise.allSettled([
-          db.aiUsage.create({
-            data: {
-              businessId,
-              type: "caption",
-              model: MODEL_CAPTION,
-              inputTokens: usage.inputTokens,
-              outputTokens: usage.outputTokens,
-              cacheReadTokens: usage.cacheReadTokens,
-              cacheCreationTokens: usage.cacheCreationTokens,
-              costUsd,
-            },
-          }),
-          db.auditLog.create({
+        // Audit log (AiUsage se eliminó en el pivot)
+        await db.auditLog
+          .create({
             data: {
               businessId,
               adminUserId,
@@ -281,8 +243,8 @@ export async function POST(request: NextRequest) {
                 costUsd,
               },
             },
-          }),
-        ]);
+          })
+          .catch(() => {});
       } catch (err) {
         const message = err instanceof Error ? err.message : "Unknown error";
         if (err instanceof Anthropic.RateLimitError) {
@@ -293,12 +255,6 @@ export async function POST(request: NextRequest) {
           send("error", { error: message });
         }
         console.error("[ai/caption] stream failed:", err);
-        // Devolver el crédito al usuario porque la API falló.
-        if (credit.generationId) {
-          await refundCredit(credit.generationId, message).catch((e) =>
-            console.error("[ai/caption] refund failed:", e),
-          );
-        }
       } finally {
         controller.close();
       }
