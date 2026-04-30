@@ -380,7 +380,7 @@ export default async function MetricsPage({
                   <tr key={biz.id} className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50">
                     <td className="px-4 py-3">
                       <Link
-                        href={`/businesses/${biz.slug}`}
+                        href={`/businesses/${biz.slug}/chat`}
                         className="font-semibold text-zinc-900 hover:underline"
                       >
                         {biz.name}

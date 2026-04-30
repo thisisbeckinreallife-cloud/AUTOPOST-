@@ -16,6 +16,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useToast } from "@/components/ui/toast";
 import { Paperclip, Loader2, Check } from "lucide-react";
+import { CalendarPreview, type SchedulePost } from "@/components/admin/CalendarPreview";
 
 interface Props {
   businessId: string;
@@ -58,6 +59,13 @@ interface Message {
   pending?: boolean;
   /** Si está, se renderiza como banner rojo en lugar de burbuja del bot */
   errorBanner?: string;
+  /** Si suggest_schedule devolvió un calendario, lo renderizamos inline */
+  schedulePreview?: {
+    schedule: SchedulePost[];
+    timezone: string;
+    batchId: string;
+    approved?: boolean;
+  };
 }
 
 export function ChatStudio({
@@ -82,6 +90,7 @@ export function ChatStudio({
   const [isDragging, setIsDragging] = useState(false);
   const messagesRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dragCounterRef = useRef(0);
 
   // Auto-scroll cuando llegan mensajes
@@ -522,11 +531,12 @@ export function ChatStudio({
                 toolCalls: [...accToolCalls],
               }));
             } else if (eventName === "tool_result") {
-              if (!VALID_TOOL_NAMES.has(String(payload.tool ?? ""))) {
+              const toolName = String(payload.tool ?? "");
+              if (!VALID_TOOL_NAMES.has(toolName)) {
                 continue;
               }
               const idx = accToolCalls.findIndex(
-                (c) => c.name === payload.tool && !c.output && !c.error,
+                (c) => c.name === toolName && !c.output && !c.error,
               );
               if (idx >= 0) {
                 accToolCalls[idx] = {
@@ -537,6 +547,54 @@ export function ChatStudio({
                 updateLastAssistant(setMessages, () => ({
                   toolCalls: [...accToolCalls],
                 }));
+              }
+
+              // 🎯 Si fue suggest_schedule con éxito, extraer el calendario
+              // y guardarlo en schedulePreview para renderizado visual
+              if (
+                toolName === "suggest_schedule" &&
+                payload.output &&
+                typeof payload.output === "object"
+              ) {
+                const out = payload.output as {
+                  schedule?: Array<{
+                    postDraftId: string;
+                    sourceFolderName: string;
+                    proposedAt: string;
+                    platforms: string[];
+                  }>;
+                  timezone?: string;
+                };
+                if (Array.isArray(out.schedule) && out.schedule.length > 0) {
+                  // Encontrar el batchId del input del tool call
+                  const callInput = accToolCalls[idx]?.input as
+                    | { batchId?: string }
+                    | undefined;
+                  const batchId = callInput?.batchId ?? "";
+                  updateLastAssistant(setMessages, () => ({
+                    schedulePreview: {
+                      schedule: out.schedule!,
+                      timezone: out.timezone ?? "UTC",
+                      batchId,
+                    },
+                  }));
+                }
+              }
+
+              // Si fue confirm_batch_schedule con éxito, marcar approved
+              if (
+                toolName === "confirm_batch_schedule" &&
+                payload.output &&
+                typeof payload.output === "object"
+              ) {
+                const out = payload.output as { scheduled?: number };
+                if ((out.scheduled ?? 0) > 0) {
+                  updateLastAssistant(setMessages, (m) => ({
+                    schedulePreview: m.schedulePreview
+                      ? { ...m.schedulePreview, approved: true }
+                      : m.schedulePreview,
+                  }));
+                }
               }
             } else if (eventName === "done") {
               updateLastAssistant(setMessages, () => ({ pending: false }));
@@ -725,7 +783,40 @@ export function ChatStudio({
         }}
       >
         {messages.map((m) => (
-          <MessageBubble key={m.id} message={m} />
+          <MessageBubble
+            key={m.id}
+            message={m}
+            sending={sending}
+            onApprove={(preview) => {
+              if (sending) return;
+              const userMsg: Message = {
+                id: `u-approve-${Date.now()}`,
+                role: "user",
+                content: "✓ Aprobar y programar todo",
+              };
+              const pendingMsg: Message = {
+                id: `a-${Date.now()}`,
+                role: "assistant",
+                content: "",
+                toolCalls: [],
+                pending: true,
+              };
+              setMessages((prev) => [...prev, userMsg, pendingMsg]);
+              const scheduleJson = JSON.stringify(
+                preview.schedule.map((s) => ({
+                  postDraftId: s.postDraftId,
+                  proposedAt: s.proposedAt,
+                  platforms: s.platforms,
+                })),
+              );
+              streamChat(
+                `He aprobado el calendario propuesto. Llama AHORA a confirm_batch_schedule con batchId="${preview.batchId}" y schedule=${scheduleJson}. Después confírmame que quedó programado y dime cuántos posts entraron en la cola.`,
+              );
+            }}
+            onRequestChanges={() => {
+              textareaRef.current?.focus();
+            }}
+          />
         ))}
       </div>
 
@@ -735,6 +826,7 @@ export function ChatStudio({
       {/* Input */}
       <div style={{ marginTop: 12, position: "relative" }}>
         <textarea
+          ref={textareaRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
@@ -977,7 +1069,17 @@ function updateLastAssistant(
   });
 }
 
-function MessageBubble({ message }: { message: Message }) {
+function MessageBubble({
+  message,
+  onApprove,
+  onRequestChanges,
+  sending,
+}: {
+  message: Message;
+  onApprove?: (preview: NonNullable<Message["schedulePreview"]>) => void;
+  onRequestChanges?: () => void;
+  sending?: boolean;
+}) {
   const isUser = message.role === "user";
 
   // Si es un banner de error, renderiza estilo distinto y SIN burbuja del bot
@@ -1057,6 +1159,84 @@ function MessageBubble({ message }: { message: Message }) {
           ))}
         </div>
       )}
+
+      {/* Calendar preview — inline cuando suggest_schedule devolvió un calendario */}
+      {message.schedulePreview && (
+        <div style={{ marginTop: 10, width: "100%", maxWidth: 720 }}>
+          {message.schedulePreview.approved ? (
+            <ApprovedCalendarBanner count={message.schedulePreview.schedule.length} />
+          ) : (
+            <CalendarPreview
+              schedule={message.schedulePreview.schedule}
+              timezone={message.schedulePreview.timezone}
+              batchId={message.schedulePreview.batchId}
+              onApprove={() => onApprove?.(message.schedulePreview!)}
+              onRequestChanges={onRequestChanges}
+              disabled={sending}
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ApprovedCalendarBanner({ count }: { count: number }) {
+  return (
+    <div
+      style={{
+        marginTop: 8,
+        padding: "14px 18px",
+        background: "rgba(107,122,46,0.08)",
+        border: "1.5px solid #6B7A2E",
+        borderLeft: "4px solid #6B7A2E",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+      }}
+    >
+      <span
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: "50%",
+          background: "#6B7A2E",
+          color: "var(--ap-paper)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 18,
+          fontWeight: 700,
+          flexShrink: 0,
+        }}
+      >
+        ✓
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p
+          className="ap-mono"
+          style={{
+            margin: 0,
+            fontSize: 11,
+            color: "#6B7A2E",
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            fontWeight: 600,
+          }}
+        >
+          Programado · {count} {count === 1 ? "post" : "posts"}
+        </p>
+        <p
+          style={{
+            margin: "3px 0 0",
+            fontSize: 13,
+            color: "var(--ap-ink-2)",
+            lineHeight: 1.45,
+          }}
+        >
+          Tus posts se publicarán solos en su hora. Puedes cerrar esta pestaña.
+        </p>
+      </div>
     </div>
   );
 }

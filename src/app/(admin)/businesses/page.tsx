@@ -322,7 +322,7 @@ export default async function BusinessesPage({
                 style={{ animationDelay: `${i * 0.07}s` }}
               >
                 {/* Main row */}
-                <Link href={`/businesses/${biz.slug}`} className="flex items-center gap-4 px-5 py-4">
+                <Link href={`/businesses/${biz.slug}/chat`} className="flex items-center gap-4 px-5 py-4">
                   {/* Avatar */}
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-zinc-100 to-zinc-200 border border-zinc-200 flex items-center justify-center shrink-0">
                     <span className="text-zinc-900 font-display font-bold text-base uppercase">

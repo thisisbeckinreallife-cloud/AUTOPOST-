@@ -164,7 +164,7 @@ export function BusinessSwitcher({ currentSlug, businesses }: Props) {
               {others.map((b) => (
                 <Link
                   key={b.id}
-                  href={`/businesses/${b.slug}`}
+                  href={`/businesses/${b.slug}/chat`}
                   onClick={() => setOpen(false)}
                   style={{
                     display: "flex",
