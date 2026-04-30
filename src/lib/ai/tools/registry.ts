@@ -503,6 +503,190 @@ export const analyzeFormatCompatibilityHandler: ToolHandler<
   };
 };
 
+// ─── Tool: regroup_batch_with_ai ─────────────────────────────────────
+export const regroupBatchTool: ToolDefinition = {
+  name: "regroup_batch_with_ai",
+  description:
+    "Reagrupa los posts de un batch usando análisis visual (gpt-4o-mini Vision). Útil cuando la heurística inicial agrupó mal por nombres: imágenes que pertenecen al mismo carrusel quedaron como posts separados, o imágenes de campañas distintas se metieron en un mismo carrusel. Detecta coherencia visual (paleta, estilo, secuencia) y reagrupa. Llámalo cuando el user pregunta '¿podrías agrupar mejor las imágenes?' o cuando ves en analyze_batch que hay muchos posts tipo IMAGE sueltos que parecen relacionados. Coste interno ~$0.005-0.015. Cancela los drafts antiguos y crea nuevos.",
+  parameters: {
+    type: "object",
+    properties: {
+      batchId: {
+        type: "string",
+        description: "ID del UploadBatch a reagrupar",
+      },
+    },
+    required: ["batchId"],
+  },
+};
+
+export const regroupBatchHandler: ToolHandler<
+  { batchId: string },
+  {
+    regrouped: number;
+    cancelled: number;
+    warnings: string[];
+    groups: Array<{
+      groupKey: string;
+      type: string;
+      reason: string;
+      filenames: string[];
+      captionDraft?: string;
+    }>;
+  }
+> = async (input, ctx) => {
+  // Llamamos al endpoint internamente reutilizando la lógica
+  const { groupWithVision } = await import("@/services/parser/smart-grouper");
+  const { hashSHA256 } = await import("@/lib/crypto");
+  const { v4: uuidv4 } = await import("uuid");
+
+  const batch = await db.uploadBatch.findFirst({
+    where: { id: input.batchId, businessId: ctx.businessId },
+    include: {
+      postDrafts: {
+        where: { status: { in: ["DRAFT", "VALIDATED", "READY"] } },
+        include: { mediaAssets: true },
+      },
+    },
+  });
+  if (!batch) {
+    throw new Error(`Batch ${input.batchId} no encontrado`);
+  }
+
+  const images = batch.postDrafts
+    .flatMap((d) => d.mediaAssets.map((m) => ({ draft: d, asset: m })))
+    .filter(({ asset }) => asset.mimeType.startsWith("image/"));
+
+  if (images.length === 0) {
+    return {
+      regrouped: 0,
+      cancelled: 0,
+      warnings: ["No hay imágenes en el batch (solo videos o vacío)."],
+      groups: [],
+    };
+  }
+
+  if (images.length > 20) {
+    return {
+      regrouped: 0,
+      cancelled: 0,
+      warnings: [
+        `El batch tiene ${images.length} imágenes — máx 20 para reagrupamiento. El user debe subir en lotes más pequeños.`,
+      ],
+      groups: [],
+    };
+  }
+
+  const visionResult = await groupWithVision({
+    images: images.map(({ asset }) => ({
+      url: asset.storageUrl,
+      filename: asset.originalFilename,
+    })),
+  });
+
+  if (visionResult.groups.length === 0) {
+    return {
+      regrouped: 0,
+      cancelled: 0,
+      warnings: visionResult.warnings,
+      groups: [],
+    };
+  }
+
+  const assetByFilename = new Map(
+    images.map(({ asset, draft }) => [asset.originalFilename, { asset, draft }]),
+  );
+
+  const newGroups: Array<{
+    groupKey: string;
+    type: string;
+    reason: string;
+    filenames: string[];
+    captionDraft?: string;
+  }> = [];
+  const draftsToCancel = new Set<string>();
+
+  for (const group of visionResult.groups) {
+    const groupAssets = group.filenames
+      .map((fn) => assetByFilename.get(fn))
+      .filter((x): x is NonNullable<typeof x> => !!x);
+
+    if (groupAssets.length === 0) continue;
+
+    for (const { draft } of groupAssets) {
+      draftsToCancel.add(draft.id);
+    }
+
+    const detectedType =
+      groupAssets.length === 1
+        ? "IMAGE"
+        : group.detectedType === "carousel"
+          ? "CAROUSEL"
+          : "IMAGE";
+
+    const newDraftId = uuidv4();
+    const caption = group.captionDraft ?? "";
+    const sortedHashes = groupAssets
+      .map(({ asset }) => asset.fileHash)
+      .sort()
+      .join("|");
+    const contentHash = hashSHA256(`${caption}|${sortedHashes}`);
+
+    await db.postDraft.create({
+      data: {
+        id: newDraftId,
+        businessId: ctx.businessId,
+        batchId: batch.id,
+        postType: detectedType as "IMAGE" | "CAROUSEL" | "REEL",
+        publishAt: groupAssets[0].draft.publishAt,
+        timezone: groupAssets[0].draft.timezone,
+        caption,
+        captionHash: hashSHA256(caption),
+        contentHash,
+        idempotencyKey: uuidv4(),
+        status: "VALIDATED",
+        sourceFolderName: group.groupKey,
+        mediaAssets: {
+          create: groupAssets.map(({ asset }, i) => ({
+            originalFilename: asset.originalFilename,
+            storagePath: asset.storagePath,
+            storageUrl: asset.storageUrl,
+            mimeType: asset.mimeType,
+            fileSize: asset.fileSize,
+            fileHash: asset.fileHash,
+            width: asset.width,
+            height: asset.height,
+            durationSec: asset.durationSec,
+            sortOrder: i,
+          })),
+        },
+      },
+    });
+
+    newGroups.push({
+      groupKey: group.groupKey,
+      type: detectedType,
+      reason: group.reason,
+      filenames: group.filenames,
+      captionDraft: group.captionDraft,
+    });
+  }
+
+  if (draftsToCancel.size > 0) {
+    await db.postDraft.updateMany({
+      where: { id: { in: Array.from(draftsToCancel) } },
+      data: { status: "CANCELLED", lastError: "Reemplazado por reagrupamiento IA" },
+    });
+  }
+
+  return {
+    regrouped: newGroups.length,
+    cancelled: draftsToCancel.size,
+    warnings: visionResult.warnings,
+    groups: newGroups,
+  };
+};
+
 // ─── Registry ──────────────────────────────────────────────────────────
 export const TOOLS = {
   analyze_batch: { def: analyzeBatchTool, handler: analyzeBatchHandler },
@@ -519,6 +703,10 @@ export const TOOLS = {
   analyze_format_compatibility: {
     def: analyzeFormatCompatibilityTool,
     handler: analyzeFormatCompatibilityHandler,
+  },
+  regroup_batch_with_ai: {
+    def: regroupBatchTool,
+    handler: regroupBatchHandler,
   },
 } as const;
 

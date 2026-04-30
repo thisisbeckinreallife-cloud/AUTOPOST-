@@ -12,6 +12,7 @@
 import JSZip from "jszip";
 import { hashSHA256 } from "@/lib/crypto";
 import type { MetaJson, ParsedPost, ParsedMediaFile, ParseResult, ParseError } from "@/types";
+import { groupByHeuristic, type FileEntry as SmartFileEntry } from "./smart-grouper";
 
 // ─── Media helpers ───────────────────────────────────────────────────────────
 
@@ -271,15 +272,48 @@ function discoverBuckets(zip: JSZip): PostBucket[] {
     }
   }
 
-  // Root-level loose media files → each becomes its own bucket
-  for (const { basename, entry } of rootFiles) {
-    if (!isMediaFile(basename)) continue;
-    const bucket: PostBucket = {
-      folderName: basename,
-      files: new Map([[basename.toLowerCase(), entry]]),
-      extractedDate: null,
-    };
-    buckets.push(bucket);
+  // Root-level loose files → aplicar smart-grouper para detectar carruseles
+  // automáticamente por patrones de naming (post-A_1.jpg → carrusel post-A)
+  if (rootFiles.length > 0) {
+    const fileEntries: SmartFileEntry[] = rootFiles
+      .filter(({ basename }) => isMediaFile(basename) || basename.toLowerCase().endsWith(".txt"))
+      .map(({ basename }) => ({
+        filename: basename,
+        isImage: isImageFile(basename),
+        isVideo: isVideoFile(basename),
+        isCaption: basename.toLowerCase().endsWith(".txt"),
+      }));
+
+    if (fileEntries.length > 0) {
+      const grouped = groupByHeuristic(fileEntries);
+
+      // Mapa rápido de nombre → entry
+      const rootByName = new Map(rootFiles.map((rf) => [rf.basename, rf.entry]));
+
+      for (const group of grouped.groups) {
+        const groupBucket: PostBucket = {
+          folderName: group.groupKey,
+          files: new Map(),
+          extractedDate: null,
+        };
+        for (const fname of group.filenames) {
+          const entry = rootByName.get(fname);
+          if (entry) {
+            groupBucket.files.set(fname.toLowerCase(), entry);
+          }
+        }
+        // Si el grupo tiene caption.txt vinculado, añadirlo
+        if (group.captionFile) {
+          const capEntry = rootByName.get(group.captionFile);
+          if (capEntry) {
+            groupBucket.files.set("caption.txt", capEntry);
+          }
+        }
+        if (groupBucket.files.size > 0) {
+          buckets.push(groupBucket);
+        }
+      }
+    }
   }
 
   return buckets;

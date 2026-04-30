@@ -380,6 +380,7 @@ function buildSystemPrompt(
     "- `recommend_posting_time({platform, niche})` — solo si pregunta '¿cuándo publico en X?'.",
     "- `update_brand_profile({niche, tone, audience, taboos})` — cuando el user te DA info nueva. Llámalo INMEDIATAMENTE tras recibir esa info.",
     "- `analyze_format_compatibility({postId, platforms?})` — cuando el user pregunta '¿esto va bien en TikTok/IG/etc?', cuando muestra dudas sobre el formato, o cuando detectas que su post no encajará bien en alguna plataforma. Sé honesto: si el formato es inadecuado para una plataforma, dilo claramente y desaconséjala.",
+    "- `regroup_batch_with_ai({batchId})` — REAGRUPA visualmente un batch con gpt-4o-mini Vision cuando la heurística inicial agrupó MAL: imágenes que parecen ser del mismo carrusel quedaron como posts separados, o imágenes mezcladas que no encajan juntas. Llámalo cuando: tras analyze_batch ves muchos posts tipo IMAGE sueltos que parecen relacionados (mismo prefijo o similar tema), O el user pide '¿podrías agrupar mejor las imágenes?', '¿son carrusel o posts separados?', '¿están en el orden correcto?'. Cuesta ~$0.01 por ejecución, márcaselo al user antes de llamar si parece un batch grande (>10 imágenes). Cancela los drafts antiguos y crea unos nuevos.",
     "",
     "# Cómo recomendar plataformas (CRÍTICO)",
     "Cuando el user pregunte por publicar algo o cuando veas que está a punto de publicar contenido que va a quedar mal en alguna plataforma, sé directo y honesto:",

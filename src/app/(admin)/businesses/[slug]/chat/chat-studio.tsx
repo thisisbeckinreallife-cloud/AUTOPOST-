@@ -42,6 +42,7 @@ const VALID_TOOL_NAMES = new Set([
   "recommend_posting_time",
   "update_brand_profile",
   "analyze_format_compatibility",
+  "regroup_batch_with_ai",
   // legacy / planned
   "suggest_caption",
   "suggest_hashtags",
@@ -243,11 +244,12 @@ export function ChatStudio({
         setMessages((m) => [...m, uploadMsg, pendingMsg]);
 
         await streamChat(
-          `Acabo de subir un batch nuevo con ID "${presignData.batchId}". Por favor:\n` +
+          `Acabo de subir un batch nuevo con ID "${presignData.batchId}" (un ZIP con varios archivos). Por favor:\n` +
             `1. Llama a analyze_batch con ese batchId.\n` +
-            `2. Para los posts más relevantes (max 3), llama a analyze_format_compatibility con su postId para ver en qué plataformas encajarán bien y en cuáles NO.\n` +
-            `3. Resume en lenguaje natural qué encontraste: número de posts, tipos detectados, problemas de formato (imágenes horizontales en TikTok, videos largos para Shorts, ratios subóptimos, etc.). Sé honesto — si algo no encaja con una plataforma, desaconséjala explícitamente.\n` +
-            `4. Hazme las preguntas que necesites para clarificar ambigüedades antes de proponer calendario.\n` +
+            `2. Mira los resultados: si detectas muchos posts tipo IMAGE sueltos con nombres parecidos o que parezcan parte del mismo set/campaña, AVÍSAME y propón llamar a regroup_batch_with_ai (Vision IA) para agruparlos correctamente como carrusel. Pídeme confirmación antes de llamarlo (cuesta ~$0.01).\n` +
+            `3. Para los posts más relevantes (max 3), llama a analyze_format_compatibility con su postId para ver en qué plataformas encajarán bien y en cuáles NO.\n` +
+            `4. Resume en lenguaje natural qué encontraste: número de posts, tipos detectados, problemas de formato (imágenes horizontales en TikTok, videos largos para Shorts, ratios subóptimos, etc.). Sé honesto — si algo no encaja con una plataforma, desaconséjala explícitamente.\n` +
+            `5. Hazme las preguntas que necesites para clarificar ambigüedades antes de proponer calendario.\n` +
             `Después espera mi confirmación para llamar suggest_schedule.`,
         );
 
@@ -1073,6 +1075,7 @@ function ToolCallChip({
     suggest_hashtags: "# Sugiriendo hashtags",
     analyze_format_compatibility: "🎯 Verificando compatibilidad por plataforma",
     analyze_media_with_vision: "👁 Analizando media con vision",
+    regroup_batch_with_ai: "🔍 Reagrupando con visión IA",
   };
   const label = labels[call.name] ?? call.name;
   const finished = call.output !== undefined || call.error !== undefined;
