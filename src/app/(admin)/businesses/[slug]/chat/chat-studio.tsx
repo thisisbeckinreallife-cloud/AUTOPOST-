@@ -77,13 +77,15 @@ export function ChatStudio({
 }: Props) {
   const { toast } = useToast();
   const [chatId, setChatId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      role: "assistant",
-      content: `Hola. Soy tu asistente editorial para ${businessName}. Puedo:\n\n• Analizar batches que hayas subido\n• Sugerir captions y hashtags con la voz de tu marca\n• Recomendarte mejores horarios por plataforma\n• Proponerte un calendario completo de publicación\n\n¿En qué te ayudo?`,
-    },
-  ]);
+
+  const welcomeMessage: Message = {
+    id: "welcome",
+    role: "assistant",
+    content: `Hola. Soy tu asistente editorial para ${businessName}. Puedo:\n\n• Analizar batches que hayas subido\n• Sugerir captions y hashtags con la voz de tu marca\n• Recomendarte mejores horarios por plataforma\n• Proponerte un calendario completo de publicación\n\n¿En qué te ayudo?`,
+  };
+
+  const [messages, setMessages] = useState<Message[]>([welcomeMessage]);
+  const [hydrated, setHydrated] = useState(false);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [upload, setUpload] = useState<UploadProgress | null>(null);
@@ -92,6 +94,72 @@ export function ChatStudio({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dragCounterRef = useRef(0);
+
+  // Hidratar chat reciente al montar — restaura conversación si el user
+  // navegó a otra pestaña y volvió en menos de 3h.
+  useEffect(() => {
+    let cancelled = false;
+    async function hydrate() {
+      try {
+        const res = await fetch(
+          `/api/ai/chat/recent?businessId=${businessId}`,
+          { credentials: "same-origin" },
+        );
+        if (!res.ok) {
+          setHydrated(true);
+          return;
+        }
+        const json = await res.json();
+        const chat = json.data;
+        if (cancelled) return;
+        if (!chat || !chat.id) {
+          setHydrated(true);
+          return;
+        }
+        setChatId(chat.id);
+
+        // Reconstruir mensajes desde el histórico
+        const restored: Message[] = chat.messages
+          .filter((m: { role: string }) => m.role !== "tool")
+          .map((m: {
+            id: string;
+            role: string;
+            content: string;
+            toolCalls: unknown;
+          }) => {
+            const tcRaw = m.toolCalls as
+              | Array<{ name: string; input: unknown; output?: unknown }>
+              | null;
+            return {
+              id: m.id,
+              role: m.role as "user" | "assistant",
+              content: m.content,
+              toolCalls: Array.isArray(tcRaw)
+                ? tcRaw.map((tc) => ({
+                    name: tc.name,
+                    input: tc.input,
+                    output: tc.output,
+                  }))
+                : undefined,
+              pending: false,
+            };
+          });
+
+        if (restored.length > 0) {
+          setMessages([welcomeMessage, ...restored]);
+        }
+      } catch {
+        // sin chat previo, dejamos el welcome
+      } finally {
+        if (!cancelled) setHydrated(true);
+      }
+    }
+    hydrate();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businessId]);
 
   // Auto-scroll cuando llegan mensajes
   useEffect(() => {

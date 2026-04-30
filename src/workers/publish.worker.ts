@@ -453,6 +453,35 @@ console.log(
   `[Worker] Started. Queues: ${PUBLISH_QUEUE_NAME} + ${SOCIAL_PUBLISH_QUEUE_NAME} | Concurrency: ${CONCURRENCY}`,
 );
 
+// ─────────────────────────────────────────
+// CLEANUP TASK — borrar AiChats sin actividad > 3h
+// Corre cada hora. Mantiene la DB ligera y previene fuga de info de
+// conversaciones abandonadas. Los AiChatMessage se borran en cascada.
+// ─────────────────────────────────────────
+const CHAT_TTL_MS = 3 * 60 * 60 * 1000; // 3 horas
+const CHAT_CLEANUP_INTERVAL_MS = 60 * 60 * 1000; // cada hora
+
+async function cleanupStaleChats(): Promise<void> {
+  try {
+    const cutoff = new Date(Date.now() - CHAT_TTL_MS);
+    const result = await db.aiChat.deleteMany({
+      where: { updatedAt: { lt: cutoff } },
+    });
+    if (result.count > 0) {
+      console.log(`[ChatCleanup] Borrados ${result.count} chats sin actividad >3h`);
+    }
+  } catch (err) {
+    console.error("[ChatCleanup] error:", err);
+  }
+}
+
+// Primera ejecución a los 5 min de arrancar el worker (no inmediata para
+// dar tiempo a que el deploy se estabilice). Después cada hora.
+setTimeout(() => {
+  cleanupStaleChats();
+  setInterval(cleanupStaleChats, CHAT_CLEANUP_INTERVAL_MS);
+}, 5 * 60 * 1000);
+
 // Graceful shutdown — only register if running standalone (not inside Next.js)
 const isStandalone = !process.env.NEXT_RUNTIME;
 if (isStandalone) {
