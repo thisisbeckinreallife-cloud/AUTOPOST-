@@ -2,12 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
+import { getPlatformConfigs } from "@/lib/social/platforms";
 
 const updateSchema = z.object({
   caption: z.string().min(1).max(2200).optional(),
   publishAt: z.string().datetime({ offset: true }).optional(),
   status: z.enum(["CANCELLED"]).optional(), // Only allow cancellation via this endpoint
   collaborators: z.array(z.string().min(1).max(30)).max(3).optional(),
+  targetPlatforms: z
+    .array(z.enum(["TIKTOK", "LINKEDIN", "YOUTUBE", "PINTEREST"]))
+    .optional(),
+  publishToMeta: z.boolean().optional(),
 });
 
 export async function GET(
@@ -41,6 +46,18 @@ export async function GET(
             },
           },
         },
+        socialPublications: {
+          include: {
+            connection: {
+              select: {
+                platform: true,
+                externalUsername: true,
+                externalDisplayName: true,
+                status: true,
+              },
+            },
+          },
+        },
         business: {
           select: { id: true, name: true, slug: true, timezone: true },
         },
@@ -54,7 +71,52 @@ export async function GET(
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ data: draft });
+    // Enriquecer con info de plataformas para PlatformPicker
+    const [metaConn, allSocialConns] = await Promise.all([
+      db.metaConnection.findUnique({
+        where: { businessId: draft.businessId },
+        select: { igUsername: true, status: true },
+      }),
+      db.socialConnection.findMany({
+        where: { businessId: draft.businessId },
+        select: {
+          platform: true,
+          externalUsername: true,
+          externalDisplayName: true,
+          status: true,
+        },
+      }),
+    ]);
+
+    const platformConfigs = getPlatformConfigs();
+    const socialByPlatform = new Map(allSocialConns.map((c) => [c.platform, c]));
+
+    const platformInfo = platformConfigs.map((cfg) => {
+      const conn = socialByPlatform.get(cfg.platform);
+      return {
+        platform: cfg.platform,
+        displayName: cfg.displayName,
+        icon: cfg.icon,
+        available: cfg.available,
+        productionMode: cfg.productionMode,
+        connection: conn
+          ? {
+              username: conn.externalUsername,
+              displayName: conn.externalDisplayName,
+              status: conn.status,
+            }
+          : null,
+      };
+    });
+
+    return NextResponse.json({
+      data: draft,
+      platforms: platformInfo,
+      meta: {
+        connected: metaConn?.status === "ACTIVE",
+        username: metaConn?.igUsername ?? null,
+      },
+    });
   } catch (err) {
     if (err instanceof Error && err.message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -121,6 +183,26 @@ export async function PATCH(
     }
     if (parsed.data.status === "CANCELLED") {
       updates.status = "CANCELLED";
+    }
+    if (parsed.data.targetPlatforms !== undefined) {
+      // Solo se puede cambiar antes de SCHEDULED para evitar incoherencias
+      // con SocialPublications ya enqueueados.
+      if (!["DRAFT", "VALIDATED", "READY"].includes(draft.status)) {
+        return NextResponse.json(
+          { error: `No se pueden cambiar plataformas en status "${draft.status}". Cancela y re-edita.` },
+          { status: 409 },
+        );
+      }
+      updates.targetPlatforms = parsed.data.targetPlatforms;
+    }
+    if (parsed.data.publishToMeta !== undefined) {
+      if (!["DRAFT", "VALIDATED", "READY"].includes(draft.status)) {
+        return NextResponse.json(
+          { error: `No se puede cambiar Meta toggle en status "${draft.status}".` },
+          { status: 409 },
+        );
+      }
+      updates.publishToMeta = parsed.data.publishToMeta;
     }
 
     const updated = await db.$transaction(async (tx) => {

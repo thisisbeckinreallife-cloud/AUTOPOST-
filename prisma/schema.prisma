@@ -194,6 +194,16 @@ model PostDraft {
   failedAt        DateTime?
   attemptCount    Int      @default(0)
 
+  // Multi-plataforma — qué plataformas no-Meta publican este draft.
+  // Si está vacío, solo se publica en Meta legacy (Instagram + Facebook).
+  // Si tiene valores, se crea una SocialPublication por cada plataforma
+  // que tenga SocialConnection ACTIVA en este business.
+  targetPlatforms SocialPlatform[] @default([])
+
+  // Si true, publicar también en Meta (Instagram + Facebook).
+  // Default true para preservar comportamiento legacy.
+  publishToMeta Boolean @default(true)
+
   // Source info
   sourceFolderName String  // e.g. "2026-04-15_post-01"
 

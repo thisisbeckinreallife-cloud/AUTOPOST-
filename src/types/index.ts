@@ -106,6 +106,16 @@ export interface PublishJobPayload {
   attempt: number;
 }
 
+/**
+ * Payload de jobs de publicación social (TikTok / LinkedIn / YT / Pinterest).
+ * Se enrutan vía SocialPublication.id porque cada plataforma tiene su propio
+ * registro de publicación con estado independiente.
+ */
+export interface SocialPublishJobPayload {
+  socialPublicationId: string;
+  attempt: number;
+}
+
 // ─────────────────────────────────────────
 // API RESPONSE HELPERS
 // ─────────────────────────────────────────

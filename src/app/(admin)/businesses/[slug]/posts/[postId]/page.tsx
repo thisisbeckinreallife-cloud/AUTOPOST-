@@ -12,6 +12,8 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { useToast } from "@/components/ui/toast";
 import { AiCaptionStudio } from "@/components/admin/AiCaptionStudio";
 import { RequestApprovalPanel } from "@/components/admin/RequestApprovalPanel";
+import { PlatformPicker } from "@/components/admin/PlatformPicker";
+import type { SocialPlatform } from "@prisma/client";
 
 interface PostDetail {
   id: string;
@@ -31,10 +33,48 @@ interface PostDetail {
   publishedAt: string | null;
   failedAt: string | null;
   validationErrors: unknown[] | null;
+  targetPlatforms: SocialPlatform[];
+  publishToMeta: boolean;
   mediaAssets: MediaAsset[];
   publishJobs: PublishJobDetail[];
+  socialPublications: SocialPublicationDetail[];
   business: { id: string; name: string; slug: string; timezone: string };
   batch: { id: string; originalFilename: string };
+}
+
+interface SocialPublicationDetail {
+  id: string;
+  platform: SocialPlatform;
+  status: string;
+  externalPostId: string | null;
+  externalPermalink: string | null;
+  publishedAt: string | null;
+  failedAt: string | null;
+  errorMessage: string | null;
+  connection: {
+    platform: SocialPlatform;
+    externalUsername: string | null;
+    externalDisplayName: string | null;
+    status: string;
+  };
+}
+
+interface PlatformInfo {
+  platform: SocialPlatform;
+  displayName: string;
+  icon: string;
+  available: boolean;
+  productionMode: boolean;
+  connection: {
+    username: string | null;
+    displayName: string | null;
+    status: string;
+  } | null;
+}
+
+interface MetaInfo {
+  connected: boolean;
+  username: string | null;
 }
 
 interface MediaAsset {
@@ -67,6 +107,8 @@ interface Attempt {
 export default function PostDetailPage() {
   const { slug, postId } = useParams() as { slug: string; postId: string };
   const [post, setPost] = useState<PostDetail | null>(null);
+  const [platforms, setPlatforms] = useState<PlatformInfo[]>([]);
+  const [meta, setMeta] = useState<MetaInfo>({ connected: false, username: null });
   const [loading, setLoading] = useState(true);
   const [retrying, setRetrying] = useState(false);
   const [cancelling, setCancelling] = useState(false);
@@ -120,6 +162,8 @@ export default function PostDetailPage() {
       if (res.ok) {
         const data = await res.json();
         setPost(data.data);
+        if (data.platforms) setPlatforms(data.platforms);
+        if (data.meta) setMeta(data.meta);
       }
     } finally {
       setLoading(false);
@@ -304,6 +348,33 @@ export default function PostDetailPage() {
             setPost((p) => (p ? { ...p, caption: newCaption } : p))
           }
         />
+      )}
+
+      {/* Selector multi-plataforma */}
+      <PlatformPicker
+        postId={post.id}
+        editable={["DRAFT", "VALIDATED", "READY"].includes(post.status)}
+        initialTargetPlatforms={post.targetPlatforms ?? []}
+        initialPublishToMeta={post.publishToMeta ?? true}
+        metaConnected={meta.connected}
+        metaUsername={meta.username}
+        socialConnections={platforms}
+      />
+
+      {/* Estado por plataforma — si ya hay SocialPublications */}
+      {post.socialPublications && post.socialPublications.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Publicaciones por plataforma</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {post.socialPublications.map((pub) => (
+                <SocialPublicationRow key={pub.id} pub={pub} />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Aprobación del cliente — magic-link */}
@@ -550,6 +621,71 @@ function Row({
     <div className="flex gap-4">
       <dt className="w-36 text-zinc-600 shrink-0">{label}</dt>
       <dd className="text-zinc-900 font-medium">{children}</dd>
+    </div>
+  );
+}
+
+function SocialPublicationRow({ pub }: { pub: SocialPublicationDetail }) {
+  const platformLabel: Record<SocialPlatform, string> = {
+    TIKTOK: "TikTok",
+    LINKEDIN: "LinkedIn",
+    YOUTUBE: "YouTube Shorts",
+    PINTEREST: "Pinterest",
+  };
+
+  const statusColor: Record<string, string> = {
+    PUBLISHED: "#6B7A2E",
+    PUBLISHING: "#D4A627",
+    PENDING: "var(--ap-ink-3)",
+    FAILED: "var(--ap-stamp)",
+  };
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        padding: "10px 12px",
+        background: "var(--ap-paper-2)",
+        border: "1px solid var(--ap-line-2)",
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ margin: 0, fontSize: 13, color: "var(--ap-ink)", fontWeight: 600 }}>
+          {platformLabel[pub.platform]}
+        </p>
+        <p
+          className="ap-mono"
+          style={{
+            margin: "2px 0 0",
+            fontSize: 10,
+            color: statusColor[pub.status] ?? "var(--ap-ink-3)",
+            letterSpacing: "0.1em",
+          }}
+        >
+          {pub.status}
+          {pub.connection.externalUsername && ` · @${pub.connection.externalUsername}`}
+          {pub.errorMessage && ` · ${pub.errorMessage.slice(0, 60)}`}
+        </p>
+      </div>
+      {pub.externalPermalink && (
+        <a
+          href={pub.externalPermalink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ap-mono"
+          style={{
+            fontSize: 10,
+            color: "var(--ap-stamp)",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            textDecoration: "underline",
+          }}
+        >
+          Ver post →
+        </a>
+      )}
     </div>
   );
 }

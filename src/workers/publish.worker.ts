@@ -2,11 +2,15 @@
  * BullMQ publish worker.
  * Run separately from Next.js: `npm run worker`
  *
+ * Procesa dos colas:
+ *  1. PUBLISH_QUEUE_NAME — Meta legacy (IG + FB) → publishPost(meta)
+ *  2. SOCIAL_PUBLISH_QUEUE_NAME — TikTok / LinkedIn / YT / Pinterest → adapter dispatch
+ *
  * Responsibilities:
  *  1. Receive publish job from queue
  *  2. Acquire optimistic lock (prevent double-publish)
- *  3. Fetch PostDraft + assets + MetaConnection
- *  4. Call Meta API publisher
+ *  3. Fetch PostDraft + assets + connection
+ *  4. Call platform adapter
  *  5. Record result in DB
  *  6. Release lock
  */
@@ -14,10 +18,15 @@ import { Worker, Job } from "bullmq";
 import { createBullMQConnection } from "@/lib/redis";
 import { db } from "@/lib/db";
 import { publishPost } from "@/services/meta/publisher";
-import { PUBLISH_QUEUE_NAME } from "@/services/scheduler/queue";
-import type { PublishJobPayload } from "@/types";
+import {
+  PUBLISH_QUEUE_NAME,
+  SOCIAL_PUBLISH_QUEUE_NAME,
+} from "@/services/scheduler/queue";
+import type { PublishJobPayload, SocialPublishJobPayload } from "@/types";
 import { MetaApiError } from "@/services/meta/client";
 import { sendEmail, publishedEmailHtml, failedEmailHtml } from "@/lib/email";
+import { dispatchPublish, PlatformPublishError } from "@/lib/social/adapters";
+import { getValidAccessToken } from "@/lib/social/oauth/refresh";
 
 const CONCURRENCY = parseInt(process.env.WORKER_CONCURRENCY ?? "3", 10);
 const LOCK_DURATION_MS = 5 * 60 * 1000; // 5 minutes
@@ -257,6 +266,142 @@ async function processPublishJob(job: Job<PublishJobPayload>): Promise<void> {
 }
 
 // ─────────────────────────────────────────
+// SOCIAL PUBLISH JOB (TikTok / LinkedIn / YT / Pinterest)
+// ─────────────────────────────────────────
+
+async function processSocialPublishJob(
+  job: Job<SocialPublishJobPayload>,
+): Promise<void> {
+  const { socialPublicationId } = job.data;
+  const attemptNumber = (job.attemptsMade ?? 0) + 1;
+
+  console.log(
+    `[Worker] Social publish job ${job.id} | publication=${socialPublicationId} | attempt=${attemptNumber}`,
+  );
+
+  // Cargar publicación + draft + assets + connection
+  const publication = await db.socialPublication.findUnique({
+    where: { id: socialPublicationId },
+    include: {
+      postDraft: { include: { mediaAssets: true } },
+      connection: true,
+    },
+  });
+
+  if (!publication) {
+    throw new Error(`SocialPublication ${socialPublicationId} not found`);
+  }
+
+  // Idempotencia
+  if (publication.status === "PUBLISHED") {
+    console.log(`[Worker] Publication ${socialPublicationId} already published`);
+    return;
+  }
+
+  if (publication.connection.status !== "ACTIVE") {
+    await db.socialPublication.update({
+      where: { id: socialPublicationId },
+      data: {
+        status: "FAILED",
+        failedAt: new Date(),
+        errorMessage: `Connection status is ${publication.connection.status}. User must reconnect.`,
+      },
+    });
+    return; // No retry — el user debe reconectar
+  }
+
+  // Mark as publishing
+  await db.socialPublication.update({
+    where: { id: socialPublicationId },
+    data: { status: "PUBLISHING" },
+  });
+
+  try {
+    // Refresca el token si está cerca de expirar
+    const accessToken = await getValidAccessToken(publication.connection);
+
+    const result = await dispatchPublish(publication.platform, {
+      draft: publication.postDraft,
+      accessToken,
+      connection: publication.connection,
+    });
+
+    await db.$transaction([
+      db.socialPublication.update({
+        where: { id: socialPublicationId },
+        data: {
+          status: "PUBLISHED",
+          publishedAt: new Date(),
+          externalPostId: result.externalPostId,
+          externalPermalink: result.externalPermalink,
+          errorMessage: null,
+        },
+      }),
+      db.auditLog.create({
+        data: {
+          businessId: publication.connection.businessId,
+          action: "SOCIAL_POST_PUBLISHED",
+          entityType: "SocialPublication",
+          entityId: socialPublicationId,
+          detail: {
+            platform: publication.platform,
+            externalPostId: result.externalPostId,
+            permalink: result.externalPermalink,
+          },
+        },
+      }),
+    ]);
+
+    console.log(
+      `[Worker] ${publication.platform} published → ${result.externalPostId}`,
+    );
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    const isPlatformErr = err instanceof PlatformPublishError;
+    const retryable = isPlatformErr ? err.retryable : true;
+    const maxAttempts = job.opts.attempts ?? 3;
+    const isLastAttempt = attemptNumber >= maxAttempts || !retryable;
+
+    await db.socialPublication.update({
+      where: { id: socialPublicationId },
+      data: {
+        status: isLastAttempt ? "FAILED" : "PENDING",
+        failedAt: isLastAttempt ? new Date() : undefined,
+        errorMessage,
+      },
+    });
+
+    await db.auditLog
+      .create({
+        data: {
+          businessId: publication.connection.businessId,
+          action: isLastAttempt
+            ? "SOCIAL_POST_PUBLISH_FAILED"
+            : "SOCIAL_POST_PUBLISH_ATTEMPT_FAILED",
+          entityType: "SocialPublication",
+          entityId: socialPublicationId,
+          detail: {
+            platform: publication.platform,
+            errorMessage,
+            attemptNumber,
+            retryable,
+          },
+        },
+      })
+      .catch(() => {});
+
+    console.error(
+      `[Worker] ${publication.platform} publish failed (attempt ${attemptNumber}/${maxAttempts}): ${errorMessage}`,
+    );
+
+    // Si no es retryable, no relanzamos — BullMQ no reintenta más
+    if (!retryable) return;
+
+    throw err;
+  }
+}
+
+// ─────────────────────────────────────────
 // WORKER SETUP
 // ─────────────────────────────────────────
 
@@ -268,6 +413,16 @@ const worker = new Worker<PublishJobPayload>(
     concurrency: CONCURRENCY,
     autorun: true,
   }
+);
+
+const socialWorker = new Worker<SocialPublishJobPayload>(
+  SOCIAL_PUBLISH_QUEUE_NAME,
+  processSocialPublishJob,
+  {
+    connection: createBullMQConnection(),
+    concurrency: CONCURRENCY,
+    autorun: true,
+  },
 );
 
 worker.on("completed", (job) => {
@@ -282,24 +437,36 @@ worker.on("error", (err) => {
   console.error("[Worker] Worker error:", err);
 });
 
+socialWorker.on("completed", (job) => {
+  console.log(`[Worker:social] Job ${job.id} completed`);
+});
+
+socialWorker.on("failed", (job, err) => {
+  console.error(`[Worker:social] Job ${job?.id} failed:`, err.message);
+});
+
+socialWorker.on("error", (err) => {
+  console.error("[Worker:social] Worker error:", err);
+});
+
 console.log(
-  `[Worker] Started. Queue: ${PUBLISH_QUEUE_NAME} | Concurrency: ${CONCURRENCY}`
+  `[Worker] Started. Queues: ${PUBLISH_QUEUE_NAME} + ${SOCIAL_PUBLISH_QUEUE_NAME} | Concurrency: ${CONCURRENCY}`,
 );
 
 // Graceful shutdown — only register if running standalone (not inside Next.js)
 const isStandalone = !process.env.NEXT_RUNTIME;
 if (isStandalone) {
   process.on("SIGTERM", async () => {
-    console.log("[Worker] SIGTERM received, closing worker...");
-    await worker.close();
+    console.log("[Worker] SIGTERM received, closing workers...");
+    await Promise.all([worker.close(), socialWorker.close()]);
     process.exit(0);
   });
 
   process.on("SIGINT", async () => {
-    console.log("[Worker] SIGINT received, closing worker...");
-    await worker.close();
+    console.log("[Worker] SIGINT received, closing workers...");
+    await Promise.all([worker.close(), socialWorker.close()]);
     process.exit(0);
   });
 }
 
-export { worker };
+export { worker, socialWorker };

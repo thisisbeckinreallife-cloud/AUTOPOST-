@@ -1,15 +1,20 @@
 /**
  * BullMQ queue definitions and job scheduling.
- * The queue runs in the backend; Meta API is called from the worker.
- * No dependency on Meta Business Suite scheduling.
+ * Dos colas:
+ *   - PUBLISH_QUEUE_NAME ("instagram-publish") — Meta API legacy (IG + FB)
+ *   - SOCIAL_PUBLISH_QUEUE_NAME ("social-publish") — TikTok / LinkedIn / YT / Pinterest
+ *
+ * Ambas corren en el mismo worker process pero con handlers distintos.
  */
 import { Queue, QueueEvents } from "bullmq";
 import { createBullMQConnection, isRedisAvailable } from "@/lib/redis";
-import type { PublishJobPayload } from "@/types";
+import type { PublishJobPayload, SocialPublishJobPayload } from "@/types";
 
 export const PUBLISH_QUEUE_NAME = "instagram-publish";
+export const SOCIAL_PUBLISH_QUEUE_NAME = "social-publish";
 
 let _publishQueue: Queue<PublishJobPayload> | null = null;
+let _socialPublishQueue: Queue<SocialPublishJobPayload> | null = null;
 
 export function getPublishQueue(): Queue<PublishJobPayload> {
   if (!isRedisAvailable()) {
@@ -30,6 +35,64 @@ export function getPublishQueue(): Queue<PublishJobPayload> {
     });
   }
   return _publishQueue;
+}
+
+export function getSocialPublishQueue(): Queue<SocialPublishJobPayload> {
+  if (!isRedisAvailable()) {
+    throw new Error("Redis is not configured. Background job scheduling requires REDIS_URL.");
+  }
+  if (!_socialPublishQueue) {
+    _socialPublishQueue = new Queue<SocialPublishJobPayload>(SOCIAL_PUBLISH_QUEUE_NAME, {
+      connection: createBullMQConnection(),
+      defaultJobOptions: {
+        attempts: 3,
+        backoff: {
+          type: "exponential",
+          delay: 60_000,
+        },
+        removeOnComplete: { count: 500 },
+        removeOnFail: { count: 500 },
+      },
+    });
+  }
+  return _socialPublishQueue;
+}
+
+/**
+ * Schedule un job de publicación social (no-Meta).
+ */
+export async function scheduleSocialPublishJob(
+  socialPublicationId: string,
+  publishAt: Date,
+): Promise<string> {
+  const queue = getSocialPublishQueue();
+  const now = Date.now();
+  const delay = Math.max(0, publishAt.getTime() - now);
+
+  const jobId = `social-publish-${socialPublicationId}`;
+
+  const payload: SocialPublishJobPayload = {
+    socialPublicationId,
+    attempt: 1,
+  };
+
+  const job = await queue.add("social-publish", payload, {
+    jobId,
+    delay,
+  });
+
+  return job.id ?? jobId;
+}
+
+/**
+ * Cancel a pending social publish job.
+ */
+export async function cancelSocialPublishJob(bullmqJobId: string): Promise<void> {
+  const queue = getSocialPublishQueue();
+  const job = await queue.getJob(bullmqJobId);
+  if (job) {
+    await job.remove();
+  }
 }
 
 /**

@@ -19,7 +19,7 @@ import {
   getSignedDownloadUrl,
 } from "@/lib/storage";
 import { hashSHA256 } from "@/lib/crypto";
-import { schedulePublishJob } from "./queue";
+import { schedulePublishJob, scheduleSocialPublishJob } from "./queue";
 import { parseISO } from "date-fns";
 import type { ParsedPost } from "@/types";
 import type { Prisma, PostDraft } from "@prisma/client";
@@ -290,37 +290,91 @@ export async function confirmBatch(batchId: string): Promise<{
   let scheduled = 0;
   let failed = 0;
 
+  // Cargar SocialConnections activas del business — las usaremos para
+  // crear SocialPublication según targetPlatforms de cada draft.
+  const activeSocialConnections = await db.socialConnection.findMany({
+    where: { businessId: batch.businessId, status: "ACTIVE" },
+  });
+  const socialConnByPlatform = new Map(
+    activeSocialConnections.map((c) => [c.platform, c]),
+  );
+
   for (const draft of batch.postDrafts) {
     try {
-      // Create PublishJob record
-      const publishJob = await db.publishJob.create({
-        data: {
-          postDraftId: draft.id,
-          businessId: draft.businessId,
-          scheduledFor: draft.publishAt,
-          status: "PENDING",
-        },
-      });
+      let metaJobId: string | null = null;
 
-      // Schedule in BullMQ
-      const bullmqJobId = await schedulePublishJob(
-        draft.id,
-        publishJob.id,
-        draft.businessId,
-        draft.publishAt
-      );
+      // 1. Meta legacy (IG + FB) — si publishToMeta y MetaConnection existe
+      if (draft.publishToMeta) {
+        const publishJob = await db.publishJob.create({
+          data: {
+            postDraftId: draft.id,
+            businessId: draft.businessId,
+            scheduledFor: draft.publishAt,
+            status: "PENDING",
+          },
+        });
 
-      // Update records
-      await db.$transaction([
-        db.publishJob.update({
+        const bullmqJobId = await schedulePublishJob(
+          draft.id,
+          publishJob.id,
+          draft.businessId,
+          draft.publishAt,
+        );
+
+        await db.publishJob.update({
           where: { id: publishJob.id },
           data: { bullmqJobId, status: "ENQUEUED" },
-        }),
-        db.postDraft.update({
+        });
+
+        metaJobId = publishJob.id;
+      }
+
+      // 2. Plataformas no-Meta — crear SocialPublication + enqueue por cada
+      const targetPlatforms = draft.targetPlatforms ?? [];
+      const socialPublicationIds: string[] = [];
+
+      for (const platform of targetPlatforms) {
+        const conn = socialConnByPlatform.get(platform);
+        if (!conn) {
+          // Plataforma marcada como target pero sin conexión activa — skip silencioso
+          continue;
+        }
+
+        const sp = await db.socialPublication.create({
+          data: {
+            postDraftId: draft.id,
+            connectionId: conn.id,
+            platform,
+            status: "PENDING",
+          },
+        });
+
+        await scheduleSocialPublishJob(sp.id, draft.publishAt);
+        socialPublicationIds.push(sp.id);
+      }
+
+      // Update draft state — SCHEDULED si al menos uno tiene job
+      const hasAnyJob = metaJobId !== null || socialPublicationIds.length > 0;
+      if (!hasAnyJob) {
+        await db.postDraft.update({
           where: { id: draft.id },
-          data: { status: "SCHEDULED", scheduledJobId: publishJob.id },
-        }),
-      ]);
+          data: {
+            status: "FAILED",
+            lastError:
+              "El post no tiene ninguna plataforma destino (Meta deshabilitado y sin SocialConnections activas para targetPlatforms)",
+          },
+        });
+        failed++;
+        continue;
+      }
+
+      await db.postDraft.update({
+        where: { id: draft.id },
+        data: {
+          status: "SCHEDULED",
+          scheduledJobId: metaJobId,
+        },
+      });
 
       scheduled++;
     } catch (err) {
