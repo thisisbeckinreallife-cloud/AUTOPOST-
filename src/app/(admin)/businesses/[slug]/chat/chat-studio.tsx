@@ -77,8 +77,10 @@ export function ChatStudio({
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [upload, setUpload] = useState<UploadProgress | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const messagesRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dragCounterRef = useRef(0);
 
   // Auto-scroll cuando llegan mensajes
   useEffect(() => {
@@ -87,19 +89,87 @@ export function ChatStudio({
   }, [messages]);
 
   /**
-   * Sube un ZIP directo desde el chat. Tras procesar el batch,
-   * envía un mensaje pre-fabricado al LLM para que lo analice
-   * y haga clarifying questions sobre lo que detecte.
+   * Sube archivos desde el chat. Acepta:
+   *   - Un ZIP → procesa como batch (carpeta comprimida con varios posts)
+   *   - 1 imagen → 1 post tipo IMAGE
+   *   - N imágenes (≤10) → 1 post tipo CAROUSEL
+   *   - 1 video → 1 post tipo REEL
+   *   - Mezclas raras → error claro
+   * Tras procesar, envía mensaje pre-fabricado al LLM con el contexto.
    */
-  const uploadFolder = useCallback(
-    async (file: File) => {
-      if (sending || upload) return;
+  const uploadFiles = useCallback(
+    async (files: File[]) => {
+      if (sending || upload || files.length === 0) return;
 
-      const isZip = file.name.toLowerCase().endsWith(".zip");
-      if (!isZip) {
-        toast("Solo carpetas comprimidas .zip por ahora", "error");
+      // Clasificar
+      const exts = files.map((f) => extOf(f.name));
+      const types = files.map((f) => fileKind(f));
+
+      // Caso 1: un único ZIP
+      if (files.length === 1 && exts[0] === ".zip") {
+        return uploadZipBatch(files[0]);
+      }
+
+      // Si hay un ZIP mezclado con otros tipos → error
+      if (exts.some((e) => e === ".zip") && files.length > 1) {
+        toast(
+          "No mezcles un ZIP con otros archivos. Sube el ZIP solo o los archivos sueltos solos.",
+          "error",
+        );
         return;
       }
+
+      // Validar todos los tipos
+      if (types.some((t) => t === "unknown")) {
+        const bad = files.find((_, i) => types[i] === "unknown");
+        toast(
+          `Formato no soportado: ${bad?.name ?? ""}. Usa JPG/PNG/WEBP/MP4/MOV/ZIP.`,
+          "error",
+        );
+        return;
+      }
+
+      const hasImage = types.includes("image");
+      const hasVideo = types.includes("video");
+      if (hasImage && hasVideo) {
+        toast(
+          "No mezcles imágenes y videos en una misma subida — TikTok/Pinterest no aceptan mezcla. Súbelos por separado.",
+          "error",
+        );
+        return;
+      }
+
+      if (files.length > 10) {
+        toast("Máximo 10 archivos en una subida (límite del feed Instagram).", "error");
+        return;
+      }
+
+      // Tamaños
+      const oversized = files.find(
+        (f, i) =>
+          (types[i] === "image" && f.size > 8 * 1024 * 1024) ||
+          (types[i] === "video" && f.size > 100 * 1024 * 1024),
+      );
+      if (oversized) {
+        toast(
+          `${oversized.name} excede el límite de tamaño (8 MB imagen, 100 MB video).`,
+          "error",
+        );
+        return;
+      }
+
+      // Caso 2-4: medias sueltos → /api/batches/direct
+      return uploadDirectMedia(files, hasVideo ? "reel" : files.length > 1 ? "carousel" : "image");
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sending, upload, businessSlug],
+  );
+
+  /**
+   * Sube un único ZIP usando el flow batch original.
+   */
+  const uploadZipBatch = useCallback(
+    async (file: File) => {
       if (file.size > 100 * 1024 * 1024) {
         toast("El ZIP supera los 100 MB", "error");
         return;
@@ -108,7 +178,6 @@ export function ChatStudio({
       setUpload({ phase: "presigning", fileName: file.name, pct: 0 });
 
       try {
-        // 1. Presign
         const presignRes = await fetch("/api/batches/presign", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -125,13 +194,11 @@ export function ChatStudio({
         }
         const { data: presignData } = await presignRes.json();
 
-        // 2. PUT a R2 con progress
         setUpload({ phase: "uploading", fileName: file.name, pct: 0 });
         await uploadWithProgress(presignData.uploadUrl, file, (pct) =>
           setUpload((u) => (u ? { ...u, pct } : u)),
         );
 
-        // 3. POST /api/batches con storageKey
         setUpload({
           phase: "processing",
           fileName: file.name,
@@ -161,7 +228,6 @@ export function ChatStudio({
           batchId: presignData.batchId,
         });
 
-        // 4. Insertar mensaje "subido" en chat
         const uploadMsg: Message = {
           id: `u-upload-${Date.now()}`,
           role: "user",
@@ -176,8 +242,6 @@ export function ChatStudio({
         };
         setMessages((m) => [...m, uploadMsg, pendingMsg]);
 
-        // 5. Auto-llamar al chat con el batchId — el LLM debería invocar
-        // analyze_batch + analyze_format_compatibility + hacer clarifying questions
         await streamChat(
           `Acabo de subir un batch nuevo con ID "${presignData.batchId}". Por favor:\n` +
             `1. Llama a analyze_batch con ese batchId.\n` +
@@ -187,26 +251,182 @@ export function ChatStudio({
             `Después espera mi confirmación para llamar suggest_schedule.`,
         );
 
-        // Reset upload state después de 3s para no taparlo
         setTimeout(() => setUpload(null), 3000);
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Error de red";
-        setUpload({
-          phase: "error",
-          fileName: file.name,
-          pct: 0,
-          error: msg,
-        });
+        setUpload({ phase: "error", fileName: file.name, pct: 0, error: msg });
         toast(msg, "error");
         setTimeout(() => setUpload(null), 5000);
       }
     },
-    [sending, upload, businessSlug, toast],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [businessSlug, toast],
+  );
+
+  /**
+   * Sube N archivos sueltos como UN único PostDraft (image | carousel | reel).
+   * Hace presign per-file → PUT a R2 → /api/batches/direct con storageKeys.
+   * El user no pone caption ni publishAt — los pondrá luego en el editor.
+   * Por defecto: publishAt = mañana 10:00 local del business.
+   */
+  const uploadDirectMedia = useCallback(
+    async (files: File[], postType: "image" | "carousel" | "reel") => {
+      const labelFile =
+        files.length === 1
+          ? files[0].name
+          : `${files.length} archivos (${postType})`;
+      setUpload({ phase: "presigning", fileName: labelFile, pct: 0 });
+
+      try {
+        // Presign + upload de cada file
+        const storageKeys: string[] = [];
+        const filenames: string[] = [];
+        const fileSizes: number[] = [];
+        const mimeTypes: string[] = [];
+        let batchId = "";
+
+        for (let i = 0; i < files.length; i++) {
+          const f = files[i];
+          const presignRes = await fetch("/api/batches/presign", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              businessSlug,
+              fileName: f.name,
+              fileSize: f.size,
+              contentType: f.type,
+            }),
+          });
+          if (!presignRes.ok) {
+            const err = await presignRes.json().catch(() => ({}));
+            throw new Error(err.error ?? `Presign falló (${presignRes.status})`);
+          }
+          const { data: presignData } = await presignRes.json();
+          if (!batchId) batchId = presignData.batchId;
+
+          setUpload({
+            phase: "uploading",
+            fileName: `${i + 1}/${files.length} ${f.name}`,
+            pct: 0,
+          });
+          // Upload con XHR progress
+          await new Promise<void>((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("PUT", presignData.uploadUrl);
+            xhr.setRequestHeader("Content-Type", f.type || "application/octet-stream");
+            xhr.upload.onprogress = (evt) => {
+              if (evt.lengthComputable) {
+                const filePct = Math.round((evt.loaded / evt.total) * 100);
+                // Progreso global = (archivos completados + porcentaje del actual) / total
+                const overall = Math.round(((i + filePct / 100) / files.length) * 100);
+                setUpload((u) => (u ? { ...u, pct: overall } : u));
+              }
+            };
+            xhr.onload = () =>
+              xhr.status >= 200 && xhr.status < 300
+                ? resolve()
+                : reject(new Error(`Upload ${xhr.status}: ${f.name}`));
+            xhr.onerror = () => reject(new Error("Network error during upload"));
+            xhr.send(f);
+          });
+
+          storageKeys.push(presignData.storageKey);
+          filenames.push(f.name);
+          fileSizes.push(f.size);
+          mimeTypes.push(f.type || "application/octet-stream");
+        }
+
+        // POST /api/batches/direct con todos los archivos como UN post
+        setUpload({
+          phase: "processing",
+          fileName: labelFile,
+          pct: 100,
+          batchId,
+        });
+
+        // publishAt por defecto: mañana 10:00 local
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(10, 0, 0, 0);
+
+        const directRes = await fetch("/api/batches/direct", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            businessSlug,
+            batchId,
+            posts: [
+              {
+                storageKeys,
+                filenames,
+                fileSizes,
+                mimeTypes,
+                caption: "", // sin caption — el user lo añade después o lo pide al chat
+                postType,
+                publishAt: tomorrow.toISOString(),
+              },
+            ],
+          }),
+        });
+        if (!directRes.ok) {
+          const err = await directRes.json().catch(() => ({}));
+          throw new Error(err.error ?? `Procesado falló (${directRes.status})`);
+        }
+
+        setUpload({ phase: "done", fileName: labelFile, pct: 100, batchId });
+
+        const labels: Record<typeof postType, string> = {
+          image: "📷 una imagen",
+          carousel: `📚 un carrusel de ${files.length} imágenes`,
+          reel: "🎬 un video",
+        };
+        const uploadMsg: Message = {
+          id: `u-upload-${Date.now()}`,
+          role: "user",
+          content: `He subido ${labels[postType]} (${files.map((f) => f.name).join(", ")}). ¿Qué hago con esto?`,
+        };
+        const pendingMsg: Message = {
+          id: `a-${Date.now()}`,
+          role: "assistant",
+          content: "",
+          toolCalls: [],
+          pending: true,
+        };
+        setMessages((m) => [...m, uploadMsg, pendingMsg]);
+
+        await streamChat(
+          `Acabo de subir ${labels[postType]} como un único post nuevo (tipo: ${postType.toUpperCase()}, batchId "${batchId}"). Está sin caption ni horario fijo — programado por defecto para mañana 10:00.\n\n` +
+            `Por favor:\n` +
+            `1. Llama a analyze_batch con ese batchId para encontrar el postId del nuevo draft.\n` +
+            `2. Llama a analyze_format_compatibility con ese postId para evaluar en qué plataformas encajará bien.\n` +
+            `3. Cuéntame en lenguaje natural qué he subido y propónme:\n` +
+            `   - Sugerencia de caption (basada en mi marca si la tengo configurada)\n` +
+            `   - Plataformas recomendadas\n` +
+            `   - Mejor horario sugerido\n` +
+            `4. Pregúntame si quiero que ajuste algo o programe ya.`,
+        );
+
+        setTimeout(() => setUpload(null), 3000);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Error de red";
+        setUpload({ phase: "error", fileName: labelFile, pct: 0, error: msg });
+        toast(msg, "error");
+        setTimeout(() => setUpload(null), 5000);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [businessSlug, toast],
+  );
+
+  // Wrapper para mantener compatibilidad con el botón existente
+  const uploadFolder = useCallback(
+    (file: File) => uploadFiles([file]),
+    [uploadFiles],
   );
 
   /**
    * Streamea una respuesta del chat con un mensaje arbitrario.
-   * Usado tanto por sendMessage (input user) como por uploadFolder
+   * Usado tanto por sendMessage (input user) como por uploadFiles
    * (mensaje sintético post-upload).
    */
   const streamChat = useCallback(
@@ -370,16 +590,99 @@ export function ChatStudio({
     }
   };
 
+  // Drag & drop handlers — usamos contador para evitar el flicker
+  // de drag enter/leave que dispara React por cada hijo recursivamente.
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (sending || upload) return;
+    if (e.dataTransfer.types.includes("Files")) {
+      dragCounterRef.current++;
+      setIsDragging(true);
+    }
+  };
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current--;
+    if (dragCounterRef.current === 0) setIsDragging(false);
+  };
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current = 0;
+    setIsDragging(false);
+    if (sending || upload) return;
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) uploadFiles(files);
+  };
+
   return (
     <div
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
       style={{
         display: "grid",
         gridTemplateRows: "auto 1fr auto",
         gap: 0,
         height: "calc(100vh - 280px)",
         minHeight: 500,
+        position: "relative",
       }}
     >
+      {/* Drop overlay — visible solo durante drag activo */}
+      {isDragging && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 10,
+            background: "rgba(241,236,226,0.96)",
+            border: "2px dashed var(--ap-stamp)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 14,
+            pointerEvents: "none",
+          }}
+        >
+          <Paperclip
+            strokeWidth={1.5}
+            style={{ width: 40, height: 40, color: "var(--ap-stamp)" }}
+          />
+          <p
+            className="ap-display"
+            style={{
+              fontSize: 28,
+              fontStyle: "italic",
+              color: "var(--ap-ink)",
+              margin: 0,
+            }}
+          >
+            Suelta aquí.
+          </p>
+          <p
+            className="ap-mono"
+            style={{
+              fontSize: 10,
+              color: "var(--ap-ink-3)",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              margin: 0,
+            }}
+          >
+            ZIP · Imágenes · Video · Carrusel
+          </p>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ marginBottom: 16 }}>
         <p
@@ -432,7 +735,7 @@ export function ChatStudio({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="Pregúntale lo que sea — sube tu carpeta con 📎 o pídele un calendario, captions, horarios..."
+          placeholder="Pregúntale lo que sea o sube con 📎 — un ZIP, una imagen, varias para carrusel, un video..."
           rows={2}
           maxLength={4000}
           disabled={sending}
@@ -458,20 +761,21 @@ export function ChatStudio({
         <input
           ref={fileInputRef}
           type="file"
-          accept=".zip"
+          accept=".zip,.jpg,.jpeg,.png,.webp,.mp4,.mov,.m4v,image/*,video/*,application/zip"
+          multiple
           style={{ display: "none" }}
           onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) uploadFolder(file);
-            e.target.value = ""; // reset para poder re-seleccionar mismo archivo
+            const files = Array.from(e.target.files ?? []);
+            if (files.length > 0) uploadFiles(files);
+            e.target.value = ""; // reset para poder re-seleccionar mismos archivos
           }}
         />
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={sending || !!upload}
-          title="Subir carpeta .zip"
-          aria-label="Subir carpeta"
+          title="Subir carpeta ZIP, imágenes o video"
+          aria-label="Subir archivos"
           style={{
             position: "absolute",
             bottom: 12,
@@ -492,7 +796,7 @@ export function ChatStudio({
           }}
         >
           <Paperclip strokeWidth={1.8} style={{ width: 12, height: 12 }} />
-          ZIP
+          Subir
         </button>
         <button
           type="button"
@@ -522,7 +826,7 @@ export function ChatStudio({
           textTransform: "uppercase",
         }}
       >
-        Enter envía · Shift+Enter nueva línea · ZIP: arrastra o click 📎 · Negocio: {businessSlug}
+        Enter envía · Shift+Enter nueva línea · 📎 ZIP / imagen / carrusel / video · Arrastra o suelta · Negocio: {businessSlug}
       </p>
     </div>
   );
@@ -603,6 +907,28 @@ function UploadProgressBanner({ upload }: { upload: UploadProgress }) {
       )}
     </div>
   );
+}
+
+/**
+ * Extrae la extensión en lowercase con punto incluido. e.g. "foto.JPG" → ".jpg"
+ */
+function extOf(filename: string): string {
+  const m = filename.toLowerCase().match(/\.[a-z0-9]+$/);
+  return m ? m[0] : "";
+}
+
+/**
+ * Clasifica un File por su extensión + mime type.
+ */
+function fileKind(file: File): "image" | "video" | "zip" | "unknown" {
+  const ext = extOf(file.name);
+  const mime = (file.type || "").toLowerCase();
+  if (ext === ".zip" || mime === "application/zip") return "zip";
+  if ([".jpg", ".jpeg", ".png", ".webp"].includes(ext)) return "image";
+  if (mime.startsWith("image/")) return "image";
+  if ([".mp4", ".mov", ".m4v"].includes(ext)) return "video";
+  if (mime.startsWith("video/")) return "video";
+  return "unknown";
 }
 
 /**
