@@ -307,8 +307,9 @@ export async function POST(request: NextRequest) {
 
         send("done", { chatId: finalChatId });
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Unknown error";
-        send("error", { error: message });
+        const rawMessage = err instanceof Error ? err.message : "Unknown error";
+        const friendly = friendlyProviderError(rawMessage);
+        send("error", { error: friendly, raw: rawMessage });
         console.error("[ai/chat] failed:", err);
       } finally {
         controller.close();
@@ -415,4 +416,51 @@ function buildSystemPrompt(
   }
 
   return lines.join("\n");
+}
+
+/**
+ * Convierte errores crudos de los proveedores (Together.AI, Anthropic) en
+ * mensajes legibles para mostrar al user. Detecta los casos comunes:
+ * créditos agotados, rate limit, modelo no disponible, etc.
+ */
+function friendlyProviderError(raw: string): string {
+  const lower = raw.toLowerCase();
+
+  // Together.AI / Anthropic — créditos agotados
+  if (
+    lower.includes("credit_limit") ||
+    lower.includes("credit limit exceeded") ||
+    lower.includes("insufficient_quota") ||
+    lower.includes("billing")
+  ) {
+    return "El servicio de IA está sin créditos. El admin de AutoPost debe recargar la cuenta de Together.AI (https://api.together.ai/settings/billing) o Anthropic. Inténtalo de nuevo en unos minutos.";
+  }
+
+  // Rate limit
+  if (lower.includes("rate") && lower.includes("limit")) {
+    return "Demasiadas peticiones a la IA en poco tiempo. Espera unos segundos e inténtalo de nuevo.";
+  }
+
+  // Auth de proveedor
+  if (
+    lower.includes("invalid api key") ||
+    lower.includes("401") ||
+    lower.includes("unauthorized")
+  ) {
+    return "El admin de AutoPost debe revisar la API key del proveedor de IA — está caducada o es inválida.";
+  }
+
+  // Modelo no encontrado
+  if (lower.includes("model") && (lower.includes("not found") || lower.includes("does not exist"))) {
+    return "El modelo de IA configurado ya no está disponible. El admin debe actualizar la configuración.";
+  }
+
+  // Timeout
+  if (lower.includes("timeout") || lower.includes("etimedout")) {
+    return "La IA tardó demasiado en responder. Inténtalo de nuevo — si persiste, prueba con un mensaje más corto.";
+  }
+
+  // Default — al menos cortamos el JSON crudo
+  const safe = raw.length > 200 ? raw.slice(0, 200) + "…" : raw;
+  return `La IA no pudo responder: ${safe}`;
 }
