@@ -43,10 +43,14 @@ import {
 } from "@/lib/ai/tools/registry";
 
 const bodySchema = z.object({
-  chatId: z.string().optional(),
+  // .nullish() acepta string, undefined Y null — el cliente envía null la
+  // primera vez (antes de tener un chatId asignado) y JSON serializa null,
+  // no undefined. Sin nullish() Zod rechaza con "Expected string, received null"
+  // → 400 "Validation" → la UI lo pintaba como burbuja vacía.
+  chatId: z.string().nullish(),
   businessId: z.string().min(1),
   message: z.string().min(1).max(4000),
-  batchId: z.string().optional(),
+  batchId: z.string().nullish(),
 });
 
 export const runtime = "nodejs";
@@ -76,8 +80,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { businessId, message, batchId } = parsed.data;
-  let chatId = parsed.data.chatId;
+  const { businessId, message } = parsed.data;
+  // batchId puede venir como null/undefined; lo normalizamos a undefined
+  // para que el resto del código (que asume string|undefined) no rompa.
+  const batchId: string | undefined = parsed.data.batchId ?? undefined;
+  let chatId: string | undefined = parsed.data.chatId ?? undefined;
 
   if (!isTogetherAvailable()) {
     return jsonError("AI no disponible. Configura TOGETHER_API_KEY.", 503);

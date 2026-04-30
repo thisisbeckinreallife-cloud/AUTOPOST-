@@ -54,6 +54,8 @@ interface Message {
   content: string;
   toolCalls?: Array<{ name: string; input: unknown; output?: unknown; error?: string }>;
   pending?: boolean;
+  /** Si está, se renderiza como banner rojo en lugar de burbuja del bot */
+  errorBanner?: string;
 }
 
 export function ChatStudio({
@@ -211,19 +213,38 @@ export function ChatStudio({
     async (text: string) => {
       setSending(true);
       try {
+        // Construir body OMITIENDO chatId si es null (Zod .optional() no
+        // acepta null, solo undefined). Bug histórico que causaba
+        // 400 "Validation" en cada primer mensaje.
+        const requestBody: Record<string, string> = {
+          businessId,
+          message: text,
+        };
+        if (chatId) requestBody.chatId = chatId;
+
         const res = await fetch("/api/ai/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chatId, businessId, message: text }),
+          body: JSON.stringify(requestBody),
         });
 
         if (!res.ok || !res.body) {
           const err = await res.json().catch(() => ({}));
+          const friendlyMsg =
+            res.status === 503
+              ? "AI no disponible — el admin debe configurar TOGETHER_API_KEY."
+              : res.status === 429
+                ? "Demasiadas peticiones. Espera un momento e inténtalo de nuevo."
+                : res.status === 401
+                  ? "Sesión expirada. Recarga la página y vuelve a entrar."
+                  : err.details
+                    ? `Error de validación: ${JSON.stringify(err.details).slice(0, 200)}`
+                    : err.error
+                      ? `${err.error} (HTTP ${res.status})`
+                      : `Error HTTP ${res.status}`;
           updateLastAssistant(setMessages, () => ({
-            content:
-              res.status === 503
-                ? "AI no disponible. El admin debe configurar TOGETHER_API_KEY."
-                : err.error ?? `Error HTTP ${res.status}`,
+            content: "",
+            errorBanner: friendlyMsg,
             pending: false,
           }));
           return;
@@ -629,6 +650,31 @@ function updateLastAssistant(
 
 function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
+
+  // Si es un banner de error, renderiza estilo distinto y SIN burbuja del bot
+  if (message.errorBanner) {
+    return (
+      <div
+        style={{
+          marginBottom: 16,
+          padding: "12px 16px",
+          background: "rgba(229,75,38,0.06)",
+          border: "1px solid var(--ap-stamp)",
+          borderLeft: "3px solid var(--ap-stamp)",
+          color: "var(--ap-stamp)",
+          fontSize: 13,
+          lineHeight: 1.5,
+          fontFamily: "var(--ap-font-mono)",
+          letterSpacing: "0.02em",
+        }}
+        role="alert"
+      >
+        <strong style={{ marginRight: 8 }}>⚠ Error:</strong>
+        {message.errorBanner}
+      </div>
+    );
+  }
+
   return (
     <div
       style={{
