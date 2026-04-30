@@ -403,13 +403,123 @@ export const updateBrandProfileHandler: ToolHandler<
   return { ok: true, updated };
 };
 
+// ─── Tool: analyze_format_compatibility ─────────────────────────────────
+export const analyzeFormatCompatibilityTool: ToolDefinition = {
+  name: "analyze_format_compatibility",
+  description:
+    "Analiza si un PostDraft es compatible con cada plataforma social. Devuelve qué plataformas son recomendadas y qué problemas hay (formato incorrecto, aspect ratio malo, duración fuera de rango). Úsalo cuando el usuario pregunta '¿en qué plataformas puedo subir esto?', '¿esto va bien en TikTok?' o cuando detectes que está intentando publicar algo que va a quedar mal (imagen horizontal en TikTok, video largo en YouTube Shorts, etc.). Sé honesto y desaconseja explícitamente las plataformas donde no encajará.",
+  parameters: {
+    type: "object",
+    properties: {
+      postId: {
+        type: "string",
+        description: "ID del PostDraft a analizar",
+      },
+      platforms: {
+        type: "array",
+        items: {
+          type: "string",
+          enum: ["INSTAGRAM", "FACEBOOK", "TIKTOK", "LINKEDIN", "YOUTUBE", "PINTEREST"],
+        },
+        description:
+          "Plataformas a evaluar. Si vacío, evalúa todas las disponibles.",
+      },
+    },
+    required: ["postId"],
+  },
+};
+
+export const analyzeFormatCompatibilityHandler: ToolHandler<
+  {
+    postId: string;
+    platforms?: Array<
+      "INSTAGRAM" | "FACEBOOK" | "TIKTOK" | "LINKEDIN" | "YOUTUBE" | "PINTEREST"
+    >;
+  },
+  {
+    postId: string;
+    summary: {
+      recommended: string[];
+      avoid: string[];
+      adjust: string[];
+    };
+    reports: Array<{
+      platform: string;
+      recommended: boolean;
+      issues: Array<{
+        severity: "blocker" | "warning" | "tip";
+        message: string;
+        recommendation?: string;
+      }>;
+    }>;
+  }
+> = async (input, ctx) => {
+  const { analyzePostCompatibility } = await import("@/lib/social/format-rules");
+
+  const draft = await db.postDraft.findFirst({
+    where: { id: input.postId, businessId: ctx.businessId },
+    include: { mediaAssets: true },
+  });
+  if (!draft) {
+    throw new Error(`PostDraft ${input.postId} no encontrado`);
+  }
+
+  const reports = analyzePostCompatibility(
+    {
+      postType: draft.postType,
+      caption: draft.caption,
+      hasCaption: draft.caption.length > 0,
+      mediaAssets: draft.mediaAssets.map((m) => ({
+        mimeType: m.mimeType,
+        width: m.width,
+        height: m.height,
+        durationSec: m.durationSec,
+        fileSize: m.fileSize,
+      })),
+    },
+    input.platforms,
+  );
+
+  const recommended = reports.filter((r) => r.recommended).map((r) => r.platform);
+  const avoid = reports
+    .filter((r) => r.blockerCount > 0)
+    .map((r) => r.platform);
+  const adjust = reports
+    .filter((r) => r.blockerCount === 0 && r.warningCount > 0)
+    .map((r) => r.platform);
+
+  return {
+    postId: input.postId,
+    summary: { recommended, avoid, adjust },
+    reports: reports.map((r) => ({
+      platform: r.platform,
+      recommended: r.recommended,
+      issues: r.issues.map((i) => ({
+        severity: i.severity,
+        message: i.message,
+        recommendation: i.recommendation,
+      })),
+    })),
+  };
+};
+
 // ─── Registry ──────────────────────────────────────────────────────────
 export const TOOLS = {
   analyze_batch: { def: analyzeBatchTool, handler: analyzeBatchHandler },
   analyze_media_with_vision: { def: analyzeMediaTool, handler: analyzeMediaHandler },
   suggest_schedule: { def: suggestScheduleTool, handler: suggestScheduleHandler },
-  recommend_posting_time: { def: recommendPostingTimeTool, handler: recommendPostingTimeHandler },
-  update_brand_profile: { def: updateBrandProfileTool, handler: updateBrandProfileHandler },
+  recommend_posting_time: {
+    def: recommendPostingTimeTool,
+    handler: recommendPostingTimeHandler,
+  },
+  update_brand_profile: {
+    def: updateBrandProfileTool,
+    handler: updateBrandProfileHandler,
+  },
+  analyze_format_compatibility: {
+    def: analyzeFormatCompatibilityTool,
+    handler: analyzeFormatCompatibilityHandler,
+  },
 } as const;
 
 export type ToolName = keyof typeof TOOLS;

@@ -14,6 +14,7 @@ import { AiCaptionStudio } from "@/components/admin/AiCaptionStudio";
 import { RequestApprovalPanel } from "@/components/admin/RequestApprovalPanel";
 import { PlatformPicker } from "@/components/admin/PlatformPicker";
 import { InstagramMockup } from "@/components/admin/InstagramMockup";
+import { FormatWarnings } from "@/components/admin/FormatWarnings";
 import type { SocialPlatform } from "@prisma/client";
 
 interface PostDetail {
@@ -383,6 +384,13 @@ export default function PostDetailPage() {
         metaConnected={meta.connected}
         metaUsername={meta.username}
         socialConnections={platforms}
+      />
+
+      {/* Avisos de formato per-plataforma */}
+      <FormatWarnings
+        postId={post.id}
+        targetPlatforms={post.targetPlatforms ?? []}
+        publishToMeta={post.publishToMeta ?? true}
       />
 
       {/* Estado por plataforma — si ya hay SocialPublications */}

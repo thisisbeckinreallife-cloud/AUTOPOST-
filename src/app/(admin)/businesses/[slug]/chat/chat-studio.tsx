@@ -160,9 +160,14 @@ export function ChatStudio({
         setMessages((m) => [...m, uploadMsg, pendingMsg]);
 
         // 5. Auto-llamar al chat con el batchId — el LLM debería invocar
-        // analyze_batch + suggest_schedule + hacer clarifying questions
+        // analyze_batch + analyze_format_compatibility + hacer clarifying questions
         await streamChat(
-          `Acabo de subir un batch nuevo con ID "${presignData.batchId}". Llama a analyze_batch con ese ID, después a suggest_schedule. Si detectas ambigüedades en los meta.json, captions o tipos de post, hazme las preguntas necesarias para clarificarlas antes de proponer un plan final.`,
+          `Acabo de subir un batch nuevo con ID "${presignData.batchId}". Por favor:\n` +
+            `1. Llama a analyze_batch con ese batchId.\n` +
+            `2. Para los posts más relevantes (max 3), llama a analyze_format_compatibility con su postId para ver en qué plataformas encajarán bien y en cuáles NO.\n` +
+            `3. Resume en lenguaje natural qué encontraste: número de posts, tipos detectados, problemas de formato (imágenes horizontales en TikTok, videos largos para Shorts, ratios subóptimos, etc.). Sé honesto — si algo no encaja con una plataforma, desaconséjala explícitamente.\n` +
+            `4. Hazme las preguntas que necesites para clarificar ambigüedades antes de proponer calendario.\n` +
+            `Después espera mi confirmación para llamar suggest_schedule.`,
         );
 
         // Reset upload state después de 3s para no taparlo
@@ -669,6 +674,8 @@ function ToolCallChip({
     update_brand_profile: "✦ Guardando perfil de marca",
     suggest_caption: "✏ Sugiriendo caption",
     suggest_hashtags: "# Sugiriendo hashtags",
+    analyze_format_compatibility: "🎯 Verificando compatibilidad por plataforma",
+    analyze_media_with_vision: "👁 Analizando media con vision",
   };
   const label = labels[call.name] ?? call.name;
   const finished = call.output !== undefined || call.error !== undefined;
