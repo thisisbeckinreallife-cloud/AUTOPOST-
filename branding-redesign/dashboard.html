@@ -426,128 +426,277 @@ body { overflow: hidden; }
   .upload-grid { grid-template-columns: 1fr; }
 }
 
-/* ============ CALENDAR VIEW ============ */
-.cal-controls {
+/* ============ CALENDAR VIEW (full-screen, brand-adapted) ============ */
+#view-calendar { display: flex; flex-direction: column; padding: 0; }
+#view-calendar.active { display: flex; }
+#view-calendar:not(.active) { display: none; }
+
+.fc {
   display: flex;
-  gap: var(--sp-2);
-  background: var(--ink-1);
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+}
+.fc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-5) var(--sp-8);
+  border-bottom: 1px solid var(--ink-3);
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+}
+.fc-head-left {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.fc-today-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 64px;
   border: 1px solid var(--ink-3);
   border-radius: var(--r-md);
+  background: var(--ink-2);
   padding: 3px;
 }
-.cal-controls button {
-  background: none;
-  border: none;
-  padding: var(--sp-1) var(--sp-3);
+.fc-today-month {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
   color: var(--ink-7);
-  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px;
+}
+.fc-today-day {
+  width: 100%;
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: 6px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-9);
+  padding: 4px 0;
+}
+.fc-month-title {
+  font-family: var(--font-display);
+  font-size: var(--tx-h3);
+  font-weight: 600;
+  color: var(--ink-9);
+  margin: 0;
+  letter-spacing: var(--tracking-tight);
+  text-transform: capitalize;
+}
+.fc-month-range {
+  font-family: var(--font-mono);
   font-size: var(--tx-caption);
+  color: var(--ink-6);
+  margin: 4px 0 0;
+}
+.fc-head-right {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.fc-divider-v {
+  width: 1px;
+  height: 24px;
+  background: var(--ink-3);
+}
+.fc-icon-btn {
+  width: 36px; height: 36px;
+  border: 1px solid var(--ink-3);
+  background: var(--ink-1);
+  color: var(--ink-7);
+  border-radius: var(--r-md);
   cursor: pointer;
-  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all var(--d-hover);
 }
-.cal-controls button.active {
-  background: var(--ink-3);
-  color: var(--ink-9);
-}
-
-.cal-week {
-  display: grid;
-  grid-template-columns: 60px repeat(7, 1fr);
+.fc-icon-btn:hover { color: var(--ink-9); border-color: var(--ink-5); background: var(--ink-2); }
+.fc-icon-btn svg { width: 16px; height: 16px; }
+.fc-nav {
+  display: inline-flex;
   border: 1px solid var(--ink-3);
-  border-radius: var(--r-lg);
+  border-radius: var(--r-md);
   overflow: hidden;
   background: var(--ink-1);
 }
-.cal-week-head {
-  background: var(--ink-2);
-  padding: var(--sp-3) var(--sp-2);
+.fc-nav button {
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--ink-3);
+  color: var(--ink-7);
+  padding: 0 var(--sp-3);
+  height: 36px;
+  font-family: inherit;
+  font-size: var(--tx-caption);
+  cursor: pointer;
+  transition: all var(--d-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fc-nav button:last-child { border-right: none; }
+.fc-nav button:hover { color: var(--ink-9); background: var(--ink-2); }
+.fc-nav button[data-prev], .fc-nav button[data-next] { width: 36px; padding: 0; }
+.fc-nav button[data-today] { padding: 0 var(--sp-4); }
+.fc-nav svg { width: 16px; height: 16px; }
+
+.fc-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--ink-3);
+  background: var(--ink-1);
+}
+.fc-weekday {
+  padding: var(--sp-3);
   font-family: var(--font-mono);
   font-size: var(--tx-caption);
+  font-weight: 600;
   color: var(--ink-7);
   text-align: center;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--ink-3);
+  letter-spacing: 0.06em;
+  border-right: 1px solid var(--ink-3);
 }
-.cal-week-head.today { color: var(--primary); }
-.cal-time {
-  padding: var(--sp-2);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--ink-6);
-  border-top: 1px solid var(--ink-3);
-  text-align: right;
-  background: var(--ink-2);
-}
-.cal-cell {
-  border-top: 1px solid var(--ink-3);
-  border-left: 1px solid var(--ink-3);
-  min-height: 56px;
-  position: relative;
-  padding: 4px;
-}
-.cal-cell.dragover {
-  background: var(--primary-soft);
-}
+.fc-weekday:last-child { border-right: none; }
 
-.cal-post {
+.fc-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, minmax(110px, 1fr));
+  flex: 1;
+}
+.fc-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--ink-3);
+  border-bottom: 1px solid var(--ink-3);
+  cursor: pointer;
+  transition: background var(--d-hover);
+}
+.fc-day:hover { background: var(--ink-1); }
+.fc-day.other-month { background: rgba(20, 20, 26, 0.5); }
+.fc-day.other-month .fc-day-num-text { color: var(--ink-5); }
+.fc-day:nth-child(7n) { border-right: none; }
+.fc-day-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--sp-2) var(--sp-3) 0;
+}
+.fc-day-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--tx-caption);
+  font-weight: 500;
+  color: var(--ink-8);
+  transition: all var(--d-hover) var(--ease-out-quint);
+}
+.fc-day:hover .fc-day-num { border: 1px solid var(--ink-4); }
+.fc-day.today .fc-day-num {
+  background: var(--primary);
+  color: var(--ink-10);
+  font-weight: 700;
+  box-shadow: var(--glow-blue);
+}
+.fc-day.selected .fc-day-num {
+  background: var(--ink-9);
+  color: var(--ink-0);
+  font-weight: 700;
+}
+.fc-day.today.selected .fc-day-num {
+  background: var(--primary);
+  color: var(--ink-10);
+}
+.fc-day-events {
+  padding: 0 var(--sp-2) var(--sp-2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+}
+.fc-event {
   position: relative;
   background: var(--ink-2);
   border: 1px solid var(--ink-3);
   border-left: 3px solid var(--primary);
   border-radius: var(--r-sm);
-  padding: 4px 6px;
-  cursor: grab;
-  transition: all var(--d-hover);
-  margin-bottom: 3px;
-}
-.cal-post:hover {
-  background: var(--ink-3);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-.cal-post:active { cursor: grabbing; }
-.cal-post.dragging { opacity: 0.4; }
-.cal-post.ai {
-  border-left-color: var(--accent);
-  background: linear-gradient(90deg, var(--accent-soft), transparent);
-  border-style: dashed;
-  border-color: var(--accent);
-}
-.cal-post.ai::before {
-  content: '✦';
-  position: absolute;
-  top: 4px; right: 4px;
-  font-size: 10px;
-  color: var(--accent);
-  animation: pulse-violet 2s infinite;
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.cal-post-time {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--ink-7);
-  display: block;
-}
-.cal-post-title {
+  padding: 5px 7px;
   font-size: 11px;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: all var(--d-hover) var(--ease-out-quint);
+  overflow: hidden;
+}
+.fc-event:hover {
+  background: var(--ink-3);
+  transform: translateX(2px);
+}
+.fc-event-title {
+  display: block;
   color: var(--ink-9);
-  margin-top: 1px;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.cal-post-pf {
-  font-family: var(--font-mono);
-  font-size: 9px;
+.fc-event-meta {
+  display: block;
   color: var(--ink-6);
-  text-transform: uppercase;
-  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  margin-top: 1px;
+}
+.fc-event.ai {
+  border-left-color: var(--accent);
+  border-style: dashed;
+  border-color: var(--accent);
+  background: linear-gradient(90deg, var(--accent-soft), transparent);
+}
+.fc-event.ai::before {
+  content: '✦';
+  position: absolute;
+  top: 4px; right: 5px;
+  font-size: 10px;
+  color: var(--accent);
+  animation: pulse-violet 2s infinite;
+}
+.fc-event[data-pf="instagram"] { border-left-color: var(--pf-instagram); }
+.fc-event[data-pf="tiktok"]    { border-left-color: var(--pf-tiktok); }
+.fc-event[data-pf="x"]         { border-left-color: var(--pf-x); }
+.fc-event[data-pf="linkedin"]  { border-left-color: var(--pf-linkedin); }
+.fc-event[data-pf="youtube"]   { border-left-color: var(--pf-youtube); }
+.fc-event[data-pf="threads"]   { border-left-color: var(--pf-threads); }
+.fc-day-more {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-6);
+  padding: 2px 4px;
+  cursor: pointer;
+  transition: color var(--d-hover);
+}
+.fc-day-more:hover { color: var(--primary); }
+
+@media (max-width: 768px) {
+  .fc-head { padding: var(--sp-4); }
+  .fc-today-badge { display: none; }
+  .fc-grid { grid-template-rows: repeat(6, minmax(60px, 1fr)); }
+  .fc-event-title { font-size: 10px; }
+  .fc-day-events { padding: 0 4px 4px; }
 }
 
 /* ============ DETAIL MODAL ============ */
@@ -1117,131 +1266,50 @@ body { overflow: hidden; }
       </div>
     </section>
 
-    <!-- ============ CALENDAR VIEW ============ -->
+    <!-- ============ CALENDAR VIEW (full-screen month grid) ============ -->
     <section class="view" id="view-calendar">
-      <header class="view-head">
-        <div>
-          <h1 class="view-title" data-i18n="dash.calendar">Calendario</h1>
-          <p class="view-sub">14 publicaciones programadas · 3 sugerencias IA pendientes</p>
-        </div>
-        <div class="view-actions">
-          <div class="cal-controls">
-            <button data-period="month" data-i18n="dash.cal.month">Mes</button>
-            <button class="active" data-period="week" data-i18n="dash.cal.week">Semana</button>
+      <div class="fc">
+        <header class="fc-head">
+          <div class="fc-head-left">
+            <div class="fc-today-badge">
+              <span class="fc-today-month" id="fcTodayMonth">MAR</span>
+              <span class="fc-today-day" id="fcTodayDay">15</span>
+            </div>
+            <div>
+              <h1 class="fc-month-title" id="fcMonthTitle">Marzo, 2026</h1>
+              <p class="fc-month-range" id="fcMonthRange">1 mar — 31 mar 2026</p>
+            </div>
           </div>
-          <button class="btn btn-primary" data-magnetic="0.2"><i data-icon="plus"></i>Nuevo</button>
-        </div>
-      </header>
+          <div class="fc-head-right">
+            <button class="fc-icon-btn" aria-label="Buscar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
+            </button>
+            <div class="fc-divider-v"></div>
+            <div class="fc-nav">
+              <button data-prev aria-label="Mes anterior">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+              </button>
+              <button data-today>Hoy</button>
+              <button data-next aria-label="Mes siguiente">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+              </button>
+            </div>
+            <div class="fc-divider-v"></div>
+            <button class="btn btn-primary" data-magnetic="0.15"><i data-icon="plus"></i>Nueva publicación</button>
+          </div>
+        </header>
 
-      <div class="cal-week">
-        <div class="cal-week-head"></div>
-        <div class="cal-week-head">LUN 28</div>
-        <div class="cal-week-head today">MAR 29</div>
-        <div class="cal-week-head">MIÉ 30</div>
-        <div class="cal-week-head">JUE 01</div>
-        <div class="cal-week-head">VIE 02</div>
-        <div class="cal-week-head">SÁB 03</div>
-        <div class="cal-week-head">DOM 04</div>
+        <div class="fc-weekdays">
+          <div class="fc-weekday">Lun</div>
+          <div class="fc-weekday">Mar</div>
+          <div class="fc-weekday">Mié</div>
+          <div class="fc-weekday">Jue</div>
+          <div class="fc-weekday">Vie</div>
+          <div class="fc-weekday">Sáb</div>
+          <div class="fc-weekday">Dom</div>
+        </div>
 
-        <!-- 09:00 -->
-        <div class="cal-time">09:00</div>
-        <div class="cal-cell"></div>
-        <div class="cal-cell">
-          <div class="cal-post" draggable="true" data-pf="instagram">
-            <span class="cal-post-time">09:00</span>
-            <span class="cal-post-title">Reel — anuncio Q2</span>
-            <span class="cal-post-pf">Instagram</span>
-          </div>
-        </div>
-        <div class="cal-cell"></div>
-        <div class="cal-cell">
-          <div class="cal-post ai" draggable="true" data-pf="linkedin">
-            <span class="cal-post-time">09:30</span>
-            <span class="cal-post-title">Carousel — case study</span>
-            <span class="cal-post-pf">LinkedIn</span>
-          </div>
-        </div>
-        <div class="cal-cell"></div>
-        <div class="cal-cell"></div>
-        <div class="cal-cell"></div>
-
-        <!-- 12:00 -->
-        <div class="cal-time">12:00</div>
-        <div class="cal-cell">
-          <div class="cal-post" draggable="true" data-pf="x">
-            <span class="cal-post-time">12:30</span>
-            <span class="cal-post-title">Thread — datos sector</span>
-            <span class="cal-post-pf">X</span>
-          </div>
-        </div>
-        <div class="cal-cell">
-          <div class="cal-post ai" draggable="true" data-pf="threads">
-            <span class="cal-post-time">12:00</span>
-            <span class="cal-post-title">Quote — tip rápido</span>
-            <span class="cal-post-pf">Threads</span>
-          </div>
-        </div>
-        <div class="cal-cell"></div>
-        <div class="cal-cell"></div>
-        <div class="cal-cell">
-          <div class="cal-post" draggable="true" data-pf="instagram">
-            <span class="cal-post-time">13:00</span>
-            <span class="cal-post-title">Story — viernes vibes</span>
-            <span class="cal-post-pf">Instagram</span>
-          </div>
-        </div>
-        <div class="cal-cell"></div>
-        <div class="cal-cell"></div>
-
-        <!-- 15:00 -->
-        <div class="cal-time">15:00</div>
-        <div class="cal-cell"></div>
-        <div class="cal-cell"></div>
-        <div class="cal-cell">
-          <div class="cal-post" draggable="true" data-pf="tiktok">
-            <span class="cal-post-time">15:30</span>
-            <span class="cal-post-title">TikTok — detrás cámara</span>
-            <span class="cal-post-pf">TikTok</span>
-          </div>
-        </div>
-        <div class="cal-cell"></div>
-        <div class="cal-cell">
-          <div class="cal-post" draggable="true" data-pf="youtube">
-            <span class="cal-post-time">16:00</span>
-            <span class="cal-post-title">Short — feature drop</span>
-            <span class="cal-post-pf">YouTube</span>
-          </div>
-        </div>
-        <div class="cal-cell"></div>
-        <div class="cal-cell"></div>
-
-        <!-- 18:00 -->
-        <div class="cal-time">18:00</div>
-        <div class="cal-cell">
-          <div class="cal-post" draggable="true" data-pf="linkedin">
-            <span class="cal-post-time">18:00</span>
-            <span class="cal-post-title">Anuncio — webinar</span>
-            <span class="cal-post-pf">LinkedIn</span>
-          </div>
-        </div>
-        <div class="cal-cell"></div>
-        <div class="cal-cell">
-          <div class="cal-post ai" draggable="true" data-pf="instagram">
-            <span class="cal-post-time">18:30</span>
-            <span class="cal-post-title">Reel — tutorial 60s</span>
-            <span class="cal-post-pf">Instagram</span>
-          </div>
-        </div>
-        <div class="cal-cell"></div>
-        <div class="cal-cell"></div>
-        <div class="cal-cell">
-          <div class="cal-post" draggable="true" data-pf="instagram">
-            <span class="cal-post-time">19:00</span>
-            <span class="cal-post-title">Carousel — semanal</span>
-            <span class="cal-post-pf">Instagram</span>
-          </div>
-        </div>
-        <div class="cal-cell"></div>
+        <div class="fc-grid" id="fcGrid"></div>
       </div>
     </section>
 
@@ -1602,48 +1670,158 @@ body { overflow: hidden; }
   setInterval(pushLog, 1800);
   pushLog();
 
-  // === CALENDAR DRAG & DROP ===
-  let dragged = null;
-  document.querySelectorAll('.cal-post').forEach((p) => {
-    p.addEventListener('dragstart', (e) => {
-      dragged = p;
-      p.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-    });
-    p.addEventListener('dragend', () => {
-      p.classList.remove('dragging');
-      dragged = null;
-    });
-    p.addEventListener('click', () => {
-      document.getElementById('detail').classList.add('open');
-      const t = document.querySelector('.detail-title');
-      const title = p.querySelector('.cal-post-title').textContent;
-      if (t) t.textContent = title;
-    });
-  });
-  document.querySelectorAll('.cal-cell').forEach((cell) => {
-    cell.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      cell.classList.add('dragover');
-    });
-    cell.addEventListener('dragleave', () => cell.classList.remove('dragover'));
-    cell.addEventListener('drop', (e) => {
-      e.preventDefault();
-      cell.classList.remove('dragover');
-      if (dragged && cell !== dragged.parentElement) {
-        cell.appendChild(dragged);
-        dragged.style.animation = 'none';
-        // micro-bounce with out-back-soft
-        dragged.animate([
-          { transform: 'scale(0.92)' },
-          { transform: 'scale(1.04)' },
-          { transform: 'scale(1)' },
-        ], { duration: 320, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' });
-        toast('Reprogramado · publicación movida');
+  // === FULLSCREEN CALENDAR ===
+  const fcGrid = document.getElementById('fcGrid');
+  if (fcGrid) {
+    // Date helpers (vanilla, no date-fns)
+    const startOfDay = (d) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
+    const isSameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    const isSameMonth = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+    const isToday = (d) => isSameDay(d, new Date());
+    const startOfMonth = (d) => new Date(d.getFullYear(), d.getMonth(), 1);
+    const endOfMonth = (d) => new Date(d.getFullYear(), d.getMonth() + 1, 0);
+    // Lunes-first week
+    const startOfWeekMon = (d) => {
+      const x = startOfDay(d);
+      const day = x.getDay();
+      const diff = (day === 0 ? -6 : 1 - day);
+      x.setDate(x.getDate() + diff);
+      return x;
+    };
+    const endOfWeekMon = (d) => {
+      const s = startOfWeekMon(d);
+      return new Date(s.getFullYear(), s.getMonth(), s.getDate() + 6);
+    };
+    const addMonths = (d, n) => { const r = new Date(d); r.setDate(1); r.setMonth(r.getMonth() + n); return r; };
+    const ESmonths = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const ESmonthsShort = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+    const fmtMonthTitle = (d) => `${ESmonths[d.getMonth()]}, ${d.getFullYear()}`.replace(/^./, c => c.toUpperCase());
+    const fmtMonthShort = (d) => ESmonthsShort[d.getMonth()];
+    const fmtRange = (s, e) => `${s.getDate()} ${ESmonthsShort[s.getMonth()].toLowerCase()} — ${e.getDate()} ${ESmonthsShort[e.getMonth()].toLowerCase()} ${e.getFullYear()}`;
+
+    // Mock events: posts for current month (auto-relative to today)
+    const today = new Date();
+    const baseY = today.getFullYear();
+    const baseM = today.getMonth();
+    const events = [
+      { day: new Date(baseY, baseM, 3),  posts: [{ title: 'Reel — anuncio Q2', pf: 'instagram', time: '09:00' }, { title: 'Carrusel case study', pf: 'linkedin', time: '14:00', ai: true }] },
+      { day: new Date(baseY, baseM, 5),  posts: [{ title: 'Story comparativa', pf: 'instagram', time: '12:00' }] },
+      { day: new Date(baseY, baseM, 7),  posts: [{ title: 'Thread datos sector', pf: 'x', time: '10:00' }, { title: 'TikTok detrás cámara', pf: 'tiktok', time: '15:30' }] },
+      { day: new Date(baseY, baseM, 10), posts: [{ title: 'YouTube short feature', pf: 'youtube', time: '18:00', ai: true }] },
+      { day: new Date(baseY, baseM, 12), posts: [{ title: 'Quote — tip rápido', pf: 'threads', time: '12:00', ai: true }, { title: 'Carrusel semanal', pf: 'instagram', time: '19:00' }] },
+      { day: new Date(baseY, baseM, 14), posts: [{ title: 'Anuncio webinar', pf: 'linkedin', time: '11:00' }] },
+      { day: new Date(baseY, baseM, today.getDate()), posts: [{ title: 'Reel tutorial 60s', pf: 'instagram', time: '14:30', ai: true }, { title: 'Story drop nuevo color', pf: 'instagram', time: '17:00' }, { title: 'Tweet thread', pf: 'x', time: '20:00' }] },
+      { day: new Date(baseY, baseM, today.getDate() + 2), posts: [{ title: 'Reel tendencia audio', pf: 'tiktok', time: '15:00' }] },
+      { day: new Date(baseY, baseM, today.getDate() + 5), posts: [{ title: 'Carrusel newsletter', pf: 'linkedin', time: '09:00', ai: true }, { title: 'Behind scenes', pf: 'instagram', time: '13:00' }] },
+      { day: new Date(baseY, baseM, today.getDate() + 8), posts: [{ title: 'Drop semanal', pf: 'instagram', time: '11:00' }] },
+      { day: new Date(baseY, baseM, today.getDate() + 12), posts: [{ title: 'Live anuncio', pf: 'youtube', time: '18:00' }, { title: 'Story preview', pf: 'instagram', time: '20:00', ai: true }] },
+    ].filter(e => e.day.getMonth() === baseM); // keep only posts visible in current month
+
+    let viewMonth = startOfMonth(today);
+    let selectedDay = startOfDay(today);
+
+    function render() {
+      const head = document.querySelector('.fc-month-title');
+      const range = document.querySelector('.fc-month-range');
+      const todayMonth = document.getElementById('fcTodayMonth');
+      const todayDay = document.getElementById('fcTodayDay');
+      const monthStart = startOfMonth(viewMonth);
+      const monthEnd = endOfMonth(viewMonth);
+      const gridStart = startOfWeekMon(monthStart);
+      const gridEnd = endOfWeekMon(monthEnd);
+
+      head.textContent = fmtMonthTitle(viewMonth);
+      range.textContent = fmtRange(monthStart, monthEnd);
+      todayMonth.textContent = fmtMonthShort(today);
+      todayDay.textContent = String(today.getDate());
+
+      // Build days
+      fcGrid.innerHTML = '';
+      const cur = new Date(gridStart);
+      const cellCount = Math.round((gridEnd - gridStart) / 86400000) + 1;
+      // Adjust grid rows based on number of weeks
+      const rows = cellCount / 7;
+      fcGrid.style.gridTemplateRows = `repeat(${rows}, minmax(110px, 1fr))`;
+
+      for (let i = 0; i < cellCount; i++) {
+        const d = new Date(cur);
+        const dayEvents = events.find(e => isSameDay(e.day, d));
+        const isOtherMonth = !isSameMonth(d, viewMonth);
+
+        const cell = document.createElement('div');
+        cell.className = 'fc-day';
+        if (isOtherMonth) cell.classList.add('other-month');
+        if (isToday(d)) cell.classList.add('today');
+        if (isSameDay(d, selectedDay)) cell.classList.add('selected');
+        cell.dataset.date = d.toISOString().slice(0, 10);
+
+        const head = document.createElement('div');
+        head.className = 'fc-day-head';
+        const num = document.createElement('button');
+        num.type = 'button';
+        num.className = 'fc-day-num';
+        const numText = document.createElement('span');
+        numText.className = 'fc-day-num-text';
+        numText.textContent = String(d.getDate());
+        num.appendChild(numText);
+        head.appendChild(num);
+        cell.appendChild(head);
+
+        const eventsBox = document.createElement('div');
+        eventsBox.className = 'fc-day-events';
+        if (dayEvents && dayEvents.posts.length > 0) {
+          const visible = dayEvents.posts.slice(0, 2);
+          visible.forEach(p => {
+            const ev = document.createElement('div');
+            ev.className = 'fc-event' + (p.ai ? ' ai' : '');
+            ev.dataset.pf = p.pf;
+            ev.innerHTML = `<span class="fc-event-title">${p.title}</span><span class="fc-event-meta">${p.pf} · ${p.time}</span>`;
+            ev.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const detail = document.getElementById('detail');
+              detail.classList.add('open');
+              detail.querySelector('.detail-title').textContent = p.title;
+            });
+            eventsBox.appendChild(ev);
+          });
+          if (dayEvents.posts.length > 2) {
+            const more = document.createElement('div');
+            more.className = 'fc-day-more';
+            more.textContent = `+ ${dayEvents.posts.length - 2} más`;
+            eventsBox.appendChild(more);
+          }
+        }
+        cell.appendChild(eventsBox);
+
+        cell.addEventListener('click', () => {
+          selectedDay = d;
+          render();
+        });
+
+        fcGrid.appendChild(cell);
+        cur.setDate(cur.getDate() + 1);
       }
+    }
+
+    document.querySelector('[data-prev]').addEventListener('click', () => {
+      viewMonth = addMonths(viewMonth, -1);
+      render();
+      toast('Mes anterior');
     });
-  });
+    document.querySelector('[data-next]').addEventListener('click', () => {
+      viewMonth = addMonths(viewMonth, 1);
+      render();
+      toast('Mes siguiente');
+    });
+    document.querySelector('[data-today]').addEventListener('click', () => {
+      viewMonth = startOfMonth(today);
+      selectedDay = startOfDay(today);
+      render();
+      toast('Hoy');
+    });
+
+    render();
+  }
 
   // === DETAIL MODAL ===
   const detail = document.getElementById('detail');
