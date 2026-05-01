@@ -61,20 +61,56 @@
   color: var(--ink-9);
 }
 .nav-text span { color: var(--primary); }
-.nav-links {
+/* Pill nav with sliding gradient cursor */
+.nav-pill {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: var(--sp-1);
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--ink-3);
+  background: rgba(14, 14, 18, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: var(--r-full);
 }
-.nav-links a {
-  padding: var(--sp-2) var(--sp-3);
+.nav-pill-item {
+  position: relative;
+  z-index: 10;
+  display: block;
+  padding: 8px 14px;
+  font-family: var(--font-body);
+  font-size: var(--tx-caption);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--ink-7);
   text-decoration: none;
-  font-size: var(--tx-body);
-  border-radius: var(--r-sm);
-  transition: color var(--d-hover);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--d-hover) var(--ease-out-quint);
+  user-select: none;
 }
-.nav-links a:hover { color: var(--ink-9); }
+.nav-pill-item:hover { color: var(--ink-10); }
+.nav-pill-cursor {
+  position: absolute;
+  z-index: 0;
+  top: 4px;
+  left: 0;
+  width: 0;
+  height: calc(100% - 8px);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: var(--r-full);
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 0 16px rgba(79, 124, 255, 0.35);
+  transition: left 280ms var(--ease-out-quint),
+              width 280ms var(--ease-out-quint),
+              opacity 200ms var(--ease-in-out-cubic);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-pill-cursor { transition: opacity 100ms; }
+}
 .nav-actions {
   display: flex;
   align-items: center;
@@ -97,7 +133,7 @@
 .nav-btn:hover { color: var(--ink-9); border-color: var(--ink-5); }
 
 @media (max-width: 768px) {
-  .nav-links { display: none; }
+  .nav-pill { display: none; }
 }
 
 /* ============ HERO (centered, 21st.dev style + Autopost brand) ============ */
@@ -1305,13 +1341,14 @@
       <div class="nav-mark"></div>
       <div class="nav-text">autopost<span>.</span></div>
     </a>
-    <div class="nav-links">
-      <a href="#bento" data-i18n="nav.product">Producto</a>
-      <a href="#how" data-i18n="nav.how">Cómo funciona</a>
-      <a href="#pricing" data-i18n="nav.pricing">Precios</a>
-      <a href="brand-system.html" data-i18n="nav.brand">Brand</a>
-      <a href="dashboard.html" data-i18n="nav.dashboard">Dashboard</a>
-    </div>
+    <ul class="nav-pill" id="navPill" role="navigation" aria-label="Navegación principal">
+      <li><a href="#bento" class="nav-pill-item" data-i18n="nav.product">Producto</a></li>
+      <li><a href="#how" class="nav-pill-item" data-i18n="nav.how">Cómo funciona</a></li>
+      <li><a href="#pricing" class="nav-pill-item" data-i18n="nav.pricing">Precios</a></li>
+      <li><a href="brand-system.html" class="nav-pill-item" data-i18n="nav.brand">Brand</a></li>
+      <li><a href="dashboard.html" class="nav-pill-item" data-i18n="nav.dashboard">Dashboard</a></li>
+      <li class="nav-pill-cursor" aria-hidden="true"></li>
+    </ul>
     <div class="nav-actions">
       <button class="nav-btn" data-locale-toggle aria-label="Cambiar idioma">ES</button>
       <button class="nav-btn" data-theme-toggle aria-label="Cambiar tema">◐</button>
@@ -1860,6 +1897,33 @@
 <script src="assets/motion.js"></script>
 <script>
 (function () {
+  // === NAV PILL — sliding cursor ===
+  const pill = document.getElementById('navPill');
+  if (pill) {
+    const cursor = pill.querySelector('.nav-pill-cursor');
+    const items = pill.querySelectorAll('.nav-pill-item');
+    items.forEach((item) => {
+      item.addEventListener('mouseenter', () => {
+        const li = item.parentElement; // <li> wrapper
+        cursor.style.left = li.offsetLeft + 'px';
+        cursor.style.width = li.offsetWidth + 'px';
+        cursor.style.opacity = '1';
+      });
+      item.addEventListener('focus', () => {
+        const li = item.parentElement;
+        cursor.style.left = li.offsetLeft + 'px';
+        cursor.style.width = li.offsetWidth + 'px';
+        cursor.style.opacity = '1';
+      });
+    });
+    pill.addEventListener('mouseleave', () => {
+      cursor.style.opacity = '0';
+    });
+    pill.addEventListener('focusout', () => {
+      cursor.style.opacity = '0';
+    });
+  }
+
   // === FAQ ===
   document.querySelectorAll('.faq-trigger').forEach((btn) => {
     btn.addEventListener('click', () => {
