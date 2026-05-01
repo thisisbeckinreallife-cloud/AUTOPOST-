@@ -100,14 +100,17 @@
   .nav-links { display: none; }
 }
 
-/* ============ HERO ============ */
+/* ============ HERO (centered, 21st.dev style + Autopost brand) ============ */
 .hero {
   min-height: 100vh;
   position: relative;
   overflow: hidden;
-  padding: calc(var(--nav-h) + var(--sp-12)) var(--sp-6) var(--sp-16);
+  padding: calc(var(--nav-h) + var(--sp-16)) var(--sp-6) var(--sp-16);
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 .hero-bg {
   position: absolute;
@@ -118,20 +121,37 @@
 .hero-bg::before, .hero-bg::after {
   content: '';
   position: absolute;
-  width: 800px; height: 800px;
+  width: 900px; height: 900px;
   border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.15;
+  filter: blur(140px);
+  opacity: 0.18;
   animation: mesh-rotate 40s linear infinite;
 }
 .hero-bg::before {
-  top: -200px; right: -100px;
+  top: -300px;
+  left: 50%;
+  margin-left: -450px;
   background: radial-gradient(circle, var(--primary) 0%, transparent 60%);
 }
 .hero-bg::after {
-  bottom: -300px; left: -200px;
+  bottom: -400px;
+  left: 50%;
+  margin-left: -450px;
   background: radial-gradient(circle, var(--accent) 0%, transparent 60%);
   animation-direction: reverse;
+  opacity: 0.12;
+}
+.hero-grid-glow {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(79, 124, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(79, 124, 255, 0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 .hero-grain {
   position: absolute;
@@ -143,83 +163,108 @@
   z-index: 1;
 }
 .hero-inner {
-  max-width: var(--content-w-lg);
-  width: 100%;
-  margin: 0 auto;
   position: relative;
   z-index: 2;
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: var(--sp-12);
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  text-align: center;
 }
-.hero-content { max-width: 600px; }
-.hero-eyebrow {
+
+/* Stagger entrance — brand-system "out-quint" */
+.hero-item {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: hero-rise 0.5s var(--ease-out-quint) forwards;
+}
+.hero-item-1 { animation-delay: 0.10s; }
+.hero-item-2 { animation-delay: 0.25s; }
+.hero-item-3 { animation-delay: 0.40s; }
+.hero-item-4 { animation-delay: 0.55s; }
+.hero-item-5 { animation-delay: 0.70s; }
+@keyframes hero-rise {
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-item { opacity: 1; transform: none; animation: none; }
+}
+
+/* Badge — translucent, 21st.dev style adapted to brand */
+.hero-badge {
   display: inline-flex;
   align-items: center;
   gap: var(--sp-2);
-  padding: var(--sp-1) var(--sp-3);
+  padding: 6px var(--sp-4);
   border-radius: var(--r-full);
-  background: var(--ink-1);
-  border: 1px solid var(--ink-3);
-  font-family: var(--font-mono);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   font-size: var(--tx-caption);
+  font-weight: 500;
   color: var(--ink-7);
-  margin-bottom: var(--sp-6);
+  margin-bottom: var(--sp-8);
+  transition: all var(--d-hover) var(--ease-out-quint);
 }
-.hero-eyebrow-dot {
-  width: 6px; height: 6px;
-  background: var(--primary);
-  border-radius: 50%;
-  animation: pulse-blue 2.5s var(--ease-in-out-cubic) infinite;
+.hero-badge:hover {
+  border-color: rgba(168, 85, 247, 0.4);
+  color: var(--ink-9);
+  background: rgba(168, 85, 247, 0.06);
 }
+.hero-badge svg {
+  width: 14px; height: 14px;
+  color: var(--accent);
+}
+
+/* Headline — display-xl con gradient en línea 2 */
 .hero-headline {
   font-family: var(--font-display);
-  font-size: var(--tx-display-xl);
-  font-weight: 600;
-  letter-spacing: var(--tracking-tight);
-  line-height: 0.96;
-  margin: 0;
+  font-size: clamp(2.75rem, 7vw, 5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  margin: 0 0 var(--sp-6);
   color: var(--ink-9);
 }
-.hero-headline .line-1 {
-  display: block;
-  color: var(--primary);
-}
-.hero-headline .line-2 {
-  display: block;
-  color: var(--ink-9);
-  margin-top: var(--sp-1);
-}
-.hero-headline .cursor {
+.hero-headline-gradient {
   display: inline-block;
-  width: 0.06em;
-  background: var(--primary);
-  height: 0.85em;
-  margin-left: 0.05em;
-  vertical-align: -0.1em;
-  animation: blink 1s step-end infinite;
+  background: linear-gradient(135deg, var(--ink-9) 0%, var(--primary) 60%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  padding-right: 2px; /* prevent ascender clipping in some browsers */
 }
+
 .hero-sub {
   font-size: var(--tx-body-lg);
   color: var(--ink-7);
   line-height: var(--lh-normal);
-  margin: var(--sp-6) 0 var(--sp-8);
-  max-width: 520px;
+  margin: 0 0 var(--sp-10);
+  max-width: 640px;
 }
+
 .hero-ctas {
   display: flex;
   gap: var(--sp-3);
   flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: var(--sp-16);
 }
+
+/* Inline stats with vertical dividers */
 .hero-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--sp-6);
-  margin-top: var(--sp-12);
-  padding-top: var(--sp-6);
-  border-top: 1px solid var(--ink-3);
-  max-width: 520px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-8);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.hero-stat {
+  text-align: center;
 }
 .hero-stat-value {
   font-family: var(--font-display);
@@ -227,6 +272,7 @@
   font-weight: 600;
   color: var(--ink-9);
   letter-spacing: var(--tracking-tight);
+  line-height: 1;
 }
 .hero-stat-label {
   font-family: var(--font-mono);
@@ -234,185 +280,18 @@
   color: var(--ink-6);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-top: 2px;
+  margin-top: var(--sp-2);
 }
-
-/* ============ HERO 3D STAGE ============ */
-.hero-stage {
-  position: relative;
-  height: 540px;
-  perspective: 1400px;
-  perspective-origin: 50% 50%;
-}
-.stage-folder {
-  position: absolute;
-  top: 50%; right: 4%;
-  width: 200px; height: 160px;
-  transform: translateY(-50%) rotateY(-22deg) rotateX(8deg);
-  transform-style: preserve-3d;
-  animation: float 6s var(--ease-in-out-cubic) infinite;
-}
-.folder-back, .folder-front {
-  position: absolute;
-  inset: 0;
-  border-radius: 8px 14px 6px 6px;
-}
-.folder-back {
-  background: linear-gradient(135deg, var(--ink-3), var(--ink-2));
-  border: 1px solid var(--ink-4);
-}
-.folder-back::before {
-  content: '';
-  position: absolute;
-  top: -8px; left: 16px;
-  width: 60px; height: 14px;
+.hero-stat-divider {
+  width: 1px;
+  height: 32px;
   background: var(--ink-3);
-  border: 1px solid var(--ink-4);
-  border-bottom: none;
-  border-radius: 6px 6px 0 0;
-}
-.folder-front {
-  background: linear-gradient(160deg, var(--ink-2), var(--ink-1));
-  border: 1px solid var(--primary);
-  box-shadow: var(--glow-blue);
-  transform: translateZ(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 8px;
-}
-.folder-front-icon {
-  width: 36px; height: 36px;
-  background: var(--primary-soft);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--primary);
-}
-.folder-front-icon svg { width: 22px; height: 22px; }
-.folder-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--primary);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
 }
 
-/* CALENDAR GRID (target) */
-.stage-calendar {
-  position: absolute;
-  top: 50%; left: 4%;
-  width: 360px;
-  transform: translateY(-50%);
-  background: var(--ink-1);
-  border: 1px solid var(--ink-3);
-  border-radius: var(--r-lg);
-  padding: var(--sp-4);
-  box-shadow: var(--shadow-lg);
-}
-.stage-calendar-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--sp-3);
-  padding-bottom: var(--sp-3);
-  border-bottom: 1px solid var(--ink-3);
-}
-.stage-calendar-title {
-  font-family: var(--font-mono);
-  font-size: var(--tx-caption);
-  color: var(--ink-7);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.stage-calendar-pulse {
-  width: 8px; height: 8px;
-  background: var(--success);
-  border-radius: 50%;
-  animation: pulse-blue 2s infinite;
-}
-.stage-calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  grid-template-rows: 16px repeat(4, 56px);
-  gap: 4px;
-}
-.cal-day {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: var(--ink-6);
-  text-align: center;
-  line-height: 16px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.cal-slot {
-  background: var(--ink-2);
-  border: 1px solid var(--ink-3);
-  border-radius: 4px;
-  position: relative;
-  overflow: hidden;
-}
-.cal-slot.has-post {
-  border-color: var(--primary);
-  background: linear-gradient(135deg, var(--primary-soft), transparent);
-}
-.cal-slot.has-ai {
-  border-color: var(--accent);
-  border-style: dashed;
-  background: linear-gradient(135deg, var(--accent-soft), transparent);
-}
-.cal-slot-platform {
-  position: absolute;
-  top: 4px; left: 4px;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-}
-.cal-slot-time {
-  position: absolute;
-  bottom: 3px; right: 4px;
-  font-family: var(--font-mono);
-  font-size: 8px;
-  color: var(--ink-7);
-}
-
-/* FLYING CARDS (the WOW) */
-.fly-card {
-  position: absolute;
-  width: 56px; height: 72px;
-  border-radius: 6px;
-  background: linear-gradient(160deg, var(--ink-2), var(--ink-1));
-  border: 1px solid var(--ink-4);
-  overflow: hidden;
-  opacity: 0;
-  z-index: 5;
-  box-shadow: var(--shadow-md);
-}
-.fly-card::before {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border-radius: 3px;
-  background: linear-gradient(180deg, rgba(79, 124, 255, 0.4), transparent);
-}
-.fly-card[data-platform="2"]::before { background: linear-gradient(180deg, rgba(168, 85, 247, 0.4), transparent); }
-.fly-card[data-platform="3"]::before { background: linear-gradient(180deg, rgba(255, 0, 80, 0.4), transparent); }
-.fly-card[data-platform="4"]::before { background: linear-gradient(180deg, rgba(228, 64, 95, 0.4), transparent); }
-.fly-card.flying {
-  animation: fly-to-cal 1.6s var(--ease-out-quint) forwards;
-}
-@keyframes fly-to-cal {
-  0%   { opacity: 0; transform: translate(0, 0) scale(0.6) rotate(20deg); }
-  20%  { opacity: 1; }
-  60%  { transform: translate(-280px, 60px) scale(0.4) rotate(-8deg); }
-  100% { opacity: 0; transform: translate(-360px, 100px) scale(0.2) rotate(0); }
-}
-
-@media (max-width: 1024px) {
-  .hero-inner { grid-template-columns: 1fr; }
-  .hero-stage { height: 360px; max-width: 480px; margin: 0 auto; }
+@media (max-width: 640px) {
+  .hero-stats { gap: var(--sp-4); }
+  .hero-stat-divider { display: none; }
+  .hero-stat-value { font-size: var(--tx-h3); }
 }
 
 /* ============ SOCIAL MARQUEE ============ */
@@ -1314,91 +1193,43 @@
 <!-- ============ HERO ============ -->
 <section class="hero">
   <div class="hero-bg"></div>
+  <div class="hero-grid-glow"></div>
   <div class="hero-grain"></div>
+
   <div class="hero-inner">
-    <div class="hero-content">
-      <div class="hero-eyebrow in-view">
-        <span class="hero-eyebrow-dot"></span>
-        <span data-i18n="hero.eyebrow">Programación de redes con IA</span>
-      </div>
-      <h1 class="hero-headline in-view">
-        <span class="line-1" data-i18n="hero.headline.1">Tira la carpeta.</span>
-        <span class="line-2"><span data-i18n="hero.headline.2">El resto va solo.</span><span class="cursor"></span></span>
-      </h1>
-      <p class="hero-sub in-view" data-i18n="hero.sub">Sube una carpeta de posts. La IA detecta formato, sugiere hora y te monta el calendario. Tú apruebas.</p>
-      <div class="hero-ctas in-view">
-        <a href="#pricing" class="btn btn-primary" data-magnetic="0.2"><span data-i18n="hero.cta.primary">Comenzar gratis</span> →</a>
-        <a href="#demo" class="btn btn-ghost" data-magnetic="0.15"><span data-i18n="hero.cta.ghost">Ver demo en vivo</span></a>
-      </div>
-      <div class="hero-stats in-view">
-        <div>
-          <div class="hero-stat-value"><span data-count="12.4">0</span>M</div>
-          <div class="hero-stat-label" data-i18n="hero.stat1">posts publicados</div>
-        </div>
-        <div>
-          <div class="hero-stat-value"><span data-count="8.7">0</span>s</div>
-          <div class="hero-stat-label" data-i18n="hero.stat2">carpeta procesada</div>
-        </div>
-        <div>
-          <div class="hero-stat-value"><span data-count="47">0</span></div>
-          <div class="hero-stat-label" data-i18n="hero.stat3">redes conectadas</div>
-        </div>
-      </div>
+    <div class="hero-badge hero-item hero-item-1">
+      <i data-icon="sparkle"></i>
+      <span data-i18n="hero.eyebrow">Programación de redes con IA</span>
     </div>
 
-    <!-- HERO 3D STAGE -->
-    <div class="hero-stage" id="heroStage">
-      <!-- Calendar (left target) -->
-      <div class="stage-calendar">
-        <div class="stage-calendar-head">
-          <div class="stage-calendar-title">Calendario · esta semana</div>
-          <div class="stage-calendar-pulse"></div>
-        </div>
-        <div class="stage-calendar-grid">
-          <div class="cal-day">L</div><div class="cal-day">M</div><div class="cal-day">X</div><div class="cal-day">J</div><div class="cal-day">V</div><div class="cal-day">S</div><div class="cal-day">D</div>
-          <div class="cal-slot"></div>
-          <div class="cal-slot has-post"><span class="cal-slot-platform" style="background:var(--pf-instagram)"></span><span class="cal-slot-time">09:00</span></div>
-          <div class="cal-slot"></div>
-          <div class="cal-slot has-ai"><span class="cal-slot-platform" style="background:var(--accent)"></span><span class="cal-slot-time">12:30</span></div>
-          <div class="cal-slot has-post"><span class="cal-slot-platform" style="background:var(--pf-tiktok)"></span><span class="cal-slot-time">18:00</span></div>
-          <div class="cal-slot"></div>
-          <div class="cal-slot"></div>
-          <div class="cal-slot has-post"><span class="cal-slot-platform" style="background:var(--pf-x)"></span><span class="cal-slot-time">10:00</span></div>
-          <div class="cal-slot"></div>
-          <div class="cal-slot has-post"><span class="cal-slot-platform" style="background:var(--pf-linkedin)"></span><span class="cal-slot-time">14:00</span></div>
-          <div class="cal-slot"></div>
-          <div class="cal-slot has-ai"><span class="cal-slot-platform" style="background:var(--accent)"></span><span class="cal-slot-time">16:00</span></div>
-          <div class="cal-slot has-post"><span class="cal-slot-platform" style="background:var(--pf-youtube)"></span><span class="cal-slot-time">20:00</span></div>
-          <div class="cal-slot"></div>
-          <div class="cal-slot has-post"><span class="cal-slot-platform" style="background:var(--pf-instagram)"></span><span class="cal-slot-time">11:00</span></div>
-          <div class="cal-slot"></div>
-          <div class="cal-slot has-post"><span class="cal-slot-platform" style="background:var(--pf-threads)"></span><span class="cal-slot-time">19:00</span></div>
-          <div class="cal-slot"></div>
-          <div class="cal-slot has-ai"><span class="cal-slot-platform" style="background:var(--accent)"></span><span class="cal-slot-time">21:00</span></div>
-          <div class="cal-slot"></div>
-          <div class="cal-slot has-post"><span class="cal-slot-platform" style="background:var(--pf-instagram)"></span><span class="cal-slot-time">13:00</span></div>
-          <div class="cal-slot"></div>
-        </div>
-      </div>
+    <h1 class="hero-headline hero-item hero-item-2">
+      <span data-i18n="hero.headline.1">Tira la carpeta.</span>
+      <br>
+      <span class="hero-headline-gradient" data-i18n="hero.headline.2">El resto va solo.</span>
+    </h1>
 
-      <!-- Folder (right source) -->
-      <div class="stage-folder">
-        <div class="folder-back"></div>
-        <div class="folder-front">
-          <div class="folder-front-icon"><i data-icon="folder"></i></div>
-          <div class="folder-label">posts/abril.zip</div>
-        </div>
-      </div>
+    <p class="hero-sub hero-item hero-item-3" data-i18n="hero.sub">Sube una carpeta de posts. La IA detecta formato, sugiere hora y te monta el calendario. Tú apruebas.</p>
 
-      <!-- Flying cards -->
-      <div class="fly-card" data-platform="1" style="top: 45%; right: 12%;"></div>
-      <div class="fly-card" data-platform="2" style="top: 50%; right: 14%;"></div>
-      <div class="fly-card" data-platform="3" style="top: 55%; right: 13%;"></div>
-      <div class="fly-card" data-platform="4" style="top: 48%; right: 11%;"></div>
-      <div class="fly-card" data-platform="1" style="top: 52%; right: 15%;"></div>
-      <div class="fly-card" data-platform="2" style="top: 47%; right: 10%;"></div>
-      <div class="fly-card" data-platform="3" style="top: 49%; right: 14%;"></div>
-      <div class="fly-card" data-platform="4" style="top: 53%; right: 12%;"></div>
+    <div class="hero-ctas hero-item hero-item-4">
+      <a href="#pricing" class="btn btn-primary" data-magnetic="0.2"><span data-i18n="hero.cta.primary">Comenzar gratis</span> →</a>
+      <a href="#demo" class="btn btn-ghost" data-magnetic="0.15"><span data-i18n="hero.cta.ghost">Ver demo en vivo</span></a>
+    </div>
+
+    <div class="hero-stats hero-item hero-item-5">
+      <div class="hero-stat">
+        <div class="hero-stat-value"><span data-count="12.4">0</span>M+</div>
+        <div class="hero-stat-label" data-i18n="hero.stat1">posts publicados</div>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-value"><span data-count="8.7">0</span>s</div>
+        <div class="hero-stat-label" data-i18n="hero.stat2">carpeta procesada</div>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-value"><span data-count="47">0</span></div>
+        <div class="hero-stat-label" data-i18n="hero.stat3">redes conectadas</div>
+      </div>
     </div>
   </div>
 </section>
@@ -1870,38 +1701,6 @@
 <script src="assets/motion.js"></script>
 <script>
 (function () {
-  // === HERO 3D — flying cards ===
-  const flyCards = document.querySelectorAll('.fly-card');
-  const heroStage = document.getElementById('heroStage');
-  let flying = false;
-
-  function launchCards() {
-    if (flying) return;
-    flying = true;
-    flyCards.forEach((card, i) => {
-      setTimeout(() => {
-        card.classList.add('flying');
-        setTimeout(() => {
-          card.classList.remove('flying');
-        }, 1700);
-      }, i * 80);
-    });
-    setTimeout(() => { flying = false; }, flyCards.length * 80 + 1800);
-  }
-
-  // Loop the launch every 6s while in viewport
-  let heroVisible = false;
-  const heroObs = new IntersectionObserver((entries) => {
-    entries.forEach(e => { heroVisible = e.isIntersecting; });
-  });
-  heroObs.observe(heroStage);
-
-  function loop() {
-    if (heroVisible && !window.MOTION.REDUCED) launchCards();
-    setTimeout(loop, 4500);
-  }
-  setTimeout(loop, 800);
-
   // === FAQ ===
   document.querySelectorAll('.faq-trigger').forEach((btn) => {
     btn.addEventListener('click', () => {
