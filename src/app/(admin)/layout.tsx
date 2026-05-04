@@ -1,8 +1,6 @@
-import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/admin/sidebar";
 import { OnboardingTour } from "@/components/admin/onboarding-tour";
 import { db } from "@/lib/db";
-import { requireAuth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -28,43 +26,11 @@ async function getSidebarStatus() {
   }
 }
 
-/**
- * Onboarding gate: si el usuario aún no ha completado el wizard, lo
- * redirigimos al paso donde lo dejó. Esto se ejecuta en TODAS las rutas
- * dentro de (admin), así que cubre /dashboard, /businesses/*, /settings,
- * /metrics, /logs, etc.
- *
- * Si la columna no existe (DB sin migrar) tratamos al usuario como ya
- * completado para no romper sesiones existentes.
- */
-async function checkOnboarding(adminUserId: string) {
-  try {
-    const user = await db.adminUser.findUnique({
-      where: { id: adminUserId },
-      select: { onboardingCompleted: true, onboardingStep: true },
-    });
-    if (!user) return;
-    if (!user.onboardingCompleted) {
-      const step = Math.max(1, Math.min(5, user.onboardingStep || 1));
-      redirect(`/onboarding/${step}`);
-    }
-  } catch (err) {
-    // Re-lanzar redirect (Next.js usa una excepción especial)
-    if (err instanceof Error && err.message.includes("NEXT_REDIRECT")) throw err;
-    // Cualquier otro error de DB lo silenciamos: no bloqueamos al usuario.
-  }
-}
-
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // 1. Sesión obligatoria
-  const session = await requireAuth("/login");
-  // 2. Onboarding obligatorio antes de entrar al admin
-  await checkOnboarding(session.adminUserId);
-
   const status = await getSidebarStatus();
 
   return (
