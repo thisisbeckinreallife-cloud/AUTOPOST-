@@ -3,10 +3,109 @@
 @tailwind utilities;
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   AUTOPOST — EDITORIAL / PRINT-ZINE TOKENS  (namespaced bajo .ap-root)
-   Convive con el sistema Aluminum sin colisión: solo aplica dentro de
-   contenedores con la clase .ap-root.
+   AUTOPOST — REBRAND TOKENS (Fase 1, plan funcional simplificado)
+   Dark-first · azul eléctrico (operación) + violeta (IA exclusivo)
+   Tamaños base 17px+ · touch targets 48px+ · contraste AAA donde aplica.
+   Activo globalmente en :root. Las páginas con .ap-root mantienen el
+   sistema editorial-printzine antiguo (coexisten hasta migrar).
    ══════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* INK SCALE — dark-first 11 pasos */
+  --ink-0:  #08080A;
+  --ink-1:  #0E0E12;
+  --ink-2:  #14141A;
+  --ink-3:  #1C1C24;
+  --ink-4:  #2A2A36;
+  --ink-5:  #3D3D4D;
+  --ink-6:  #6B6B80;
+  --ink-7:  #A8A8BD;
+  --ink-8:  #D6D6E0;
+  --ink-9:  #F4F4F8;
+  --ink-10: #FFFFFF;
+
+  /* BRAND — primary blue (operación) + accent violet (IA exclusivo) */
+  --pri:        #4F7CFF;
+  --pri-dim:    #3B5FCF;
+  --pri-soft:   rgba(79, 124, 255, 0.12);
+  --ai:         #A855F7;
+  --ai-dim:     #8B3FD9;
+  --ai-soft:    rgba(168, 85, 247, 0.12);
+
+  /* SEMANTIC */
+  --np-success:      #4ADE80;
+  --np-success-soft: rgba(74, 222, 128, 0.12);
+  --np-warning:      #FBBF24;
+  --np-warning-soft: rgba(251, 191, 36, 0.12);
+  --np-error:        #F87171;
+  --np-error-soft:   rgba(248, 113, 113, 0.12);
+  --np-info:         #60A5FA;
+  --np-info-soft:    rgba(96, 165, 250, 0.12);
+
+  /* FONTS — Geist primary, Inter fallback (cargadas en layout.tsx) */
+  --np-font-sans:    "Geist", "Inter", -apple-system, system-ui, sans-serif;
+  --np-font-mono:    "Geist Mono", "JetBrains Mono", "SF Mono", monospace;
+
+  /* SHADOWS dark-aware */
+  --np-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --np-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--ink-3);
+  --np-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--ink-3);
+  --np-glow-blue:   0 0 24px rgba(79, 124, 255, 0.35);
+  --np-glow-violet: 0 0 24px rgba(168, 85, 247, 0.35);
+
+  /* MOTION */
+  --np-ease-out:  cubic-bezier(0.16, 1, 0.3, 1);
+  --np-ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Light theme (toggle data-theme="light" en <html>) */
+html[data-theme="light"] {
+  --ink-0:  #FFFFFF;
+  --ink-1:  #FAFAFB;
+  --ink-2:  #F4F4F8;
+  --ink-3:  #E5E5EC;
+  --ink-4:  #D6D6E0;
+  --ink-5:  #A8A8BD;
+  --ink-6:  #6B6B80;
+  --ink-7:  #3D3D4D;
+  --ink-8:  #2A2A36;
+  --ink-9:  #14141A;
+  --ink-10: #08080A;
+  --np-shadow-sm: 0 1px 2px rgba(8, 8, 10, 0.06);
+  --np-shadow-md: 0 4px 12px rgba(8, 8, 10, 0.08), 0 0 0 1px var(--ink-3);
+  --np-shadow-lg: 0 12px 32px rgba(8, 8, 10, 0.10), 0 0 0 1px var(--ink-3);
+}
+
+/* NP-ROOT — namespace explícito para páginas nuevas del rebrand
+   Garantiza min font-size 17px y toques accesibles 48px+. */
+.np-root {
+  font-family: var(--np-font-sans);
+  background: var(--ink-0);
+  color: var(--ink-8);
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'cv11', 'ss01';
+}
+.np-root :focus-visible {
+  outline: 2px solid var(--pri);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.np-root ::selection {
+  background: var(--pri);
+  color: var(--ink-10);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .np-root *, .np-root *::before, .np-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 100ms !important;
+  }
+}
+
 /* Fuentes cargadas via <link rel="stylesheet"> en app/layout.tsx (no @import — bloquea render). */
 
 .ap-root {

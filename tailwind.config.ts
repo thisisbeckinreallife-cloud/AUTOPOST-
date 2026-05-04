@@ -13,8 +13,53 @@ const config: Config = {
         display: ['"Instrument Serif"', '"Times New Roman"', "serif"],
         headline: ['"Instrument Serif"', '"Times New Roman"', "serif"],
         mono: ['"JetBrains Mono"', '"SF Mono"', "ui-monospace", "monospace"],
+        /* Rebrand (Fase 1): Geist con fallback Inter — usar font-np-sans / font-np-mono
+           para forzar el nuevo system en componentes brand-new. */
+        "np-sans": ["Geist", "Inter", "system-ui", "-apple-system", "sans-serif"],
+        "np-mono": ["Geist Mono", "JetBrains Mono", "SF Mono", "ui-monospace", "monospace"],
+      },
+      fontSize: {
+        /* Rebrand: tamaños accesibles min 17px body, 14px caption (+2 vs estándar) */
+        "np-caption":   ["14px", { lineHeight: "1.4", letterSpacing: "0.02em" }],
+        "np-body":      ["17px", { lineHeight: "1.55" }],
+        "np-body-lg":   ["19px", { lineHeight: "1.55" }],
+        "np-h4":        ["22px", { lineHeight: "1.3", letterSpacing: "-0.005em", fontWeight: "500" }],
+        "np-h3":        ["26px", { lineHeight: "1.25", letterSpacing: "-0.01em", fontWeight: "600" }],
+        "np-h2":        ["34px", { lineHeight: "1.2", letterSpacing: "-0.015em", fontWeight: "600" }],
+        "np-h1":        ["40px", { lineHeight: "1.15", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "np-display":   ["56px", { lineHeight: "1.05", letterSpacing: "-0.025em", fontWeight: "700" }],
+        "np-display-xl":["72px", { lineHeight: "1", letterSpacing: "-0.03em", fontWeight: "800" }],
       },
       colors: {
+        /* ══════════════════════════════════════════════════════════════
+           REBRAND (Fase 1) — paleta dark-first del nuevo producto.
+           Coexiste con los tokens editoriales (brand/surface/accent).
+           Usar bg-ink-2, text-ink-9, bg-pri, bg-ai en componentes nuevos.
+           ══════════════════════════════════════════════════════════════ */
+        ink: {
+          0:  "var(--ink-0)",
+          1:  "var(--ink-1)",
+          2:  "var(--ink-2)",
+          3:  "var(--ink-3)",
+          4:  "var(--ink-4)",
+          5:  "var(--ink-5)",
+          6:  "var(--ink-6)",
+          7:  "var(--ink-7)",
+          8:  "var(--ink-8)",
+          9:  "var(--ink-9)",
+          10: "var(--ink-10)",
+        },
+        pri: {
+          DEFAULT: "var(--pri)",
+          dim:     "var(--pri-dim)",
+          soft:    "var(--pri-soft)",
+        },
+        ai: {
+          DEFAULT: "var(--ai)",
+          dim:     "var(--ai-dim)",
+          soft:    "var(--ai-soft)",
+        },
+
         /* ══════════════════════════════════════════════════════════════
            brand.* / accent.* / surface.* — Editorial print-zine palette.
            Off-bone paper, tomato stamp, olive, mustard. Ink in 4 tones.
@@ -256,6 +301,9 @@ const config: Config = {
       spacing: {
         "18": "4.5rem",
         "88": "22rem",
+        /* Rebrand (Fase 1): touch targets accesibles */
+        "np-touch":    "48px",   /* min touch target — botones, links interactivos */
+        "np-touch-lg": "56px",   /* CTA primarios */
       },
     },
   },

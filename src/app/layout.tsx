@@ -69,6 +69,12 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
+        {/* Rebrand (Fase 1): Geist Sans + Geist Mono — fallback automático a Inter
+            si bloquea (font-family declarado en globals.css con cascade). */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body className="font-sans antialiased">
         <Providers>{children}</Providers>

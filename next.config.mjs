@@ -1,3 +1,9 @@
+import createNextIntlPlugin from "next-intl/plugin";
+
+// next-intl plugin: apunta a /src/i18n/request.ts (Fase 1 rebrand).
+// Sin esto, getTranslations() server-side no resuelve mensajes.
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Output standalone: bundle solo deps usadas por archivo → container 5-10×
@@ -95,4 +101,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);
