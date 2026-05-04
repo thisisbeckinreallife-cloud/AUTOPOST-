@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autopost · Entrar</title>
+<meta name="description" content="Entra a Autopost. Tu calendario sigue donde lo dejaste.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/tokens.css">
+<style>
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== Background mesh + grid ===== */
+.auth-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.auth-bg::before, .auth-bg::after {
+  content: '';
+  position: absolute;
+  width: 800px; height: 800px;
+  border-radius: 50%;
+  filter: blur(140px);
+  opacity: 0.15;
+  animation: mesh-rotate 50s linear infinite;
+}
+.auth-bg::before {
+  top: -300px; left: 50%; margin-left: -600px;
+  background: radial-gradient(circle, var(--primary) 0%, transparent 60%);
+}
+.auth-bg::after {
+  bottom: -400px; left: 50%; margin-left: 100px;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 60%);
+  animation-direction: reverse;
+  opacity: 0.10;
+}
+.auth-grid-glow {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(79, 124, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(79, 124, 255, 0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== Card ===== */
+.auth-stage {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 440px;
+  padding: var(--sp-6);
+}
+.auth-card {
+  background: linear-gradient(180deg, var(--ink-1), var(--ink-0));
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-2xl);
+  padding: var(--sp-10) var(--sp-8);
+  position: relative;
+  overflow: hidden;
+}
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  opacity: 0.4;
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-8);
+  text-decoration: none;
+  width: fit-content;
+}
+.auth-brand-mark {
+  width: 26px; height: 26px;
+  background: var(--primary);
+  border-radius: 5px;
+  position: relative;
+  flex-shrink: 0;
+  box-shadow: var(--glow-blue);
+}
+.auth-brand-mark::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  background: var(--ink-1);
+  border-radius: 1px;
+}
+.auth-brand-text {
+  font-family: var(--font-mono);
+  font-size: var(--tx-h4);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--ink-9);
+}
+.auth-brand-text span { color: var(--primary); }
+
+.auth-title {
+  font-family: var(--font-display);
+  font-size: var(--tx-h2);
+  font-weight: 600;
+  color: var(--ink-9);
+  margin: 0 0 var(--sp-2);
+  letter-spacing: var(--tracking-tight);
+}
+.auth-sub {
+  font-size: var(--tx-body);
+  color: var(--ink-7);
+  margin: 0 0 var(--sp-8);
+  line-height: var(--lh-normal);
+}
+
+/* ===== OAuth buttons ===== */
+.auth-oauth {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-6);
+}
+.auth-oauth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-md);
+  color: var(--ink-9);
+  font-family: inherit;
+  font-size: var(--tx-body);
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--d-hover) var(--ease-out-quint);
+}
+.auth-oauth-btn:hover {
+  border-color: var(--ink-5);
+  background: var(--ink-2);
+  transform: translateY(-1px);
+}
+.auth-oauth-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-6);
+  color: var(--ink-6);
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.auth-divider::before, .auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--ink-3);
+}
+
+/* ===== Form ===== */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.auth-field { display: flex; flex-direction: column; gap: var(--sp-2); }
+.auth-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-7);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.auth-label-row a {
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ink-7);
+  font-family: var(--font-body);
+  font-size: var(--tx-caption);
+  text-decoration: none;
+  transition: color var(--d-hover);
+}
+.auth-label-row a:hover { color: var(--primary); }
+.auth-input {
+  width: 100%;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--ink-0);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-md);
+  color: var(--ink-9);
+  font-family: inherit;
+  font-size: var(--tx-body);
+  transition: all var(--d-hover) var(--ease-out-quint);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.auth-input::placeholder { color: var(--ink-5); }
+.auth-input:hover { border-color: var(--ink-4); }
+.auth-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.15);
+  background: var(--ink-1);
+}
+.auth-input.error {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15);
+}
+.auth-error {
+  color: var(--error);
+  font-size: var(--tx-caption);
+  font-family: var(--font-mono);
+  margin-top: 4px;
+  display: none;
+}
+.auth-input.error + .auth-error { display: block; }
+
+.auth-pw-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.auth-pw-toggle {
+  position: absolute;
+  right: 8px;
+  width: 32px; height: 32px;
+  background: transparent;
+  border: none;
+  color: var(--ink-6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-sm);
+  transition: color var(--d-hover);
+}
+.auth-pw-toggle:hover { color: var(--ink-9); }
+.auth-pw-toggle svg { width: 16px; height: 16px; }
+
+.auth-remember {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--tx-caption);
+  color: var(--ink-7);
+  cursor: pointer;
+  user-select: none;
+}
+.auth-checkbox {
+  width: 16px; height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.auth-submit {
+  width: 100%;
+  padding: var(--sp-3) var(--sp-4);
+  margin-top: var(--sp-2);
+  background: var(--primary);
+  color: var(--ink-10);
+  border: none;
+  border-radius: var(--r-md);
+  font-family: inherit;
+  font-size: var(--tx-body);
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  box-shadow: var(--shadow-sm), var(--glow-blue);
+  transition: all var(--d-hover) var(--ease-out-quint);
+}
+.auth-submit:hover {
+  background: var(--primary-dim);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md), var(--glow-blue);
+}
+.auth-submit:active { transform: translateY(0); }
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+.auth-submit-spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: var(--ink-10);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+.auth-submit.loading .auth-submit-text { opacity: 0.7; }
+.auth-submit.loading .auth-submit-spinner { display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.auth-foot {
+  margin-top: var(--sp-8);
+  text-align: center;
+  font-size: var(--tx-body);
+  color: var(--ink-7);
+}
+.auth-foot a {
+  color: var(--ink-9);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid var(--ink-4);
+  transition: all var(--d-hover);
+}
+.auth-foot a:hover { color: var(--primary); border-color: var(--primary); }
+
+/* ===== Footer outside card ===== */
+.auth-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  margin-top: var(--sp-6);
+}
+.auth-ctrl-btn {
+  width: 32px; height: 32px;
+  border: 1px solid var(--ink-3);
+  background: rgba(14, 14, 18, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--ink-7);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all var(--d-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.auth-ctrl-btn:hover { color: var(--ink-9); border-color: var(--ink-5); }
+.auth-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 var(--sp-3);
+  height: 32px;
+  border: 1px solid var(--ink-3);
+  background: rgba(14, 14, 18, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: var(--r-sm);
+  color: var(--ink-7);
+  font-size: var(--tx-caption);
+  text-decoration: none;
+  transition: all var(--d-hover);
+}
+.auth-back:hover { color: var(--ink-9); border-color: var(--ink-5); }
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  .auth-bg::before, .auth-bg::after { animation: none; }
+}
+
+@media (max-width: 480px) {
+  .auth-card { padding: var(--sp-8) var(--sp-6); }
+}
+</style>
+</head>
+<body class="grain">
+
+<div class="auth-bg"></div>
+<div class="auth-grid-glow"></div>
+
+<main class="auth-stage">
+  <div class="auth-card">
+    <a href="landing.html" class="auth-brand" aria-label="Autopost">
+      <div class="auth-brand-mark"></div>
+      <div class="auth-brand-text">autopost<span>.</span></div>
+    </a>
+
+    <h1 class="auth-title" data-i18n="auth.title">Bienvenido de vuelta</h1>
+    <p class="auth-sub" data-i18n="auth.sub">Tu calendario sigue donde lo dejaste.</p>
+
+    <div class="auth-oauth">
+      <button class="auth-oauth-btn" type="button" data-oauth="google">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.99.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09a6.6 6.6 0 0 1 0-4.18V7.07H2.18a11 11 0 0 0 0 9.86l3.66-2.84z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.07.56 4.21 1.64l3.15-3.15A11 11 0 0 0 12 1a11 11 0 0 0-9.82 6.07l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/>
+        </svg>
+        <span data-i18n="auth.google">Continuar con Google</span>
+      </button>
+      <button class="auth-oauth-btn" type="button" data-oauth="apple">
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M16.36 12.7c-.02-2.05 1.67-3.04 1.75-3.09-.95-1.39-2.43-1.58-2.96-1.6-1.26-.13-2.46.74-3.1.74-.65 0-1.63-.72-2.69-.7-1.38.02-2.65.8-3.36 2.04-1.43 2.48-.37 6.16 1.03 8.18.69.99 1.5 2.1 2.56 2.06 1.03-.04 1.42-.66 2.66-.66 1.24 0 1.59.66 2.68.64 1.11-.02 1.81-1.01 2.49-2 .78-1.15 1.1-2.27 1.12-2.32-.02-.01-2.15-.83-2.18-3.29zM14.4 6.93c.57-.69.95-1.65.85-2.61-.82.03-1.83.55-2.42 1.24-.53.61-1 1.59-.87 2.53.92.07 1.86-.47 2.44-1.16z"/>
+        </svg>
+        <span data-i18n="auth.apple">Continuar con Apple</span>
+      </button>
+    </div>
+
+    <div class="auth-divider"><span data-i18n="auth.or">O con email</span></div>
+
+    <form class="auth-form" id="authForm" novalidate>
+      <div class="auth-field">
+        <div class="auth-label-row">
+          <label for="email" data-i18n="auth.email">Email</label>
+        </div>
+        <input id="email" name="email" type="email" class="auth-input" placeholder="maria@treintayocho.com" autocomplete="email" required data-i18n-attr="placeholder:auth.email_placeholder">
+        <span class="auth-error" data-i18n="auth.email_error">Introduce un email válido</span>
+      </div>
+
+      <div class="auth-field">
+        <div class="auth-label-row">
+          <label for="password" data-i18n="auth.password">Contraseña</label>
+          <a href="#" data-i18n="auth.forgot">¿Olvidaste tu contraseña?</a>
+        </div>
+        <div class="auth-pw-wrap">
+          <input id="password" name="password" type="password" class="auth-input" placeholder="••••••••••••" autocomplete="current-password" required minlength="6">
+          <button type="button" class="auth-pw-toggle" id="pwToggle" aria-label="Mostrar contraseña">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" id="pwEye">
+              <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+        <span class="auth-error" data-i18n="auth.password_error">Mínimo 6 caracteres</span>
+      </div>
+
+      <label class="auth-remember">
+        <input type="checkbox" class="auth-checkbox" id="remember" checked>
+        <span data-i18n="auth.remember">Mantener sesión iniciada durante 30 días</span>
+      </label>
+
+      <button type="submit" class="auth-submit" id="submitBtn">
+        <span class="auth-submit-spinner"></span>
+        <span class="auth-submit-text" data-i18n="auth.submit">Entrar</span>
+        <span class="auth-submit-arrow">→</span>
+      </button>
+    </form>
+
+    <p class="auth-foot">
+      <span data-i18n="auth.no_account">¿No tienes cuenta?</span>
+      <a href="landing.html#pricing" data-i18n="auth.start_free">Empieza gratis</a>
+    </p>
+  </div>
+
+  <div class="auth-controls">
+    <a href="landing.html" class="auth-back" data-i18n="auth.back">← Volver</a>
+    <button class="auth-ctrl-btn" data-locale-toggle aria-label="Cambiar idioma">ES</button>
+    <button class="auth-ctrl-btn" data-theme-toggle aria-label="Cambiar tema">◐</button>
+  </div>
+</main>
+
+<script src="assets/i18n.js"></script>
+<script src="assets/motion.js"></script>
+<script>
+(function () {
+  const form = document.getElementById('authForm');
+  const email = document.getElementById('email');
+  const pw = document.getElementById('password');
+  const submit = document.getElementById('submitBtn');
+  const pwToggle = document.getElementById('pwToggle');
+  const pwEye = document.getElementById('pwEye');
+
+  // === Password show/hide ===
+  pwToggle.addEventListener('click', () => {
+    const showing = pw.type === 'text';
+    pw.type = showing ? 'password' : 'text';
+    pwEye.innerHTML = showing
+      ? '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>'
+      : '<path d="M2 12s4-7 10-7c2 0 3.7.4 5.2 1.1L20 4M22 12s-4 7-10 7c-2 0-3.7-.4-5.2-1.1L4 20"/><path d="M9.5 9.5a3 3 0 0 0 4 4"/>';
+    pwToggle.setAttribute('aria-label', showing ? 'Mostrar contraseña' : 'Ocultar contraseña');
+  });
+
+  // === Validation ===
+  function emailValid(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+  function clearError(input) { input.classList.remove('error'); }
+  email.addEventListener('input', () => clearError(email));
+  pw.addEventListener('input', () => clearError(pw));
+
+  // === Submit (mock) ===
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    let ok = true;
+    if (!emailValid(email.value.trim())) { email.classList.add('error'); ok = false; }
+    if (pw.value.length < 6) { pw.classList.add('error'); ok = false; }
+    if (!ok) return;
+
+    // Mock authentication: spinner → redirect
+    submit.classList.add('loading');
+    submit.disabled = true;
+
+    // Persist mock session for the dashboard greeting
+    try {
+      localStorage.setItem('autopost-session', JSON.stringify({
+        email: email.value.trim(),
+        loggedAt: Date.now(),
+        remember: document.getElementById('remember').checked,
+      }));
+    } catch (_) { /* ignore */ }
+
+    setTimeout(() => {
+      window.location.href = 'dashboard.html';
+    }, 900);
+  });
+
+  // === OAuth buttons (mock) ===
+  document.querySelectorAll('[data-oauth]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const provider = btn.getAttribute('data-oauth');
+      btn.style.opacity = '0.7';
+      btn.style.pointerEvents = 'none';
+      try {
+        localStorage.setItem('autopost-session', JSON.stringify({
+          provider,
+          loggedAt: Date.now(),
+          remember: true,
+        }));
+      } catch (_) { /* ignore */ }
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 700);
+    });
+  });
+
+  // Auto-focus email
+  setTimeout(() => email.focus(), 100);
+})();
+</script>
+</body>
+</html>

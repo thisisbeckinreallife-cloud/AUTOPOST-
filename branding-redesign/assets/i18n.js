@@ -114,6 +114,25 @@
       'theme.dark':        'Oscuro',
       'theme.light':       'Claro',
 
+      // Auth (login)
+      'auth.title':           'Bienvenido de vuelta',
+      'auth.sub':             'Tu calendario sigue donde lo dejaste.',
+      'auth.google':          'Continuar con Google',
+      'auth.apple':           'Continuar con Apple',
+      'auth.or':              'O con email',
+      'auth.email':           'Email',
+      'auth.email_placeholder':'maria@treintayocho.com',
+      'auth.email_error':     'Introduce un email válido',
+      'auth.password':        'Contraseña',
+      'auth.password_error':  'Mínimo 6 caracteres',
+      'auth.forgot':          '¿Olvidaste tu contraseña?',
+      'auth.remember':        'Mantener sesión iniciada durante 30 días',
+      'auth.submit':          'Entrar',
+      'auth.no_account':      '¿No tienes cuenta?',
+      'auth.start_free':      'Empieza gratis',
+      'auth.back':            '← Volver',
+      'auth.logout':          'Cerrar sesión',
+
       // Brand system
       'bs.title':          'Sistema de marca',
       'bs.sub':            'Identidad, voz, tipografía, color, motion. Un único documento navegable.',
@@ -242,6 +261,25 @@
 
       'theme.dark':        'Dark',
       'theme.light':       'Light',
+
+      // Auth (login)
+      'auth.title':           'Welcome back',
+      'auth.sub':             'Your calendar is right where you left it.',
+      'auth.google':          'Continue with Google',
+      'auth.apple':           'Continue with Apple',
+      'auth.or':              'Or with email',
+      'auth.email':           'Email',
+      'auth.email_placeholder':'maria@treintayocho.com',
+      'auth.email_error':     'Enter a valid email',
+      'auth.password':        'Password',
+      'auth.password_error':  '6 characters minimum',
+      'auth.forgot':          'Forgot password?',
+      'auth.remember':        'Keep me signed in for 30 days',
+      'auth.submit':          'Sign in',
+      'auth.no_account':      'No account yet?',
+      'auth.start_free':      'Start free',
+      'auth.back':            '← Back',
+      'auth.logout':          'Sign out',
 
       'bs.title':          'Brand system',
       'bs.sub':            'Identity, voice, type, color, motion. One navigable document.',

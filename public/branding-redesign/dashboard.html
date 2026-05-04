@@ -153,6 +153,85 @@ body { overflow: hidden; }
 }
 .dash-toggle:hover { color: var(--ink-9); border-color: var(--ink-5); }
 
+/* === Account dropdown menu === */
+.dash-menu {
+  position: absolute;
+  bottom: calc(var(--sp-2) + 60px);
+  left: var(--sp-3);
+  right: var(--sp-3);
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  padding: var(--sp-2);
+  box-shadow: var(--shadow-xl);
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+  transform-origin: bottom left;
+  transition: opacity var(--d-hover) var(--ease-out-quint),
+              transform var(--d-hover) var(--ease-out-quint);
+  pointer-events: none;
+  z-index: 30;
+}
+.dash-menu.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.dash-menu-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  border-radius: var(--r-md);
+}
+.dash-menu-name {
+  font-size: var(--tx-body);
+  color: var(--ink-9);
+  font-weight: 500;
+  line-height: 1.2;
+}
+.dash-menu-email {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-6);
+  margin-top: 2px;
+  word-break: break-all;
+}
+.dash-menu-sep {
+  height: 1px;
+  background: var(--ink-3);
+  margin: 4px 0;
+}
+.dash-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-sm);
+  color: var(--ink-8);
+  text-decoration: none;
+  font-family: inherit;
+  font-size: var(--tx-body);
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--d-hover);
+}
+.dash-menu-item:hover {
+  background: var(--ink-2);
+  color: var(--ink-9);
+}
+.dash-menu-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+.dash-menu-logout {
+  color: var(--error);
+}
+.dash-menu-logout:hover {
+  background: var(--error-soft);
+  color: var(--error);
+}
+
 /* ============ MAIN ============ */
 .dash-main {
   overflow-y: auto;
@@ -1175,17 +1254,36 @@ body { overflow: hidden; }
       <button class="dash-nav-item" data-view="settings"><i data-icon="settings"></i><span data-i18n="dash.settings">Conexiones</span></button>
     </nav>
     <div class="dash-side-footer">
-      <div class="dash-account">
+      <div class="dash-account" id="dashAccount" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false">
         <div class="dash-avatar"></div>
         <div>
-          <div class="dash-account-name">María L.</div>
-          <div class="dash-account-biz">treintayocho</div>
+          <div class="dash-account-name" id="dashAccountName">María L.</div>
+          <div class="dash-account-biz" id="dashAccountBiz">treintayocho</div>
         </div>
       </div>
       <div class="dash-toggles">
         <button class="dash-toggle" data-locale-toggle aria-label="Idioma">ES</button>
         <button class="dash-toggle" data-theme-toggle aria-label="Tema">◐</button>
       </div>
+    </div>
+
+    <!-- Account dropdown menu -->
+    <div class="dash-menu" id="dashMenu" role="menu" aria-hidden="true">
+      <div class="dash-menu-head">
+        <div class="dash-avatar"></div>
+        <div>
+          <div class="dash-menu-name" id="dashMenuName">María L.</div>
+          <div class="dash-menu-email" id="dashMenuEmail">maria@treintayocho.com</div>
+        </div>
+      </div>
+      <div class="dash-menu-sep"></div>
+      <a href="#settings" class="dash-menu-item"><i data-icon="settings"></i><span>Cuenta y conexiones</span></a>
+      <a href="brand-system.html" class="dash-menu-item"><i data-icon="grid"></i><span>Brand system</span></a>
+      <a href="landing.html" class="dash-menu-item"><i data-icon="arrow"></i><span>Volver a la web</span></a>
+      <div class="dash-menu-sep"></div>
+      <button class="dash-menu-item dash-menu-logout" id="dashLogout" type="button">
+        <i data-icon="close"></i><span data-i18n="auth.logout">Cerrar sesión</span>
+      </button>
     </div>
   </aside>
 
@@ -1682,6 +1780,64 @@ body { overflow: hidden; }
   }
   setInterval(pushLog, 1800);
   pushLog();
+
+  // === ACCOUNT MENU + SESSION ===
+  const account = document.getElementById('dashAccount');
+  const menu = document.getElementById('dashMenu');
+  const logoutBtn = document.getElementById('dashLogout');
+  const accountName = document.getElementById('dashAccountName');
+  const accountBiz = document.getElementById('dashAccountBiz');
+  const menuName = document.getElementById('dashMenuName');
+  const menuEmail = document.getElementById('dashMenuEmail');
+
+  // Read mock session set by login.html
+  let session = null;
+  try {
+    const raw = localStorage.getItem('autopost-session');
+    if (raw) session = JSON.parse(raw);
+  } catch (_) { /* ignore */ }
+
+  if (session) {
+    if (session.email) {
+      const username = session.email.split('@')[0];
+      const display = username.charAt(0).toUpperCase() + username.slice(1).replace(/\./g, ' ');
+      accountName.textContent = display;
+      menuName.textContent = display;
+      menuEmail.textContent = session.email;
+      // Try to extract a biz handle from the email domain
+      const domain = (session.email.split('@')[1] || '').split('.')[0];
+      if (domain) accountBiz.textContent = domain;
+    } else if (session.provider) {
+      menuEmail.textContent = `via ${session.provider}`;
+    }
+  }
+
+  function toggleMenu(force) {
+    const open = force !== undefined ? force : !menu.classList.contains('open');
+    menu.classList.toggle('open', open);
+    account.setAttribute('aria-expanded', open);
+    menu.setAttribute('aria-hidden', !open);
+  }
+  account.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMenu();
+  });
+  account.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMenu(); }
+    if (e.key === 'Escape') toggleMenu(false);
+  });
+  document.addEventListener('click', (e) => {
+    if (!menu.contains(e.target) && !account.contains(e.target)) toggleMenu(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') toggleMenu(false);
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    try { localStorage.removeItem('autopost-session'); } catch (_) {}
+    toast('Sesión cerrada · hasta pronto');
+    setTimeout(() => { window.location.href = 'login.html'; }, 700);
+  });
 
   // === FULLSCREEN CALENDAR ===
   const fcGrid = document.getElementById('fcGrid');
