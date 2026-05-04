@@ -1,8 +1,12 @@
-import createNextIntlPlugin from "next-intl/plugin";
-
-// next-intl plugin: apunta a /src/i18n/request.ts (Fase 1 rebrand).
-// Sin esto, getTranslations() server-side no resuelve mensajes.
-const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+// next-intl plugin: temporalmente deshabilitado en Fase 2 — diagnóstico
+// reveló que envolver next.config con createNextIntlPlugin rompe el
+// arranque del server.js en Railway standalone (server.js termina con
+// exit silencioso post-Ready, pre-healthcheck) aunque NINGUNA página use
+// todavía useTranslations/getTranslations. Re-habilitar en Fase 3 cuando
+// el onboarding wizard sea la primera consumer real de i18n.
+//
+// import createNextIntlPlugin from "next-intl/plugin";
+// const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -101,4 +105,4 @@ const nextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default nextConfig;
