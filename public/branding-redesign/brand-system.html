@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autopost · Brand System</title>
+<meta name="description" content="Sistema de marca de Autopost. Identidad, voz, tipografía, color, motion.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/tokens.css">
+<style>
+/* === BRAND SYSTEM SPECIFIC === */
+.bs-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+.bs-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  border-right: 1px solid var(--ink-3);
+  background: var(--ink-1);
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-6);
+  overflow-y: auto;
+}
+.bs-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-8);
+  padding-bottom: var(--sp-6);
+  border-bottom: 1px solid var(--ink-3);
+}
+.bs-brand-mark {
+  width: 28px; height: 28px;
+  background: var(--primary);
+  border-radius: 4px;
+  position: relative;
+  flex-shrink: 0;
+}
+.bs-brand-mark::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  background: var(--ink-1);
+  border-radius: 1px;
+}
+.bs-brand-text {
+  font-family: var(--font-mono);
+  font-size: var(--tx-mono);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--ink-9);
+}
+.bs-brand-text span { color: var(--primary); }
+.bs-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.bs-nav a {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-md);
+  color: var(--ink-7);
+  text-decoration: none;
+  font-size: var(--tx-body);
+  transition: all var(--d-hover) var(--ease-out-quint);
+  border-left: 2px solid transparent;
+}
+.bs-nav a:hover {
+  background: var(--ink-2);
+  color: var(--ink-9);
+  transform: translateX(4px);
+}
+.bs-nav a.active {
+  color: var(--primary);
+  border-left-color: var(--primary);
+  background: var(--primary-soft);
+}
+.bs-nav-num {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  min-width: 22px;
+}
+.bs-nav a.active .bs-nav-num { color: var(--primary); }
+.bs-sidebar-footer {
+  margin-top: auto;
+  padding-top: var(--sp-6);
+  border-top: 1px solid var(--ink-3);
+  display: flex;
+  gap: var(--sp-2);
+}
+.bs-toggle {
+  flex: 1;
+  padding: var(--sp-2);
+  background: var(--ink-2);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-sm);
+  color: var(--ink-7);
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  cursor: pointer;
+  transition: all var(--d-hover);
+}
+.bs-toggle:hover { color: var(--ink-9); border-color: var(--ink-5); }
+
+.bs-main {
+  padding: var(--sp-12) var(--sp-12);
+  max-width: 1100px;
+}
+
+.bs-section {
+  margin-bottom: var(--sp-32);
+  scroll-margin-top: var(--sp-8);
+}
+.bs-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-2);
+}
+.bs-section-num {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  letter-spacing: 0.1em;
+}
+.bs-section-title {
+  font-family: var(--font-display);
+  font-size: var(--tx-display-lg);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+  color: var(--ink-9);
+}
+.bs-section-sub {
+  font-size: var(--tx-body-lg);
+  color: var(--ink-7);
+  max-width: 640px;
+  margin: 0 0 var(--sp-12);
+}
+
+/* === IDENTITY === */
+.id-card {
+  padding: var(--sp-10);
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-xl);
+  position: relative;
+  overflow: hidden;
+}
+.id-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 80% 20%, var(--primary-soft) 0%, transparent 50%);
+  pointer-events: none;
+}
+.id-naming {
+  font-family: var(--font-display);
+  font-size: var(--tx-display-xl);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1;
+  color: var(--ink-9);
+  margin: 0 0 var(--sp-4);
+}
+.id-naming-dot { color: var(--primary); }
+.id-meaning {
+  font-size: var(--tx-body-lg);
+  color: var(--ink-7);
+  max-width: 600px;
+  margin: 0;
+  position: relative;
+}
+.id-meaning strong { color: var(--ink-9); font-weight: 500; }
+
+.taglines {
+  display: grid;
+  gap: var(--sp-3);
+  margin-top: var(--sp-8);
+}
+.tagline {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: var(--sp-5) var(--sp-6);
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  transition: all var(--d-hover) var(--ease-out-quint);
+}
+.tagline:hover { border-color: var(--ink-4); transform: translateX(4px); }
+.tagline-id {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  letter-spacing: 0.1em;
+}
+.tagline-text {
+  font-family: var(--font-display);
+  font-size: var(--tx-h3);
+  font-weight: 500;
+  color: var(--ink-8);
+}
+.tagline-text small {
+  display: block;
+  font-size: var(--tx-body);
+  color: var(--ink-6);
+  font-weight: 400;
+  margin-top: var(--sp-1);
+  font-style: italic;
+}
+.tagline-status {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-5);
+}
+.tagline.winner {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, var(--primary-soft), transparent 60%);
+}
+.tagline.winner .tagline-text { color: var(--ink-9); font-weight: 600; }
+.tagline.winner .tagline-id { color: var(--primary); }
+.tagline.winner .tagline-status { color: var(--primary); font-weight: 600; }
+
+/* === LOGO === */
+.logo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-6);
+}
+.logo-stage {
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  padding: var(--sp-12) var(--sp-8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  position: relative;
+  overflow: hidden;
+}
+.logo-stage[data-bg="white"] { background: var(--ink-9); }
+.logo-stage[data-bg="primary"] { background: var(--primary); }
+.logo-stage-label {
+  position: absolute;
+  top: var(--sp-3);
+  left: var(--sp-4);
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.logo-stage[data-bg="white"] .logo-stage-label,
+.logo-stage[data-bg="primary"] .logo-stage-label { color: rgba(255,255,255,0.5); }
+.logo-stage[data-bg="white"] .logo-stage-label { color: rgba(0,0,0,0.4); }
+
+.logomark {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.logomark-iso {
+  display: grid;
+  grid-template-columns: repeat(4, 12px);
+  grid-template-rows: repeat(4, 12px);
+  gap: 2px;
+}
+.logomark-cell {
+  width: 12px; height: 12px;
+  background: var(--ink-4);
+  border-radius: 1.5px;
+}
+.logomark-cell.lit {
+  background: var(--primary);
+  box-shadow: 0 0 8px rgba(79, 124, 255, 0.5);
+}
+.logomark-cell.path {
+  background: rgba(79, 124, 255, 0.2);
+}
+.logomark-text {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--ink-9);
+}
+.logomark-text-dot { color: var(--primary); }
+
+.logomark.mono-light .logomark-cell.lit { background: var(--ink-10); box-shadow: none; }
+.logomark.mono-light .logomark-cell.path { background: rgba(255,255,255,0.25); }
+.logomark.mono-light .logomark-cell { background: rgba(255,255,255,0.15); }
+.logomark.mono-light .logomark-text { color: var(--ink-10); }
+.logomark.mono-light .logomark-text-dot { color: var(--ink-10); }
+
+.logomark.mono-dark .logomark-cell.lit { background: var(--ink-0); box-shadow: none; }
+.logomark.mono-dark .logomark-cell.path { background: rgba(0,0,0,0.25); }
+.logomark.mono-dark .logomark-cell { background: rgba(0,0,0,0.12); }
+.logomark.mono-dark .logomark-text { color: var(--ink-0); }
+.logomark.mono-dark .logomark-text-dot { color: var(--ink-0); }
+
+.logo-construction {
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  padding: var(--sp-8);
+  display: flex;
+  gap: var(--sp-8);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.logo-construction-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 28px);
+  grid-template-rows: repeat(4, 28px);
+  gap: 4px;
+  position: relative;
+}
+.logo-construction-cell {
+  width: 28px; height: 28px;
+  border: 1px dashed var(--ink-4);
+  border-radius: 2px;
+  position: relative;
+}
+.logo-construction-cell.lit {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.logo-construction-cell.path {
+  background: rgba(79, 124, 255, 0.15);
+  border-color: rgba(79, 124, 255, 0.3);
+}
+.logo-construction-info {
+  flex: 1;
+  min-width: 240px;
+}
+.logo-construction-info h4 {
+  font-family: var(--font-display);
+  font-size: var(--tx-h4);
+  margin: 0 0 var(--sp-2);
+  color: var(--ink-9);
+}
+.logo-construction-info p {
+  margin: 0 0 var(--sp-3);
+  color: var(--ink-7);
+  font-size: var(--tx-body);
+}
+.logo-construction-info ul {
+  margin: 0;
+  padding-left: var(--sp-5);
+  color: var(--ink-7);
+  font-size: var(--tx-body);
+}
+.logo-construction-info li { margin-bottom: var(--sp-1); }
+
+/* === COLOR === */
+.swatch-row {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  gap: 0;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  margin-bottom: var(--sp-3);
+}
+.swatch-cell {
+  height: 80px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  transition: transform var(--d-hover) var(--ease-out-quint);
+}
+.swatch-cell:hover { transform: translateY(-4px) scale(1.02); z-index: 1; box-shadow: var(--shadow-md); }
+.swatch-cell-light { color: rgba(255,255,255,0.85); }
+.swatch-cell-dark  { color: rgba(0,0,0,0.65); }
+
+.color-blocks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--sp-3);
+  margin-top: var(--sp-6);
+}
+.color-block {
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--d-hover) var(--ease-out-quint);
+}
+.color-block:hover { border-color: var(--ink-5); transform: translateY(-2px); }
+.color-block-stage {
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  font-weight: 600;
+}
+.color-block-info {
+  padding: var(--sp-3) var(--sp-4);
+}
+.color-block-name {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-9);
+  font-weight: 600;
+}
+.color-block-hex {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  margin-top: 2px;
+}
+.color-block-role {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-6);
+  margin-top: var(--sp-1);
+  line-height: 1.3;
+}
+.color-copy-toast {
+  position: fixed;
+  bottom: var(--sp-6);
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  padding: var(--sp-3) var(--sp-5);
+  background: var(--ink-2);
+  border: 1px solid var(--ink-4);
+  color: var(--ink-9);
+  border-radius: var(--r-full);
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  opacity: 0;
+  transition: all var(--d-hover) var(--ease-out-quint);
+  pointer-events: none;
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+}
+.color-copy-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* === TYPOGRAPHY === */
+.type-spec {
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  padding: var(--sp-8);
+  margin-bottom: var(--sp-3);
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: var(--sp-6);
+  align-items: baseline;
+}
+.type-spec-text {
+  font-family: var(--font-display);
+  color: var(--ink-9);
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--lh-tight);
+}
+.type-spec-meta {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  text-align: right;
+  line-height: var(--lh-loose);
+}
+.type-spec-meta strong { color: var(--ink-8); display: block; font-weight: 600; }
+
+.type-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-8);
+}
+.type-pair-card {
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  padding: var(--sp-6);
+}
+.type-pair-card h4 {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  margin: 0 0 var(--sp-2);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.type-pair-sample {
+  font-size: 56px;
+  line-height: 1;
+  margin: var(--sp-4) 0;
+  color: var(--ink-9);
+}
+.type-pair-card.display .type-pair-sample { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; }
+.type-pair-card.mono .type-pair-sample { font-family: var(--font-mono); }
+.type-pair-card p {
+  margin: 0;
+  font-size: var(--tx-body);
+  color: var(--ink-7);
+  line-height: var(--lh-normal);
+}
+
+/* === ICONS === */
+.icons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--sp-3);
+}
+.icon-tile {
+  aspect-ratio: 1;
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  color: var(--ink-8);
+  transition: all var(--d-hover) var(--ease-out-quint);
+}
+.icon-tile:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.icon-tile svg { width: 28px; height: 28px; }
+.icon-tile-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-6);
+}
+
+/* === GRID + SPACING === */
+.spacing-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-6);
+  flex-wrap: wrap;
+}
+.spacing-block {
+  background: var(--primary-soft);
+  border: 1px solid var(--primary);
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--primary);
+}
+.grid-overlay {
+  position: relative;
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  padding: var(--sp-8);
+  min-height: 200px;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0, transparent 7px, rgba(79, 124, 255, 0.06) 7px, rgba(79, 124, 255, 0.06) 8px),
+    repeating-linear-gradient(90deg, transparent 0, transparent 7px, rgba(79, 124, 255, 0.06) 7px, rgba(79, 124, 255, 0.06) 8px);
+}
+.grid-overlay-info {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-7);
+  line-height: var(--lh-loose);
+}
+.grid-overlay-info strong { color: var(--ink-9); }
+
+/* === SHADOWS / RADIUS === */
+.shadow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-8);
+}
+.shadow-tile {
+  background: var(--ink-2);
+  border-radius: var(--r-lg);
+  padding: var(--sp-8) var(--sp-5);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-7);
+}
+.shadow-tile strong {
+  display: block;
+  color: var(--ink-9);
+  margin-bottom: var(--sp-1);
+}
+.shadow-tile.sm    { box-shadow: var(--shadow-sm); }
+.shadow-tile.md    { box-shadow: var(--shadow-md); }
+.shadow-tile.lg    { box-shadow: var(--shadow-lg); }
+.shadow-tile.xl    { box-shadow: var(--shadow-xl); }
+.shadow-tile.glow-blue   { box-shadow: var(--glow-blue); border: 1px solid var(--primary); }
+.shadow-tile.glow-violet { box-shadow: var(--glow-violet); border: 1px solid var(--accent); }
+
+.radii-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--sp-3);
+}
+.radius-tile {
+  background: var(--ink-2);
+  border: 1px solid var(--ink-4);
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-7);
+}
+.radius-tile strong { color: var(--ink-9); }
+
+/* === VOICE === */
+.voice-principles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-8);
+}
+.voice-card {
+  padding: var(--sp-6);
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+}
+.voice-card-num {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--primary);
+  margin-bottom: var(--sp-2);
+}
+.voice-card-name {
+  font-family: var(--font-display);
+  font-size: var(--tx-h4);
+  font-weight: 600;
+  color: var(--ink-9);
+  margin: 0 0 var(--sp-2);
+}
+.voice-card-desc {
+  font-size: var(--tx-body);
+  color: var(--ink-7);
+  margin: 0;
+}
+
+.do-dont {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+.dd-card {
+  padding: var(--sp-4) var(--sp-5);
+  border-radius: var(--r-md);
+  border: 1px solid;
+  font-size: var(--tx-body);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+}
+.dd-card.do  { border-color: var(--success); background: var(--success-soft); color: var(--ink-9); }
+.dd-card.dont{ border-color: var(--error); background: var(--error-soft); color: var(--ink-9); }
+.dd-card-icon {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--success);
+}
+.dd-card.dont .dd-card-icon { color: var(--error); }
+.dd-card-text small {
+  display: block;
+  margin-top: var(--sp-1);
+  color: var(--ink-6);
+  font-size: var(--tx-caption);
+}
+
+/* === MOTION === */
+.motion-easings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-8);
+}
+.motion-tile {
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  padding: var(--sp-5);
+  cursor: pointer;
+}
+.motion-tile h4 {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-7);
+  margin: 0 0 var(--sp-2);
+  letter-spacing: 0.05em;
+}
+.motion-tile-name {
+  font-family: var(--font-display);
+  font-size: var(--tx-h4);
+  font-weight: 600;
+  color: var(--ink-9);
+  margin: 0 0 var(--sp-3);
+}
+.motion-track {
+  height: 32px;
+  background: var(--ink-0);
+  border-radius: var(--r-sm);
+  position: relative;
+  overflow: hidden;
+}
+.motion-dot {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 24px; height: 24px;
+  background: var(--primary);
+  border-radius: 50%;
+  box-shadow: var(--glow-blue);
+  margin-left: 4px;
+}
+.motion-tile p {
+  margin: var(--sp-3) 0 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-6);
+}
+
+.motion-rules {
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  padding: var(--sp-6);
+}
+.motion-rules ol {
+  margin: 0;
+  padding-left: var(--sp-5);
+  color: var(--ink-7);
+  line-height: var(--lh-loose);
+}
+.motion-rules li { margin-bottom: var(--sp-2); }
+.motion-rules li strong { color: var(--ink-9); font-weight: 500; }
+
+/* === DECISIONS === */
+.decisions {
+  background: linear-gradient(135deg, var(--primary-soft), var(--accent-soft));
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-xl);
+  padding: var(--sp-10);
+}
+.decisions h3 {
+  font-family: var(--font-display);
+  font-size: var(--tx-h2);
+  margin: 0 0 var(--sp-4);
+  color: var(--ink-9);
+}
+.decisions ol {
+  counter-reset: dec;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.decisions li {
+  counter-increment: dec;
+  padding: var(--sp-4) 0;
+  border-bottom: 1px solid var(--ink-3);
+  position: relative;
+  padding-left: var(--sp-10);
+  color: var(--ink-7);
+}
+.decisions li:last-child { border-bottom: none; }
+.decisions li::before {
+  content: counter(dec, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: var(--sp-4);
+  font-family: var(--font-mono);
+  font-size: var(--tx-h4);
+  color: var(--primary);
+  font-weight: 600;
+}
+.decisions li strong {
+  display: block;
+  color: var(--ink-9);
+  margin-bottom: var(--sp-1);
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+/* === SCROLL PROGRESS === */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary);
+  transform-origin: 0 0;
+  transform: scaleX(0);
+  z-index: 200;
+  transition: transform 50ms linear;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 960px) {
+  .bs-layout { grid-template-columns: 1fr; }
+  .bs-sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--ink-3); }
+  .bs-main { padding: var(--sp-8) var(--sp-5); }
+  .logo-grid { grid-template-columns: 1fr; }
+  .type-pair { grid-template-columns: 1fr; }
+  .swatch-row { grid-template-columns: repeat(6, 1fr); }
+  .swatch-row .swatch-cell:nth-child(n+7) { display: none; }
+  .type-spec { grid-template-columns: 1fr; }
+  .type-spec-meta { text-align: left; }
+  .do-dont { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" data-scroll-progress></div>
+
+<div class="bs-layout">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="bs-sidebar">
+    <div class="bs-brand">
+      <div class="bs-brand-mark"></div>
+      <div class="bs-brand-text">autopost<span>.</span></div>
+    </div>
+    <nav class="bs-nav" id="bsNav">
+      <a href="#identity" class="active"><span class="bs-nav-num">01</span><span data-i18n="bs.s.identity">Identidad</span></a>
+      <a href="#logo"><span class="bs-nav-num">02</span><span data-i18n="bs.s.logo">Logo</span></a>
+      <a href="#color"><span class="bs-nav-num">03</span><span data-i18n="bs.s.color">Color</span></a>
+      <a href="#type"><span class="bs-nav-num">04</span><span data-i18n="bs.s.type">Tipografía</span></a>
+      <a href="#icons"><span class="bs-nav-num">05</span><span data-i18n="bs.s.icons">Iconografía</span></a>
+      <a href="#grid"><span class="bs-nav-num">06</span><span data-i18n="bs.s.grid">Grid + Spacing</span></a>
+      <a href="#shadow"><span class="bs-nav-num">07</span><span data-i18n="bs.s.shadow">Sombras + Radii</span></a>
+      <a href="#voice"><span class="bs-nav-num">08</span><span data-i18n="bs.s.voice">Voz y tono</span></a>
+      <a href="#motion"><span class="bs-nav-num">09</span><span data-i18n="bs.s.motion">Motion</span></a>
+    </nav>
+    <div class="bs-sidebar-footer">
+      <button class="bs-toggle" data-locale-toggle aria-label="Cambiar idioma">ES</button>
+      <button class="bs-toggle" data-theme-toggle aria-label="Cambiar tema">◐</button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="bs-main">
+    <header class="bs-section">
+      <div class="bs-section-head"><span class="bs-section-num">BRAND SYSTEM · v1.0 · 2026</span></div>
+      <h1 class="bs-section-title" data-i18n="bs.title">Sistema de marca</h1>
+      <p class="bs-section-sub" data-i18n="bs.sub">Identidad, voz, tipografía, color, motion. Un único documento navegable. Click cualquier color para copiarlo.</p>
+    </header>
+
+    <!-- ============ 01 IDENTITY ============ -->
+    <section class="bs-section" id="identity">
+      <div class="bs-section-head"><span class="bs-section-num">01 · IDENTITY</span></div>
+      <h2 class="bs-section-title" data-i18n="bs.s.identity">Identidad</h2>
+      <p class="bs-section-sub">Naming, posicionamiento, taglines. Lo que define qué somos antes de tocar pixel.</p>
+
+      <div class="id-card in-view">
+        <h3 class="id-naming">autopost<span class="id-naming-dot">.</span></h3>
+        <p class="id-meaning">La <strong>mesa de control invisible</strong> que convierte un caos de assets en un calendario que se publica solo. Linear gestionó el caos del software; Autopost gestiona el caos del contenido.</p>
+      </div>
+
+      <div class="taglines stagger">
+        <div class="tagline in-view">
+          <div class="tagline-id">A · ES</div>
+          <div class="tagline-text">"El calendario que se monta solo."<small>EN: "The calendar that builds itself."</small></div>
+          <div class="tagline-status">v1</div>
+        </div>
+        <div class="tagline in-view">
+          <div class="tagline-id">B · ES</div>
+          <div class="tagline-text">"Publicar dejó de ser tu problema."<small>EN: "Publishing stopped being your problem."</small></div>
+          <div class="tagline-status">v2</div>
+        </div>
+        <div class="tagline winner in-view">
+          <div class="tagline-id">★ ES</div>
+          <div class="tagline-text">"Tira la carpeta. El resto va solo."<small>EN: "Drop the folder. The rest is automatic."</small></div>
+          <div class="tagline-status">WINNER</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 02 LOGO ============ -->
+    <section class="bs-section" id="logo">
+      <div class="bs-section-head"><span class="bs-section-num">02 · LOGO</span></div>
+      <h2 class="bs-section-title" data-i18n="bs.s.logo">Logo</h2>
+      <p class="bs-section-sub">Wordmark monoespaciado + isotipo geométrico. Tres versiones, una construcción.</p>
+
+      <div class="logo-grid">
+        <div class="logo-stage in-view" data-bg="dark">
+          <span class="logo-stage-label">Full color · dark bg</span>
+          <div class="logomark">
+            <div class="logomark-iso">
+              <div class="logomark-cell lit"></div><div class="logomark-cell"></div><div class="logomark-cell"></div><div class="logomark-cell"></div>
+              <div class="logomark-cell"></div><div class="logomark-cell path"></div><div class="logomark-cell"></div><div class="logomark-cell"></div>
+              <div class="logomark-cell"></div><div class="logomark-cell"></div><div class="logomark-cell path"></div><div class="logomark-cell"></div>
+              <div class="logomark-cell"></div><div class="logomark-cell"></div><div class="logomark-cell"></div><div class="logomark-cell lit"></div>
+            </div>
+            <div class="logomark-text">autopost<span class="logomark-text-dot">.</span></div>
+          </div>
+        </div>
+        <div class="logo-stage in-view" data-bg="white">
+          <span class="logo-stage-label">Mono · light bg</span>
+          <div class="logomark mono-dark">
+            <div class="logomark-iso">
+              <div class="logomark-cell lit"></div><div class="logomark-cell"></div><div class="logomark-cell"></div><div class="logomark-cell"></div>
+              <div class="logomark-cell"></div><div class="logomark-cell path"></div><div class="logomark-cell"></div><div class="logomark-cell"></div>
+              <div class="logomark-cell"></div><div class="logomark-cell"></div><div class="logomark-cell path"></div><div class="logomark-cell"></div>
+              <div class="logomark-cell"></div><div class="logomark-cell"></div><div class="logomark-cell"></div><div class="logomark-cell lit"></div>
+            </div>
+            <div class="logomark-text">autopost<span class="logomark-text-dot">.</span></div>
+          </div>
+        </div>
+        <div class="logo-stage in-view" data-bg="primary">
+          <span class="logo-stage-label">Mono · brand bg</span>
+          <div class="logomark mono-light">
+            <div class="logomark-iso">
+              <div class="logomark-cell lit"></div><div class="logomark-cell"></div><div class="logomark-cell"></div><div class="logomark-cell"></div>
+              <div class="logomark-cell"></div><div class="logomark-cell path"></div><div class="logomark-cell"></div><div class="logomark-cell"></div>
+              <div class="logomark-cell"></div><div class="logomark-cell"></div><div class="logomark-cell path"></div><div class="logomark-cell"></div>
+              <div class="logomark-cell"></div><div class="logomark-cell"></div><div class="logomark-cell"></div><div class="logomark-cell lit"></div>
+            </div>
+            <div class="logomark-text">autopost<span class="logomark-text-dot">.</span></div>
+          </div>
+        </div>
+        <div class="logo-stage in-view" data-bg="dark">
+          <span class="logo-stage-label">Isotype solo · 64px</span>
+          <div class="logomark-iso" style="grid-template-columns:repeat(4,18px);grid-template-rows:repeat(4,18px);gap:3px">
+            <div class="logomark-cell lit" style="width:18px;height:18px"></div><div class="logomark-cell" style="width:18px;height:18px"></div><div class="logomark-cell" style="width:18px;height:18px"></div><div class="logomark-cell" style="width:18px;height:18px"></div>
+            <div class="logomark-cell" style="width:18px;height:18px"></div><div class="logomark-cell path" style="width:18px;height:18px"></div><div class="logomark-cell" style="width:18px;height:18px"></div><div class="logomark-cell" style="width:18px;height:18px"></div>
+            <div class="logomark-cell" style="width:18px;height:18px"></div><div class="logomark-cell" style="width:18px;height:18px"></div><div class="logomark-cell path" style="width:18px;height:18px"></div><div class="logomark-cell" style="width:18px;height:18px"></div>
+            <div class="logomark-cell" style="width:18px;height:18px"></div><div class="logomark-cell" style="width:18px;height:18px"></div><div class="logomark-cell" style="width:18px;height:18px"></div><div class="logomark-cell lit" style="width:18px;height:18px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="logo-construction in-view">
+        <div class="logo-construction-grid">
+          <div class="logo-construction-cell lit"></div><div class="logo-construction-cell"></div><div class="logo-construction-cell"></div><div class="logo-construction-cell"></div>
+          <div class="logo-construction-cell"></div><div class="logo-construction-cell path"></div><div class="logo-construction-cell"></div><div class="logo-construction-cell"></div>
+          <div class="logo-construction-cell"></div><div class="logo-construction-cell"></div><div class="logo-construction-cell path"></div><div class="logo-construction-cell"></div>
+          <div class="logo-construction-cell"></div><div class="logo-construction-cell"></div><div class="logo-construction-cell"></div><div class="logo-construction-cell lit"></div>
+        </div>
+        <div class="logo-construction-info">
+          <h4>Construcción geométrica</h4>
+          <p>Grid 4×4. Cursor azul viaja desde la celda "caos" (sup-izq) hasta "lunes 9:00" (inf-der), formando una flecha "→" implícita. Dos celdas intermedias en azul-soft sugieren el path de la IA.</p>
+          <ul>
+            <li>Ratio 1:1 · safe area = 1 celda</li>
+            <li>Tamaño mínimo isotipo: 16px</li>
+            <li>Gap entre wordmark e isotipo: 1.5× altura del wordmark</li>
+            <li>El wordmark NUNCA va sin el punto final</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 03 COLOR ============ -->
+    <section class="bs-section" id="color">
+      <div class="bs-section-head"><span class="bs-section-num">03 · COLOR</span></div>
+      <h2 class="bs-section-title" data-i18n="bs.s.color">Color</h2>
+      <p class="bs-section-sub">Escala de neutros calibrada para dark-first + azul eléctrico (operación) + violeta (IA). Click cualquier swatch para copiar el hex.</p>
+
+      <h3 class="tx-h4 tx-bright" style="margin-bottom:var(--sp-3)">Ink scale · 11 pasos</h3>
+      <div class="swatch-row in-view">
+        <div class="swatch-cell swatch-cell-light" style="background:#08080A" data-hex="#08080A">ink-0</div>
+        <div class="swatch-cell swatch-cell-light" style="background:#0E0E12" data-hex="#0E0E12">ink-1</div>
+        <div class="swatch-cell swatch-cell-light" style="background:#14141A" data-hex="#14141A">ink-2</div>
+        <div class="swatch-cell swatch-cell-light" style="background:#1C1C24" data-hex="#1C1C24">ink-3</div>
+        <div class="swatch-cell swatch-cell-light" style="background:#2A2A36" data-hex="#2A2A36">ink-4</div>
+        <div class="swatch-cell swatch-cell-light" style="background:#3D3D4D" data-hex="#3D3D4D">ink-5</div>
+        <div class="swatch-cell swatch-cell-light" style="background:#6B6B80" data-hex="#6B6B80">ink-6</div>
+        <div class="swatch-cell swatch-cell-dark" style="background:#A8A8BD" data-hex="#A8A8BD">ink-7</div>
+        <div class="swatch-cell swatch-cell-dark" style="background:#D6D6E0" data-hex="#D6D6E0">ink-8</div>
+        <div class="swatch-cell swatch-cell-dark" style="background:#F4F4F8" data-hex="#F4F4F8">ink-9</div>
+        <div class="swatch-cell swatch-cell-dark" style="background:#FFFFFF" data-hex="#FFFFFF">ink-10</div>
+      </div>
+
+      <h3 class="tx-h4 tx-bright" style="margin-top:var(--sp-10);margin-bottom:var(--sp-3)">Brand</h3>
+      <div class="color-blocks stagger">
+        <div class="color-block in-view" data-hex="#4F7CFF">
+          <div class="color-block-stage" style="background:#4F7CFF;color:#fff;box-shadow:inset 0 0 64px rgba(0,0,0,0.2)">primary</div>
+          <div class="color-block-info">
+            <span class="color-block-name">--primary</span>
+            <span class="color-block-hex">#4F7CFF</span>
+            <span class="color-block-role">Color "GO/publicado/ejecutado". CTAs principales.</span>
+          </div>
+        </div>
+        <div class="color-block in-view" data-hex="#3B5FCF">
+          <div class="color-block-stage" style="background:#3B5FCF;color:#fff">primary-dim</div>
+          <div class="color-block-info">
+            <span class="color-block-name">--primary-dim</span>
+            <span class="color-block-hex">#3B5FCF</span>
+            <span class="color-block-role">Hover state del primary. Active = dim aún más.</span>
+          </div>
+        </div>
+        <div class="color-block in-view" data-hex="#A855F7">
+          <div class="color-block-stage" style="background:#A855F7;color:#fff;box-shadow:inset 0 0 64px rgba(0,0,0,0.2)">accent</div>
+          <div class="color-block-info">
+            <span class="color-block-name">--accent</span>
+            <span class="color-block-hex">#A855F7</span>
+            <span class="color-block-role">Reservado <strong>exclusivamente</strong> para momentos IA.</span>
+          </div>
+        </div>
+        <div class="color-block in-view" data-hex="#8B3FD9">
+          <div class="color-block-stage" style="background:#8B3FD9;color:#fff">accent-dim</div>
+          <div class="color-block-info">
+            <span class="color-block-name">--accent-dim</span>
+            <span class="color-block-hex">#8B3FD9</span>
+            <span class="color-block-role">Hover de IA-CTAs.</span>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="tx-h4 tx-bright" style="margin-top:var(--sp-10);margin-bottom:var(--sp-3)">Semantic</h3>
+      <div class="color-blocks stagger">
+        <div class="color-block in-view" data-hex="#4ADE80">
+          <div class="color-block-stage" style="background:#4ADE80;color:#08080A">success</div>
+          <div class="color-block-info">
+            <span class="color-block-name">--success</span>
+            <span class="color-block-hex">#4ADE80</span>
+            <span class="color-block-role">Publicado · conexión OK.</span>
+          </div>
+        </div>
+        <div class="color-block in-view" data-hex="#FBBF24">
+          <div class="color-block-stage" style="background:#FBBF24;color:#08080A">warning</div>
+          <div class="color-block-info">
+            <span class="color-block-name">--warning</span>
+            <span class="color-block-hex">#FBBF24</span>
+            <span class="color-block-role">Token expirando · revisar borrador.</span>
+          </div>
+        </div>
+        <div class="color-block in-view" data-hex="#F87171">
+          <div class="color-block-stage" style="background:#F87171;color:#08080A">error</div>
+          <div class="color-block-info">
+            <span class="color-block-name">--error</span>
+            <span class="color-block-hex">#F87171</span>
+            <span class="color-block-role">Falló publicación · token revocado.</span>
+          </div>
+        </div>
+        <div class="color-block in-view" data-hex="#60A5FA">
+          <div class="color-block-stage" style="background:#60A5FA;color:#08080A">info</div>
+          <div class="color-block-info">
+            <span class="color-block-name">--info</span>
+            <span class="color-block-hex">#60A5FA</span>
+            <span class="color-block-role">Notificaciones, tooltips.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 04 TYPE ============ -->
+    <section class="bs-section" id="type">
+      <div class="bs-section-head"><span class="bs-section-num">04 · TYPE</span></div>
+      <h2 class="bs-section-title" data-i18n="bs.s.type">Tipografía</h2>
+      <p class="bs-section-sub">Geist Sans + Geist Mono. Si no carga, fallback a Inter + JetBrains Mono. Display generosa, mono para datos.</p>
+
+      <div class="type-pair">
+        <div class="type-pair-card display in-view">
+          <h4>Display + Body — Geist Sans (fallback Inter)</h4>
+          <div class="type-pair-sample">Aa</div>
+          <p>Vercel-grade. Cuadrada en pesos altos pero abierta — autoridad sin frialdad. Pesos 400 / 500 / 600 / 700.</p>
+        </div>
+        <div class="type-pair-card mono in-view">
+          <h4>Mono — Geist Mono (fallback JetBrains Mono)</h4>
+          <div class="type-pair-sample">{ }</div>
+          <p>Datos, status, timestamps, hex codes. Aporta densidad técnica sin caer en pixel-art retro.</p>
+        </div>
+      </div>
+
+      <h3 class="tx-h4 tx-bright" style="margin-bottom:var(--sp-3)">Escala modular</h3>
+      <div class="type-spec in-view">
+        <p class="type-spec-text" style="font-size:72px">Tira la carpeta.</p>
+        <div class="type-spec-meta"><strong>display-xl</strong>72 / 76<br>tracking -2%<br>weight 600</div>
+      </div>
+      <div class="type-spec in-view">
+        <p class="type-spec-text" style="font-size:56px">Tira la carpeta.</p>
+        <div class="type-spec-meta"><strong>display-lg</strong>56 / 60<br>tracking -1%<br>weight 600</div>
+      </div>
+      <div class="type-spec in-view">
+        <p class="type-spec-text" style="font-size:40px">Tira la carpeta.</p>
+        <div class="type-spec-meta"><strong>h1</strong>40 / 46<br>tracking -1%<br>weight 600</div>
+      </div>
+      <div class="type-spec in-view">
+        <p class="type-spec-text" style="font-size:32px;font-weight:600">Tira la carpeta.</p>
+        <div class="type-spec-meta"><strong>h2</strong>32 / 38<br>tracking 0<br>weight 600</div>
+      </div>
+      <div class="type-spec in-view">
+        <p class="type-spec-text" style="font-size:24px;font-weight:500">Tira la carpeta.</p>
+        <div class="type-spec-meta"><strong>h3</strong>24 / 30<br>tracking 0<br>weight 500</div>
+      </div>
+      <div class="type-spec in-view">
+        <p class="type-spec-text" style="font-size:18px;font-weight:400;line-height:1.5">Tira la carpeta. Sube imágenes, vídeos, copys. La IA detecta formato, sugiere hora y monta el calendario.</p>
+        <div class="type-spec-meta"><strong>body-lg</strong>18 / 28<br>tracking 0<br>weight 400</div>
+      </div>
+      <div class="type-spec in-view">
+        <p class="type-spec-text" style="font-size:15px;font-weight:400;line-height:1.6">Tira la carpeta. Sube imágenes, vídeos, copys. La IA detecta formato, sugiere hora y monta el calendario.</p>
+        <div class="type-spec-meta"><strong>body</strong>15 / 24<br>tracking 0<br>weight 400</div>
+      </div>
+      <div class="type-spec in-view">
+        <p class="type-spec-text" style="font-family:var(--font-mono);font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em">PUBLICADO · LUN 09:00</p>
+        <div class="type-spec-meta"><strong>caption / mono</strong>13 / 20<br>tracking +5%<br>uppercase opcional</div>
+      </div>
+    </section>
+
+    <!-- ============ 05 ICONS ============ -->
+    <section class="bs-section" id="icons">
+      <div class="bs-section-head"><span class="bs-section-num">05 · ICONS</span></div>
+      <h2 class="bs-section-title" data-i18n="bs.s.icons">Iconografía</h2>
+      <p class="bs-section-sub">Stroke 1.5 · esquinas 1px · terminaciones cuadradas. Set base de 28 iconos para cubrir nav, plataformas, acciones y feedback.</p>
+
+      <div class="icons-grid stagger">
+        <div class="icon-tile in-view"><i data-icon="folder"></i><span class="icon-tile-name">folder</span></div>
+        <div class="icon-tile in-view"><i data-icon="upload"></i><span class="icon-tile-name">upload</span></div>
+        <div class="icon-tile in-view"><i data-icon="calendar"></i><span class="icon-tile-name">calendar</span></div>
+        <div class="icon-tile in-view"><i data-icon="sparkle"></i><span class="icon-tile-name">sparkle</span></div>
+        <div class="icon-tile in-view"><i data-icon="chevron"></i><span class="icon-tile-name">chevron</span></div>
+        <div class="icon-tile in-view"><i data-icon="check"></i><span class="icon-tile-name">check</span></div>
+        <div class="icon-tile in-view"><i data-icon="arrow"></i><span class="icon-tile-name">arrow</span></div>
+        <div class="icon-tile in-view"><i data-icon="settings"></i><span class="icon-tile-name">settings</span></div>
+        <div class="icon-tile in-view"><i data-icon="instagram"></i><span class="icon-tile-name">instagram</span></div>
+        <div class="icon-tile in-view"><i data-icon="tiktok"></i><span class="icon-tile-name">tiktok</span></div>
+        <div class="icon-tile in-view"><i data-icon="x"></i><span class="icon-tile-name">x</span></div>
+        <div class="icon-tile in-view"><i data-icon="linkedin"></i><span class="icon-tile-name">linkedin</span></div>
+        <div class="icon-tile in-view"><i data-icon="youtube"></i><span class="icon-tile-name">youtube</span></div>
+        <div class="icon-tile in-view"><i data-icon="threads"></i><span class="icon-tile-name">threads</span></div>
+        <div class="icon-tile in-view"><i data-icon="facebook"></i><span class="icon-tile-name">facebook</span></div>
+        <div class="icon-tile in-view"><i data-icon="grid"></i><span class="icon-tile-name">grid</span></div>
+        <div class="icon-tile in-view"><i data-icon="chart"></i><span class="icon-tile-name">chart</span></div>
+        <div class="icon-tile in-view"><i data-icon="play"></i><span class="icon-tile-name">play</span></div>
+        <div class="icon-tile in-view"><i data-icon="image"></i><span class="icon-tile-name">image</span></div>
+        <div class="icon-tile in-view"><i data-icon="video"></i><span class="icon-tile-name">video</span></div>
+        <div class="icon-tile in-view"><i data-icon="clock"></i><span class="icon-tile-name">clock</span></div>
+        <div class="icon-tile in-view"><i data-icon="eye"></i><span class="icon-tile-name">eye</span></div>
+        <div class="icon-tile in-view"><i data-icon="heart"></i><span class="icon-tile-name">heart</span></div>
+        <div class="icon-tile in-view"><i data-icon="user"></i><span class="icon-tile-name">user</span></div>
+        <div class="icon-tile in-view"><i data-icon="bell"></i><span class="icon-tile-name">bell</span></div>
+        <div class="icon-tile in-view"><i data-icon="search"></i><span class="icon-tile-name">search</span></div>
+        <div class="icon-tile in-view"><i data-icon="plus"></i><span class="icon-tile-name">plus</span></div>
+        <div class="icon-tile in-view"><i data-icon="close"></i><span class="icon-tile-name">close</span></div>
+      </div>
+    </section>
+
+    <!-- ============ 06 GRID + SPACING ============ -->
+    <section class="bs-section" id="grid">
+      <div class="bs-section-head"><span class="bs-section-num">06 · GRID + SPACING</span></div>
+      <h2 class="bs-section-title" data-i18n="bs.s.grid">Grid + Spacing</h2>
+      <p class="bs-section-sub">Escala 4/8 base. 12-col fluid grid hasta 1200px. Pulsa <kbd style="font-family:var(--font-mono);background:var(--ink-2);padding:2px 6px;border-radius:4px;border:1px solid var(--ink-4)">G</kbd> para activar el overlay.</p>
+
+      <h3 class="tx-h4 tx-bright" style="margin-bottom:var(--sp-3)">Spacing tokens</h3>
+      <div class="spacing-row in-view">
+        <div class="spacing-block" style="width:4px;height:32px">4</div>
+        <div class="spacing-block" style="width:8px;height:32px">8</div>
+        <div class="spacing-block" style="width:12px;height:32px">12</div>
+        <div class="spacing-block" style="width:16px;height:32px">16</div>
+        <div class="spacing-block" style="width:24px;height:32px">24</div>
+        <div class="spacing-block" style="width:32px;height:32px">32</div>
+        <div class="spacing-block" style="width:48px;height:32px">48</div>
+        <div class="spacing-block" style="width:64px;height:32px">64</div>
+        <div class="spacing-block" style="width:96px;height:32px">96</div>
+        <div class="spacing-block" style="width:128px;height:32px">128</div>
+      </div>
+
+      <h3 class="tx-h4 tx-bright" style="margin-top:var(--sp-8);margin-bottom:var(--sp-3)">Baseline grid</h3>
+      <div class="grid-overlay in-view">
+        <div class="grid-overlay-info">
+          <strong>8px baseline grid</strong><br>
+          Toda altura de línea, padding y margin es múltiplo de 4 o 8. Esto garantiza ritmo vertical entre componentes sin tener que pensar en cada decisión.<br><br>
+          <strong>Container:</strong> max-width 1200px · padding lateral 24px (mobile) / 48px (desktop).<br>
+          <strong>Columnas:</strong> 12 fluid · gutter 24px.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 07 SHADOW + RADIUS ============ -->
+    <section class="bs-section" id="shadow">
+      <div class="bs-section-head"><span class="bs-section-num">07 · SHADOW + RADIUS</span></div>
+      <h2 class="bs-section-title" data-i18n="bs.s.shadow">Sombras + Radii</h2>
+      <p class="bs-section-sub">Sombras dark-aware (rgba negro puro, no warm). Glows reservados a brand y IA. Radios 4/8/12/16/24.</p>
+
+      <h3 class="tx-h4 tx-bright" style="margin-bottom:var(--sp-3)">Sombras</h3>
+      <div class="shadow-grid stagger">
+        <div class="shadow-tile sm in-view"><strong>shadow-sm</strong>botones, chips</div>
+        <div class="shadow-tile md in-view"><strong>shadow-md</strong>cards default</div>
+        <div class="shadow-tile lg in-view"><strong>shadow-lg</strong>modals, popovers</div>
+        <div class="shadow-tile xl in-view"><strong>shadow-xl</strong>hero stages</div>
+        <div class="shadow-tile glow-blue in-view"><strong>glow-blue</strong>CTA primario</div>
+        <div class="shadow-tile glow-violet in-view"><strong>glow-violet</strong>solo IA</div>
+      </div>
+
+      <h3 class="tx-h4 tx-bright" style="margin-top:var(--sp-8);margin-bottom:var(--sp-3)">Radios</h3>
+      <div class="radii-grid stagger">
+        <div class="radius-tile in-view" style="border-radius:4px"><strong>r-sm</strong>&nbsp;4px</div>
+        <div class="radius-tile in-view" style="border-radius:8px"><strong>r-md</strong>&nbsp;8px</div>
+        <div class="radius-tile in-view" style="border-radius:12px"><strong>r-lg</strong>&nbsp;12px</div>
+        <div class="radius-tile in-view" style="border-radius:16px"><strong>r-xl</strong>&nbsp;16px</div>
+        <div class="radius-tile in-view" style="border-radius:24px"><strong>r-2xl</strong>&nbsp;24px</div>
+        <div class="radius-tile in-view" style="border-radius:9999px"><strong>r-full</strong>&nbsp;pill</div>
+      </div>
+    </section>
+
+    <!-- ============ 08 VOICE ============ -->
+    <section class="bs-section" id="voice">
+      <div class="bs-section-head"><span class="bs-section-num">08 · VOICE & TONE</span></div>
+      <h2 class="bs-section-title" data-i18n="bs.s.voice">Voz y tono</h2>
+      <p class="bs-section-sub">Cuatro principios. Seis ejemplos do/don't sobre microcopy real del producto.</p>
+
+      <div class="voice-principles stagger">
+        <div class="voice-card in-view">
+          <div class="voice-card-num">PRINCIPIO 01</div>
+          <h4 class="voice-card-name">Claro</h4>
+          <p class="voice-card-desc">Datos concretos, números reales, verbos específicos. Cero ambigüedad.</p>
+        </div>
+        <div class="voice-card in-view">
+          <div class="voice-card-num">PRINCIPIO 02</div>
+          <h4 class="voice-card-name">Directo</h4>
+          <p class="voice-card-desc">Imperativo cuando aplique. Frases cortas. Sin rodeos ni pre-amblos.</p>
+        </div>
+        <div class="voice-card in-view">
+          <div class="voice-card-num">PRINCIPIO 03</div>
+          <h4 class="voice-card-name">Sin hype</h4>
+          <p class="voice-card-desc">Cero "magic", "powered by AI", "revolucionario". Demostramos haciendo.</p>
+        </div>
+        <div class="voice-card in-view">
+          <div class="voice-card-num">PRINCIPIO 04</div>
+          <h4 class="voice-card-name">Operativo</h4>
+          <p class="voice-card-desc">El copy ayuda a tomar la siguiente acción. Si no, sobra.</p>
+        </div>
+      </div>
+
+      <h3 class="tx-h4 tx-bright" style="margin-bottom:var(--sp-3)">Do · Don't</h3>
+      <div class="do-dont">
+        <div class="dd-card do in-view"><span class="dd-card-icon">DO</span><span class="dd-card-text">"Carpeta procesada en 8.7s"<small>microcopy de toast post-upload</small></span></div>
+        <div class="dd-card dont in-view"><span class="dd-card-icon">DON'T</span><span class="dd-card-text">"Tu contenido ha sido optimizado"<small>vacío, no aporta dato</small></span></div>
+      </div>
+      <div class="do-dont">
+        <div class="dd-card do in-view"><span class="dd-card-icon">DO</span><span class="dd-card-text">"Conecta Instagram"<small>CTA de connection card</small></span></div>
+        <div class="dd-card dont in-view"><span class="dd-card-icon">DON'T</span><span class="dd-card-text">"Da el siguiente paso conectando tu cuenta"<small>relleno innecesario</small></span></div>
+      </div>
+      <div class="do-dont">
+        <div class="dd-card do in-view"><span class="dd-card-icon">DO</span><span class="dd-card-text">"IA detecta carruseles automáticamente"<small>bento card description</small></span></div>
+        <div class="dd-card dont in-view"><span class="dd-card-icon">DON'T</span><span class="dd-card-text">"Magia powered by AI revolucionaria"<small>todo lo que evitamos</small></span></div>
+      </div>
+      <div class="do-dont">
+        <div class="dd-card do in-view"><span class="dd-card-icon">DO</span><span class="dd-card-text">"3 publicaciones · martes 14:00"<small>resumen de plan en dashboard</small></span></div>
+        <div class="dd-card dont in-view"><span class="dd-card-icon">DON'T</span><span class="dd-card-text">"Tu calendario está listo para brillar"<small>florituras vacías</small></span></div>
+      </div>
+      <div class="do-dont">
+        <div class="dd-card do in-view"><span class="dd-card-icon">DO</span><span class="dd-card-text">"Token expira en 7 días"<small>warning state en connections</small></span></div>
+        <div class="dd-card dont in-view"><span class="dd-card-icon">DON'T</span><span class="dd-card-text">"¡Atención! Acción requerida pronto"<small>alarmismo sin info útil</small></span></div>
+      </div>
+      <div class="do-dont">
+        <div class="dd-card do in-view"><span class="dd-card-icon">DO</span><span class="dd-card-text">"Sin posts esta semana — ¿subes una carpeta?"<small>empty state del calendario</small></span></div>
+        <div class="dd-card dont in-view"><span class="dd-card-icon">DON'T</span><span class="dd-card-text">"¡Vaya! Aquí no hay nada todavía"<small>vacío, no propone acción</small></span></div>
+      </div>
+    </section>
+
+    <!-- ============ 09 MOTION ============ -->
+    <section class="bs-section" id="motion">
+      <div class="bs-section-head"><span class="bs-section-num">09 · MOTION</span></div>
+      <h2 class="bs-section-title" data-i18n="bs.s.motion">Motion</h2>
+      <p class="bs-section-sub">Tres easings, cuatro duraciones. Cada animación cuenta cómo se ordena el contenido — no decora. Click cualquier track para reproducir.</p>
+
+      <div class="motion-easings stagger">
+        <div class="motion-tile in-view" data-easing="cubic-bezier(0.16, 1, 0.3, 1)" data-duration="800">
+          <h4>EASE 01</h4>
+          <h3 class="motion-tile-name">out-quint</h3>
+          <div class="motion-track"><div class="motion-dot"></div></div>
+          <p>cubic-bezier(0.16, 1, 0.3, 1) · entrance · 400-800ms</p>
+        </div>
+        <div class="motion-tile in-view" data-easing="cubic-bezier(0.65, 0, 0.35, 1)" data-duration="500">
+          <h4>EASE 02</h4>
+          <h3 class="motion-tile-name">in-out-cubic</h3>
+          <div class="motion-track"><div class="motion-dot"></div></div>
+          <p>cubic-bezier(0.65, 0, 0.35, 1) · transitions · 200-500ms</p>
+        </div>
+        <div class="motion-tile in-view" data-easing="cubic-bezier(0.34, 1.56, 0.64, 1)" data-duration="500">
+          <h4>EASE 03</h4>
+          <h3 class="motion-tile-name">out-back-soft</h3>
+          <div class="motion-track"><div class="motion-dot"></div></div>
+          <p>cubic-bezier(0.34, 1.56, 0.64, 1) · micro-feedback · 200-500ms</p>
+        </div>
+      </div>
+
+      <h3 class="tx-h4 tx-bright" style="margin-bottom:var(--sp-3)">Cinco reglas</h3>
+      <div class="motion-rules in-view">
+        <ol>
+          <li><strong>Solo transform y opacity.</strong> Nunca top/left/width/height. Eso garantiza 60fps.</li>
+          <li><strong>Duración por jerarquía.</strong> 120ms feedback · 200ms hover · 400ms entrance · 800ms story.</li>
+          <li><strong>Stagger 80ms entre hijos.</strong> Suficiente para sentir orden, no tanto como para esperar.</li>
+          <li><strong>El motion comunica función.</strong> Si quitas la animación y la información sigue clara, sobraba.</li>
+          <li><strong>prefers-reduced-motion respetado.</strong> Entrance OFF, transitions &lt; 120ms. Sin excepciones.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ DECISIONS ============ -->
+    <section class="bs-section" id="decisions">
+      <div class="bs-section-head"><span class="bs-section-num">+ DECISIONS</span></div>
+      <h2 class="bs-section-title">Cinco decisiones no obvias</h2>
+      <p class="bs-section-sub">Lo que no se ve a primera vista pero condiciona todo el sistema.</p>
+
+      <div class="decisions in-view">
+        <ol>
+          <li><strong>Violeta exclusivo IA, jamás como decoración.</strong>El #A855F7 sólo aparece en sparkle, sugerencias IA y el "AI Draft" del dashboard. Nunca en CTAs no-IA, nunca en banners, nunca en footer. Eso convierte el violeta en lenguaje funcional, no estético.</li>
+          <li><strong>El wordmark siempre lleva punto.</strong>"autopost." con el punto azul. El punto significa "publicado/done". Sin él, el wordmark queda incompleto — es parte del mark, no de la frase.</li>
+          <li><strong>Inks con tinte +5° hacia el azul.</strong>Los neutros no son grises puros (R=G=B). Tienen un tinte +5° hacia el blue que los hace conviv mejor con #4F7CFF y evita que el dark se vea "marrón" en pantallas OLED.</li>
+          <li><strong>Geist como display Y body, sin pareja serif.</strong>Una sola familia. Más coherente, menos peso de fuentes, mejor performance. El contraste lo da Geist Mono para datos y status.</li>
+          <li><strong>Glow solo en momentos justificados.</strong>--glow-blue en el CTA principal del hero. --glow-violet sólo en outputs IA. En el resto del producto: cero glow. El glow es un recurso caro — usarlo en todas partes lo banaliza.</li>
+        </ol>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="color-copy-toast" id="copyToast">Copiado al portapapeles</div>
+
+<script src="assets/icons.js"></script>
+<script src="assets/i18n.js"></script>
+<script src="assets/motion.js"></script>
+<script>
+(function () {
+  // === ACTIVE NAV TRACKING ===
+  const links = document.querySelectorAll('#bsNav a');
+  const sections = Array.from(links).map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => observer.observe(s));
+
+  // === COPY HEX ON CLICK ===
+  const toast = document.getElementById('copyToast');
+  let toastTimeout;
+  function showToast(text) {
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => toast.classList.remove('show'), 1600);
+  }
+  function copyHex(hex) {
+    navigator.clipboard.writeText(hex).then(() => showToast(hex + ' · copiado'));
+  }
+  document.querySelectorAll('[data-hex]').forEach(el => {
+    el.addEventListener('click', () => copyHex(el.getAttribute('data-hex')));
+  });
+
+  // === GRID OVERLAY (G) ===
+  let gridActive = false;
+  document.addEventListener('keydown', (e) => {
+    if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+    if (e.key === 'g' || e.key === 'G') {
+      gridActive = !gridActive;
+      document.body.style.backgroundImage = gridActive
+        ? 'repeating-linear-gradient(0deg, transparent 0, transparent 7px, rgba(79,124,255,0.06) 7px, rgba(79,124,255,0.06) 8px), repeating-linear-gradient(90deg, transparent 0, transparent 7px, rgba(79,124,255,0.06) 7px, rgba(79,124,255,0.06) 8px)'
+        : '';
+      showToast(gridActive ? 'Grid overlay ON' : 'Grid overlay OFF');
+    }
+  });
+
+  // === MOTION TILE PLAYBACK ===
+  document.querySelectorAll('.motion-tile').forEach((tile) => {
+    const dot = tile.querySelector('.motion-dot');
+    const easing = tile.getAttribute('data-easing');
+    const duration = parseInt(tile.getAttribute('data-duration'), 10);
+    let playing = false;
+    function play() {
+      if (playing) return;
+      playing = true;
+      dot.style.transition = `transform ${duration}ms ${easing}`;
+      const trackW = tile.querySelector('.motion-track').offsetWidth;
+      requestAnimationFrame(() => {
+        dot.style.transform = `translate(${trackW - 32}px, -50%)`;
+        setTimeout(() => {
+          dot.style.transition = `transform ${duration}ms ${easing}`;
+          dot.style.transform = `translateY(-50%)`;
+          setTimeout(() => { playing = false; }, duration);
+        }, duration + 200);
+      });
+    }
+    tile.addEventListener('click', play);
+    // Auto-play once on first reveal
+    const tileObs = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setTimeout(play, 300);
+          tileObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    tileObs.observe(tile);
+  });
+})();
+</script>
+</body>
+</html>

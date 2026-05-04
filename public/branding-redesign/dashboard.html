@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autopost · Dashboard</title>
+<meta name="description" content="Dashboard de Autopost. Sube, programa, publica.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/tokens.css">
+<style>
+body { overflow: hidden; }
+
+.dash {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  height: 100vh;
+}
+
+/* ============ SIDEBAR ============ */
+.dash-side {
+  background: var(--ink-1);
+  border-right: 1px solid var(--ink-3);
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-4);
+}
+.dash-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-6);
+}
+.dash-brand-mark {
+  width: 22px; height: 22px;
+  background: var(--primary);
+  border-radius: 4px;
+  position: relative;
+  flex-shrink: 0;
+}
+.dash-brand-mark::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  background: var(--ink-1);
+  border-radius: 1px;
+}
+.dash-brand-text {
+  font-family: var(--font-mono);
+  font-size: var(--tx-body);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--ink-9);
+}
+.dash-brand-text span { color: var(--primary); }
+
+.dash-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+.dash-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-md);
+  color: var(--ink-7);
+  text-decoration: none;
+  font-size: var(--tx-body);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  width: 100%;
+  border-left: 2px solid transparent;
+  transition: all var(--d-hover) var(--ease-out-quint);
+}
+.dash-nav-item:hover {
+  background: var(--ink-2);
+  color: var(--ink-9);
+  transform: translateX(4px);
+}
+.dash-nav-item.active {
+  background: var(--ink-2);
+  color: var(--ink-9);
+  border-left-color: var(--primary);
+}
+.dash-nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+.dash-nav-item .badge {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: 1px 6px;
+  border-radius: var(--r-full);
+}
+
+.dash-side-footer {
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--ink-3);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.dash-account {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: background var(--d-hover);
+}
+.dash-account:hover { background: var(--ink-2); }
+.dash-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  flex-shrink: 0;
+}
+.dash-account-name {
+  font-size: var(--tx-caption);
+  color: var(--ink-9);
+  font-weight: 500;
+  line-height: 1.2;
+}
+.dash-account-biz {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-6);
+}
+.dash-toggles { display: flex; gap: 2px; }
+.dash-toggle {
+  width: 28px; height: 28px;
+  background: transparent;
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-sm);
+  color: var(--ink-7);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--d-hover);
+}
+.dash-toggle:hover { color: var(--ink-9); border-color: var(--ink-5); }
+
+/* ============ MAIN ============ */
+.dash-main {
+  overflow-y: auto;
+  position: relative;
+}
+.view {
+  position: absolute;
+  inset: 0;
+  padding: var(--sp-8) var(--sp-10);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--d-hover), transform var(--d-hover) var(--ease-out-quint);
+  pointer-events: none;
+  overflow-y: auto;
+}
+.view.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.view-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-8);
+  padding-bottom: var(--sp-4);
+  border-bottom: 1px solid var(--ink-3);
+}
+.view-title {
+  font-family: var(--font-display);
+  font-size: var(--tx-h1);
+  font-weight: 600;
+  color: var(--ink-9);
+  margin: 0;
+  letter-spacing: var(--tracking-tight);
+}
+.view-sub {
+  font-size: var(--tx-body);
+  color: var(--ink-7);
+  margin: 4px 0 0;
+}
+.view-actions { display: flex; gap: var(--sp-2); }
+
+@media (max-width: 768px) {
+  .dash { grid-template-columns: 1fr; grid-template-rows: 60px 1fr; }
+  .dash-side { flex-direction: row; padding: var(--sp-2) var(--sp-3); align-items: center; gap: var(--sp-2); border-right: none; border-bottom: 1px solid var(--ink-3); }
+  .dash-brand { margin-bottom: 0; }
+  .dash-nav { flex-direction: row; flex: 1; overflow-x: auto; }
+  .dash-nav-item { padding: var(--sp-2); border-left: none; border-bottom: 2px solid transparent; }
+  .dash-nav-item.active { border-bottom-color: var(--primary); border-left: none; }
+  .dash-nav-item span { display: none; }
+  .dash-side-footer { flex-direction: row; padding: 0; border: none; }
+  .view { padding: var(--sp-4); }
+}
+
+/* ============ UPLOAD VIEW ============ */
+.upload-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: var(--sp-6);
+  height: calc(100% - 100px);
+}
+.dropzone {
+  background: var(--ink-1);
+  border: 2px dashed var(--ink-3);
+  border-radius: var(--r-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+  padding: var(--sp-12);
+  cursor: pointer;
+  transition: all var(--d-hover) var(--ease-out-quint);
+  position: relative;
+  overflow: hidden;
+  min-height: 380px;
+}
+.dropzone:hover, .dropzone.dragging {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, var(--primary-soft), transparent 70%);
+}
+.dropzone.dragging .dropzone-folder { transform: scale(1.1) rotateY(180deg); }
+.dropzone-folder {
+  width: 96px; height: 80px;
+  background: linear-gradient(135deg, var(--ink-3), var(--ink-2));
+  border: 1px solid var(--primary);
+  border-radius: 8px 14px 6px 6px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform var(--d-story) var(--ease-out-quint);
+  box-shadow: var(--glow-blue);
+}
+.dropzone-folder::before {
+  content: '';
+  position: absolute;
+  top: -8px; left: 16px;
+  width: 36px; height: 12px;
+  background: var(--ink-3);
+  border: 1px solid var(--primary);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+}
+.dropzone-text {
+  text-align: center;
+}
+.dropzone-text strong {
+  font-family: var(--font-display);
+  font-size: var(--tx-h3);
+  color: var(--ink-9);
+  display: block;
+  font-weight: 500;
+}
+.dropzone-text span {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+}
+
+.upload-list {
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-xl);
+  padding: var(--sp-4);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.upload-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--ink-3);
+  margin-bottom: var(--sp-2);
+}
+.upload-list-title {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-7);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.asset {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--ink-2);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-md);
+  transition: all var(--d-hover);
+}
+.asset.classified {
+  border-color: var(--primary);
+}
+.asset-icon {
+  width: 32px; height: 32px;
+  background: var(--ink-3);
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-7);
+}
+.asset-icon svg { width: 16px; height: 16px; }
+.asset.classified .asset-icon { background: var(--primary-soft); color: var(--primary); }
+.asset-info { min-width: 0; }
+.asset-name {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.asset-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-6);
+  margin-top: 2px;
+}
+.asset-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.asset.skeleton {
+  position: relative;
+  overflow: hidden;
+}
+.asset.skeleton .asset-info {
+  background: linear-gradient(90deg, var(--ink-2), var(--ink-3), var(--ink-2));
+  background-size: 200% 100%;
+  height: 32px;
+  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+}
+.asset.skeleton .asset-name, .asset.skeleton .asset-meta { display: none; }
+.asset.analyzing .asset-status { color: var(--accent); }
+.asset.analyzing .asset-status::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  margin-right: 4px;
+  animation: pulse-violet 1s infinite;
+}
+.asset.classified .asset-status { color: var(--success); }
+.asset-platform {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: var(--r-full);
+  background: var(--ink-3);
+  color: var(--ink-8);
+  margin-left: var(--sp-1);
+}
+
+.ai-logs {
+  margin-top: var(--sp-6);
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  padding: var(--sp-4);
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  height: 240px;
+  overflow-y: auto;
+  grid-column: 1 / -1;
+}
+.ai-logs-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding-bottom: var(--sp-2);
+  margin-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--ink-3);
+  color: var(--ink-7);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ai-logs-pulse {
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse-violet 1s infinite;
+}
+.ai-log-line {
+  color: var(--ink-7);
+  padding: 2px 0;
+  opacity: 0.7;
+  animation: log-in 0.3s ease-out;
+}
+.ai-log-line strong { color: var(--accent); }
+.ai-log-line.fresh { opacity: 1; }
+.ai-log-line .prefix { color: var(--accent); }
+@keyframes log-in {
+  from { opacity: 0; transform: translateX(-4px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@media (max-width: 1024px) {
+  .upload-grid { grid-template-columns: 1fr; }
+}
+
+/* ============ CALENDAR VIEW (full-screen, brand-adapted) ============ */
+#view-calendar { display: flex; flex-direction: column; padding: 0; }
+#view-calendar.active { display: flex; }
+#view-calendar:not(.active) { display: none; }
+
+.fc {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+}
+.fc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-5) var(--sp-8);
+  border-bottom: 1px solid var(--ink-3);
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+}
+.fc-head-left {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.fc-today-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 64px;
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-md);
+  background: var(--ink-2);
+  padding: 3px;
+}
+.fc-today-month {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink-7);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px;
+}
+.fc-today-day {
+  width: 100%;
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: 6px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-9);
+  padding: 4px 0;
+}
+.fc-month-title {
+  font-family: var(--font-display);
+  font-size: var(--tx-h3);
+  font-weight: 600;
+  color: var(--ink-9);
+  margin: 0;
+  letter-spacing: var(--tracking-tight);
+  text-transform: capitalize;
+}
+.fc-month-range {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  margin: 4px 0 0;
+}
+.fc-head-right {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.fc-divider-v {
+  width: 1px;
+  height: 24px;
+  background: var(--ink-3);
+}
+.fc-icon-btn {
+  width: 36px; height: 36px;
+  border: 1px solid var(--ink-3);
+  background: var(--ink-1);
+  color: var(--ink-7);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--d-hover);
+}
+.fc-icon-btn:hover { color: var(--ink-9); border-color: var(--ink-5); background: var(--ink-2); }
+.fc-icon-btn svg { width: 16px; height: 16px; }
+.fc-nav {
+  display: inline-flex;
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--ink-1);
+}
+.fc-nav button {
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--ink-3);
+  color: var(--ink-7);
+  padding: 0 var(--sp-3);
+  height: 36px;
+  font-family: inherit;
+  font-size: var(--tx-caption);
+  cursor: pointer;
+  transition: all var(--d-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fc-nav button:last-child { border-right: none; }
+.fc-nav button:hover { color: var(--ink-9); background: var(--ink-2); }
+.fc-nav button[data-prev], .fc-nav button[data-next] { width: 36px; padding: 0; }
+.fc-nav button[data-today] { padding: 0 var(--sp-4); }
+.fc-nav svg { width: 16px; height: 16px; }
+
+.fc-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--ink-3);
+  background: var(--ink-1);
+}
+.fc-weekday {
+  padding: var(--sp-3);
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  font-weight: 600;
+  color: var(--ink-7);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-right: 1px solid var(--ink-3);
+}
+.fc-weekday:last-child { border-right: none; }
+
+.fc-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: minmax(120px, 1fr);
+  flex: 1;
+  background: var(--ink-3);
+  gap: 1px;
+}
+.fc-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--ink-0);
+  cursor: pointer;
+  transition: background var(--d-hover);
+}
+.fc-day:hover { background: var(--ink-1); }
+.fc-day.other-month { background: rgba(8, 8, 10, 0.6); }
+.fc-day.other-month .fc-day-num-text { color: var(--ink-5); opacity: 0.6; }
+.fc-day-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px 10px 0;
+}
+.fc-day-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: var(--r-full);
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: var(--tx-caption);
+  font-weight: 500;
+  color: var(--ink-7);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: color var(--d-hover) var(--ease-out-quint);
+}
+.fc-day-num-text {
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.fc-day:hover .fc-day-num-text { color: var(--ink-9); }
+.fc-day.today .fc-day-num {
+  background: var(--primary);
+  box-shadow: var(--glow-blue);
+}
+.fc-day.today .fc-day-num-text {
+  color: var(--ink-10);
+  font-weight: 700;
+}
+.fc-day.selected:not(.today) .fc-day-num {
+  background: var(--ink-9);
+}
+.fc-day.selected:not(.today) .fc-day-num-text {
+  color: var(--ink-0);
+  font-weight: 700;
+}
+.fc-day-events {
+  padding: 0 var(--sp-2) var(--sp-2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+}
+.fc-event {
+  position: relative;
+  background: var(--ink-2);
+  border: 1px solid var(--ink-3);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--r-sm);
+  padding: 5px 7px;
+  font-size: 11px;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: all var(--d-hover) var(--ease-out-quint);
+  overflow: hidden;
+}
+.fc-event:hover {
+  background: var(--ink-3);
+  transform: translateX(2px);
+}
+.fc-event-title {
+  display: block;
+  color: var(--ink-9);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fc-event-meta {
+  display: block;
+  color: var(--ink-6);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  margin-top: 1px;
+}
+.fc-event.ai {
+  border-left-color: var(--accent);
+  border-style: dashed;
+  border-color: var(--accent);
+  background: linear-gradient(90deg, var(--accent-soft), transparent);
+}
+.fc-event.ai::before {
+  content: '✦';
+  position: absolute;
+  top: 4px; right: 5px;
+  font-size: 10px;
+  color: var(--accent);
+  animation: pulse-violet 2s infinite;
+}
+.fc-event[data-pf="instagram"] { border-left-color: var(--pf-instagram); }
+.fc-event[data-pf="tiktok"]    { border-left-color: var(--pf-tiktok); }
+.fc-event[data-pf="x"]         { border-left-color: var(--pf-x); }
+.fc-event[data-pf="linkedin"]  { border-left-color: var(--pf-linkedin); }
+.fc-event[data-pf="youtube"]   { border-left-color: var(--pf-youtube); }
+.fc-event[data-pf="threads"]   { border-left-color: var(--pf-threads); }
+.fc-day-more {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-6);
+  padding: 2px 4px;
+  cursor: pointer;
+  transition: color var(--d-hover);
+}
+.fc-day-more:hover { color: var(--primary); }
+
+@media (max-width: 768px) {
+  .fc-head { padding: var(--sp-4); }
+  .fc-today-badge { display: none; }
+  .fc-grid { grid-template-rows: repeat(6, minmax(60px, 1fr)); }
+  .fc-event-title { font-size: 10px; }
+  .fc-day-events { padding: 0 4px 4px; }
+}
+
+/* ============ DETAIL MODAL ============ */
+.detail {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: 480px;
+  background: var(--ink-1);
+  border-left: 1px solid var(--ink-3);
+  z-index: 50;
+  transform: translateX(100%);
+  transition: transform var(--d-entrance) var(--ease-out-quint);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-xl);
+}
+.detail.open { transform: translateX(0); }
+.detail-head {
+  padding: var(--sp-5) var(--sp-6);
+  border-bottom: 1px solid var(--ink-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.detail-title {
+  font-family: var(--font-display);
+  font-size: var(--tx-h4);
+  font-weight: 600;
+  color: var(--ink-9);
+  margin: 0;
+}
+.detail-close {
+  width: 32px; height: 32px;
+  background: var(--ink-2);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-sm);
+  color: var(--ink-7);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.detail-close:hover { color: var(--ink-9); border-color: var(--ink-5); }
+.detail-tabs {
+  display: flex;
+  gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-6);
+  border-bottom: 1px solid var(--ink-3);
+}
+.detail-tab {
+  background: none;
+  border: none;
+  color: var(--ink-7);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--tx-caption);
+  font-family: inherit;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all var(--d-hover);
+}
+.detail-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+.detail-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-6);
+}
+
+/* PHONE MOCKUP */
+.phone {
+  width: 280px;
+  margin: 0 auto var(--sp-6);
+  background: var(--ink-0);
+  border: 8px solid var(--ink-2);
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.phone-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-9);
+  background: var(--ink-0);
+}
+.phone-bar-icons { display: flex; gap: 4px; opacity: 0.6; }
+.phone-bar-icon {
+  width: 12px; height: 8px;
+  background: var(--ink-9);
+  border-radius: 1px;
+  opacity: 0.4;
+}
+.ig-feed { background: #000; padding: var(--sp-3); color: #fff; }
+.ig-row {
+  display: flex; align-items: center; gap: var(--sp-2);
+  padding-bottom: var(--sp-3);
+}
+.ig-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f58529, #dd2a7b, #515bd4);
+  padding: 1.5px;
+}
+.ig-avatar > div {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: var(--ink-9);
+}
+.ig-handle {
+  font-size: 11px;
+  font-weight: 600;
+}
+.ig-img {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--primary), var(--accent), var(--primary));
+  margin-bottom: var(--sp-2);
+  position: relative;
+  overflow: hidden;
+}
+.ig-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.7'/></filter><rect width='100' height='100' filter='url(%23n)' opacity='0.4'/></svg>");
+}
+.ig-actions {
+  display: flex; gap: var(--sp-3);
+  padding: var(--sp-1) 0;
+}
+.ig-actions svg { width: 18px; height: 18px; stroke: #fff; }
+.ig-caption {
+  font-size: 11px;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+.ig-caption strong { font-weight: 600; }
+.ig-caption .tag { color: #6896E5; }
+
+.detail-field {
+  margin-bottom: var(--sp-5);
+}
+.detail-field label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--sp-2);
+}
+.detail-field textarea {
+  width: 100%;
+  background: var(--ink-0);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-md);
+  color: var(--ink-9);
+  font-family: inherit;
+  font-size: var(--tx-body);
+  line-height: var(--lh-normal);
+  padding: var(--sp-3);
+  resize: vertical;
+  min-height: 80px;
+}
+.detail-field textarea:focus { border-color: var(--primary); outline: none; }
+.detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+}
+.detail-tag {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px dashed var(--accent);
+  padding: 4px 8px;
+  border-radius: var(--r-full);
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all var(--d-hover);
+}
+.detail-tag:hover { background: var(--accent); color: var(--ink-10); }
+.detail-tag .score {
+  font-size: 9px;
+  opacity: 0.7;
+  border-left: 1px solid currentColor;
+  padding-left: 4px;
+}
+.detail-time {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--ink-2);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-md);
+}
+.detail-mini-heat {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+  flex: 1;
+}
+.detail-mini-heat-cell {
+  height: 20px;
+  background: var(--ink-3);
+  border-radius: 2px;
+}
+.detail-mini-heat-cell.h1 { background: rgba(79, 124, 255, 0.3); }
+.detail-mini-heat-cell.h2 { background: rgba(79, 124, 255, 0.6); }
+.detail-mini-heat-cell.h3 { background: var(--primary); }
+
+/* ============ ANALYTICS VIEW ============ */
+.an-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-8);
+}
+.an-kpi {
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  padding: var(--sp-5);
+}
+.an-kpi-label {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.an-kpi-value {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--ink-9);
+  margin-top: var(--sp-2);
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+}
+.an-kpi-trend {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--success);
+  margin-top: var(--sp-2);
+}
+.an-kpi-trend.down { color: var(--error); }
+
+.an-charts {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--sp-4);
+}
+.an-card {
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  padding: var(--sp-6);
+}
+.an-card-title {
+  font-family: var(--font-display);
+  font-size: var(--tx-h4);
+  font-weight: 600;
+  color: var(--ink-9);
+  margin: 0 0 var(--sp-4);
+}
+.an-line { width: 100%; height: 240px; }
+.an-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.an-bar-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 60px;
+  align-items: center;
+  gap: var(--sp-3);
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+}
+.an-bar-row .pf { color: var(--ink-7); }
+.an-bar {
+  height: 14px;
+  background: var(--ink-3);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  position: relative;
+}
+.an-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: var(--r-sm);
+  width: 0;
+  transition: width 1s var(--ease-out-quint);
+}
+.an-bar-row .val { color: var(--ink-9); text-align: right; }
+
+.an-heat {
+  display: grid;
+  grid-template-columns: 60px repeat(7, 1fr);
+  gap: 3px;
+  margin-top: var(--sp-3);
+}
+.an-heat-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-6);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: var(--sp-2);
+}
+.an-heat-cell {
+  aspect-ratio: 1;
+  background: var(--ink-3);
+  border-radius: 3px;
+}
+.an-heat-cell.h1 { background: rgba(79, 124, 255, 0.25); }
+.an-heat-cell.h2 { background: rgba(79, 124, 255, 0.5); }
+.an-heat-cell.h3 { background: rgba(79, 124, 255, 0.75); }
+.an-heat-cell.h4 { background: var(--primary); }
+
+@media (max-width: 1024px) {
+  .an-kpis { grid-template-columns: repeat(2, 1fr); }
+  .an-charts { grid-template-columns: 1fr; }
+}
+
+/* ============ SETTINGS VIEW ============ */
+.connections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--sp-4);
+}
+.conn-card {
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  padding: var(--sp-5);
+}
+.conn-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+.conn-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--r-sm);
+  background: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.conn-icon svg { width: 22px; height: 22px; color: var(--ink-8); }
+.conn-name {
+  font-family: var(--font-display);
+  font-size: var(--tx-h4);
+  font-weight: 600;
+  color: var(--ink-9);
+  margin: 0;
+}
+.conn-status {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  margin-top: 2px;
+}
+.conn-card.connected .conn-status { color: var(--success); }
+.conn-account {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-7);
+  padding: var(--sp-2) 0;
+  border-top: 1px solid var(--ink-3);
+  margin-top: var(--sp-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* TOGGLE SWITCH */
+.switch {
+  position: relative;
+  width: 44px; height: 24px;
+  background: var(--ink-3);
+  border-radius: var(--r-full);
+  cursor: pointer;
+  transition: background var(--d-hover);
+}
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 20px; height: 20px;
+  background: var(--ink-7);
+  border-radius: 50%;
+  transition: all var(--d-hover) var(--ease-out-back-soft);
+}
+.switch.on {
+  background: var(--primary);
+  box-shadow: var(--glow-blue);
+}
+.switch.on::after {
+  background: var(--ink-10);
+  transform: translateX(20px);
+}
+
+.expiry-bar {
+  height: 4px;
+  background: var(--ink-3);
+  border-radius: var(--r-full);
+  overflow: hidden;
+  margin-top: var(--sp-2);
+}
+.expiry-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: var(--r-full);
+}
+.expiry-fill.warn { background: var(--warning); }
+
+/* ============ TOAST ============ */
+.toast {
+  position: fixed;
+  bottom: var(--sp-6);
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  background: var(--ink-2);
+  border: 1px solid var(--ink-4);
+  color: var(--ink-9);
+  padding: var(--sp-3) var(--sp-5);
+  border-radius: var(--r-full);
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transition: all var(--d-hover) var(--ease-out-quint);
+  pointer-events: none;
+  z-index: 200;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="dash">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="dash-side">
+    <div class="dash-brand">
+      <div class="dash-brand-mark"></div>
+      <div class="dash-brand-text">autopost<span>.</span></div>
+    </div>
+    <nav class="dash-nav" id="dashNav">
+      <button class="dash-nav-item active" data-view="upload"><i data-icon="upload"></i><span data-i18n="dash.upload">Subir</span></button>
+      <button class="dash-nav-item" data-view="calendar"><i data-icon="calendar"></i><span data-i18n="dash.calendar">Calendario</span><span class="badge">3 IA</span></button>
+      <button class="dash-nav-item" data-view="analytics"><i data-icon="chart"></i><span data-i18n="dash.analytics">Analytics</span></button>
+      <button class="dash-nav-item" data-view="settings"><i data-icon="settings"></i><span data-i18n="dash.settings">Conexiones</span></button>
+    </nav>
+    <div class="dash-side-footer">
+      <div class="dash-account">
+        <div class="dash-avatar"></div>
+        <div>
+          <div class="dash-account-name">María L.</div>
+          <div class="dash-account-biz">treintayocho</div>
+        </div>
+      </div>
+      <div class="dash-toggles">
+        <button class="dash-toggle" data-locale-toggle aria-label="Idioma">ES</button>
+        <button class="dash-toggle" data-theme-toggle aria-label="Tema">◐</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="dash-main">
+
+    <!-- ============ UPLOAD VIEW ============ -->
+    <section class="view active" id="view-upload">
+      <header class="view-head">
+        <div>
+          <h1 class="view-title" data-i18n="dash.upload">Subir</h1>
+          <p class="view-sub">Arrastra una carpeta. La IA detecta formato, sugiere hora y monta el calendario.</p>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-ghost"><i data-icon="folder"></i>Examinar</button>
+          <button class="btn btn-primary" data-magnetic="0.2"><i data-icon="plus"></i>Nuevo post</button>
+        </div>
+      </header>
+
+      <div class="upload-grid">
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-folder"></div>
+          <div class="dropzone-text">
+            <strong data-i18n="dash.upload.drop">Arrastra una carpeta aquí</strong>
+            <span data-i18n="dash.upload.or">o haz click para seleccionar</span>
+          </div>
+        </div>
+        <div class="upload-list">
+          <div class="upload-list-head">
+            <span class="upload-list-title">Cola · 8 assets</span>
+            <span class="chip chip-ai">✦ procesando</span>
+          </div>
+          <div class="asset classified">
+            <div class="asset-icon"><i data-icon="image"></i></div>
+            <div class="asset-info">
+              <div class="asset-name">reel-anuncio.mov</div>
+              <div class="asset-meta">12.3 MB · reel</div>
+            </div>
+            <div><span class="asset-status">Listo</span><span class="asset-platform">IG</span></div>
+          </div>
+          <div class="asset classified">
+            <div class="asset-icon"><i data-icon="image"></i></div>
+            <div class="asset-info">
+              <div class="asset-name">carousel-1.png</div>
+              <div class="asset-meta">2.1 MB · carrusel 3/3</div>
+            </div>
+            <div><span class="asset-status">Listo</span><span class="asset-platform">LI</span></div>
+          </div>
+          <div class="asset classified">
+            <div class="asset-icon"><i data-icon="image"></i></div>
+            <div class="asset-info">
+              <div class="asset-name">tweet-thread.txt</div>
+              <div class="asset-meta">240 chars · texto</div>
+            </div>
+            <div><span class="asset-status">Listo</span><span class="asset-platform">X</span></div>
+          </div>
+          <div class="asset analyzing">
+            <div class="asset-icon"><i data-icon="video"></i></div>
+            <div class="asset-info">
+              <div class="asset-name">behind-the-scenes.mp4</div>
+              <div class="asset-meta">8.4 MB · vídeo</div>
+            </div>
+            <div><span class="asset-status">Analizando</span></div>
+          </div>
+          <div class="asset analyzing">
+            <div class="asset-icon"><i data-icon="image"></i></div>
+            <div class="asset-info">
+              <div class="asset-name">portada-mar.jpg</div>
+              <div class="asset-meta">1.8 MB · imagen</div>
+            </div>
+            <div><span class="asset-status">Analizando</span></div>
+          </div>
+          <div class="asset skeleton">
+            <div class="asset-icon"></div>
+            <div class="asset-info"></div>
+            <div></div>
+          </div>
+          <div class="asset skeleton">
+            <div class="asset-icon"></div>
+            <div class="asset-info"></div>
+            <div></div>
+          </div>
+        </div>
+
+        <div class="ai-logs" id="aiLogs">
+          <div class="ai-logs-head">
+            <span class="ai-logs-pulse"></span>
+            <span>IA · LOG EN VIVO</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CALENDAR VIEW (full-screen month grid) ============ -->
+    <section class="view" id="view-calendar">
+      <div class="fc">
+        <header class="fc-head">
+          <div class="fc-head-left">
+            <div class="fc-today-badge">
+              <span class="fc-today-month" id="fcTodayMonth">MAR</span>
+              <span class="fc-today-day" id="fcTodayDay">15</span>
+            </div>
+            <div>
+              <h1 class="fc-month-title" id="fcMonthTitle">Marzo, 2026</h1>
+              <p class="fc-month-range" id="fcMonthRange">1 mar — 31 mar 2026</p>
+            </div>
+          </div>
+          <div class="fc-head-right">
+            <button class="fc-icon-btn" aria-label="Buscar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
+            </button>
+            <div class="fc-divider-v"></div>
+            <div class="fc-nav">
+              <button data-prev aria-label="Mes anterior">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+              </button>
+              <button data-today>Hoy</button>
+              <button data-next aria-label="Mes siguiente">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+              </button>
+            </div>
+            <div class="fc-divider-v"></div>
+            <button class="btn btn-primary" data-magnetic="0.15"><i data-icon="plus"></i>Nueva publicación</button>
+          </div>
+        </header>
+
+        <div class="fc-weekdays">
+          <div class="fc-weekday">Lun</div>
+          <div class="fc-weekday">Mar</div>
+          <div class="fc-weekday">Mié</div>
+          <div class="fc-weekday">Jue</div>
+          <div class="fc-weekday">Vie</div>
+          <div class="fc-weekday">Sáb</div>
+          <div class="fc-weekday">Dom</div>
+        </div>
+
+        <div class="fc-grid" id="fcGrid"></div>
+      </div>
+    </section>
+
+    <!-- ============ ANALYTICS VIEW ============ -->
+    <section class="view" id="view-analytics">
+      <header class="view-head">
+        <div>
+          <h1 class="view-title" data-i18n="dash.analytics">Analytics</h1>
+          <p class="view-sub">Últimos 30 días · todas las redes</p>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-ghost">Últimos 30 días</button>
+          <button class="btn btn-ghost"><i data-icon="upload"></i>Exportar</button>
+        </div>
+      </header>
+
+      <div class="an-kpis">
+        <div class="an-kpi">
+          <div class="an-kpi-label" data-i18n="dash.an.engagement">Engagement</div>
+          <div class="an-kpi-value"><span data-count="6.2">0</span>%</div>
+          <div class="an-kpi-trend">↑ 1.4% vs mes pasado</div>
+        </div>
+        <div class="an-kpi">
+          <div class="an-kpi-label" data-i18n="dash.an.reach">Alcance</div>
+          <div class="an-kpi-value"><span data-count="847">0</span>k</div>
+          <div class="an-kpi-trend">↑ 12.3%</div>
+        </div>
+        <div class="an-kpi">
+          <div class="an-kpi-label" data-i18n="dash.an.posts">Publicados</div>
+          <div class="an-kpi-value"><span data-count="142">0</span></div>
+          <div class="an-kpi-trend">↑ 28 nuevas</div>
+        </div>
+        <div class="an-kpi">
+          <div class="an-kpi-label" data-i18n="dash.an.best">Mejor hora</div>
+          <div class="an-kpi-value">14<span style="font-size:0.5em;color:var(--ink-7)">:30</span></div>
+          <div class="an-kpi-trend">Martes promedia +18%</div>
+        </div>
+      </div>
+
+      <div class="an-charts">
+        <div class="an-card">
+          <h3 class="an-card-title">Engagement · 30 días</h3>
+          <svg class="an-line" viewBox="0 0 600 240" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#4F7CFF" stop-opacity="0.4"/>
+                <stop offset="100%" stop-color="#4F7CFF" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- grid -->
+            <line x1="0" y1="60" x2="600" y2="60" stroke="#1C1C24" stroke-dasharray="3"/>
+            <line x1="0" y1="120" x2="600" y2="120" stroke="#1C1C24" stroke-dasharray="3"/>
+            <line x1="0" y1="180" x2="600" y2="180" stroke="#1C1C24" stroke-dasharray="3"/>
+            <!-- area -->
+            <path id="anLineArea" d="M0 200 L40 180 L80 190 L120 160 L160 170 L200 130 L240 140 L280 100 L320 110 L360 80 L400 90 L440 60 L480 70 L520 50 L560 65 L600 40 L600 240 L0 240 Z" fill="url(#lineGrad)"/>
+            <!-- line -->
+            <path id="anLinePath" d="M0 200 L40 180 L80 190 L120 160 L160 170 L200 130 L240 140 L280 100 L320 110 L360 80 L400 90 L440 60 L480 70 L520 50 L560 65 L600 40" stroke="#4F7CFF" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div class="an-card">
+          <h3 class="an-card-title">Por plataforma</h3>
+          <div class="an-bars">
+            <div class="an-bar-row"><span class="pf">Instagram</span><div class="an-bar"><div class="an-bar-fill" data-w="92"></div></div><span class="val">8.4%</span></div>
+            <div class="an-bar-row"><span class="pf">TikTok</span><div class="an-bar"><div class="an-bar-fill" data-w="78"></div></div><span class="val">6.9%</span></div>
+            <div class="an-bar-row"><span class="pf">LinkedIn</span><div class="an-bar"><div class="an-bar-fill" data-w="64"></div></div><span class="val">5.2%</span></div>
+            <div class="an-bar-row"><span class="pf">YouTube</span><div class="an-bar"><div class="an-bar-fill" data-w="52"></div></div><span class="val">4.1%</span></div>
+            <div class="an-bar-row"><span class="pf">X</span><div class="an-bar"><div class="an-bar-fill" data-w="38"></div></div><span class="val">2.8%</span></div>
+            <div class="an-bar-row"><span class="pf">Threads</span><div class="an-bar"><div class="an-bar-fill" data-w="22"></div></div><span class="val">1.6%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="an-card" style="margin-top:var(--sp-4)">
+        <h3 class="an-card-title">Heatmap · mejor hora por día</h3>
+        <div class="an-heat">
+          <div class="an-heat-label">L</div>
+          <div class="an-heat-cell"></div><div class="an-heat-cell h1"></div><div class="an-heat-cell h2"></div><div class="an-heat-cell h3"></div><div class="an-heat-cell h4"></div><div class="an-heat-cell h2"></div><div class="an-heat-cell h1"></div>
+          <div class="an-heat-label">M</div>
+          <div class="an-heat-cell h1"></div><div class="an-heat-cell h2"></div><div class="an-heat-cell h3"></div><div class="an-heat-cell h4"></div><div class="an-heat-cell h4"></div><div class="an-heat-cell h3"></div><div class="an-heat-cell h2"></div>
+          <div class="an-heat-label">X</div>
+          <div class="an-heat-cell"></div><div class="an-heat-cell h1"></div><div class="an-heat-cell h2"></div><div class="an-heat-cell h3"></div><div class="an-heat-cell h3"></div><div class="an-heat-cell h2"></div><div class="an-heat-cell h1"></div>
+          <div class="an-heat-label">J</div>
+          <div class="an-heat-cell h1"></div><div class="an-heat-cell h2"></div><div class="an-heat-cell h3"></div><div class="an-heat-cell h4"></div><div class="an-heat-cell h3"></div><div class="an-heat-cell h2"></div><div class="an-heat-cell h1"></div>
+          <div class="an-heat-label">V</div>
+          <div class="an-heat-cell"></div><div class="an-heat-cell h1"></div><div class="an-heat-cell h2"></div><div class="an-heat-cell h2"></div><div class="an-heat-cell h3"></div><div class="an-heat-cell h2"></div><div class="an-heat-cell h1"></div>
+          <div class="an-heat-label">S</div>
+          <div class="an-heat-cell"></div><div class="an-heat-cell"></div><div class="an-heat-cell h1"></div><div class="an-heat-cell h2"></div><div class="an-heat-cell h2"></div><div class="an-heat-cell h1"></div><div class="an-heat-cell"></div>
+          <div class="an-heat-label">D</div>
+          <div class="an-heat-cell"></div><div class="an-heat-cell"></div><div class="an-heat-cell"></div><div class="an-heat-cell h1"></div><div class="an-heat-cell h1"></div><div class="an-heat-cell"></div><div class="an-heat-cell"></div>
+          <div class="an-heat-label" style="visibility:hidden">.</div>
+          <div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+          <div class="an-heat-label">h</div>
+          <div style="text-align:center;font-family:var(--font-mono);font-size:9px;color:var(--ink-6)">9</div>
+          <div style="text-align:center;font-family:var(--font-mono);font-size:9px;color:var(--ink-6)">11</div>
+          <div style="text-align:center;font-family:var(--font-mono);font-size:9px;color:var(--ink-6)">13</div>
+          <div style="text-align:center;font-family:var(--font-mono);font-size:9px;color:var(--ink-6)">15</div>
+          <div style="text-align:center;font-family:var(--font-mono);font-size:9px;color:var(--ink-6)">17</div>
+          <div style="text-align:center;font-family:var(--font-mono);font-size:9px;color:var(--ink-6)">19</div>
+          <div style="text-align:center;font-family:var(--font-mono);font-size:9px;color:var(--ink-6)">21</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SETTINGS VIEW ============ -->
+    <section class="view" id="view-settings">
+      <header class="view-head">
+        <div>
+          <h1 class="view-title" data-i18n="dash.settings">Conexiones</h1>
+          <p class="view-sub">Conecta cuentas vía OAuth oficial. Renueva antes de que expire.</p>
+        </div>
+      </header>
+
+      <div class="connections">
+        <div class="conn-card connected">
+          <div class="conn-head">
+            <div class="conn-icon" style="background:rgba(228,64,95,0.15);color:#E4405F"><i data-icon="instagram"></i></div>
+            <div style="flex:1">
+              <h3 class="conn-name">Instagram</h3>
+              <div class="conn-status">Conectado</div>
+            </div>
+            <div class="switch on" data-switch></div>
+          </div>
+          <div class="conn-account">
+            <span>@treintayocho</span>
+            <span style="color:var(--ink-6)">expira en 87d</span>
+          </div>
+          <div class="expiry-bar"><div class="expiry-fill" style="width:78%"></div></div>
+        </div>
+
+        <div class="conn-card connected">
+          <div class="conn-head">
+            <div class="conn-icon" style="background:rgba(255,0,80,0.15);color:#FF0050"><i data-icon="tiktok"></i></div>
+            <div style="flex:1">
+              <h3 class="conn-name">TikTok</h3>
+              <div class="conn-status">Conectado</div>
+            </div>
+            <div class="switch on" data-switch></div>
+          </div>
+          <div class="conn-account">
+            <span>@treintayocho_</span>
+            <span style="color:var(--ink-6)">expira en 12d</span>
+          </div>
+          <div class="expiry-bar"><div class="expiry-fill warn" style="width:18%"></div></div>
+        </div>
+
+        <div class="conn-card connected">
+          <div class="conn-head">
+            <div class="conn-icon" style="background:rgba(29,161,242,0.15);color:#1DA1F2"><i data-icon="x"></i></div>
+            <div style="flex:1">
+              <h3 class="conn-name">X (Twitter)</h3>
+              <div class="conn-status">Conectado</div>
+            </div>
+            <div class="switch on" data-switch></div>
+          </div>
+          <div class="conn-account">
+            <span>@treintayocho</span>
+            <span style="color:var(--ink-6)">no expira</span>
+          </div>
+        </div>
+
+        <div class="conn-card connected">
+          <div class="conn-head">
+            <div class="conn-icon" style="background:rgba(10,102,194,0.15);color:#0A66C2"><i data-icon="linkedin"></i></div>
+            <div style="flex:1">
+              <h3 class="conn-name">LinkedIn</h3>
+              <div class="conn-status">Conectado</div>
+            </div>
+            <div class="switch on" data-switch></div>
+          </div>
+          <div class="conn-account">
+            <span>treintayocho</span>
+            <span style="color:var(--ink-6)">expira en 156d</span>
+          </div>
+          <div class="expiry-bar"><div class="expiry-fill" style="width:92%"></div></div>
+        </div>
+
+        <div class="conn-card">
+          <div class="conn-head">
+            <div class="conn-icon" style="background:rgba(255,0,0,0.15);color:#FF0000"><i data-icon="youtube"></i></div>
+            <div style="flex:1">
+              <h3 class="conn-name">YouTube</h3>
+              <div class="conn-status" data-i18n="dash.set.connect">Conectar</div>
+            </div>
+            <div class="switch" data-switch></div>
+          </div>
+        </div>
+
+        <div class="conn-card">
+          <div class="conn-head">
+            <div class="conn-icon" style="background:rgba(168,168,189,0.15);color:#A8A8BD"><i data-icon="threads"></i></div>
+            <div style="flex:1">
+              <h3 class="conn-name">Threads</h3>
+              <div class="conn-status" data-i18n="dash.set.connect">Conectar</div>
+            </div>
+            <div class="switch" data-switch></div>
+          </div>
+        </div>
+
+        <div class="conn-card">
+          <div class="conn-head">
+            <div class="conn-icon" style="background:rgba(24,119,242,0.15);color:#1877F2"><i data-icon="facebook"></i></div>
+            <div style="flex:1">
+              <h3 class="conn-name">Facebook</h3>
+              <div class="conn-status" data-i18n="dash.set.connect">Conectar</div>
+            </div>
+            <div class="switch" data-switch></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ DETAIL MODAL ============ -->
+<aside class="detail" id="detail">
+  <div class="detail-head">
+    <h2 class="detail-title">Reel — anuncio Q2</h2>
+    <button class="detail-close" id="detailClose"><i data-icon="close"></i></button>
+  </div>
+  <div class="detail-tabs">
+    <button class="detail-tab active" data-pf="instagram">Instagram</button>
+    <button class="detail-tab" data-pf="tiktok">TikTok</button>
+    <button class="detail-tab" data-pf="x">X</button>
+  </div>
+  <div class="detail-body">
+    <div class="phone">
+      <div class="phone-bar">
+        <span>9:41</span>
+        <div class="phone-bar-icons"><div class="phone-bar-icon"></div><div class="phone-bar-icon"></div></div>
+      </div>
+      <div class="ig-feed">
+        <div class="ig-row">
+          <div class="ig-avatar"><div></div></div>
+          <span class="ig-handle">treintayocho</span>
+        </div>
+        <div class="ig-img"></div>
+        <div class="ig-actions">
+          <i data-icon="heart"></i>
+          <i data-icon="play"></i>
+          <i data-icon="upload"></i>
+        </div>
+        <div class="ig-caption">
+          <strong>treintayocho</strong> Llega Q2 y con él el lanzamiento de la app que llevas pidiendo. Tira la carpeta. El resto va solo. <span class="tag">#productlaunch #saas #q2</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-field">
+      <label data-i18n="dash.detail.copy">Copy</label>
+      <textarea>Llega Q2 y con él el lanzamiento de la app que llevas pidiendo. Tira la carpeta. El resto va solo.</textarea>
+    </div>
+
+    <div class="detail-field">
+      <label><span data-i18n="dash.detail.tags">Hashtags</span> · <span class="chip chip-ai">✦ sugeridos</span></label>
+      <div class="detail-tags">
+        <span class="detail-tag">#productlaunch <span class="score">94</span></span>
+        <span class="detail-tag">#saas <span class="score">87</span></span>
+        <span class="detail-tag">#q2 <span class="score">81</span></span>
+        <span class="detail-tag">#startup <span class="score">76</span></span>
+        <span class="detail-tag">#automation <span class="score">72</span></span>
+      </div>
+    </div>
+
+    <div class="detail-field">
+      <label data-i18n="dash.detail.time">Hora óptima</label>
+      <div class="detail-time">
+        <strong style="color:var(--primary);font-family:var(--font-mono);font-size:var(--tx-h4)">14:30</strong>
+        <div class="detail-mini-heat">
+          <div class="detail-mini-heat-cell"></div><div class="detail-mini-heat-cell h1"></div><div class="detail-mini-heat-cell h2"></div><div class="detail-mini-heat-cell h3"></div><div class="detail-mini-heat-cell h2"></div><div class="detail-mini-heat-cell h1"></div><div class="detail-mini-heat-cell"></div><div class="detail-mini-heat-cell h1"></div><div class="detail-mini-heat-cell h2"></div><div class="detail-mini-heat-cell h3"></div><div class="detail-mini-heat-cell h2"></div><div class="detail-mini-heat-cell h1"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" style="width:100%" data-magnetic="0.1" data-i18n="dash.detail.publish">Programar publicación</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script src="assets/icons.js"></script>
+<script src="assets/i18n.js"></script>
+<script src="assets/motion.js"></script>
+<script>
+(function () {
+  // === HASH ROUTING ===
+  const navItems = document.querySelectorAll('[data-view]');
+  const views = document.querySelectorAll('.view');
+  function showView(name) {
+    views.forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
+    navItems.forEach(b => b.classList.toggle('active', b.getAttribute('data-view') === name));
+    if (window.location.hash !== '#' + name) {
+      history.replaceState(null, '', '#' + name);
+    }
+    // trigger analytics bar fills + entrance
+    if (name === 'analytics') triggerAnalytics();
+  }
+  navItems.forEach((btn) => {
+    btn.addEventListener('click', () => showView(btn.getAttribute('data-view')));
+  });
+  window.addEventListener('hashchange', () => {
+    const v = window.location.hash.slice(1) || 'upload';
+    showView(v);
+  });
+  // Initial
+  const initial = window.location.hash.slice(1) || 'upload';
+  showView(initial);
+
+  // === TOAST ===
+  const toastEl = document.getElementById('toast');
+  let toastT;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => toastEl.classList.remove('show'), 2000);
+  }
+
+  // === DROPZONE ===
+  const dropzone = document.getElementById('dropzone');
+  if (dropzone) {
+    ['dragenter','dragover'].forEach(ev => dropzone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragging');
+    }));
+    ['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragging');
+    }));
+    dropzone.addEventListener('drop', () => toast('Procesando carpeta…'));
+  }
+
+  // === AI LOGS STREAM ===
+  const aiLogs = document.getElementById('aiLogs');
+  const logSamples = [
+    '<span class="prefix">✦</span> detectando formato · <strong>reel-anuncio.mov</strong>',
+    '<span class="prefix">✦</span> grupo carrusel · <strong>carousel-1.png</strong> + 2 más',
+    '<span class="prefix">✦</span> tono detectado · <strong>profesional + cercano</strong>',
+    '<span class="prefix">✦</span> hora óptima · <strong>mar 14:30</strong>',
+    '<span class="prefix">✦</span> hashtags sugeridos · <strong>5 generados</strong>',
+    '<span class="prefix">✦</span> plataforma · <strong>Instagram + LinkedIn</strong>',
+    '<span class="prefix">✦</span> longitud copy · <strong>189 chars · óptimo</strong>',
+    '<span class="prefix">✦</span> safe zones detectadas · <strong>9:16 + 1:1</strong>',
+  ];
+  let logIdx = 0;
+  function pushLog() {
+    if (!aiLogs || document.hidden) return;
+    const line = document.createElement('div');
+    line.className = 'ai-log-line fresh';
+    line.innerHTML = `<span style="color:var(--ink-6)">${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span> ${logSamples[logIdx % logSamples.length]}`;
+    aiLogs.appendChild(line);
+    setTimeout(() => line.classList.remove('fresh'), 800);
+    aiLogs.scrollTop = aiLogs.scrollHeight;
+    while (aiLogs.children.length > 12) aiLogs.removeChild(aiLogs.children[1]);
+    logIdx++;
+  }
+  setInterval(pushLog, 1800);
+  pushLog();
+
+  // === FULLSCREEN CALENDAR ===
+  const fcGrid = document.getElementById('fcGrid');
+  if (fcGrid) {
+    // Date helpers (vanilla, no date-fns)
+    const startOfDay = (d) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
+    const isSameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    const isSameMonth = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+    const isToday = (d) => isSameDay(d, new Date());
+    const startOfMonth = (d) => new Date(d.getFullYear(), d.getMonth(), 1);
+    const endOfMonth = (d) => new Date(d.getFullYear(), d.getMonth() + 1, 0);
+    // Lunes-first week
+    const startOfWeekMon = (d) => {
+      const x = startOfDay(d);
+      const day = x.getDay();
+      const diff = (day === 0 ? -6 : 1 - day);
+      x.setDate(x.getDate() + diff);
+      return x;
+    };
+    const endOfWeekMon = (d) => {
+      const s = startOfWeekMon(d);
+      return new Date(s.getFullYear(), s.getMonth(), s.getDate() + 6);
+    };
+    const addMonths = (d, n) => { const r = new Date(d); r.setDate(1); r.setMonth(r.getMonth() + n); return r; };
+    const ESmonths = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const ESmonthsShort = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+    const fmtMonthTitle = (d) => `${ESmonths[d.getMonth()]}, ${d.getFullYear()}`.replace(/^./, c => c.toUpperCase());
+    const fmtMonthShort = (d) => ESmonthsShort[d.getMonth()];
+    const fmtRange = (s, e) => `${s.getDate()} ${ESmonthsShort[s.getMonth()].toLowerCase()} — ${e.getDate()} ${ESmonthsShort[e.getMonth()].toLowerCase()} ${e.getFullYear()}`;
+
+    // Mock events: posts for current month (auto-relative to today)
+    const today = new Date();
+    const baseY = today.getFullYear();
+    const baseM = today.getMonth();
+    const events = [
+      { day: new Date(baseY, baseM, 3),  posts: [{ title: 'Reel — anuncio Q2', pf: 'instagram', time: '09:00' }, { title: 'Carrusel case study', pf: 'linkedin', time: '14:00', ai: true }] },
+      { day: new Date(baseY, baseM, 5),  posts: [{ title: 'Story comparativa', pf: 'instagram', time: '12:00' }] },
+      { day: new Date(baseY, baseM, 7),  posts: [{ title: 'Thread datos sector', pf: 'x', time: '10:00' }, { title: 'TikTok detrás cámara', pf: 'tiktok', time: '15:30' }] },
+      { day: new Date(baseY, baseM, 10), posts: [{ title: 'YouTube short feature', pf: 'youtube', time: '18:00', ai: true }] },
+      { day: new Date(baseY, baseM, 12), posts: [{ title: 'Quote — tip rápido', pf: 'threads', time: '12:00', ai: true }, { title: 'Carrusel semanal', pf: 'instagram', time: '19:00' }] },
+      { day: new Date(baseY, baseM, 14), posts: [{ title: 'Anuncio webinar', pf: 'linkedin', time: '11:00' }] },
+      { day: new Date(baseY, baseM, today.getDate()), posts: [{ title: 'Reel tutorial 60s', pf: 'instagram', time: '14:30', ai: true }, { title: 'Story drop nuevo color', pf: 'instagram', time: '17:00' }, { title: 'Tweet thread', pf: 'x', time: '20:00' }] },
+      { day: new Date(baseY, baseM, today.getDate() + 2), posts: [{ title: 'Reel tendencia audio', pf: 'tiktok', time: '15:00' }] },
+      { day: new Date(baseY, baseM, today.getDate() + 5), posts: [{ title: 'Carrusel newsletter', pf: 'linkedin', time: '09:00', ai: true }, { title: 'Behind scenes', pf: 'instagram', time: '13:00' }] },
+      { day: new Date(baseY, baseM, today.getDate() + 8), posts: [{ title: 'Drop semanal', pf: 'instagram', time: '11:00' }] },
+      { day: new Date(baseY, baseM, today.getDate() + 12), posts: [{ title: 'Live anuncio', pf: 'youtube', time: '18:00' }, { title: 'Story preview', pf: 'instagram', time: '20:00', ai: true }] },
+    ].filter(e => e.day.getMonth() === baseM); // keep only posts visible in current month
+
+    let viewMonth = startOfMonth(today);
+    let selectedDay = startOfDay(today);
+
+    function render() {
+      const head = document.querySelector('.fc-month-title');
+      const range = document.querySelector('.fc-month-range');
+      const todayMonth = document.getElementById('fcTodayMonth');
+      const todayDay = document.getElementById('fcTodayDay');
+      const monthStart = startOfMonth(viewMonth);
+      const monthEnd = endOfMonth(viewMonth);
+      const gridStart = startOfWeekMon(monthStart);
+      const gridEnd = endOfWeekMon(monthEnd);
+
+      head.textContent = fmtMonthTitle(viewMonth);
+      range.textContent = fmtRange(monthStart, monthEnd);
+      todayMonth.textContent = fmtMonthShort(today);
+      todayDay.textContent = String(today.getDate());
+
+      // Build days
+      fcGrid.innerHTML = '';
+      const cur = new Date(gridStart);
+      const cellCount = Math.round((gridEnd - gridStart) / 86400000) + 1;
+      // Adjust grid rows based on number of weeks
+      const rows = cellCount / 7;
+      fcGrid.style.gridTemplateRows = `repeat(${rows}, minmax(110px, 1fr))`;
+
+      for (let i = 0; i < cellCount; i++) {
+        const d = new Date(cur);
+        const dayEvents = events.find(e => isSameDay(e.day, d));
+        const isOtherMonth = !isSameMonth(d, viewMonth);
+
+        const cell = document.createElement('div');
+        cell.className = 'fc-day';
+        if (isOtherMonth) cell.classList.add('other-month');
+        if (isToday(d)) cell.classList.add('today');
+        if (isSameDay(d, selectedDay)) cell.classList.add('selected');
+        cell.dataset.date = d.toISOString().slice(0, 10);
+
+        const head = document.createElement('div');
+        head.className = 'fc-day-head';
+        const num = document.createElement('div');
+        num.className = 'fc-day-num';
+        const numText = document.createElement('span');
+        numText.className = 'fc-day-num-text';
+        numText.textContent = String(d.getDate());
+        num.appendChild(numText);
+        head.appendChild(num);
+        cell.appendChild(head);
+
+        const eventsBox = document.createElement('div');
+        eventsBox.className = 'fc-day-events';
+        if (dayEvents && dayEvents.posts.length > 0) {
+          const visible = dayEvents.posts.slice(0, 2);
+          visible.forEach(p => {
+            const ev = document.createElement('div');
+            ev.className = 'fc-event' + (p.ai ? ' ai' : '');
+            ev.dataset.pf = p.pf;
+            ev.innerHTML = `<span class="fc-event-title">${p.title}</span><span class="fc-event-meta">${p.pf} · ${p.time}</span>`;
+            ev.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const detail = document.getElementById('detail');
+              detail.classList.add('open');
+              detail.querySelector('.detail-title').textContent = p.title;
+            });
+            eventsBox.appendChild(ev);
+          });
+          if (dayEvents.posts.length > 2) {
+            const more = document.createElement('div');
+            more.className = 'fc-day-more';
+            more.textContent = `+ ${dayEvents.posts.length - 2} más`;
+            eventsBox.appendChild(more);
+          }
+        }
+        cell.appendChild(eventsBox);
+
+        cell.addEventListener('click', () => {
+          selectedDay = d;
+          render();
+        });
+
+        fcGrid.appendChild(cell);
+        cur.setDate(cur.getDate() + 1);
+      }
+    }
+
+    document.querySelector('[data-prev]').addEventListener('click', () => {
+      viewMonth = addMonths(viewMonth, -1);
+      render();
+      toast('Mes anterior');
+    });
+    document.querySelector('[data-next]').addEventListener('click', () => {
+      viewMonth = addMonths(viewMonth, 1);
+      render();
+      toast('Mes siguiente');
+    });
+    document.querySelector('[data-today]').addEventListener('click', () => {
+      viewMonth = startOfMonth(today);
+      selectedDay = startOfDay(today);
+      render();
+      toast('Hoy');
+    });
+
+    render();
+  }
+
+  // === DETAIL MODAL ===
+  const detail = document.getElementById('detail');
+  document.getElementById('detailClose').addEventListener('click', () => detail.classList.remove('open'));
+  document.querySelectorAll('.detail-tab').forEach((t) => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.detail-tab').forEach(x => x.classList.toggle('active', x === t));
+    });
+  });
+
+  // === SWITCH TOGGLE ===
+  document.querySelectorAll('[data-switch]').forEach((sw) => {
+    sw.addEventListener('click', () => {
+      const wasOn = sw.classList.toggle('on');
+      const card = sw.closest('.conn-card');
+      const status = card.querySelector('.conn-status');
+      if (wasOn) {
+        card.classList.add('connected');
+        if (status) status.textContent = 'Conectado';
+        toast('Cuenta activada');
+      } else {
+        card.classList.remove('connected');
+        if (status) status.textContent = 'Pausado';
+        toast('Cuenta pausada');
+      }
+    });
+  });
+
+  // === ANALYTICS TRIGGER (bars + line draw) ===
+  let analyticsTriggered = false;
+  function triggerAnalytics() {
+    if (analyticsTriggered) return;
+    analyticsTriggered = true;
+    setTimeout(() => {
+      document.querySelectorAll('.an-bar-fill').forEach((b, i) => {
+        setTimeout(() => { b.style.width = b.getAttribute('data-w') + '%'; }, i * 80);
+      });
+      const path = document.getElementById('anLinePath');
+      if (path) {
+        const len = path.getTotalLength();
+        path.style.strokeDasharray = len;
+        path.style.strokeDashoffset = len;
+        path.animate(
+          [{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
+          { duration: 1400, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' }
+        );
+      }
+    }, 200);
+  }
+
+  // === HASHTAG REGENERATE (mock) ===
+  document.querySelectorAll('.detail-tag').forEach(t => {
+    t.addEventListener('click', () => {
+      t.style.transform = 'scale(0.92)';
+      setTimeout(() => { t.style.transform = ''; }, 200);
+      toast('Hashtag insertado · ' + t.textContent.split(' ')[0]);
+    });
+  });
+})();
+</script>
+</body>
+</html>

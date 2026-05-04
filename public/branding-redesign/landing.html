@@ -1,0 +1,2497 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autopost · Tira la carpeta. El resto va solo.</title>
+<meta name="description" content="Sube una carpeta de posts. La IA detecta formato, sugiere hora y monta el calendario. Tú apruebas. Autopost publica solo en Instagram, TikTok, X, LinkedIn, YouTube y Threads.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/tokens.css">
+<style>
+/* ============ NAV ============ */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-h);
+  z-index: 100;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(8, 8, 10, 0.7);
+  border-bottom: 1px solid rgba(28, 28, 36, 0.5);
+  transition: background var(--d-hover);
+}
+.nav-inner {
+  max-width: var(--content-w);
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--sp-6);
+}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  text-decoration: none;
+}
+.nav-mark {
+  width: 22px; height: 22px;
+  background: var(--primary);
+  border-radius: 4px;
+  position: relative;
+  flex-shrink: 0;
+}
+.nav-mark::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  background: var(--ink-0);
+  border-radius: 1px;
+}
+.nav-text {
+  font-family: var(--font-mono);
+  font-size: var(--tx-body);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--ink-9);
+}
+.nav-text span { color: var(--primary); }
+/* Pill nav with sliding gradient cursor */
+.nav-pill {
+  position: relative;
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--ink-3);
+  background: rgba(14, 14, 18, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: var(--r-full);
+}
+.nav-pill-item {
+  position: relative;
+  z-index: 10;
+  display: block;
+  padding: 8px 14px;
+  font-family: var(--font-body);
+  font-size: var(--tx-caption);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-7);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--d-hover) var(--ease-out-quint);
+  user-select: none;
+}
+.nav-pill-item:hover { color: var(--ink-10); }
+.nav-pill-cursor {
+  position: absolute;
+  z-index: 0;
+  top: 4px;
+  left: 0;
+  width: 0;
+  height: calc(100% - 8px);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: var(--r-full);
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 0 16px rgba(79, 124, 255, 0.35);
+  transition: left 280ms var(--ease-out-quint),
+              width 280ms var(--ease-out-quint),
+              opacity 200ms var(--ease-in-out-cubic);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-pill-cursor { transition: opacity 100ms; }
+}
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.nav-btn {
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--ink-3);
+  background: transparent;
+  color: var(--ink-7);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all var(--d-hover);
+}
+.nav-btn:hover { color: var(--ink-9); border-color: var(--ink-5); }
+
+@media (max-width: 768px) {
+  .nav-pill { display: none; }
+}
+
+/* ============ HERO (centered, 21st.dev style + Autopost brand) ============ */
+.hero {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  padding: calc(var(--nav-h) + var(--sp-16)) var(--sp-6) var(--sp-16);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.hero-bg::before, .hero-bg::after {
+  content: '';
+  position: absolute;
+  width: 900px; height: 900px;
+  border-radius: 50%;
+  filter: blur(140px);
+  opacity: 0.18;
+  animation: mesh-rotate 40s linear infinite;
+}
+.hero-bg::before {
+  top: -300px;
+  left: 50%;
+  margin-left: -450px;
+  background: radial-gradient(circle, var(--primary) 0%, transparent 60%);
+}
+.hero-bg::after {
+  bottom: -400px;
+  left: 50%;
+  margin-left: -450px;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 60%);
+  animation-direction: reverse;
+  opacity: 0.12;
+}
+.hero-grid-glow {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(79, 124, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(79, 124, 255, 0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.hero-grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' /></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.6'/></svg>");
+  opacity: 0.025;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 1;
+}
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Stagger entrance — brand-system "out-quint" */
+.hero-item {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: hero-rise 0.5s var(--ease-out-quint) forwards;
+}
+.hero-item-1 { animation-delay: 0.10s; }
+.hero-item-2 { animation-delay: 0.25s; }
+.hero-item-3 { animation-delay: 0.40s; }
+.hero-item-4 { animation-delay: 0.55s; }
+.hero-item-5 { animation-delay: 0.70s; }
+@keyframes hero-rise {
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-item { opacity: 1; transform: none; animation: none; }
+}
+
+/* Badge — translucent, 21st.dev style adapted to brand */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 6px var(--sp-4);
+  border-radius: var(--r-full);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: var(--tx-caption);
+  font-weight: 500;
+  color: var(--ink-7);
+  margin-bottom: var(--sp-8);
+  transition: all var(--d-hover) var(--ease-out-quint);
+}
+.hero-badge:hover {
+  border-color: rgba(168, 85, 247, 0.4);
+  color: var(--ink-9);
+  background: rgba(168, 85, 247, 0.06);
+}
+.hero-badge svg {
+  width: 14px; height: 14px;
+  color: var(--accent);
+}
+
+/* Headline — display-xl con gradient en línea 2 */
+.hero-headline {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 7vw, 5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  margin: 0 0 var(--sp-6);
+  color: var(--ink-9);
+}
+.hero-headline-gradient {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--ink-9) 0%, var(--primary) 60%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  padding-right: 2px; /* prevent ascender clipping in some browsers */
+}
+
+.hero-sub {
+  font-size: var(--tx-body-lg);
+  color: var(--ink-7);
+  line-height: var(--lh-normal);
+  margin: 0 0 var(--sp-10);
+  max-width: 640px;
+}
+
+.hero-ctas {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: var(--sp-16);
+}
+
+/* Inline stats with vertical dividers */
+.hero-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-8);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.hero-stat {
+  text-align: center;
+}
+.hero-stat-value {
+  font-family: var(--font-display);
+  font-size: var(--tx-h2);
+  font-weight: 600;
+  color: var(--ink-9);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1;
+}
+.hero-stat-label {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: var(--sp-2);
+}
+.hero-stat-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--ink-3);
+}
+
+@media (max-width: 640px) {
+  .hero-stats { gap: var(--sp-4); }
+  .hero-stat-divider { display: none; }
+  .hero-stat-value { font-size: var(--tx-h3); }
+}
+
+/* ============ SOCIAL MARQUEE ============ */
+.social {
+  padding: var(--sp-12) 0;
+  border-top: 1px solid var(--ink-3);
+  border-bottom: 1px solid var(--ink-3);
+  background: var(--ink-1);
+  overflow: hidden;
+}
+.social-title {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 var(--sp-6);
+}
+.social-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+  gap: var(--sp-12);
+}
+.social-marquee-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  color: var(--ink-6);
+  filter: grayscale(1);
+  opacity: 0.7;
+  transition: all var(--d-hover);
+}
+.social-marquee-item:hover {
+  filter: grayscale(0);
+  opacity: 1;
+}
+.social-marquee-item svg { width: 28px; height: 28px; }
+.social-marquee-item span {
+  font-family: var(--font-mono);
+  font-size: var(--tx-body);
+  font-weight: 500;
+}
+
+/* ============ HOW IT WORKS ============ */
+.how {
+  padding: var(--sp-24) var(--sp-6);
+  max-width: var(--content-w);
+  margin: 0 auto;
+}
+.section-head {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto var(--sp-16);
+}
+.section-eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--sp-3);
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: var(--tx-display-lg);
+  font-weight: 600;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+  color: var(--ink-9);
+}
+.section-sub {
+  font-size: var(--tx-body-lg);
+  color: var(--ink-7);
+  margin: var(--sp-4) 0 0;
+  line-height: var(--lh-normal);
+}
+
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-4);
+  position: relative;
+}
+.how-step {
+  background: linear-gradient(180deg, var(--ink-1), var(--ink-0));
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-xl);
+  padding: var(--sp-8);
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--d-hover) var(--ease-out-quint);
+}
+.how-step:hover { border-color: var(--ink-4); }
+.how-step-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-4);
+}
+.how-step-num {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}
+.how-step-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--r-md);
+  background: var(--ink-2);
+  border: 1px solid var(--ink-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-8);
+}
+.how-step-icon svg { width: 18px; height: 18px; }
+.how-step-title {
+  font-family: var(--font-display);
+  font-size: var(--tx-h3);
+  font-weight: 600;
+  color: var(--ink-9);
+  margin: 0 0 var(--sp-3);
+  letter-spacing: var(--tracking-snug);
+}
+.how-step-desc {
+  font-size: var(--tx-body);
+  color: var(--ink-7);
+  line-height: var(--lh-normal);
+  margin: 0 0 var(--sp-6);
+}
+.how-step-visual {
+  height: 200px;
+  background: var(--ink-0);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.how-step.ai .how-step-icon {
+  border-color: rgba(168, 85, 247, 0.4);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* === STEP 1 — folder with thumbnails === */
+.hv-folder-stage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  perspective: 800px;
+}
+.hv-folder {
+  position: relative;
+  width: 130px; height: 100px;
+  transform-style: preserve-3d;
+  transform: rotateX(-12deg) rotateY(-8deg);
+  animation: hv-folder-float 5s var(--ease-in-out-cubic) infinite;
+}
+@keyframes hv-folder-float {
+  0%, 100% { transform: rotateX(-12deg) rotateY(-8deg) translateY(0); }
+  50%      { transform: rotateX(-10deg) rotateY(-6deg) translateY(-6px); }
+}
+.hv-folder-back {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--ink-3), var(--ink-2));
+  border: 1px solid var(--ink-4);
+  border-radius: 6px 12px 8px 8px;
+}
+.hv-folder-back::before {
+  content: '';
+  position: absolute;
+  top: -8px; left: 14px;
+  width: 44px; height: 12px;
+  background: var(--ink-3);
+  border: 1px solid var(--ink-4);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+}
+.hv-folder-front {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, var(--ink-2), var(--ink-1));
+  border: 1px solid var(--primary);
+  border-radius: 6px 12px 8px 8px;
+  transform: translateZ(8px);
+  box-shadow: 0 8px 24px rgba(79, 124, 255, 0.3);
+}
+.hv-thumbs {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+}
+.hv-thumb {
+  width: 28px; height: 36px;
+  border-radius: 4px;
+  background: var(--ink-2);
+  border: 1px solid var(--ink-4);
+  position: relative;
+  overflow: hidden;
+  animation: hv-thumb-fall 3s var(--ease-out-quint) infinite;
+  opacity: 0;
+}
+.hv-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 2px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  opacity: 0.6;
+}
+.hv-thumb:nth-child(1) { animation-delay: 0s; }
+.hv-thumb:nth-child(2) { animation-delay: 0.4s; }
+.hv-thumb:nth-child(3) { animation-delay: 0.8s; }
+.hv-thumb:nth-child(2)::after { background: linear-gradient(135deg, var(--accent), var(--primary)); }
+.hv-thumb:nth-child(3)::after { background: linear-gradient(135deg, var(--success), var(--info)); }
+@keyframes hv-thumb-fall {
+  0%   { opacity: 0; transform: translateY(-30px) scale(1); }
+  20%  { opacity: 1; }
+  60%  { opacity: 1; transform: translateY(20px) scale(0.85); }
+  80%  { opacity: 0; transform: translateY(35px) scale(0.7); }
+  100% { opacity: 0; }
+}
+.hv-folder-label {
+  position: absolute;
+  bottom: 12px; left: 50%;
+  transform: translate(-50%, 0) translateZ(9px);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--primary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* === STEP 2 — image with floating AI tags === */
+.hv-img-stage {
+  position: relative;
+  width: 80%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hv-img {
+  width: 100px;
+  height: 130px;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(79, 124, 255, 0.4), rgba(168, 85, 247, 0.4)),
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15), transparent 60%);
+  border: 1px solid var(--ink-4);
+  position: relative;
+  box-shadow: var(--shadow-md);
+}
+.hv-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.7'/></filter><rect width='100' height='100' filter='url(%23n)' opacity='0.4'/></svg>");
+  opacity: 0.3;
+  border-radius: 8px;
+  mix-blend-mode: overlay;
+}
+.hv-tag {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-full);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent);
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  background-color: rgba(168, 85, 247, 0.12);
+  opacity: 0;
+  animation: hv-tag-pop 4s var(--ease-out-quint) infinite;
+}
+.hv-tag::before {
+  content: '✦';
+  font-size: 9px;
+}
+.hv-tag.t1 { top: 14%; right: 8%; animation-delay: 0.4s; }
+.hv-tag.t2 { top: 38%; left: -12%; animation-delay: 0.8s; }
+.hv-tag.t3 { bottom: 22%; right: -4%; animation-delay: 1.2s; }
+.hv-tag.t4 { bottom: 6%; left: 12%; animation-delay: 1.6s; }
+@keyframes hv-tag-pop {
+  0%, 5%   { opacity: 0; transform: scale(0.8); }
+  15%, 60% { opacity: 1; transform: scale(1); }
+  75%      { opacity: 1; }
+  90%, 100%{ opacity: 0; transform: scale(0.95); }
+}
+
+/* === STEP 3 — calendar with posts filling === */
+.hv-cal {
+  width: 80%;
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-md);
+  padding: 10px;
+}
+.hv-cal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--ink-3);
+}
+.hv-cal-month {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--ink-7);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.hv-cal-pulse {
+  width: 6px; height: 6px;
+  background: var(--success);
+  border-radius: 50%;
+  animation: pulse-blue 1.5s infinite;
+}
+.hv-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: 12px repeat(3, 28px);
+  gap: 3px;
+}
+.hv-cal-day {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--ink-6);
+  text-align: center;
+}
+.hv-cal-cell {
+  background: var(--ink-2);
+  border-radius: 3px;
+  position: relative;
+  border: 1px solid transparent;
+}
+.hv-cal-cell.has-post {
+  animation: hv-cell-fill 4s var(--ease-out-quint) infinite;
+}
+.hv-cal-cell.has-post::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 2px;
+  background: var(--pf, var(--primary));
+  opacity: 0;
+  animation: hv-fill-color 4s var(--ease-out-quint) infinite;
+}
+.hv-cal-cell.has-post.ai::after { background: var(--accent); }
+@keyframes hv-cell-fill {
+  0%, 100% { border-color: transparent; }
+  60%      { border-color: var(--ink-4); }
+}
+@keyframes hv-fill-color {
+  0%, 30%  { opacity: 0; transform: scale(0.5); }
+  50%      { opacity: 1; transform: scale(1); }
+  100%     { opacity: 1; }
+}
+.hv-cal-cell:nth-child(8)  { animation-delay: 0.0s; }
+.hv-cal-cell:nth-child(8)::after  { animation-delay: 0.0s; }
+.hv-cal-cell:nth-child(11) { animation-delay: 0.2s; }
+.hv-cal-cell:nth-child(11)::after { animation-delay: 0.2s; }
+.hv-cal-cell:nth-child(13) { animation-delay: 0.4s; }
+.hv-cal-cell:nth-child(13)::after { animation-delay: 0.4s; }
+.hv-cal-cell:nth-child(16) { animation-delay: 0.6s; }
+.hv-cal-cell:nth-child(16)::after { animation-delay: 0.6s; }
+.hv-cal-cell:nth-child(20) { animation-delay: 0.8s; }
+.hv-cal-cell:nth-child(20)::after { animation-delay: 0.8s; }
+.hv-cal-cell:nth-child(23) { animation-delay: 1.0s; }
+.hv-cal-cell:nth-child(23)::after { animation-delay: 1.0s; }
+.hv-cal-cell:nth-child(26) { animation-delay: 1.2s; }
+.hv-cal-cell:nth-child(26)::after { animation-delay: 1.2s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hv-folder, .hv-thumb, .hv-tag, .hv-cal-cell, .hv-cal-cell::after { animation: none; }
+  .hv-thumb, .hv-tag { opacity: 1; }
+  .hv-cal-cell.has-post::after { opacity: 1; transform: none; }
+}
+
+@media (max-width: 768px) {
+  .how-steps { grid-template-columns: 1fr; }
+}
+
+/* ============ INSIDE — visual tour del producto ============ */
+.inside {
+  padding: var(--sp-12) var(--sp-6) var(--sp-24);
+  max-width: var(--content-w);
+  margin: 0 auto;
+}
+.inside-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+}
+.inside-card {
+  background: linear-gradient(180deg, var(--ink-1), var(--ink-0));
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-xl);
+  padding: var(--sp-8);
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--d-hover) var(--ease-out-quint);
+}
+.inside-card:hover { border-color: var(--ink-4); }
+.inside-card.wide { grid-column: span 2; }
+.inside-card-step {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-7);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-full);
+  background: var(--ink-1);
+  margin-bottom: var(--sp-4);
+}
+.inside-card-step .num {
+  color: var(--primary);
+  font-weight: 600;
+}
+.inside-card-title {
+  font-family: var(--font-display);
+  font-size: var(--tx-h3);
+  font-weight: 600;
+  color: var(--ink-9);
+  margin: 0 0 var(--sp-2);
+  letter-spacing: var(--tracking-snug);
+}
+.inside-card-desc {
+  font-size: var(--tx-body);
+  color: var(--ink-7);
+  margin: 0 0 var(--sp-6);
+  line-height: var(--lh-normal);
+  max-width: 480px;
+}
+.inside-card-stage {
+  position: relative;
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  background: var(--ink-0);
+  padding: var(--sp-6);
+  overflow: hidden;
+}
+
+/* Stage 1: Drop & process — animated upload card */
+.tour-upload {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.tour-drop {
+  border: 2px dashed var(--ink-4);
+  border-radius: var(--r-md);
+  padding: var(--sp-6);
+  text-align: center;
+  background: var(--ink-1);
+  position: relative;
+  transition: all var(--d-hover) var(--ease-out-quint);
+}
+.tour-drop.active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+.tour-drop-icon {
+  width: 40px; height: 40px;
+  margin: 0 auto var(--sp-2);
+  background: var(--ink-2);
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-7);
+}
+.tour-drop-icon svg { width: 20px; height: 20px; }
+.tour-drop-text {
+  font-size: var(--tx-caption);
+  color: var(--ink-8);
+  font-weight: 500;
+}
+.tour-files {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tour-file {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 8px 10px;
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.tour-file-icon {
+  width: 24px; height: 24px;
+  background: var(--ink-2);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-7);
+}
+.tour-file-icon svg { width: 14px; height: 14px; }
+.tour-file-name { color: var(--ink-9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tour-file-status {
+  padding: 1px 6px;
+  border-radius: var(--r-full);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.tour-file-status.ok { background: rgba(74, 222, 128, 0.12); color: var(--success); }
+.tour-file-status.ai { background: var(--accent-soft); color: var(--accent); }
+.tour-file-status.ai::before { content: '✦ '; }
+
+/* Stage 2: AI labels on a preview */
+.tour-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-6);
+  padding: var(--sp-4);
+}
+.tour-preview-img {
+  width: 110px;
+  height: 140px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(79, 124, 255, 0.5), rgba(168, 85, 247, 0.5));
+  border: 1px solid var(--ink-4);
+  position: relative;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-md);
+}
+.tour-preview-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.7'/></filter><rect width='100' height='100' filter='url(%23n)' opacity='0.4'/></svg>");
+  opacity: 0.3;
+  border-radius: 8px;
+  mix-blend-mode: overlay;
+}
+.tour-preview-labels {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.tour-label-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: var(--sp-3);
+  align-items: center;
+  font-size: var(--tx-caption);
+}
+.tour-label-row dt {
+  font-family: var(--font-mono);
+  color: var(--ink-6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 10px;
+}
+.tour-label-row dd {
+  margin: 0;
+  color: var(--ink-9);
+  font-weight: 500;
+}
+.tour-label-row dd .pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--r-full);
+  background: var(--ink-2);
+  border: 1px solid var(--ink-3);
+  font-size: 10px;
+  margin-right: 4px;
+}
+.tour-label-row dd .pill.ai {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.tour-label-row dd .pill.ai::before { content: '✦ '; }
+
+/* Stage 3: Calendar with platforms */
+.tour-cal {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: 16px repeat(3, 32px);
+  gap: 4px;
+}
+.tour-cal-day {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--ink-6);
+  text-align: center;
+  letter-spacing: 0.06em;
+}
+.tour-cal-cell {
+  background: var(--ink-2);
+  border: 1px solid var(--ink-3);
+  border-radius: 3px;
+  position: relative;
+}
+.tour-cal-cell.has {
+  border-color: var(--ink-4);
+}
+.tour-cal-cell.has::before {
+  content: '';
+  position: absolute;
+  left: 3px; top: 3px;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--c, var(--primary));
+}
+.tour-cal-cell.has.ai::before { background: var(--accent); animation: pulse-violet 2s infinite; }
+
+/* Stage 4: Publishing notification flow */
+.tour-toasts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.tour-toast {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 10px 12px;
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-left: 3px solid var(--success);
+  border-radius: var(--r-md);
+  font-size: var(--tx-caption);
+}
+.tour-toast.scheduled {
+  border-left-color: var(--primary);
+}
+.tour-toast-icon {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--success);
+}
+.tour-toast.scheduled .tour-toast-icon { color: var(--primary); }
+.tour-toast-icon svg { width: 14px; height: 14px; }
+.tour-toast-text strong { color: var(--ink-9); display: block; font-weight: 500; }
+.tour-toast-text span { color: var(--ink-6); font-size: 11px; font-family: var(--font-mono); }
+.tour-toast-time {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-6);
+}
+
+/* Open-in-full link */
+.inside-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--sp-10);
+}
+
+@media (max-width: 768px) {
+  .inside-grid { grid-template-columns: 1fr; }
+  .inside-card.wide { grid-column: span 1; }
+  .tour-preview { flex-direction: column; gap: var(--sp-4); }
+  .tour-preview-labels { width: 100%; }
+}
+
+/* ============ FEATURES (5-card asymmetric, Autopost brand) ============ */
+.features {
+  padding: var(--sp-24) var(--sp-6);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.features-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--sp-3);
+}
+.feat-card {
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-xl);
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--d-hover) var(--ease-out-quint);
+}
+.feat-card:hover { border-color: var(--ink-4); }
+.feat-card-content {
+  padding: var(--sp-8);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Card spans */
+.feat-1 { grid-column: span 6; }
+.feat-2 { grid-column: span 6; }
+.feat-3 { grid-column: span 6; }
+.feat-4 { grid-column: span 6; }
+.feat-5 { grid-column: span 6; }
+
+@media (min-width: 640px) {
+  .feat-2 { grid-column: span 3; }
+  .feat-3 { grid-column: span 3; }
+}
+@media (min-width: 1024px) {
+  .feat-1 { grid-column: span 2; }
+  .feat-2 { grid-column: span 2; }
+  .feat-3 { grid-column: span 2; }
+  .feat-4 { grid-column: span 3; }
+  .feat-5 { grid-column: span 3; }
+}
+
+/* === CARD 1: Big number 100% with doodle underline === */
+.feat-bignum {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 96px;
+  width: 224px;
+  margin: 0 auto;
+}
+.feat-bignum-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--ink-3);
+}
+.feat-bignum-text {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: 56px;
+  font-weight: 600;
+  color: var(--ink-9);
+  letter-spacing: var(--tracking-tight);
+  background: linear-gradient(135deg, var(--ink-9) 30%, var(--primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.feat-1-title {
+  margin-top: var(--sp-6);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--tx-h3);
+  font-weight: 600;
+  color: var(--ink-9);
+  letter-spacing: var(--tracking-snug);
+}
+
+/* === CARD 2: Circle with icon + chart wave below === */
+.feat-circle {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  margin: 0 auto;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.feat-circle::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.feat-circle-svg {
+  width: 90px;
+  height: auto;
+}
+.feat-2-meta {
+  margin-top: var(--sp-6);
+  text-align: center;
+}
+.feat-2-title {
+  font-family: var(--font-display);
+  font-size: var(--tx-h4);
+  font-weight: 600;
+  color: var(--ink-9);
+  margin: 0 0 var(--sp-2);
+}
+.feat-card p {
+  font-size: var(--tx-body);
+  color: var(--ink-7);
+  margin: 0;
+  line-height: var(--lh-normal);
+}
+
+/* === CARD 3: Document/window mockup with line chart === */
+.feat-window {
+  position: relative;
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-md);
+  background: var(--ink-2);
+  padding: var(--sp-4);
+  padding-top: var(--sp-6);
+  margin-bottom: var(--sp-4);
+  overflow: hidden;
+}
+.feat-window-dots {
+  position: absolute;
+  top: var(--sp-2);
+  left: var(--sp-3);
+  display: flex;
+  gap: 4px;
+}
+.feat-window-dots span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--ink-3);
+  border: 1px solid var(--ink-4);
+}
+.feat-window-svg {
+  width: 100%;
+  height: auto;
+  color: var(--ink-7);
+}
+
+/* === CARD 4: Icon left + chart wave right === */
+.feat-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-6);
+  height: 100%;
+}
+.feat-icon-circle {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-8);
+}
+.feat-icon-circle::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.feat-icon-circle.ai { color: var(--accent); border-color: rgba(168, 85, 247, 0.3); }
+.feat-icon-circle.ai::before { border-color: rgba(168, 85, 247, 0.15); }
+.feat-icon-circle svg { width: 22px; height: 22px; stroke-width: 1.5; }
+.feat-split-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--sp-12);
+}
+.feat-split-right {
+  position: relative;
+  margin: -32px -32px 0 16px;
+  border-left: 1px solid var(--ink-3);
+  border-top: 1px solid var(--ink-3);
+  border-top-left-radius: var(--r-lg);
+  padding: var(--sp-6);
+  overflow: hidden;
+}
+.feat-split-right-dots {
+  position: absolute;
+  top: var(--sp-2);
+  left: var(--sp-3);
+  display: flex;
+  gap: 4px;
+}
+.feat-split-right-dots span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--ink-3);
+  border: 1px solid var(--ink-4);
+}
+.feat-wave-svg {
+  width: 100%;
+  height: auto;
+  color: var(--ink-7);
+}
+
+/* === CARD 5: Icon left + members center divider right === */
+.feat-members {
+  position: relative;
+  margin: -32px -32px 0 0;
+  height: calc(100% + 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.feat-members::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: 0 auto;
+  width: 1px;
+  background: var(--ink-3);
+}
+.feat-members-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  padding: var(--sp-6) 0;
+  width: 100%;
+}
+.feat-member {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: calc(50% + 14px);
+}
+.feat-member.right { justify-content: flex-end; margin-left: auto; }
+.feat-member.left  { justify-content: flex-start; margin-right: auto; padding-left: calc(50% - 16px); width: calc(50% + 16px); }
+.feat-member-tag {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  padding: 4px 10px;
+  border: 1px solid var(--ink-3);
+  background: var(--ink-2);
+  border-radius: var(--r-sm);
+  color: var(--ink-8);
+  white-space: nowrap;
+}
+.feat-member-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border: 4px solid var(--ink-1);
+  flex-shrink: 0;
+}
+.feat-member-avatar.b { background: linear-gradient(135deg, var(--accent), var(--success)); }
+.feat-member-avatar.c { background: linear-gradient(135deg, var(--success), var(--info)); }
+
+@media (max-width: 640px) {
+  .feat-card-content { padding: var(--sp-6); }
+  .feat-split { grid-template-columns: 1fr; }
+  .feat-split-right { margin: var(--sp-4) 0 0; border-radius: var(--r-md); border-left: 1px solid var(--ink-3); }
+  .feat-members { margin: 0; height: auto; }
+}
+
+/* ============ COMPARE ============ */
+.compare {
+  padding: var(--sp-24) var(--sp-6);
+  max-width: var(--content-w);
+  margin: 0 auto;
+}
+.compare-stage {
+  position: relative;
+  height: 480px;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  border: 1px solid var(--ink-3);
+  user-select: none;
+}
+.compare-side {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-12);
+  text-align: center;
+}
+.compare-before {
+  background: var(--ink-2);
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0, transparent 10px, rgba(248, 113, 113, 0.05) 10px, rgba(248, 113, 113, 0.05) 11px);
+  z-index: 1;
+}
+.compare-after {
+  background: linear-gradient(135deg, var(--ink-1), var(--ink-2));
+  clip-path: inset(0 0 0 50%);
+  z-index: 2;
+}
+.compare-label {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.compare-after .compare-label { color: var(--primary); }
+.compare-headline {
+  font-family: var(--font-display);
+  font-size: var(--tx-h2);
+  font-weight: 600;
+  color: var(--ink-9);
+  margin: 0;
+  max-width: 360px;
+  letter-spacing: var(--tracking-tight);
+}
+.compare-chaos {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  width: 240px;
+  margin-top: var(--sp-4);
+}
+.compare-chaos-cell {
+  height: 24px;
+  background: rgba(248, 113, 113, 0.15);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 2px;
+  transform: rotate(var(--r));
+}
+.compare-clean {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  width: 240px;
+  margin-top: var(--sp-4);
+}
+.compare-clean-cell {
+  height: 24px;
+  background: var(--primary-soft);
+  border: 1px solid var(--primary);
+  border-radius: 2px;
+}
+.compare-handle {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: var(--primary);
+  z-index: 3;
+  cursor: ew-resize;
+  transition: left 0s linear;
+}
+.compare-handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: var(--glow-blue);
+}
+.compare-handle::before {
+  content: '⇋';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--ink-10);
+  font-size: 16px;
+  z-index: 1;
+}
+
+/* ============ TESTIMONIALS ============ */
+.tm {
+  padding: var(--sp-24) var(--sp-6);
+  max-width: var(--content-w);
+  margin: 0 auto;
+}
+.tm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--sp-4);
+}
+.tm-card {
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-lg);
+  padding: var(--sp-6);
+  transition: transform var(--d-hover) var(--ease-out-quint), border-color var(--d-hover);
+  transform-style: preserve-3d;
+}
+.tm-card:hover { border-color: var(--ink-5); }
+.tm-quote {
+  font-size: var(--tx-body-lg);
+  color: var(--ink-9);
+  line-height: var(--lh-normal);
+  margin: 0 0 var(--sp-5);
+}
+.tm-person {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.tm-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.tm-name {
+  font-weight: 600;
+  color: var(--ink-9);
+  font-size: var(--tx-body);
+}
+.tm-role {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+}
+
+/* ============ PRICING ============ */
+.pricing {
+  padding: var(--sp-24) var(--sp-6);
+  max-width: var(--content-w);
+  margin: 0 auto;
+}
+.pricing-toggle {
+  display: inline-flex;
+  align-items: center;
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-full);
+  padding: 4px;
+  margin-bottom: var(--sp-12);
+  gap: 4px;
+}
+.pricing-toggle button {
+  border: none;
+  background: transparent;
+  color: var(--ink-7);
+  padding: var(--sp-2) var(--sp-5);
+  border-radius: var(--r-full);
+  font-family: inherit;
+  font-size: var(--tx-body);
+  cursor: pointer;
+  transition: all var(--d-hover);
+  position: relative;
+}
+.pricing-toggle button.active {
+  background: var(--primary);
+  color: var(--ink-10);
+  font-weight: 500;
+}
+.pricing-save {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: var(--accent);
+  color: var(--ink-10);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: var(--r-full);
+  text-transform: uppercase;
+}
+.pricing-tiers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-4);
+}
+.tier {
+  background: var(--ink-1);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-xl);
+  padding: var(--sp-8);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.tier.featured {
+  border-color: var(--primary);
+  background: linear-gradient(180deg, var(--primary-soft), transparent 40%), var(--ink-1);
+  box-shadow: var(--glow-blue);
+}
+.tier-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--primary);
+  color: var(--ink-10);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: var(--r-full);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.tier-name {
+  font-family: var(--font-display);
+  font-size: var(--tx-h3);
+  font-weight: 600;
+  color: var(--ink-9);
+  margin: 0 0 var(--sp-1);
+}
+.tier-desc {
+  font-size: var(--tx-body);
+  color: var(--ink-7);
+  margin: 0 0 var(--sp-6);
+}
+.tier-price {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-6);
+}
+.tier-price-num {
+  font-family: var(--font-display);
+  font-size: 56px;
+  font-weight: 600;
+  color: var(--ink-9);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1;
+}
+.tier-price-period {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+}
+.tier-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--sp-8);
+  flex: 1;
+}
+.tier-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-2) 0;
+  font-size: var(--tx-body);
+  color: var(--ink-8);
+}
+.tier-features li::before {
+  content: '';
+  width: 14px; height: 14px;
+  background: var(--success);
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5 9-11'/></svg>") center/contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5 9-11'/></svg>") center/contain no-repeat;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+@media (max-width: 768px) {
+  .pricing-tiers { grid-template-columns: 1fr; }
+}
+
+/* ============ FAQ ============ */
+.faq {
+  padding: var(--sp-24) var(--sp-6);
+  max-width: 800px;
+  margin: 0 auto;
+}
+.faq-list {
+  margin-top: var(--sp-12);
+}
+.faq-item {
+  border-bottom: 1px solid var(--ink-3);
+}
+.faq-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  padding: var(--sp-6) 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--tx-h4);
+  color: var(--ink-9);
+  text-align: left;
+  font-weight: 500;
+}
+.faq-trigger:hover { color: var(--primary); }
+.faq-icon {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  color: var(--ink-7);
+  transition: transform var(--d-hover) var(--ease-out-quint);
+  flex-shrink: 0;
+}
+.faq-item.open .faq-icon {
+  transform: rotate(45deg);
+  background: var(--primary);
+  color: var(--ink-10);
+}
+.faq-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--d-entrance) var(--ease-out-quint);
+}
+.faq-item.open .faq-body { max-height: 500px; }
+.faq-body p {
+  margin: 0;
+  padding: 0 0 var(--sp-6);
+  color: var(--ink-7);
+  font-size: var(--tx-body-lg);
+  line-height: var(--lh-normal);
+}
+
+/* ============ FOOTER ============ */
+.footer {
+  background: var(--ink-1);
+  border-top: 1px solid var(--ink-3);
+  padding: var(--sp-16) var(--sp-6) var(--sp-8);
+}
+.footer-inner {
+  max-width: var(--content-w);
+  margin: 0 auto;
+}
+.footer-cols {
+  display: grid;
+  grid-template-columns: 2fr repeat(4, 1fr);
+  gap: var(--sp-8);
+  margin-bottom: var(--sp-12);
+}
+.footer-brand-text {
+  font-family: var(--font-mono);
+  font-size: var(--tx-h3);
+  color: var(--ink-9);
+  letter-spacing: -0.04em;
+  font-weight: 600;
+  margin-bottom: var(--sp-3);
+}
+.footer-brand-text span { color: var(--primary); }
+.footer-tag {
+  color: var(--ink-7);
+  font-size: var(--tx-body);
+  max-width: 280px;
+}
+.footer-col h4 {
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--sp-3);
+}
+.footer-col a {
+  display: block;
+  padding: var(--sp-1) 0;
+  color: var(--ink-7);
+  text-decoration: none;
+  font-size: var(--tx-body);
+  transition: color var(--d-hover);
+}
+.footer-col a:hover { color: var(--ink-9); }
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--sp-6);
+  border-top: 1px solid var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--tx-caption);
+  color: var(--ink-6);
+}
+.footer-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.footer-status-dot {
+  width: 8px; height: 8px;
+  background: var(--success);
+  border-radius: 50%;
+  animation: pulse-blue 2s infinite;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+}
+@media (max-width: 768px) {
+  .footer-cols { grid-template-columns: 1fr 1fr; }
+  .footer-brand { grid-column: span 2; }
+}
+</style>
+</head>
+<body class="grain">
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <div class="nav-mark"></div>
+      <div class="nav-text">autopost<span>.</span></div>
+    </a>
+    <ul class="nav-pill" id="navPill" role="navigation" aria-label="Navegación principal">
+      <li><a href="#bento" class="nav-pill-item" data-i18n="nav.product">Producto</a></li>
+      <li><a href="#how" class="nav-pill-item" data-i18n="nav.how">Cómo funciona</a></li>
+      <li><a href="#pricing" class="nav-pill-item" data-i18n="nav.pricing">Precios</a></li>
+      <li><a href="brand-system.html" class="nav-pill-item" data-i18n="nav.brand">Brand</a></li>
+      <li><a href="dashboard.html" class="nav-pill-item" data-i18n="nav.dashboard">Dashboard</a></li>
+      <li class="nav-pill-cursor" aria-hidden="true"></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="nav-btn" data-locale-toggle aria-label="Cambiar idioma">ES</button>
+      <button class="nav-btn" data-theme-toggle aria-label="Cambiar tema">◐</button>
+      <a href="#pricing" class="btn btn-primary" data-magnetic="0.2" data-i18n="nav.cta">Comenzar</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-glow"></div>
+  <div class="hero-grain"></div>
+
+  <div class="hero-inner">
+    <div class="hero-badge hero-item hero-item-1">
+      <i data-icon="sparkle"></i>
+      <span data-i18n="hero.eyebrow">Programación de redes con IA</span>
+    </div>
+
+    <h1 class="hero-headline hero-item hero-item-2">
+      <span data-i18n="hero.headline.1">Tira la carpeta.</span>
+      <br>
+      <span class="hero-headline-gradient" data-i18n="hero.headline.2">El resto va solo.</span>
+    </h1>
+
+    <p class="hero-sub hero-item hero-item-3" data-i18n="hero.sub">Sube una carpeta de posts. La IA detecta formato, sugiere hora y te monta el calendario. Tú apruebas.</p>
+
+    <div class="hero-ctas hero-item hero-item-4">
+      <a href="#pricing" class="btn btn-primary" data-magnetic="0.2"><span data-i18n="hero.cta.primary">Comenzar gratis</span> →</a>
+      <a href="#demo" class="btn btn-ghost" data-magnetic="0.15"><span data-i18n="hero.cta.ghost">Ver demo en vivo</span></a>
+    </div>
+
+    <div class="hero-stats hero-item hero-item-5">
+      <div class="hero-stat">
+        <div class="hero-stat-value"><span data-count="12.4">0</span>M+</div>
+        <div class="hero-stat-label" data-i18n="hero.stat1">posts publicados</div>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-value"><span data-count="8.7">0</span>s</div>
+        <div class="hero-stat-label" data-i18n="hero.stat2">carpeta procesada</div>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-value"><span data-count="47">0</span></div>
+        <div class="hero-stat-label" data-i18n="hero.stat3">redes conectadas</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SOCIAL MARQUEE ============ -->
+<section class="social">
+  <p class="social-title" data-i18n="social.title">Publica nativo en</p>
+  <div class="social-marquee">
+    <div class="social-marquee-item"><i data-icon="instagram"></i><span>Instagram</span></div>
+    <div class="social-marquee-item"><i data-icon="tiktok"></i><span>TikTok</span></div>
+    <div class="social-marquee-item"><i data-icon="x"></i><span>X</span></div>
+    <div class="social-marquee-item"><i data-icon="linkedin"></i><span>LinkedIn</span></div>
+    <div class="social-marquee-item"><i data-icon="youtube"></i><span>YouTube Shorts</span></div>
+    <div class="social-marquee-item"><i data-icon="threads"></i><span>Threads</span></div>
+    <div class="social-marquee-item"><i data-icon="facebook"></i><span>Facebook</span></div>
+    <!-- duplicate for infinite loop -->
+    <div class="social-marquee-item"><i data-icon="instagram"></i><span>Instagram</span></div>
+    <div class="social-marquee-item"><i data-icon="tiktok"></i><span>TikTok</span></div>
+    <div class="social-marquee-item"><i data-icon="x"></i><span>X</span></div>
+    <div class="social-marquee-item"><i data-icon="linkedin"></i><span>LinkedIn</span></div>
+    <div class="social-marquee-item"><i data-icon="youtube"></i><span>YouTube Shorts</span></div>
+    <div class="social-marquee-item"><i data-icon="threads"></i><span>Threads</span></div>
+    <div class="social-marquee-item"><i data-icon="facebook"></i><span>Facebook</span></div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="how" id="how">
+  <header class="section-head in-view">
+    <div class="section-eyebrow">CÓMO FUNCIONA</div>
+    <h2 class="section-title" data-i18n="how.title">Tres pasos. Sin fricción.</h2>
+    <p class="section-sub" data-i18n="how.sub">Subes la carpeta. La IA la entiende. El calendario se publica solo.</p>
+  </header>
+
+  <div class="how-steps stagger">
+    <!-- STEP 1 -->
+    <div class="how-step in-view">
+      <div class="how-step-meta">
+        <div class="how-step-num" data-i18n="how.s1.label">Paso 01</div>
+        <div class="how-step-icon"><i data-icon="folder"></i></div>
+      </div>
+      <h3 class="how-step-title" data-i18n="how.s1.title">Tira la carpeta</h3>
+      <p class="how-step-desc" data-i18n="how.s1.desc">Imágenes, vídeos, copys, drafts mezclados. Da igual el orden — cero edición previa.</p>
+      <div class="how-step-visual">
+        <div class="hv-folder-stage">
+          <div class="hv-folder">
+            <div class="hv-folder-back"></div>
+            <div class="hv-folder-front">
+              <div class="hv-folder-label">posts/abril</div>
+            </div>
+          </div>
+          <div class="hv-thumbs">
+            <div class="hv-thumb"></div>
+            <div class="hv-thumb"></div>
+            <div class="hv-thumb"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="how-step ai in-view">
+      <div class="how-step-meta">
+        <div class="how-step-num" data-i18n="how.s2.label">Paso 02</div>
+        <div class="how-step-icon"><i data-icon="sparkle"></i></div>
+      </div>
+      <h3 class="how-step-title" data-i18n="how.s2.title">La IA lo entiende</h3>
+      <p class="how-step-desc" data-i18n="how.s2.desc">Detecta qué es cada cosa, en qué red va y a qué hora rinde mejor.</p>
+      <div class="how-step-visual">
+        <div class="hv-img-stage">
+          <div class="hv-img"></div>
+          <div class="hv-tag t1">Carrusel · 3 imágenes</div>
+          <div class="hv-tag t2">Instagram + LinkedIn</div>
+          <div class="hv-tag t3">Mejor hora · 14:30</div>
+          <div class="hv-tag t4">Tono profesional</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="how-step in-view">
+      <div class="how-step-meta">
+        <div class="how-step-num" data-i18n="how.s3.label">Paso 03</div>
+        <div class="how-step-icon"><i data-icon="calendar"></i></div>
+      </div>
+      <h3 class="how-step-title" data-i18n="how.s3.title">Y publica solo</h3>
+      <p class="how-step-desc" data-i18n="how.s3.desc">Tú apruebas. Autopost publica en cada red en su momento. Tú vuelves a crear.</p>
+      <div class="how-step-visual">
+        <div class="hv-cal">
+          <div class="hv-cal-head">
+            <span class="hv-cal-month">Esta semana</span>
+            <span class="hv-cal-pulse"></span>
+          </div>
+          <div class="hv-cal-grid">
+            <div class="hv-cal-day">L</div><div class="hv-cal-day">M</div><div class="hv-cal-day">X</div><div class="hv-cal-day">J</div><div class="hv-cal-day">V</div><div class="hv-cal-day">S</div><div class="hv-cal-day">D</div>
+            <div class="hv-cal-cell has-post" style="--pf:#E4405F"></div><div class="hv-cal-cell"></div><div class="hv-cal-cell has-post ai"></div><div class="hv-cal-cell"></div><div class="hv-cal-cell has-post" style="--pf:#1DA1F2"></div><div class="hv-cal-cell"></div><div class="hv-cal-cell"></div>
+            <div class="hv-cal-cell"></div><div class="hv-cal-cell has-post" style="--pf:#FF0050"></div><div class="hv-cal-cell"></div><div class="hv-cal-cell has-post" style="--pf:#0A66C2"></div><div class="hv-cal-cell"></div><div class="hv-cal-cell has-post ai"></div><div class="hv-cal-cell"></div>
+            <div class="hv-cal-cell has-post" style="--pf:#E4405F"></div><div class="hv-cal-cell"></div><div class="hv-cal-cell has-post" style="--pf:#FF0000"></div><div class="hv-cal-cell"></div><div class="hv-cal-cell"></div><div class="hv-cal-cell has-post" style="--pf:#E4405F"></div><div class="hv-cal-cell"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INSIDE — visual tour ============ -->
+<section class="inside" id="demo">
+  <header class="section-head in-view">
+    <div class="section-eyebrow">POR DENTRO</div>
+    <h2 class="section-title">Así es Autopost por dentro.</h2>
+    <p class="section-sub">Cuatro momentos del producto. Sin tecnicismos.</p>
+  </header>
+
+  <div class="inside-grid stagger">
+    <!-- 01 — UPLOAD -->
+    <div class="inside-card in-view">
+      <span class="inside-card-step"><span class="num">01</span> · Subir</span>
+      <h3 class="inside-card-title">Sueltas la carpeta. Ya está.</h3>
+      <p class="inside-card-desc">Arrastra desde tu Mac, Drive o Dropbox. Vídeos, imágenes, textos. Autopost los guarda y empieza a trabajar.</p>
+      <div class="inside-card-stage">
+        <div class="tour-upload">
+          <div class="tour-drop active">
+            <div class="tour-drop-icon"><i data-icon="upload"></i></div>
+            <div class="tour-drop-text">posts/abril-2026.zip · 24 archivos</div>
+          </div>
+          <div class="tour-files">
+            <div class="tour-file">
+              <div class="tour-file-icon"><i data-icon="video"></i></div>
+              <span class="tour-file-name">reel-anuncio.mov</span>
+              <span class="tour-file-status ok">✓ subido</span>
+            </div>
+            <div class="tour-file">
+              <div class="tour-file-icon"><i data-icon="image"></i></div>
+              <span class="tour-file-name">carrusel-3-img.zip</span>
+              <span class="tour-file-status ai">analizando</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02 — AI READS -->
+    <div class="inside-card in-view">
+      <span class="inside-card-step"><span class="num">02</span> · IA</span>
+      <h3 class="inside-card-title">La IA lee cada post. Y te lo explica.</h3>
+      <p class="inside-card-desc">Te dice qué ha visto en cada archivo, en qué red encaja mejor y a qué hora rinde más. En español.</p>
+      <div class="inside-card-stage">
+        <div class="tour-preview">
+          <div class="tour-preview-img"></div>
+          <dl class="tour-preview-labels">
+            <div class="tour-label-row"><dt>Tipo</dt><dd><span class="pill">Carrusel · 3 imágenes</span></dd></div>
+            <div class="tour-label-row"><dt>Redes</dt><dd><span class="pill ai">Instagram</span><span class="pill ai">LinkedIn</span></dd></div>
+            <div class="tour-label-row"><dt>Hora</dt><dd><span class="pill ai">Martes 14:30</span></dd></div>
+            <div class="tour-label-row"><dt>Tono</dt><dd><span class="pill ai">Profesional cálido</span></dd></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <!-- 03 — CALENDAR -->
+    <div class="inside-card in-view">
+      <span class="inside-card-step"><span class="num">03</span> · Calendario</span>
+      <h3 class="inside-card-title">Tu mes, ya organizado.</h3>
+      <p class="inside-card-desc">Cada punto es una publicación. Cada color, una red. Si quieres mover algo, lo arrastras y ya.</p>
+      <div class="inside-card-stage">
+        <div class="tour-cal">
+          <div class="tour-cal-day">L</div><div class="tour-cal-day">M</div><div class="tour-cal-day">X</div><div class="tour-cal-day">J</div><div class="tour-cal-day">V</div><div class="tour-cal-day">S</div><div class="tour-cal-day">D</div>
+          <div class="tour-cal-cell has" style="--c:#E4405F"></div><div class="tour-cal-cell"></div><div class="tour-cal-cell has ai"></div><div class="tour-cal-cell"></div><div class="tour-cal-cell has" style="--c:#1DA1F2"></div><div class="tour-cal-cell"></div><div class="tour-cal-cell"></div>
+          <div class="tour-cal-cell has" style="--c:#0A66C2"></div><div class="tour-cal-cell has" style="--c:#FF0050"></div><div class="tour-cal-cell"></div><div class="tour-cal-cell has ai"></div><div class="tour-cal-cell"></div><div class="tour-cal-cell has" style="--c:#FF0000"></div><div class="tour-cal-cell"></div>
+          <div class="tour-cal-cell"></div><div class="tour-cal-cell has" style="--c:#E4405F"></div><div class="tour-cal-cell has ai"></div><div class="tour-cal-cell"></div><div class="tour-cal-cell has" style="--c:#0A66C2"></div><div class="tour-cal-cell"></div><div class="tour-cal-cell has" style="--c:#E4405F"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 04 — PUBLISH -->
+    <div class="inside-card in-view">
+      <span class="inside-card-step"><span class="num">04</span> · Publica</span>
+      <h3 class="inside-card-title">Y tú te enteras cuando ya está hecho.</h3>
+      <p class="inside-card-desc">Cuando llega la hora, Autopost publica desde tu cuenta. Te llega aviso. Tú vuelves a crear.</p>
+      <div class="inside-card-stage">
+        <div class="tour-toasts">
+          <div class="tour-toast">
+            <div class="tour-toast-icon"><i data-icon="check"></i></div>
+            <div class="tour-toast-text"><strong>Publicado en Instagram</strong><span>Reel — anuncio Q2</span></div>
+            <div class="tour-toast-time">hace 2 min</div>
+          </div>
+          <div class="tour-toast">
+            <div class="tour-toast-icon"><i data-icon="check"></i></div>
+            <div class="tour-toast-text"><strong>Publicado en LinkedIn</strong><span>Carrusel — case study</span></div>
+            <div class="tour-toast-time">hace 5 min</div>
+          </div>
+          <div class="tour-toast scheduled">
+            <div class="tour-toast-icon"><i data-icon="clock"></i></div>
+            <div class="tour-toast-text"><strong>Programado · TikTok</strong><span>Detrás cámara · sale a las 18:00</span></div>
+            <div class="tour-toast-time">en 3h 12min</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="inside-cta">
+    <a href="dashboard.html" class="btn btn-ghost" data-magnetic="0.15" target="_blank">Ver el dashboard completo →</a>
+  </div>
+</section>
+
+<!-- ============ FEATURES (5-card asymmetric) ============ -->
+<section class="features" id="bento">
+  <header class="section-head in-view">
+    <div class="section-eyebrow">CAPACIDADES</div>
+    <h2 class="section-title" data-i18n="bento.title">Hace lo que llevas haciendo a mano. Mejor.</h2>
+  </header>
+
+  <div class="features-grid stagger">
+
+    <!-- CARD 1 — 100% automático -->
+    <div class="feat-card feat-1 in-view">
+      <div class="feat-card-content" style="align-items:center;justify-content:center">
+        <div class="feat-bignum">
+          <svg class="feat-bignum-svg" viewBox="0 0 254 104" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <path d="M112.891 97.7022C140.366 97.0802 171.004 94.6715 201.087 87.5116C210.43 85.2881 219.615 82.6412 228.284 78.2473C232.198 76.3179 235.905 73.9942 239.348 71.3124C241.85 69.2557 243.954 66.7571 245.555 63.9408C249.34 57.3235 248.281 50.5341 242.498 45.6109C239.033 42.7237 235.228 40.2703 231.169 38.3054C219.443 32.7209 207.141 28.4382 194.482 25.534C184.013 23.1927 173.358 21.7755 162.64 21.2989C161.376 21.3512 160.113 21.181 158.908 20.796C158.034 20.399 156.857 19.1682 156.962 18.4535C157.115 17.8927 157.381 17.3689 157.743 16.9139C158.104 16.4588 158.555 16.0821 159.067 15.8066C160.14 15.4683 161.274 15.3733 162.389 15.5286C179.805 15.3566 196.626 18.8373 212.998 24.462C220.978 27.2494 228.798 30.4747 236.423 34.1232C240.476 36.1159 244.202 38.7131 247.474 41.8258C254.342 48.2578 255.745 56.9397 251.841 65.4892C249.793 69.8582 246.736 73.6777 242.921 76.6327C236.224 82.0192 228.522 85.4602 220.502 88.2924C205.017 93.7847 188.964 96.9081 172.738 99.2109C153.442 101.949 133.993 103.478 114.506 103.79C91.1468 104.161 67.9334 102.97 45.1169 97.5831C36.0094 95.5616 27.2626 92.1655 19.1771 87.5116C13.839 84.5746 9.1557 80.5802 5.41318 75.7725C-0.54238 67.7259 -1.13794 59.1763 3.25594 50.2827C5.82447 45.3918 9.29572 41.0315 13.4863 37.4319C24.2989 27.5721 37.0438 20.9681 50.5431 15.7272C68.1451 8.8849 86.4883 5.1395 105.175 2.83669C129.045 0.0992292 153.151 0.134761 177.013 2.94256C197.672 5.23215 218.04 9.01724 237.588 16.3889C240.089 17.3418 242.498 18.5197 244.933 19.6446C246.627 20.4387 247.725 21.6695 246.997 23.615C246.455 25.1105 244.814 25.5605 242.63 24.5811C230.322 18.9961 217.233 16.1904 204.117 13.4376C188.761 10.3438 173.2 8.36665 157.558 7.52174C129.914 5.70776 102.154 8.06792 75.2124 14.5228C60.6177 17.8788 46.5758 23.2977 33.5102 30.6161C26.6595 34.3329 20.4123 39.0673 14.9818 44.658C12.9433 46.8071 11.1336 49.1622 9.58207 51.6855C4.87056 59.5336 5.61172 67.2494 11.9246 73.7608C15.2064 77.0494 18.8775 79.925 22.8564 82.3236C31.6176 87.7101 41.3848 90.5291 51.3902 92.5804C70.6068 96.5773 90.0219 97.7419 112.891 97.7022Z" fill="currentColor"/>
+          </svg>
+          <span class="feat-bignum-text">100%</span>
+        </div>
+        <h3 class="feat-1-title">Automático.<br>Sin tocar un post.</h3>
+      </div>
+    </div>
+
+    <!-- CARD 2 — Detección de formato (sparkle IA en círculo) -->
+    <div class="feat-card feat-2 in-view">
+      <div class="feat-card-content">
+        <div class="feat-circle">
+          <svg class="feat-circle-svg" viewBox="0 0 212 143" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- doodle waves muted (background) -->
+            <path d="M44 55c-1-1-2-2-2-3 0-1 0-2 1-3 8-10 17-18 28-23 11-6 22-9 35-9 13 0 25 3 36 9 11 5 20 13 28 23 1 1 1 2 1 3 0 1-1 2-2 3-1 1-2 1-3 1-1 0-2-1-3-2-7-9-15-16-25-21-10-5-21-7-32-7-11 0-22 2-32 7-10 5-19 12-26 21-1 1-2 2-3 2-1 0-2 0-3-1z M126 142c-12-3-22-9-30-18-8-9-12-21-12-34 0-6 2-11 6-15 4-4 9-6 15-6 6 0 11 2 15 6 4 4 6 9 6 15 0 4 2 7 5 10 3 3 6 4 10 4 4 0 8-1 10-4 3-3 4-6 4-10 0-14-5-25-15-34-10-9-22-14-36-14-14 0-26 5-36 14-10 9-15 21-15 34 0 3 0 7 1 11 1 4 2 9 4 14 0 1 0 2 0 3-1 1-1 1-2 2-1 0-2 0-3 0-1-1-2-1-2-2-2-5-3-9-4-13-1-5-1-9-1-14 0-16 6-29 17-40 11-11 25-16 41-16 16 0 30 5 41 16 11 11 17 24 17 40 0 6-2 11-6 15-4 4-9 6-15 6-6 0-11-2-16-6-4-4-7-9-7-15 0-4-1-7-4-10-3-3-6-4-10-4-4 0-7 1-10 4-3 3-4 6-4 10 0 11 3 21 10 28 7 8 16 13 27 16 1 0 2 1 2 2 0 1 0 2 0 3 0 1-1 1-1 2-1 1-2 1-3 1z" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+            <!-- center horizontal line in primary -->
+            <path d="M3 72H209" stroke="#4F7CFF" stroke-width="6" stroke-linecap="round"/>
+            <!-- top arc highlighted -->
+            <path d="M44 55c8-10 17-18 28-23 11-6 22-9 35-9 13 0 25 3 36 9 11 5 20 13 28 23" stroke="url(#feat2grad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="feat2grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#A855F7" stop-opacity="0"/>
+                <stop offset="100%" stop-color="#4F7CFF" stop-opacity="1"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="feat-2-meta">
+          <h3 class="feat-2-title">Detección de formato</h3>
+          <p>Reel · carrusel · story · post estático. La IA agrupa cada asset en su sitio.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 3 — Engagement chart "documento" -->
+    <div class="feat-card feat-3 in-view">
+      <div class="feat-card-content">
+        <div class="feat-window">
+          <div class="feat-window-dots"><span></span><span></span><span></span></div>
+          <svg class="feat-window-svg" viewBox="0 0 386 123" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- header icons + text muted -->
+            <circle cx="29" cy="29" r="14" fill="#2A2A36"/>
+            <path d="M29 23v12M35 29l-6 6-6-6" stroke="#A8A8BD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="55" y="32" font-family="JetBrains Mono, monospace" font-size="11" fill="#A8A8BD">engagement.csv</text>
+            <text x="265" y="32" font-family="JetBrains Mono, monospace" font-size="13" fill="#F4F4F8" font-weight="600">+28.4%</text>
+            <!-- chart curve growing -->
+            <path d="M3 121C3 121 15 94 36 88s30-7 50-7c11 0 20-17 28-17s9 28 17 28 18-14 30-12c11 3 32 12 39 12s12-28 20-28 25 30 31 28 14-30 21-30c6 0 18 28 21 28 8 0 13-15 18-15 7 0 18-8 30-9 12-2 13 18 28 17 15-1 21 26 21 26" stroke="#4F7CFF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <path d="M3 123C3 123 15 94 36 88s30-7 50-7c11 0 20-17 28-17s9 28 17 28 18-14 30-12c11 3 32 12 39 12s12-28 20-28 25 30 31 28 14-30 21-30c6 0 18 28 21 28 8 0 13-15 18-15 7 0 18-8 30-9 12-2 13 18 28 17 15-1 21 26 21 26 V123 H3 Z" fill="url(#feat3grad)"/>
+            <defs>
+              <linearGradient id="feat3grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#4F7CFF" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#4F7CFF" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div style="text-align:center">
+          <h3 class="feat-2-title">Métricas que crecen</h3>
+          <p>Engagement, alcance, mejor hora. Sin vanity metrics.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 4 — IA explícita: copy en tu tono (con sparkle violeta) -->
+    <div class="feat-card feat-4 in-view">
+      <div class="feat-card-content">
+        <div class="feat-split">
+          <div class="feat-split-left">
+            <div class="feat-icon-circle ai">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6M12 15v6M3 12h6M15 12h6M5.6 5.6l4.2 4.2M14.2 14.2l4.2 4.2M5.6 18.4l4.2-4.2M14.2 9.8l4.2-4.2"/></svg>
+            </div>
+            <div>
+              <span class="chip chip-ai" style="margin-bottom:var(--sp-3)">✦ Inteligencia</span>
+              <h3 class="feat-2-title" data-i18n="bento.ai.title">IA que entiende tu marca</h3>
+              <p data-i18n="bento.ai.desc">Detecta formato, sugiere franja horaria, escribe el copy en tu tono.</p>
+            </div>
+          </div>
+          <div class="feat-split-right">
+            <div class="feat-split-right-dots"><span></span><span></span><span></span></div>
+            <svg class="feat-wave-svg" viewBox="0 0 366 231" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- audio-wave style line -->
+              <path d="M1 180l3-8v12l3-10 1 10 2 3v-31l3-3v-7l3-10v15v6l1 5 1 11v-14l2-5 2-5v-10l2 5v-16l2 2v-7l2-3 2-6v11l1 4 2 11v-8l1-7 1-4 2 9 2 4v-9v-4l3 4v-6l2-11 1-9v-11l2 6v8l3-17 2-7 1 5 3 2v9l2 5 1 20 2-6 2-4 3-8 2-4 1 8 2 6v6l1 5 2-7 1 7v4l2 3v10l3-10v-12l4-7 2-7v5l2 6 2 4 1-8 2-6 1 4v15l3 4v-9l2-11 1-4v17l2 3 2 5 2-6 2-4 2 11v7l3 5 2-7 2-4 2 7 1 5 1 5 3-5 4-6v9l3 3 2 6 3-6 2 3 4 6 2-12 2-6 3 3 4-7 4-4 4-8 4-4v-8l3-5v-6l2-5v-7l2-6 2 6 9-11 2 8 3-8V81l2-12 2-12 2 6 1 17 1 26 3-26 2-4v23l3-4 2-7v-8l2-4 2 6v8l1 24 2-13 2-5 2 4v4l2 5 2-26 2-15 2-3 2-6v23l2-4 2-10v8h4v11l2 14 2-23 3 19v10l4-2 2 11 2-15 3-4 1 12v-19l2 2 4-5 1 12 3-2 3 5 2-8 1-7 3-9 1 12 2-29 3 8 7-53-3 45 3 9 6-47-1 38v8l2 9 3-19 1 17 3 4 2 7 2-23 2-43 5-18-3 56 2 6 6-41-6 93 2-10 2 7v-18l4-15 2 15v8l1 3 3 7 2-15 2 8 2-10 3 6 1-21 3-19 2 14 3-22 2-4 1 7 3 4v14l3 14 2 6 4-13 1-3 2 11 1 5 2-2 2 9 3 7 1-3" stroke="#4F7CFF" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M1 180l3-8v12l3-10 1 10 2 3v-31l3-3v-7l3-10v15v6l1 5 1 11v-14l2-5 2-5v-10l2 5v-16l2 2v-7l2-3 2-6v11l1 4 2 11v-8l1-7 1-4 2 9 2 4v-9v-4l3 4v-6l2-11 1-9v-11l2 6v8l3-17 2-7 1 5 3 2v9l2 5 1 20 2-6 2-4 3-8 2-4 1 8 2 6v6l1 5 2-7 1 7v4l2 3v10l3-10v-12l4-7 2-7v5l2 6 2 4 1-8 2-6 1 4v15l3 4v-9l2-11 1-4v17l2 3 2 5 2-6 2-4 2 11v7l3 5 2-7 2-4 2 7 1 5 1 5 3-5 4-6v9l3 3 2 6 3-6 2 3 4 6 2-12 2-6 3 3 4-7 4-4 4-8 4-4v-8l3-5v-6l2-5v-7l2-6 2 6 9-11 2 8 3-8V81l2-12 2-12 2 6 1 17 1 26 3-26 2-4v23l3-4 2-7v-8l2-4 2 6v8l1 24 2-13 2-5 2 4v4l2 5 2-26 2-15 2-3 2-6v23l2-4 2-10v8h4v11l2 14 2-23 3 19v10l4-2 2 11 2-15 3-4 1 12v-19l2 2 4-5 1 12 3-2 3 5 2-8 1-7 3-9 1 12 2-29 3 8 7-53-3 45 3 9 6-47-1 38v8l2 9 3-19 1 17 3 4 2 7 2-23 2-43 5-18-3 56 2 6 6-41-6 93 2-10 2 7v-18l4-15 2 15v8l1 3 3 7 2-15 2 8 2-10 3 6 1-21 3-19 2 14 3-22 2-4 1 7 3 4v14l3 14 2 6 4-13 1-3 2 11 1 5 2-2 2 9 3 7 1-3 V231 L1 231 Z" fill="url(#feat4grad)"/>
+              <defs>
+                <linearGradient id="feat4grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#A855F7" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="#A855F7" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 5 — Multi-cuenta con avatares -->
+    <div class="feat-card feat-5 in-view">
+      <div class="feat-card-content">
+        <div class="feat-split">
+          <div class="feat-split-left">
+            <div class="feat-icon-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2.5"/><path d="M3 19a6 6 0 0 1 12 0M15 19a4 4 0 0 1 7 0"/></svg>
+            </div>
+            <div>
+              <h3 class="feat-2-title">Multi-cuenta sin fricción</h3>
+              <p>Una carpeta. Varios negocios. Cero copia-pega entre apps.</p>
+            </div>
+          </div>
+          <div class="feat-members">
+            <div class="feat-members-list">
+              <div class="feat-member right">
+                <span class="feat-member-tag">@treintayocho</span>
+                <div class="feat-member-avatar"></div>
+              </div>
+              <div class="feat-member left">
+                <div class="feat-member-avatar b"></div>
+                <span class="feat-member-tag">@cofreshop</span>
+              </div>
+              <div class="feat-member right">
+                <span class="feat-member-tag">@klosk.studio</span>
+                <div class="feat-member-avatar c"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ COMPARE ============ -->
+<section class="compare">
+  <header class="section-head in-view">
+    <div class="section-eyebrow">ANTES Y DESPUÉS</div>
+    <h2 class="section-title" data-i18n="compare.title">Antes y después</h2>
+    <p class="section-sub">Arrastra el handle.</p>
+  </header>
+
+  <div class="compare-stage" id="compareStage">
+    <div class="compare-side compare-before">
+      <div class="compare-label" data-i18n="compare.before">Tu pantalla actual</div>
+      <h3 class="compare-headline">Excel · WhatsApp · 3 apps · 47 borradores sin saber dónde van.</h3>
+      <div class="compare-chaos">
+        <div class="compare-chaos-cell" style="--r: -3deg"></div>
+        <div class="compare-chaos-cell" style="--r: 5deg"></div>
+        <div class="compare-chaos-cell" style="--r: -2deg"></div>
+        <div class="compare-chaos-cell" style="--r: 4deg"></div>
+        <div class="compare-chaos-cell" style="--r: 6deg"></div>
+        <div class="compare-chaos-cell" style="--r: -5deg"></div>
+        <div class="compare-chaos-cell" style="--r: 2deg"></div>
+        <div class="compare-chaos-cell" style="--r: -4deg"></div>
+      </div>
+    </div>
+    <div class="compare-side compare-after">
+      <div class="compare-label" data-i18n="compare.after">Con Autopost</div>
+      <h3 class="compare-headline">Una carpeta. Un calendario. Cero apps abiertas.</h3>
+      <div class="compare-clean">
+        <div class="compare-clean-cell"></div>
+        <div class="compare-clean-cell"></div>
+        <div class="compare-clean-cell"></div>
+        <div class="compare-clean-cell"></div>
+        <div class="compare-clean-cell"></div>
+        <div class="compare-clean-cell"></div>
+        <div class="compare-clean-cell"></div>
+        <div class="compare-clean-cell"></div>
+      </div>
+    </div>
+    <div class="compare-handle" id="compareHandle"></div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section class="tm">
+  <header class="section-head in-view">
+    <div class="section-eyebrow">CASOS</div>
+    <h2 class="section-title" data-i18n="tm.title">Equipos que ya delegaron publicar</h2>
+  </header>
+
+  <div class="tm-grid stagger">
+    <div class="tm-card in-view" data-tilt="6">
+      <p class="tm-quote">"Pasamos de 4 personas haciendo calendario a una persona aprobando. Recuperamos 12h por semana."</p>
+      <div class="tm-person">
+        <div class="tm-avatar" style="background:linear-gradient(135deg,#4F7CFF,#A855F7)"></div>
+        <div>
+          <div class="tm-name">Marta Calle</div>
+          <div class="tm-role">CMO · Treintayocho</div>
+        </div>
+      </div>
+    </div>
+    <div class="tm-card in-view" data-tilt="6">
+      <p class="tm-quote">"La IA detecta carruseles que ni nosotros sabíamos que estaban ahí. Increíble lo de los formatos mezclados."</p>
+      <div class="tm-person">
+        <div class="tm-avatar" style="background:linear-gradient(135deg,#A855F7,#FF6B47)"></div>
+        <div>
+          <div class="tm-name">Adrián Beltrán</div>
+          <div class="tm-role">Founder · Cofreshop</div>
+        </div>
+      </div>
+    </div>
+    <div class="tm-card in-view" data-tilt="6">
+      <p class="tm-quote">"Llevamos 8 cuentas en paralelo. Sin Autopost necesitaríamos contratar dos personas más."</p>
+      <div class="tm-person">
+        <div class="tm-avatar" style="background:linear-gradient(135deg,#4ADE80,#4F7CFF)"></div>
+        <div>
+          <div class="tm-name">Lucía Pradera</div>
+          <div class="tm-role">Director · Agencia Tinta</div>
+        </div>
+      </div>
+    </div>
+    <div class="tm-card in-view" data-tilt="6">
+      <p class="tm-quote">"Lo del 'tira la carpeta' es real. Subo zip de Drive, voy a cenar, vuelvo y está todo programado."</p>
+      <div class="tm-person">
+        <div class="tm-avatar" style="background:linear-gradient(135deg,#FBBF24,#F87171)"></div>
+        <div>
+          <div class="tm-name">Pol Fernández</div>
+          <div class="tm-role">Creator · 200k IG</div>
+        </div>
+      </div>
+    </div>
+    <div class="tm-card in-view" data-tilt="6">
+      <p class="tm-quote">"El heatmap de mejor hora cambió completamente nuestra estrategia. Subimos 40% en engagement."</p>
+      <div class="tm-person">
+        <div class="tm-avatar" style="background:linear-gradient(135deg,#60A5FA,#A855F7)"></div>
+        <div>
+          <div class="tm-name">Sara Ortuño</div>
+          <div class="tm-role">Head Social · Klosk</div>
+        </div>
+      </div>
+    </div>
+    <div class="tm-card in-view" data-tilt="6">
+      <p class="tm-quote">"Cuesta menos que un becario. Hace el trabajo de tres. No me ralla la espalda en sillas raras."</p>
+      <div class="tm-person">
+        <div class="tm-avatar" style="background:linear-gradient(135deg,#A855F7,#4ADE80)"></div>
+        <div>
+          <div class="tm-name">Iván Robles</div>
+          <div class="tm-role">SMM · freelance</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section class="pricing" id="pricing">
+  <header class="section-head in-view">
+    <div class="section-eyebrow">PRECIOS</div>
+    <h2 class="section-title" data-i18n="pricing.title">Precios que escalan contigo</h2>
+    <p class="section-sub" data-i18n="pricing.sub">Cancela cuando quieras. Sin permanencia.</p>
+  </header>
+
+  <div style="text-align:center">
+    <div class="pricing-toggle">
+      <button class="active" data-period="monthly" data-i18n="pricing.monthly">Mensual</button>
+      <button data-period="yearly">
+        <span data-i18n="pricing.yearly">Anual</span>
+        <span class="pricing-save" data-i18n="pricing.save">Ahorra 20%</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="pricing-tiers stagger">
+    <div class="tier in-view">
+      <h3 class="tier-name" data-i18n="pricing.t1.name">Solo</h3>
+      <p class="tier-desc" data-i18n="pricing.t1.desc">Para creators y emprendedores.</p>
+      <div class="tier-price">
+        <span class="tier-price-num" data-price-monthly="19" data-price-yearly="15">19</span>
+        <span class="tier-price-period">€/mes</span>
+      </div>
+      <ul class="tier-features">
+        <li>1 cuenta · 3 redes</li>
+        <li>50 posts/mes</li>
+        <li>IA detección formato</li>
+        <li>Calendario semanal</li>
+        <li>Soporte email</li>
+      </ul>
+      <a href="#" class="btn btn-ghost" data-i18n="pricing.cta">Empezar</a>
+    </div>
+    <div class="tier featured in-view">
+      <div class="tier-badge">Recomendado</div>
+      <h3 class="tier-name" data-i18n="pricing.t2.name">Pro</h3>
+      <p class="tier-desc" data-i18n="pricing.t2.desc">Para social media managers y agencias pequeñas.</p>
+      <div class="tier-price">
+        <span class="tier-price-num" data-price-monthly="49" data-price-yearly="39">49</span>
+        <span class="tier-price-period">€/mes</span>
+      </div>
+      <ul class="tier-features">
+        <li>3 cuentas · 7 redes</li>
+        <li>200 posts/mes</li>
+        <li>IA copy en tu tono</li>
+        <li>Heatmap mejor hora</li>
+        <li>Analytics completo</li>
+        <li>Soporte prioritario</li>
+      </ul>
+      <a href="#" class="btn btn-primary" data-magnetic="0.2" data-i18n="pricing.cta">Empezar</a>
+    </div>
+    <div class="tier in-view">
+      <h3 class="tier-name" data-i18n="pricing.t3.name">Studio</h3>
+      <p class="tier-desc" data-i18n="pricing.t3.desc">Para agencias y equipos.</p>
+      <div class="tier-price">
+        <span class="tier-price-num" data-price-monthly="149" data-price-yearly="119">149</span>
+        <span class="tier-price-period">€/mes</span>
+      </div>
+      <ul class="tier-features">
+        <li>10 cuentas · todas las redes</li>
+        <li>Posts ilimitados</li>
+        <li>Equipo: 5 usuarios</li>
+        <li>API + webhooks</li>
+        <li>SSO + auditoría</li>
+        <li>Account manager</li>
+      </ul>
+      <a href="#" class="btn btn-ghost" data-i18n="pricing.cta">Empezar</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="faq">
+  <header class="section-head in-view">
+    <div class="section-eyebrow">FAQ</div>
+    <h2 class="section-title" data-i18n="faq.title">Preguntas frecuentes</h2>
+  </header>
+
+  <div class="faq-list">
+    <div class="faq-item">
+      <button class="faq-trigger"><span data-i18n="faq.q1">¿Mis publicaciones se hacen desde mi cuenta real?</span><span class="faq-icon">+</span></button>
+      <div class="faq-body"><p data-i18n="faq.a1">Sí. Autopost se conecta vía OAuth oficial a cada red. Las publicaciones aparecen como si las hubieras hecho tú desde la app.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-trigger"><span data-i18n="faq.q2">¿Puedo aprobar antes de que se publique?</span><span class="faq-icon">+</span></button>
+      <div class="faq-body"><p data-i18n="faq.a2">Por defecto sí. Cada post se queda en estado "Borrador IA" hasta que tú apruebas. También puedes activar autoaprobado para flujos confiables.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-trigger"><span data-i18n="faq.q3">¿Qué redes están soportadas?</span><span class="faq-icon">+</span></button>
+      <div class="faq-body"><p data-i18n="faq.a3">Instagram, TikTok, X, LinkedIn, YouTube Shorts, Threads y Facebook. Más cada trimestre.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-trigger"><span data-i18n="faq.q4">¿Mis datos se usan para entrenar modelos?</span><span class="faq-icon">+</span></button>
+      <div class="faq-body"><p data-i18n="faq.a4">No. Los assets que subes se procesan en sesión y no entran en ningún corpus de entrenamiento.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-trigger"><span data-i18n="faq.q5">¿Cuánto tarda en procesar una carpeta?</span><span class="faq-icon">+</span></button>
+      <div class="faq-body"><p data-i18n="faq.a5">Una carpeta de 30-50 assets tarda 8-12 segundos. Lo verás en vivo con el contador del hero.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-cols">
+      <div class="footer-brand">
+        <div class="footer-brand-text">autopost<span>.</span></div>
+        <p class="footer-tag">Tira la carpeta. El resto va solo.</p>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.product">Producto</h4>
+        <a href="#bento">Capacidades</a>
+        <a href="#how">Cómo funciona</a>
+        <a href="#pricing">Precios</a>
+        <a href="dashboard.html">Demo</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.resources">Recursos</h4>
+        <a href="brand-system.html">Brand</a>
+        <a href="#">Docs</a>
+        <a href="#">API</a>
+        <a href="#">Changelog</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.company">Empresa</h4>
+        <a href="#">Sobre</a>
+        <a href="#">Blog</a>
+        <a href="#">Empleo</a>
+        <a href="#">Contacto</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.legal">Legal</h4>
+        <a href="#">Términos</a>
+        <a href="#">Privacidad</a>
+        <a href="#">DPA</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Autopost · <span data-i18n="footer.rights">Todos los derechos reservados.</span></span>
+      <span class="footer-status"><span class="footer-status-dot"></span><span data-i18n="footer.status">Estado</span> · 99.98% uptime</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/icons.js"></script>
+<script src="assets/i18n.js"></script>
+<script src="assets/motion.js"></script>
+<script>
+(function () {
+  // === NAV PILL — sliding cursor ===
+  const pill = document.getElementById('navPill');
+  if (pill) {
+    const cursor = pill.querySelector('.nav-pill-cursor');
+    const items = pill.querySelectorAll('.nav-pill-item');
+    items.forEach((item) => {
+      item.addEventListener('mouseenter', () => {
+        const li = item.parentElement; // <li> wrapper
+        cursor.style.left = li.offsetLeft + 'px';
+        cursor.style.width = li.offsetWidth + 'px';
+        cursor.style.opacity = '1';
+      });
+      item.addEventListener('focus', () => {
+        const li = item.parentElement;
+        cursor.style.left = li.offsetLeft + 'px';
+        cursor.style.width = li.offsetWidth + 'px';
+        cursor.style.opacity = '1';
+      });
+    });
+    pill.addEventListener('mouseleave', () => {
+      cursor.style.opacity = '0';
+    });
+    pill.addEventListener('focusout', () => {
+      cursor.style.opacity = '0';
+    });
+  }
+
+  // === FAQ ===
+  document.querySelectorAll('.faq-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      btn.parentElement.classList.toggle('open');
+    });
+  });
+
+  // === PRICING TOGGLE ===
+  const periodBtns = document.querySelectorAll('[data-period]');
+  const priceNums = document.querySelectorAll('[data-price-monthly]');
+  periodBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      periodBtns.forEach(b => b.classList.toggle('active', b === btn));
+      const period = btn.getAttribute('data-period');
+      priceNums.forEach((el) => {
+        const target = parseInt(el.getAttribute(period === 'yearly' ? 'data-price-yearly' : 'data-price-monthly'), 10);
+        if (window.MOTION) window.MOTION.countUp(el, target, 600);
+        else el.textContent = target;
+      });
+    });
+  });
+
+  // === COMPARE SLIDER ===
+  const stage = document.getElementById('compareStage');
+  const handle = document.getElementById('compareHandle');
+  const after = stage.querySelector('.compare-after');
+  let dragging = false;
+  function setSplit(x) {
+    const r = stage.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(100, ((x - r.left) / r.width) * 100));
+    handle.style.left = pct + '%';
+    after.style.clipPath = `inset(0 0 0 ${pct}%)`;
+  }
+  handle.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    handle.setPointerCapture(e.pointerId);
+  });
+  handle.addEventListener('pointermove', (e) => {
+    if (dragging) setSplit(e.clientX);
+  });
+  handle.addEventListener('pointerup', (e) => {
+    dragging = false;
+    handle.releasePointerCapture(e.pointerId);
+  });
+  stage.addEventListener('click', (e) => { if (e.target === stage) setSplit(e.clientX); });
+
+})();
+</script>
+</body>
+</html>
