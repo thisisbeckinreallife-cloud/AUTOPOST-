@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && cp -R .next/static .next/standalone/.next/ 2>/dev/null; cp -R public .next/standalone/ 2>/dev/null; true",
+    "build": "next build && cp -R .next/static .next/standalone/.next/ 2>/dev/null; cp -R public .next/standalone/ 2>/dev/null; mkdir -p .next/standalone/src/messages 2>/dev/null; cp -R src/messages/. .next/standalone/src/messages/ 2>/dev/null; true",
     "start": "node scripts/start.js",
     "worker": "tsx --watch src/workers/publish.worker.ts",
     "worker:once": "tsx src/workers/publish.worker.ts",
