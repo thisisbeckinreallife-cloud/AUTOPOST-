@@ -13,12 +13,25 @@ datasource db {
 model AdminUser {
   id              String    @id @default(cuid())
   email           String    @unique
-  passwordHash    String
+  // passwordHash es opcional: usuarios solo-Google no tienen contraseña.
+  // Pueden establecerla con "olvidé contraseña" si quieren login dual.
+  passwordHash    String?
   emailVerified   Boolean   @default(false)
   resetToken      String?   @unique
   resetTokenExp   DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+
+  // Identidad y perfil (Fase 2 — OAuth + simplificación UX).
+  // name: lo que el dashboard muestra como saludo ("Hola María.").
+  // avatar: URL pública (Google profile pic o S3 propio).
+  // provider: "email" para signup tradicional, "google" para OAuth.
+  // googleId: sub claim del JWT de Google. Permite vincular cuentas existentes
+  // si el email ya tenía signup tradicional.
+  name          String?
+  avatar        String?
+  provider      String    @default("email")
+  googleId      String?   @unique
 
   // Plan tier — sin créditos, solo metadata para gating de features.
   // Stripe gestiona la facturación semanal aparte.

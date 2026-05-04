@@ -24,9 +24,13 @@ export async function POST(request: NextRequest) {
 
     const user = await db.adminUser.findUnique({ where: { email } });
 
-    // Constant-time comparison to prevent user enumeration
+    // Constant-time comparison to prevent user enumeration.
+    // Si el usuario es solo-OAuth (sin passwordHash), no puede loguear con password.
+    // El error genérico "Invalid credentials" no revela si fue por user o por método.
     const passwordValid =
-      user ? await verifyPassword(password, user.passwordHash) : false;
+      user && user.passwordHash
+        ? await verifyPassword(password, user.passwordHash)
+        : false;
 
     if (!user || !passwordValid) {
       // Deliberate 500ms delay to slow brute force
