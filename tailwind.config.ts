@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 
+// Cache bust: 1777909986
 const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
