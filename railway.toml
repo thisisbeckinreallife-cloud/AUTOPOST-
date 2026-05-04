@@ -1,9 +1,21 @@
 [build]
+# Builder actual: Nixpacks. Para migrar a Dockerfile multi-stage:
+#   builder = "DOCKERFILE"
+#   dockerfilePath = "Dockerfile"
+# Probar antes con: docker build -t autopost:test .
 builder = "NIXPACKS"
 
 [deploy]
 preDeployCommand = ["npm run db:migrate"]
 startCommand = "npm start"
+
+# Healthcheck — Railway llama esta ruta tras el deploy. Si responde 200,
+# considera el deploy "healthy" y enruta tráfico hacia él. Si responde
+# 503 o timeout, tira el container y reintenta. Cubre casos donde el
+# build pasa pero la app crashea al arrancar (DB caída, secrets faltantes).
+healthcheckPath = "/api/healthz"
 healthcheckTimeout = 300
+
+# Si el container falla varias veces, restart automático.
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3

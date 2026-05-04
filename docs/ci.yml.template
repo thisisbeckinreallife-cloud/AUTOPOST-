@@ -1,0 +1,73 @@
+name: CI
+
+# Pilla errores en 1-2 min ANTES de que toquen Railway.
+# Bloquea merge si type-check, lint o build fallan.
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Type-check · Lint · Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 18.20.5
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.20.5
+          cache: 'npm'
+
+      - name: Verify lock file in sync
+        # Si package.json es más nuevo que el lock, alguien editó deps sin reinstalar.
+        # Esto destrucción 8 deploys consecutivos en Fase 2.
+        run: |
+          if [ "package.json" -nt "package-lock.json" ]; then
+            echo "::error::package.json modificado más reciente que package-lock.json — ejecuta 'npm install' antes de pushear"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true  # warnings no bloquean (de momento)
+
+      - name: Build (Next.js standalone)
+        run: npm run build
+        env:
+          # Stub envs — el build no debe necesitar valores reales para
+          # validar tipos y compilar. Si necesita más, añadir aquí.
+          DATABASE_URL: postgresql://stub:stub@localhost:5432/stub
+          SESSION_SECRET: ci-stub-secret-32-chars-minimum-required
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          ENCRYPTION_KEY: ci-stub-key-64-chars-minimum-required-padding-to-fill-the-length
+
+      - name: Verify standalone bundle
+        run: |
+          if [ ! -f .next/standalone/server.js ]; then
+            echo "::error::Standalone bundle no generado — verifica next.config.mjs#output: 'standalone'"
+            exit 1
+          fi
+          if [ ! -d .next/standalone/src/messages ]; then
+            echo "::warning::messages/ no en standalone bundle — runtime fallará si la build script no los copia"
+          fi
+          echo "✓ Standalone bundle OK"

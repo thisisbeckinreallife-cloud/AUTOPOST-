@@ -14,7 +14,14 @@
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force && tsx scripts/seed.ts",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "deploy:status": "bash scripts/deploy-status.sh",
+    "deploy:smoke": "bash scripts/smoke-test.sh",
+    "deploy:logs": "railway logs --deployment $(railway status --json | python3 -c \"import sys,json; print(json.load(sys.stdin)['environments']['edges'][0]['node']['serviceInstances']['edges'][0]['node']['latestDeployment']['id'])\") --lines 100"
+  },
+  "engines": {
+    "node": "18.20.5",
+    "npm": ">=9.0.0"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
