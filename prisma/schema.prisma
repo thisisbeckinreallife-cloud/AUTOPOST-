@@ -33,6 +33,21 @@ model AdminUser {
   provider      String    @default("email")
   googleId      String?   @unique
 
+  // Onboarding wizard (Fase 3 — paso a paso para no-técnicos).
+  // onboardingStep: 1..5 — el paso actual del wizard, 0 = no iniciado.
+  // onboardingCompleted: true tras pasar el paso 5 ("¡Listo!"). Mientras
+  // sea false, el middleware del dashboard redirige a /onboarding/[step]
+  // para evitar que el usuario se pierda.
+  // businessName + businessType se capturan en el paso 1 y crean el
+  // primer Business automáticamente.
+  // assistantMode: si true, dashboard muestra panel "¿Qué es esto?" en
+  // cada vista. Default true para nuevos usuarios.
+  onboardingStep      Int      @default(0)
+  onboardingCompleted Boolean  @default(false)
+  businessName        String?
+  businessType        String?
+  assistantMode       Boolean  @default(true)
+
   // Plan tier — sin créditos, solo metadata para gating de features.
   // Stripe gestiona la facturación semanal aparte.
   plan          String    @default("FREE")  // FREE | SOLO | PRO | AGENCY
