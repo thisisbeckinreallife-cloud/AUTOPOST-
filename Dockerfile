@@ -16,7 +16,7 @@
 # ============================================================
 # Stage 1: deps — instala node_modules (capa cacheable)
 # ============================================================
-FROM node:18.20.5-slim AS deps
+FROM node:22.11.0-slim AS deps
 WORKDIR /app
 
 # OpenSSL necesario para Prisma engines
@@ -31,7 +31,7 @@ RUN npm ci --no-audit --no-fund
 # ============================================================
 # Stage 2: builder — Prisma generate + Next build
 # ============================================================
-FROM node:18.20.5-slim AS builder
+FROM node:22.11.0-slim AS builder
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
@@ -46,7 +46,7 @@ RUN npm run build
 # ============================================================
 # Stage 3: runner — imagen final mínima
 # ============================================================
-FROM node:18.20.5-slim AS runner
+FROM node:22.11.0-slim AS runner
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*

@@ -20,8 +20,8 @@
     "deploy:logs": "railway logs --deployment $(railway status --json | python3 -c \"import sys,json; print(json.load(sys.stdin)['environments']['edges'][0]['node']['serviceInstances']['edges'][0]['node']['latestDeployment']['id'])\") --lines 100"
   },
   "engines": {
-    "node": "18.20.5",
-    "npm": ">=9.0.0"
+    "node": ">=20.0.0 <23.0.0",
+    "npm": ">=10.0.0"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
