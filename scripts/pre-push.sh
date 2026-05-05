@@ -25,18 +25,28 @@ echo "  PRE-PUSH VALIDATION"
 echo "════════════════════════════════════════════"
 echo ""
 
-# 1. Detectar lock desync
+# 1. Detectar lock desync — DOS niveles
 echo "→ Verificando package-lock.json sincronizado..."
 if [ -f package-lock.json ] && [ -f package.json ]; then
-  # Check si package.json es más nuevo que el lock
+  # 1a. Check rápido por mtime
   if [ "package.json" -nt "package-lock.json" ]; then
     echo "✗ package.json modificado después que package-lock.json"
     echo "  → Ejecuta: npm install"
     echo "  → Esto destrucción 8 deploys consecutivos en Fase 2."
     exit 1
   fi
+  # 1b. Check estricto: simular lo que hará GitHub Actions y Railway
+  # Esto pilla casos donde el mtime es OK pero el lock no describe
+  # todos los paquetes (caso real: root cause del 9º deploy fail).
+  if ! npm ci --dry-run > /tmp/prepush-npmci.log 2>&1; then
+    echo "✗ npm ci --dry-run falla → el lock no está completo"
+    echo "  → rm -rf node_modules package-lock.json && npm install"
+    echo "  Últimas líneas del error:"
+    tail -8 /tmp/prepush-npmci.log | sed 's/^/    /'
+    exit 1
+  fi
 fi
-echo "  ✓ Lock OK"
+echo "  ✓ Lock OK (mtime + npm ci dry-run)"
 echo ""
 
 # 2. Type-check (rápido, ~10s)
