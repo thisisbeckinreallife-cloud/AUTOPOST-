@@ -1,5 +1,10 @@
 import { cn } from "@/lib/utils";
 
+/**
+ * Card — Carbon Workshop.
+ * Surface elevada sin glassmorphism. ink-2 + border ink-4. Radius md.
+ * Mantiene API legacy: Card, CardHeader, CardTitle, CardContent, CardInteractive.
+ */
 export function Card({
   children,
   className,
@@ -10,7 +15,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-xl border border-zinc-200 bg-white shadow-sm transition-all",
+        "rounded-md border border-ink-4 bg-ink-2 transition-shadow duration-200 ease-out",
         className
       )}
     >
@@ -27,9 +32,7 @@ export function CardHeader({
   className?: string;
 }) {
   return (
-    <div className={cn("flex flex-col space-y-1.5 p-6", className)}>
-      {children}
-    </div>
+    <div className={cn("flex flex-col gap-2 p-6", className)}>{children}</div>
   );
 }
 
@@ -41,7 +44,7 @@ export function CardTitle({
   className?: string;
 }) {
   return (
-    <h3 className={cn("text-lg font-display font-bold text-zinc-900", className)}>
+    <h3 className={cn("text-xl font-semibold text-ink-9 tracking-tight", className)}>
       {children}
     </h3>
   );
@@ -54,7 +57,7 @@ export function CardContent({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <div className={cn("p-6 pt-0", className)}>{children}</div>;
+  return <div className={cn("p-6 pt-0 text-ink-8", className)}>{children}</div>;
 }
 
 export function CardInteractive({
@@ -67,7 +70,9 @@ export function CardInteractive({
   return (
     <div
       className={cn(
-        "rounded-xl border border-zinc-200 bg-white shadow-sm hover:shadow-md hover:border-zinc-300 transition-all relative overflow-hidden",
+        "rounded-md border border-ink-4 bg-ink-2 transition-all duration-200 ease-out",
+        "hover:shadow-md hover:border-ink-5",
+        "relative overflow-hidden",
         className
       )}
     >

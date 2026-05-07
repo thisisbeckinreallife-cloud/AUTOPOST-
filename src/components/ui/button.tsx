@@ -2,31 +2,65 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
 
+/**
+ * Button — Carbon Workshop.
+ * Acento naranja-óxido sólido. Sin gradientes, sin glows, sin shimmer.
+ *
+ * Variants legacy retrocompatibles (default/destructive/outline/ghost/link/
+ * secondary/gradient) reimplementadas con tokens nuevos para no romper
+ * imports existentes durante la migración.
+ */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-lg text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary disabled:pointer-events-none disabled:opacity-40",
+  [
+    "inline-flex items-center justify-center gap-2",
+    "font-sans font-medium whitespace-nowrap select-none",
+    "rounded-md transition-all duration-200 ease-out",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring focus-visible:ring-offset-2 focus-visible:ring-offset-ink-1",
+    "disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed",
+  ],
   {
     variants: {
       variant: {
-        default:
-          "bg-brand-500 text-white hover:bg-brand-400 shadow-glow-sm hover:shadow-glow active:bg-brand-600 hover:-translate-y-px active:translate-y-0",
-        destructive:
-          "bg-red-600 text-white hover:bg-red-500 active:bg-red-700",
-        outline:
-          "border border-white/[0.1] bg-transparent text-zinc-300 hover:border-white/[0.18] hover:text-white hover:bg-white/[0.04]",
-        ghost:
-          "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200",
-        link:
-          "text-brand-400 underline-offset-4 hover:underline hover:text-brand-300",
-        secondary:
-          "bg-zinc-800/80 text-zinc-200 hover:bg-zinc-700 border border-white/[0.04]",
-        gradient:
-          "bg-gradient-brand-vivid text-white shadow-glow-sm hover:shadow-glow hover:-translate-y-px active:translate-y-0",
+        default: [
+          "bg-accent text-ink-0",
+          "hover:bg-accent-hover hover:-translate-y-px",
+          "active:bg-accent-active active:translate-y-0",
+        ],
+        destructive: [
+          "bg-error text-ink-9",
+          "hover:opacity-90 hover:-translate-y-px",
+          "active:translate-y-0",
+        ],
+        outline: [
+          "bg-transparent text-ink-9 border border-ink-4",
+          "hover:border-ink-5 hover:bg-ink-2",
+          "active:bg-ink-3",
+        ],
+        ghost: [
+          "bg-transparent text-ink-8",
+          "hover:bg-ink-2 hover:text-ink-9",
+          "active:bg-ink-3",
+        ],
+        link: [
+          "bg-transparent text-accent underline-offset-4",
+          "hover:underline hover:text-accent-strong",
+        ],
+        secondary: [
+          "bg-ink-3 text-ink-9 border border-ink-4",
+          "hover:bg-ink-4 hover:border-ink-5",
+        ],
+        // Alias legacy: gradient se comporta como default (sin gradient)
+        gradient: [
+          "bg-accent text-ink-0",
+          "hover:bg-accent-hover hover:-translate-y-px",
+          "active:bg-accent-active active:translate-y-0",
+        ],
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-7 px-3 text-xs",
-        lg: "h-11 px-6 text-base",
-        icon: "h-9 w-9",
+        default: "h-11 px-4 text-sm",  // 44px touch target (WCAG)
+        sm:      "h-8 px-3 text-xs",
+        lg:      "h-12 px-6 text-base",
+        icon:    "h-11 w-11",
       },
     },
     defaultVariants: {
@@ -46,35 +80,21 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, loading, children, disabled, ...props }, ref) => (
     <button
       ref={ref}
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size }), className)}
       disabled={disabled || loading}
+      aria-busy={loading || undefined}
       {...props}
     >
       {loading && (
-        <svg
-          className="mr-2 h-4 w-4 animate-spin"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          />
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-          />
-        </svg>
+        <span
+          className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin-slow"
+          aria-hidden="true"
+        />
       )}
       {children}
     </button>
   )
 );
-
 Button.displayName = "Button";
+
+export { buttonVariants };
