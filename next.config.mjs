@@ -53,6 +53,24 @@ const nextConfig = {
     }
     return config;
   },
+  // Redirects 301: las URLs viejas de preview rutas → /lab/*
+  // Mover a /lab/* fue parte del Bloque A del rediseño (Mayo 2026):
+  // estas rutas no convierten al usuario y no deben indexarse.
+  async redirects() {
+    return [
+      { source: "/demo",                    destination: "/lab/demo",                    permanent: true },
+      { source: "/demo/:path*",             destination: "/lab/demo/:path*",             permanent: true },
+      { source: "/editorial",               destination: "/lab/editorial",               permanent: true },
+      { source: "/editorial/:path*",        destination: "/lab/editorial/:path*",        permanent: true },
+      { source: "/hero-preview",            destination: "/lab/hero-preview",            permanent: true },
+      { source: "/hero-preview/:path*",     destination: "/lab/hero-preview/:path*",     permanent: true },
+      { source: "/palette-preview",         destination: "/lab/palette-preview",         permanent: true },
+      { source: "/palette-preview/:path*",  destination: "/lab/palette-preview/:path*",  permanent: true },
+      { source: "/brand-lab",               destination: "/lab/brand-lab",               permanent: true },
+      { source: "/brand-lab/:path*",        destination: "/lab/brand-lab/:path*",        permanent: true },
+      { source: "/comparar/:competidor",    destination: "/lab/comparar/:competidor",    permanent: true },
+    ];
+  },
   // Security + cache headers
   async headers() {
     return [

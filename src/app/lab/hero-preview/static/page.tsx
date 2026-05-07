@@ -54,7 +54,7 @@ function Header() {
           <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">/hero-preview/static</div>
           <h1 className="text-lg font-bold">Validación visual de los 4 actos</h1>
         </div>
-        <Link href="/hero-preview" className="text-xs text-zinc-400 hover:text-white">
+        <Link href="/lab/hero-preview" className="text-xs text-zinc-400 hover:text-white">
           Ver con scroll real →
         </Link>
       </div>
