@@ -1,11 +1,13 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { cn } from "@/components/brand/cn";
+import { CheckoutButton, type CheckoutTier } from "./CheckoutButton";
 
 interface Tier {
   name: string;
+  /** Identificador estable para la API Stripe — no traducir. */
+  id: CheckoutTier;
   desc: string;
   /** Precio facturado semanalmente. */
   weekly: number;
@@ -29,6 +31,7 @@ interface Tier {
 const TIERS: Tier[] = [
   {
     name: "Básico",
+    id: "basic",
     desc: "Para creators y emprendedores.",
     weekly: 5,
     yearly: 4,
@@ -42,6 +45,7 @@ const TIERS: Tier[] = [
   },
   {
     name: "Pro",
+    id: "pro",
     desc: "Para social media managers y agencias pequeñas.",
     weekly: 7,
     yearly: 6,
@@ -57,6 +61,7 @@ const TIERS: Tier[] = [
   },
   {
     name: "Agency",
+    id: "agency",
     desc: "Para agencias y equipos.",
     weekly: 10,
     yearly: 8,
@@ -190,18 +195,13 @@ function TierCard({ tier, period }: { tier: Tier; period: "weekly" | "yearly" })
         ))}
       </ul>
 
-      <Link
-        href="/signup"
-        className={cn(
-          "inline-flex items-center justify-center h-12 px-5 rounded-lg font-medium text-np-body",
-          "transition-all duration-200",
-          tier.featured
-            ? "bg-accent text-ink-0 shadow-md hover:bg-accent-hover hover:-translate-y-px"
-            : "bg-transparent text-ink-8 border border-ink-3 hover:border-ink-5 hover:bg-ink-2"
-        )}
+      <CheckoutButton
+        tier={tier.id}
+        period={period}
+        featured={tier.featured}
       >
         Empezar 7 días gratis
-      </Link>
+      </CheckoutButton>
     </article>
   );
 }
