@@ -21,7 +21,80 @@
   --motion-slow:    400ms;
   --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
 
+  /* ── Compat layer (eliminar al cerrar Bloque B) ──────────────────────
+     Variables CSS que componentes legacy del rebrand v1 (landing-v2/*,
+     auth, onboarding, dashboard) referencian via var(--np-*) y similares.
+     Todas redirigen al sistema Carbon Workshop. */
+  --pri:               #FF6A2C;
+  --pri-dim:           #E55A1F;
+  --pri-soft:          rgba(255, 106, 44, 0.12);
+  --ai:                #FF6A2C;
+  --ai-dim:            #E55A1F;
+  --ai-soft:           rgba(255, 106, 44, 0.14);
+  /* Ink scale como CSS vars (algunos componentes usan var(--ink-N)) */
+  --ink-0:             #0A0B09;
+  --ink-1:             #0E0F0D;
+  --ink-2:             #151714;
+  --ink-3:             #1E211D;
+  --ink-4:             #2A2D29;
+  --ink-5:             #3A3D38;
+  --ink-6:             #6B6A64;
+  --ink-7:             #A8A69E;
+  --ink-8:             #D6D3CC;
+  --ink-9:             #EDEAE3;
+  --ink-10:            #FFFFFF;
+  --np-success:        #7FA84E;
+  --np-success-soft:   rgba(127, 168, 78, 0.12);
+  --np-warning:        #E8A93B;
+  --np-warning-soft:   rgba(232, 169, 59, 0.12);
+  --np-error:          #D24545;
+  --np-error-soft:     rgba(210, 69, 69, 0.12);
+  --np-info:           #6B6A64;
+  --np-info-soft:      rgba(107, 106, 100, 0.18);
+  --np-shadow-sm:      0 1px 2px 0 rgba(10, 11, 9, 0.6);
+  --np-shadow-md:      0 4px 8px -2px rgba(10, 11, 9, 0.7), 0 2px 4px -2px rgba(10, 11, 9, 0.5);
+  --np-shadow-lg:      0 12px 24px -8px rgba(10, 11, 9, 0.75), 0 4px 8px -4px rgba(10, 11, 9, 0.5);
+  --np-glow-blue:      0 0 0 1px rgba(255, 106, 44, 0.0);
+  --np-glow-violet:    0 0 0 1px rgba(255, 106, 44, 0.0);
+  --np-ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+  --np-ease-back:      cubic-bezier(0.34, 1.56, 0.64, 1);
+  --np-font-sans:      var(--font-mona-sans);
+  --np-font-mono:      var(--font-jetbrains-mono);
+
   color-scheme: dark;
+}
+
+/* ── Compat layer (eliminar al cerrar Bloque B) ────────────────────────
+   Clases del rebrand v1 redirigidas al sistema Carbon Workshop. */
+.np-root {
+  background: #0E0F0D;
+  color: #EDEAE3;
+}
+.np-root :focus-visible {
+  outline: 2px solid #FF6A2C;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+@keyframes np-hero-fade {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes np-tag-pop {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.04); }
+}
+.np-anim-hero-fade {
+  animation: np-hero-fade 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.np-anim-tag-pop {
+  animation: np-tag-pop 1.5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .np-anim-hero-fade, .np-anim-tag-pop {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* ── Base layer ─────────────────────────────────────────────────────────── */

@@ -49,16 +49,19 @@ const config: Config = {
         /* Escala de tinta dark-first 10 niveles. ink-0 más oscuro, ink-9 más claro.
            Contrastes verificados WCAG: ink-9 sobre ink-1 = 15.8:1 (AAA). */
         ink: {
-          0: "#0A0B09",
-          1: "#0E0F0D",
-          2: "#151714",
-          3: "#1E211D",
-          4: "#2A2D29",
-          5: "#3A3D38",
-          6: "#6B6A64",
-          7: "#A8A69E",
-          8: "#D6D3CC",
-          9: "#EDEAE3",
+          0:  "#0A0B09",
+          1:  "#0E0F0D",
+          2:  "#151714",
+          3:  "#1E211D",
+          4:  "#2A2D29",
+          5:  "#3A3D38",
+          6:  "#6B6A64",
+          7:  "#A8A69E",
+          8:  "#D6D3CC",
+          9:  "#EDEAE3",
+          /* Compat: rebrand v1 usaba ink-10 = blanco puro. Mapear al claro
+             del sistema nuevo (off-white) para no romper componentes legacy. */
+          10: "#FFFFFF",
         },
         /* Acento principal — naranja-óxido (cinta métrica de carpintero, NO neón).
            accent-DEFAULT sobre ink-1 = 7.2:1 (AAA). */
@@ -100,10 +103,27 @@ const config: Config = {
           soft:    "rgba(107, 106, 100, 0.18)",
           strong:  "#A8A69E",
         },
+        /* ── Compat layer (eliminar al cerrar Bloque B) ──────────────────
+           Mapea tokens del rebrand v1 (azul-violeta) al sistema nuevo para
+           que los componentes legacy de landing-v2 se vean con la paleta
+           Carbon Workshop sin tocar archivo a archivo. */
+        pri: {
+          DEFAULT: "#FF6A2C",
+          dim:     "#E55A1F",
+          soft:    "rgba(255, 106, 44, 0.12)",
+        },
+        ai: {
+          DEFAULT: "#FF6A2C",
+          dim:     "#E55A1F",
+          soft:    "rgba(255, 106, 44, 0.14)",
+        },
       },
       fontFamily: {
         sans: ["var(--font-mona-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-jetbrains-mono)", "ui-monospace", "monospace"],
+        /* Compat: componentes legacy usan font-np-sans / font-np-mono */
+        "np-sans": ["var(--font-mona-sans)", "system-ui", "sans-serif"],
+        "np-mono": ["var(--font-jetbrains-mono)", "ui-monospace", "monospace"],
       },
       fontSize: {
         xs:           ["0.75rem",   { lineHeight: "1rem",     letterSpacing: "0.01em",   fontWeight: "500" }],
@@ -119,6 +139,16 @@ const config: Config = {
         "display-xl": ["5.5rem",    { lineHeight: "5.5rem",   letterSpacing: "-0.04em",  fontWeight: "800" }],
         "mono-xs":    ["0.75rem",   { lineHeight: "1rem",     letterSpacing: "0",        fontWeight: "400" }],
         "mono-sm":    ["0.8125rem", { lineHeight: "1.25rem",  letterSpacing: "0",        fontWeight: "500" }],
+        /* Compat: tamaños del rebrand v1 (eliminar al cerrar Bloque B) */
+        "np-caption":     ["0.875rem", { lineHeight: "1.25rem",  letterSpacing: "0.01em",   fontWeight: "500" }],
+        "np-body":        ["1rem",     { lineHeight: "1.5rem",   letterSpacing: "0",        fontWeight: "400" }],
+        "np-body-lg":     ["1.125rem", { lineHeight: "1.75rem",  letterSpacing: "-0.005em", fontWeight: "400" }],
+        "np-h4":          ["1.25rem",  { lineHeight: "1.875rem", letterSpacing: "-0.01em",  fontWeight: "500" }],
+        "np-h3":          ["1.5rem",   { lineHeight: "2rem",     letterSpacing: "-0.015em", fontWeight: "600" }],
+        "np-h2":          ["2rem",     { lineHeight: "2.375rem", letterSpacing: "-0.02em",  fontWeight: "600" }],
+        "np-h1":          ["2.5rem",   { lineHeight: "2.875rem", letterSpacing: "-0.025em", fontWeight: "700" }],
+        "np-display":     ["3.25rem",  { lineHeight: "3.5rem",   letterSpacing: "-0.03em",  fontWeight: "700" }],
+        "np-display-xl":  ["4.25rem",  { lineHeight: "4.5rem",   letterSpacing: "-0.035em", fontWeight: "800" }],
       },
       boxShadow: {
         sm:    "0 1px 2px 0 rgba(10, 11, 9, 0.6)",
