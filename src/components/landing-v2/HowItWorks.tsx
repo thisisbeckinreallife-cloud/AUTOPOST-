@@ -167,7 +167,9 @@ function CalendarVisual() {
         <span className="font-np-mono text-[9px] text-ink-7 uppercase tracking-widest">
           Esta semana
         </span>
-        <span className="w-1.5 h-1.5 rounded-full bg-[color:var(--np-success)] animate-pulse" />
+        <span aria-hidden="true" className="font-np-mono text-[9px] text-ink-6 tracking-wider">
+          7 redes
+        </span>
       </div>
       <div className="grid grid-cols-7 gap-1">
         {["L", "M", "X", "J", "V", "S", "D"].map((d) => (

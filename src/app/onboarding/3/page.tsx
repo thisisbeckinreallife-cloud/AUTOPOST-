@@ -84,6 +84,10 @@ export default function OnboardingStep3() {
       backHref="/onboarding/2"
     >
       {phase === "idle" || phase === "uploading" ? (
+        <FolderContractGuide />
+      ) : null}
+
+      {phase === "idle" || phase === "uploading" ? (
         <div
           onClick={() => fileInputRef.current?.click()}
           onDragOver={(e) => e.preventDefault()}
@@ -125,6 +129,21 @@ export default function OnboardingStep3() {
               </p>
             </>
           )}
+        </div>
+      ) : null}
+
+      {phase === "idle" ? (
+        <div className="mt-4 flex justify-center">
+          <a
+            href="/api/onboarding/sample-folder"
+            className={cn(
+              "inline-flex items-center gap-2 text-sm text-ink-7 hover:text-ink-9 transition-colors",
+              "underline underline-offset-4 decoration-ink-4 hover:decoration-accent"
+            )}
+          >
+            <span aria-hidden="true">↓</span>
+            Descargar carpeta de ejemplo
+          </a>
         </div>
       ) : null}
 
@@ -173,5 +192,46 @@ export default function OnboardingStep3() {
         </div>
       ) : null}
     </StepShell>
+  );
+}
+
+/**
+ * FolderContractGuide — qué puede haber dentro de la carpeta.
+ *
+ * Visualiza el "contrato implícito" de Autopost para usuarios no-técnicos:
+ * cualquier archivo vale, la IA detecta qué hace cada uno. Sin estructura
+ * obligatoria. Reemplaza el riesgo de subir basura desorganizada con
+ * expectativas claras antes del drop zone.
+ */
+function FolderContractGuide() {
+  const examples = [
+    { icon: "🖼️",  what: "Una imagen suelta",          becomes: "Un post" },
+    { icon: "🎬",  what: "Un vídeo",                    becomes: "Un reel" },
+    { icon: "📂",  what: "Carpeta con 3-10 imágenes",   becomes: "Un carrusel" },
+    { icon: "📝",  what: "Un .txt con notas",           becomes: "Leyenda sugerida" },
+  ];
+  return (
+    <div className="mb-6">
+      <p className="font-np-mono text-np-caption text-ink-6 uppercase tracking-widest mb-3 text-center">
+        Qué puede haber en tu carpeta
+      </p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {examples.map((ex) => (
+          <div
+            key={ex.what}
+            className="bg-ink-1 border border-ink-3 rounded-md p-4 text-center"
+          >
+            <div className="text-2xl mb-2" aria-hidden="true">{ex.icon}</div>
+            <div className="text-xs text-ink-7 leading-tight mb-1">{ex.what}</div>
+            <div className="text-xs text-accent-strong font-medium leading-tight">
+              → {ex.becomes}
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-ink-6 text-center mt-3">
+        No hace falta orden ni estructura concreta. La IA lo detecta sola.
+      </p>
+    </div>
   );
 }

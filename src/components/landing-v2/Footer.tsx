@@ -19,7 +19,7 @@ export function Footer() {
             { href: "#how", label: "Cómo funciona" },
             { href: "#features", label: "Características" },
             { href: "#pricing", label: "Precios" },
-            { href: "/signup", label: "Empezar gratis" },
+            { href: "/signup", label: "Empezar 7 días gratis" },
           ]} />
 
           <FooterCol title="Recursos" links={[
@@ -41,10 +41,7 @@ export function Footer() {
 
         <div className="flex items-center justify-between flex-wrap gap-4 pt-6 border-t border-ink-3 font-np-mono text-np-caption text-ink-6">
           <span>© 2026 Autopost · Todos los derechos reservados.</span>
-          <span className="inline-flex items-center gap-2">
-            <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-[color:var(--np-success)] animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]" />
-            Estado · 99.98% uptime
-          </span>
+          <span>Hecho en España</span>
         </div>
       </div>
     </footer>
