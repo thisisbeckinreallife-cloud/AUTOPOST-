@@ -3,10 +3,10 @@ import { ImageResponse } from "next/og";
 /**
  * Open Graph image dinámica · 1200x630.
  * Sirve automáticamente como og:image y twitter:image de la home.
- * Genera-en-el-edge usando next/og — no necesita imagen estática.
  *
- * Tipografía system fallback (Mona Sans no carga aquí). Mantenemos
- * el sistema cromático Carbon Workshop: bg ink-1 · acento naranja-óxido.
+ * Satori (engine de next/og) es estricto: TODO <div> con más de un hijo
+ * necesita display: "flex" o "display: none" explícito. No respeta el
+ * default block del browser.
  */
 export const runtime = "edge";
 export const alt = "Autopost — Tira la carpeta. El resto va solo.";
@@ -41,13 +41,14 @@ export default async function OG() {
           />
           <div
             style={{
+              display: "flex",
               fontSize: "26px",
               fontWeight: 600,
               letterSpacing: "-0.02em",
               color: "#EDEAE3",
             }}
           >
-            autopost
+            <span>autopost</span>
             <span style={{ color: "#FF6A2C" }}>.</span>
           </div>
         </div>
@@ -56,6 +57,7 @@ export default async function OG() {
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <div
             style={{
+              display: "flex",
               fontSize: "108px",
               fontWeight: 800,
               lineHeight: 1.02,
@@ -67,6 +69,7 @@ export default async function OG() {
           </div>
           <div
             style={{
+              display: "flex",
               fontSize: "108px",
               fontWeight: 800,
               lineHeight: 1.02,
@@ -88,7 +91,7 @@ export default async function OG() {
             color: "#A8A69E",
           }}
         >
-          <div style={{ display: "flex", gap: "32px" }}>
+          <div style={{ display: "flex", gap: "32px", alignItems: "center" }}>
             <span>7 redes</span>
             <span style={{ color: "#3A3D38" }}>·</span>
             <span>Sin permanencia</span>
@@ -97,6 +100,7 @@ export default async function OG() {
           </div>
           <div
             style={{
+              display: "flex",
               padding: "10px 20px",
               background: "#FF6A2C",
               color: "#0A0B09",
