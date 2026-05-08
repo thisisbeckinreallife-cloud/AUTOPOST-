@@ -27,6 +27,7 @@ import { MetaApiError } from "@/services/meta/client";
 import { sendEmail, publishedEmailHtml, failedEmailHtml } from "@/lib/email";
 import { dispatchPublish, PlatformPublishError } from "@/lib/social/adapters";
 import { getValidAccessToken } from "@/lib/social/oauth/refresh";
+import { appendWatermark } from "@/lib/billing/watermark";
 
 const CONCURRENCY = parseInt(process.env.WORKER_CONCURRENCY ?? "3", 10);
 const LOCK_DURATION_MS = 5 * 60 * 1000; // 5 minutes
@@ -108,6 +109,22 @@ async function processPublishJob(job: Job<PublishJobPayload>): Promise<void> {
       throw new Error(
         `MetaConnection status is "${connection.status}". Token may be expired.`
       );
+    }
+
+    // ─── 5b. Watermark "Programado con autopost.app" si plan FREE/BASIC ───
+    // Single-tenant actual: el owner es el único AdminUser de la instancia.
+    // Subscription incluido para honrar plan vigente cuando el webhook de
+    // Stripe llega tarde y AdminUser.plan está desactualizado.
+    const owner = await db.adminUser.findFirst({
+      include: { subscription: true },
+    });
+
+    if (owner) {
+      const watermarkedCaption = appendWatermark(draft.caption, owner, owner.subscription);
+      if (watermarkedCaption !== draft.caption) {
+        console.log(`[Worker] Watermark añadido (plan=${owner.plan} hideWatermark=${owner.hideWatermark})`);
+        draft.caption = watermarkedCaption;
+      }
     }
 
     // ─── 6. Publish ───
@@ -319,6 +336,20 @@ async function processSocialPublishJob(
   try {
     // Refresca el token si está cerca de expirar
     const accessToken = await getValidAccessToken(publication.connection);
+
+    // Watermark "Programado con autopost.app" si plan FREE/BASIC.
+    const owner = await db.adminUser.findFirst({ include: { subscription: true } });
+    if (owner) {
+      const watermarkedCaption = appendWatermark(
+        publication.postDraft.caption,
+        owner,
+        owner.subscription,
+      );
+      if (watermarkedCaption !== publication.postDraft.caption) {
+        console.log(`[Worker] Watermark añadido (plan=${owner.plan} platform=${publication.platform})`);
+        publication.postDraft.caption = watermarkedCaption;
+      }
+    }
 
     const result = await dispatchPublish(publication.platform, {
       draft: publication.postDraft,

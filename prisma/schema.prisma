@@ -56,6 +56,16 @@ model AdminUser {
   stripeCustomerId      String? @unique
   stripeSubscriptionId  String? @unique
 
+  // Settings de cuenta (Bloque D — pantalla /account).
+  // hideWatermark: si true Y plan ≥ Pro, NO se añade "Programado con
+  // autopost.app" al final de los posts publicados. FREE/SOLO siempre
+  // tienen watermark independientemente del valor (server-side enforced).
+  // language: idioma preferido para emails y UI ("es" | "en").
+  // emailNotifications: recibir emails al publicar/fallar/cobro.
+  hideWatermark      Boolean @default(false)
+  language           String  @default("es")
+  emailNotifications Boolean @default(true)
+
   auditLogs AuditLog[]
   chats     AiChat[]
   subscription Subscription?
