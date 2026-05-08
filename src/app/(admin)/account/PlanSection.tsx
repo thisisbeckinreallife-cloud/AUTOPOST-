@@ -8,7 +8,7 @@ interface PlanData {
   label: string;
   priceWeekly: number;
   features: {
-    canHideWatermark: boolean;
+    hasWatermark: boolean;
     maxAccounts: number;
     postsPerMonth: number;
     teamSize: number;
@@ -128,7 +128,9 @@ export function PlanSection({ plan }: { plan: PlanData }) {
               : `${plan.features.postsPerMonth} posts/mes`}
           </li>
           <li>
-            {plan.features.canHideWatermark ? "Sin marca de agua" : "Con marca \"autopost.app\""}
+            {plan.features.hasWatermark
+              ? "Posts con marca \"autopost.app\""
+              : "Posts sin marca de agua"}
           </li>
           <li>
             {plan.features.teamSize > 1

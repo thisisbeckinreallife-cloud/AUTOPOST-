@@ -11,13 +11,13 @@ interface Preferences {
 
 export function PreferencesSection({
   preferences: initial,
-  canHideWatermark,
+  hasWatermark,
 }: {
   preferences: Preferences;
-  canHideWatermark: boolean;
+  /** true si el plan actual lleva marca "Programado con autopost.app". */
+  hasWatermark: boolean;
 }) {
   const [language, setLanguage] = useState(initial.language);
-  const [hideWatermark, setHideWatermark] = useState(initial.hideWatermark);
   const [emailNotifications, setEmailNotifications] = useState(initial.emailNotifications);
   const [saving, setSaving] = useState(false);
   const [savedField, setSavedField] = useState<string | null>(null);
@@ -46,12 +46,6 @@ export function PreferencesSection({
   function onLanguageChange(value: "es" | "en") {
     setLanguage(value);
     void patch({ language: value }, "Idioma");
-  }
-
-  function onWatermarkChange(value: boolean) {
-    if (!canHideWatermark) return; // bloqueado por plan
-    setHideWatermark(value);
-    void patch({ hideWatermark: value }, "Marca de agua");
   }
 
   function onEmailChange(value: boolean) {
@@ -99,30 +93,40 @@ export function PreferencesSection({
           </div>
         </div>
 
-        {/* Marca de agua */}
+        {/* Marca de agua — solo informativo. La regla es automática:
+            FREE lleva watermark · cualquier plan de pago no la lleva. */}
         <div className="py-4">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-ink-9">
-                Ocultar marca "Programado con autopost.app"
+                Marca "Programado con autopost.app"
               </p>
-              <p className="text-xs text-ink-7 mt-0.5">
-                {canHideWatermark
-                  ? "Tus posts se publican sin la mención al final."
-                  : "Disponible en plan Pro o superior. "}
-                {!canHideWatermark ? (
+              {hasWatermark ? (
+                <p className="text-xs text-ink-7 mt-0.5">
+                  Tus posts terminan con esta mención porque estás en el plan
+                  gratuito. Cualquier plan de pago la elimina automáticamente.{" "}
                   <Link href="/#pricing" className="underline text-accent hover:text-accent-strong">
-                    Mejora tu plan
+                    Ver planes desde €5/sem
                   </Link>
-                ) : null}
-              </p>
+                </p>
+              ) : (
+                <p className="text-xs text-success-strong mt-0.5">
+                  ✓ Tus posts se publican sin marca. Incluido en tu plan.
+                </p>
+              )}
             </div>
-            <Toggle
-              checked={hideWatermark}
-              disabled={!canHideWatermark}
-              onChange={onWatermarkChange}
-              ariaLabel="Ocultar marca de agua"
-            />
+            <div className="shrink-0">
+              <span
+                aria-label={hasWatermark ? "Marca activa" : "Sin marca"}
+                className={`inline-flex items-center px-3 h-7 rounded-full border text-xs font-medium ${
+                  hasWatermark
+                    ? "bg-warning-soft text-warning-strong border-warning/30"
+                    : "bg-success-soft text-success-strong border-success/30"
+                }`}
+              >
+                {hasWatermark ? "Activa" : "Sin marca"}
+              </span>
+            </div>
           </div>
         </div>
 

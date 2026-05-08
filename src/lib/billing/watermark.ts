@@ -1,47 +1,37 @@
 /**
  * Billing · Watermark "Programado con autopost.app"
  * ──────────────────────────────────────────────────────────────────────────
- * Inserta un texto promocional al final del caption de los posts cuando el
- * usuario está en plan FREE o BASIC. Pro y Agency NO llevan watermark.
+ * Inserta un texto promocional al final del caption de los posts publicados
+ * SOLO cuando el usuario está en plan FREE. Cualquier plan de pago
+ * (BASIC, PRO, AGENCY) publica sin watermark — no es negociable: si pagas,
+ * no llevas marca. Si no pagas, llevas marca siempre.
  *
- * El usuario puede desactivar el watermark con el toggle `hideWatermark`
- * en Settings, PERO esa preferencia solo se respeta si su plan ≥ PRO.
- * Server-side check: nunca confíes en `hideWatermark=true` con plan FREE.
+ * No hay toggle. La regla es binaria: tier === "FREE" → watermark, else null.
  *
  * Política de inserción:
  *  - Si la caption YA contiene el watermark (substring exacto), no duplica.
  *  - Si la caption está vacía, deja vacía (no spammeamos).
- *  - Insertamos con doble salto de línea + dot separator + emoji minimal.
+ *  - Insertamos con doble salto de línea + em-dash separator + emoji.
  *  - Texto fijo: "—\n📲 Programado con autopost.app"
  */
 
 import type { AdminUser, Subscription } from "@prisma/client";
-import { getEffectiveTier, FEATURES, type Tier } from "./plan";
+import { getEffectiveTier } from "./plan";
 
 export const WATERMARK_TEXT = "—\n📲 Programado con autopost.app";
 
 /**
  * Devuelve el watermark a aplicar (string) o null si no procede.
  *
- * Reglas:
- *  - Si tier ≥ PRO Y user.hideWatermark === true → no watermark.
- *  - En cualquier otro caso → watermark (FREE/BASIC siempre, PRO/AGENCY
- *    solo si no han desactivado).
+ * Regla única: solo el plan FREE lleva watermark. Cualquier plan de pago
+ * (BASIC/PRO/AGENCY) lo elimina automáticamente — sin toggle ni preferencia.
  */
 export function getWatermarkFor(
-  user: Pick<AdminUser, "plan" | "hideWatermark">,
+  user: Pick<AdminUser, "plan">,
   subscription?: Pick<Subscription, "status" | "tier"> | null
 ): string | null {
   const tier = getEffectiveTier(user, subscription);
-
-  // Pro/Agency con preferencia de ocultar → respetamos
-  if (FEATURES.canHideWatermark(tier) && user.hideWatermark) {
-    return null;
-  }
-
-  // FREE/BASIC: siempre watermark, pase lo que pase con hideWatermark
-  // Pro/Agency con hideWatermark=false: también watermark
-  return WATERMARK_TEXT;
+  return tier === "FREE" ? WATERMARK_TEXT : null;
 }
 
 /**
@@ -50,7 +40,7 @@ export function getWatermarkFor(
  */
 export function appendWatermark(
   caption: string,
-  user: Pick<AdminUser, "plan" | "hideWatermark">,
+  user: Pick<AdminUser, "plan">,
   subscription?: Pick<Subscription, "status" | "tier"> | null
 ): string {
   const watermark = getWatermarkFor(user, subscription);

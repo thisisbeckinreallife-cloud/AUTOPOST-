@@ -72,8 +72,21 @@ export function tierAtLeast(actual: Tier, minimum: Tier): boolean {
  * Feature gates — fuente de verdad para qué puede hacer cada plan.
  */
 export const FEATURES = {
-  /** Si false, los posts llevan "Programado con autopost.app" al final. */
-  canHideWatermark: (tier: Tier) => tierAtLeast(tier, "PRO"),
+  /**
+   * Si true, los posts del usuario llevan "Programado con autopost.app".
+   * Solo FREE — cualquier plan de pago (BASIC+) publica sin marca.
+   * Sin toggle de usuario: la regla es automática y binaria.
+   */
+  hasWatermark: (tier: Tier) => tier === "FREE",
+
+  /**
+   * Legacy alias (para compatibilidad con código pre-2026-05-08 que
+   * preguntaba "puede el usuario ocultar la marca?"). Ahora cualquier
+   * plan de pago la oculta automáticamente, así que es equivalente a
+   * !hasWatermark.
+   * @deprecated usar !FEATURES.hasWatermark(tier)
+   */
+  canHideWatermark: (tier: Tier) => tier !== "FREE",
 
   /** Conexiones simultáneas a redes sociales. */
   maxAccounts: (tier: Tier): number => {

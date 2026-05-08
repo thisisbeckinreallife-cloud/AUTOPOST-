@@ -36,6 +36,7 @@ const TIERS: Tier[] = [
     weekly: 5,
     yearly: 4,
     features: [
+      "Sin marca \"autopost.app\" en tus posts",
       "1 cuenta · 3 redes",
       "50 posts al mes",
       "La IA detecta el formato",
@@ -50,6 +51,7 @@ const TIERS: Tier[] = [
     weekly: 7,
     yearly: 6,
     features: [
+      "Sin marca \"autopost.app\"",
       "3 cuentas · 7 redes",
       "200 posts al mes",
       "La IA escribe en tu tono",
@@ -66,6 +68,7 @@ const TIERS: Tier[] = [
     weekly: 10,
     yearly: 8,
     features: [
+      "Sin marca \"autopost.app\"",
       "10 cuentas · todas las redes",
       "Posts ilimitados",
       "Equipo de 5 personas",
