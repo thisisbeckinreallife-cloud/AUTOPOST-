@@ -88,23 +88,29 @@ export default function OnboardingStep3() {
       ) : null}
 
       {phase === "idle" || phase === "uploading" ? (
-        <div
+        <button
+          type="button"
           onClick={() => fileInputRef.current?.click()}
           onDragOver={(e) => e.preventDefault()}
           onDrop={onDrop}
+          aria-describedby="dropzone-help"
+          aria-busy={phase === "uploading" || undefined}
           className={cn(
-            "border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all",
-            "bg-ink-1 hover:bg-pri-soft hover:border-pri",
-            phase === "uploading" ? "border-pri bg-pri-soft" : "border-ink-3"
+            "w-full block border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all",
+            "bg-ink-1 hover:bg-accent-soft hover:border-accent",
+            "focus-visible:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent-ring",
+            phase === "uploading" ? "border-accent bg-accent-soft" : "border-ink-3"
           )}
         >
           <input
             ref={fileInputRef}
             type="file"
             multiple
-            className="hidden"
+            className="sr-only"
             onChange={(e) => onFiles(e.target.files)}
             accept="image/*,video/*,.zip,.txt,.pdf"
+            aria-hidden="true"
+            tabIndex={-1}
           />
           <div className="text-5xl mb-3" aria-hidden="true">
             {phase === "uploading" ? "⏳" : "📁"}
@@ -121,15 +127,15 @@ export default function OnboardingStep3() {
               <h3 className="font-np-sans text-np-h3 font-semibold text-ink-9 mb-2">
                 Arrastra una carpeta aquí
               </h3>
-              <p className="text-np-body text-ink-7 mb-4">
-                O haz click para elegir desde tu ordenador.
+              <p id="dropzone-help" className="text-np-body text-ink-7 mb-4">
+                O pulsa Enter para elegir desde tu ordenador.
               </p>
               <p className="font-np-mono text-np-caption text-ink-6">
                 Suele tardar 8 segundos para 30-50 archivos.
               </p>
             </>
           )}
-        </div>
+        </button>
       ) : null}
 
       {phase === "idle" ? (

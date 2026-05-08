@@ -62,16 +62,20 @@ export function Faq() {
       <div className="flex flex-col">
         {ITEMS.map((item, i) => {
           const isOpen = open === i;
+          const buttonId = `faq-q-${i}`;
+          const panelId = `faq-panel-${i}`;
           return (
             <div key={i} className="border-b border-ink-3">
               <button
                 type="button"
+                id={buttonId}
                 aria-expanded={isOpen}
+                aria-controls={panelId}
                 onClick={() => setOpen(isOpen ? null : i)}
                 className={cn(
                   "w-full flex items-center justify-between gap-4 py-6 text-left",
                   "font-np-sans text-np-h4 font-medium text-ink-9 hover:text-accent",
-                  "transition-colors"
+                  "focus-visible:text-accent transition-colors"
                 )}
               >
                 <span>{item.q}</span>
@@ -86,7 +90,12 @@ export function Faq() {
                   +
                 </span>
               </button>
+              {/* role=region + aria-labelledby + hidden quita el panel cerrado del a11y tree */}
               <div
+                id={panelId}
+                role="region"
+                aria-labelledby={buttonId}
+                hidden={!isOpen}
                 className={cn(
                   "overflow-hidden transition-[max-height] duration-400 ease-out",
                   isOpen ? "max-h-[500px]" : "max-h-0"
