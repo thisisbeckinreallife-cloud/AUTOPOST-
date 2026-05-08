@@ -69,10 +69,15 @@ export default function OnboardingStep3() {
     router.push("/onboarding/4");
   }
 
+  const [confirmSkip, setConfirmSkip] = React.useState(false);
+
   function skip() {
-    if (confirm("¿Saltar la guía? Podrás subir tu carpeta después desde el panel.")) {
-      void fetch("/api/onboarding/complete", { method: "POST" }).then(() => router.push("/dashboard"));
-    }
+    setConfirmSkip(true);
+  }
+
+  function confirmSkipNow() {
+    setConfirmSkip(false);
+    void fetch("/api/onboarding/complete", { method: "POST" }).then(() => router.push("/dashboard"));
   }
 
   return (
@@ -197,7 +202,85 @@ export default function OnboardingStep3() {
           </Button>
         </div>
       ) : null}
+
+      {confirmSkip ? (
+        <SkipConfirmDialog
+          onConfirm={confirmSkipNow}
+          onCancel={() => setConfirmSkip(false)}
+        />
+      ) : null}
     </StepShell>
+  );
+}
+
+/**
+ * SkipConfirmDialog — sustituye el confirm() nativo. Estilizado con Carbon
+ * Workshop, focus trap básico (botón cancelar tiene focus al abrir), Esc
+ * cierra, click en backdrop cierra.
+ */
+function SkipConfirmDialog({
+  onConfirm,
+  onCancel,
+}: {
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const cancelRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    cancelRef.current?.focus();
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onCancel();
+    }
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onCancel]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="skip-dialog-title"
+      aria-describedby="skip-dialog-desc"
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+    >
+      <button
+        type="button"
+        aria-label="Cerrar"
+        onClick={onCancel}
+        className="absolute inset-0 bg-ink-0/80 backdrop-blur-sm animate-fade-in"
+      />
+      <div className="relative z-10 w-full max-w-md bg-ink-2 border border-ink-4 rounded-md shadow-xl p-6 animate-slide-up">
+        <h3 id="skip-dialog-title" className="text-xl font-semibold text-ink-9 tracking-tight mb-2">
+          ¿Saltar esta guía?
+        </h3>
+        <p id="skip-dialog-desc" className="text-sm text-ink-7 mb-6 leading-normal">
+          Podrás subir tu carpeta después desde el panel principal.
+          La guía está aquí para que la primera vez sea más fácil.
+        </p>
+        <div className="flex gap-2 flex-wrap justify-end">
+          <button
+            ref={cancelRef}
+            type="button"
+            onClick={onCancel}
+            className="inline-flex items-center justify-center h-11 px-4 rounded-md border border-ink-4 text-ink-9 font-medium text-sm hover:bg-ink-3 hover:border-ink-5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="inline-flex items-center justify-center h-11 px-4 rounded-md bg-accent text-ink-0 font-medium text-sm shadow-md hover:bg-accent-hover transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring focus-visible:ring-offset-2 focus-visible:ring-offset-ink-2"
+          >
+            Saltar y ir al panel
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
