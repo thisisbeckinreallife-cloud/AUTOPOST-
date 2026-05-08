@@ -109,13 +109,13 @@ export function PillNav() {
             href="/signup"
             className={cn(
               "inline-flex items-center justify-center h-10 px-4 rounded-lg",
-              "bg-pri text-ink-10 font-medium text-np-caption",
-              "shadow-[var(--np-shadow-sm),var(--np-glow-blue)]",
-              "hover:bg-pri-dim hover:-translate-y-px",
+              "bg-accent text-ink-0 font-medium text-np-caption",
+              "shadow-md",
+              "hover:bg-accent-hover hover:-translate-y-px",
               "transition-all duration-200"
             )}
           >
-            Comenzar gratis
+            Empezar 7 días gratis
           </Link>
         </div>
       </div>

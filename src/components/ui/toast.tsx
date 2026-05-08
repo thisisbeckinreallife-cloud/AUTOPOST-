@@ -1,10 +1,15 @@
 "use client";
 
 import { createContext, useCallback, useContext, useState } from "react";
-import { CheckCircle, AlertCircle, Info, X } from "lucide-react";
+import { CheckCircle, AlertCircle, Info, X, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type ToastVariant = "success" | "error" | "info";
+/**
+ * Toast — Carbon Workshop.
+ * ToastProvider + useToast hook + ToastItem con animación slide-up.
+ * Auto-dismiss 4s, dismiss manual con botón X.
+ */
+type ToastVariant = "success" | "error" | "info" | "warning";
 
 interface Toast {
   id: number;
@@ -42,7 +47,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast: addToast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+      <div
+        role="region"
+        aria-label="Notificaciones"
+        className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"
+      >
         {toasts.map((t) => (
           <ToastItem key={t.id} toast={t} onDismiss={() => removeToast(t.id)} />
         ))}
@@ -52,30 +61,52 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 }
 
 const iconMap: Record<ToastVariant, React.ReactNode> = {
-  success: <CheckCircle className="h-4 w-4 text-green-400 shrink-0" />,
-  error: <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />,
-  info: <Info className="h-4 w-4 text-blue-400 shrink-0" />,
+  success: <CheckCircle className="h-4 w-4 text-success-strong shrink-0" />,
+  error:   <AlertCircle className="h-4 w-4 text-error-strong shrink-0" />,
+  warning: <AlertTriangle className="h-4 w-4 text-warning-strong shrink-0" />,
+  info:    <Info className="h-4 w-4 text-info-strong shrink-0" />,
 };
 
-const borderMap: Record<ToastVariant, string> = {
-  success: "border-green-500/15",
-  error: "border-red-500/15",
-  info: "border-blue-500/15",
+const accentBar: Record<ToastVariant, string> = {
+  success: "bg-success",
+  error:   "bg-error",
+  warning: "bg-warning",
+  info:    "bg-ink-5",
 };
 
-function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
+function ToastItem({
+  toast,
+  onDismiss,
+}: {
+  toast: Toast;
+  onDismiss: () => void;
+}) {
   return (
     <div
+      role="status"
+      aria-live="polite"
       className={cn(
-        "pointer-events-auto max-w-sm bg-surface-card/95 backdrop-blur-sm border rounded-xl px-4 py-3 shadow-elevated flex items-start gap-3 animate-slide-up",
-        borderMap[toast.variant]
+        "pointer-events-auto relative flex items-start gap-3",
+        "min-w-[320px] max-w-md p-4 rounded-md",
+        "border border-ink-4 bg-ink-2 text-ink-9 shadow-lg",
+        "animate-slide-up"
       )}
     >
-      <div className="mt-0.5">{iconMap[toast.variant]}</div>
-      <p className="text-sm text-zinc-200 flex-1">{toast.message}</p>
+      <span
+        aria-hidden="true"
+        className={cn("absolute left-0 top-0 bottom-0 w-1 rounded-l-md", accentBar[toast.variant])}
+      />
+      <div className="mt-0.5 pl-2">{iconMap[toast.variant]}</div>
+      <p className="text-sm text-ink-9 flex-1">{toast.message}</p>
       <button
+        type="button"
         onClick={onDismiss}
-        className="text-zinc-600 hover:text-zinc-400 transition-colors shrink-0"
+        aria-label="Cerrar notificación"
+        className={cn(
+          "shrink-0 h-6 w-6 inline-flex items-center justify-center rounded-md",
+          "text-ink-7 hover:text-ink-9 hover:bg-ink-3 transition-colors",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring"
+        )}
       >
         <X className="h-3.5 w-3.5" />
       </button>

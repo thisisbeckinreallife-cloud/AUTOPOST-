@@ -1,40 +1,66 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
+import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 
 const SITE_URL = "https://autopost-production-cd57.up.railway.app";
 
+/**
+ * Mona Sans Variable Font (GitHub OFL).
+ * Eje wght 200-900 + wdth 75-125 cubre body + UI + display en una request.
+ * Archivo descargado en src/app/fonts/Mona-Sans.var.woff2 (~299KB).
+ */
+const monaSans = localFont({
+  src: "./fonts/Mona-Sans.var.woff2",
+  variable: "--font-mona-sans",
+  display: "swap",
+  weight: "200 900",
+  style: "normal",
+  declarations: [{ prop: "font-stretch", value: "75% 125%" }],
+});
+
+/**
+ * JetBrains Mono — datos numéricos en pricing/dashboard, code blocks.
+ * 2 pesos suficientes (400 cuerpo, 500 énfasis).
+ */
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "AutoPost — La carpeta es el calendario.",
+  title: "Autopost — Tira la carpeta. El resto va solo.",
   description:
-    "Una semana de posts, escrita antes del café. Sueltas la carpeta. AutoPost detecta carruseles, extrae el copy y programa 30 días en 2 minutos. Vía API oficial de Meta.",
-  applicationName: "AutoPost",
-  authors: [{ name: "AutoPost" }],
+    "Sube una carpeta de posts. La IA detecta formato, sugiere hora y monta el calendario. Tú apruebas. Autopost publica solo en Instagram, TikTok, X, LinkedIn, YouTube y Threads.",
+  applicationName: "Autopost",
+  authors: [{ name: "Autopost" }],
   keywords: [
     "scheduler instagram",
-    "programar posts instagram",
-    "automatización instagram",
-    "carruseles instagram",
+    "programar posts redes sociales",
+    "automatización contenido",
     "social media manager",
     "agencia instagram",
-    "programar carrusel",
-    "API Meta oficial",
+    "IA programación posts",
+    "Meta API oficial",
   ],
   openGraph: {
-    title: "AutoPost — La carpeta es el calendario.",
+    title: "Autopost — Tira la carpeta. El resto va solo.",
     description:
-      "Sueltas la carpeta. AutoPost detecta carruseles, extrae el copy y programa 30 días. Una herramienta editorial para Instagram, hecha para agencias y creadores hispanohablantes.",
+      "Sube una carpeta de posts. La IA detecta formato, sugiere hora y monta el calendario. Tú apruebas.",
     type: "website",
     url: SITE_URL,
-    siteName: "AutoPost",
+    siteName: "Autopost",
     locale: "es_ES",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AutoPost — La carpeta es el calendario.",
+    title: "Autopost — Tira la carpeta. El resto va solo.",
     description:
-      "30 días de Instagram programados en 2 minutos. Detectamos carruseles, extraemos copy y publicamos vía API oficial de Meta.",
+      "Sube una carpeta de posts. La IA detecta formato, sugiere hora y monta el calendario.",
   },
   robots: {
     index: true,
@@ -54,30 +80,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
+    <html
+      lang="es"
+      className={`${monaSans.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
-        <meta name="theme-color" content="#F1ECE2" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Editorial display + body + mono — preload del display que es LCP */}
-        <link
-          rel="preload"
-          as="style"
-          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
-        {/* Rebrand (Fase 1): Geist Sans + Geist Mono — fallback automático a Inter
-            si bloquea (font-family declarado en globals.css con cascade). */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
+        <meta name="theme-color" content="#0E0F0D" />
       </head>
-      <body className="font-sans antialiased">
-        <Providers>{children}</Providers>
+      <body className="bg-ink-1 text-ink-9 font-sans antialiased">
+        <a href="#main-content" className="skip-to-content">
+          Saltar al contenido
+        </a>
+        <Providers>
+          <div id="main-content">{children}</div>
+        </Providers>
       </body>
     </html>
   );

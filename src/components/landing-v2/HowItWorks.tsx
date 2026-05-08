@@ -122,10 +122,7 @@ function AiTagsVisual() {
   return (
     <div className="relative w-3/4 h-full flex items-center justify-center">
       <div
-        className="w-24 h-32 rounded-lg shadow-md relative"
-        style={{
-          background: "linear-gradient(135deg, rgba(79,124,255,0.5), rgba(168,85,247,0.5))",
-        }}
+        className="w-24 h-32 rounded-lg shadow-md relative bg-ink-3 border border-ink-4"
       />
       <Tag style={{ top: "14%", right: "0%", animationDelay: "0.4s" }}>Carrusel · 3 imágenes</Tag>
       <Tag style={{ top: "38%", left: "-15%", animationDelay: "0.8s" }}>IG + LinkedIn</Tag>
@@ -170,7 +167,9 @@ function CalendarVisual() {
         <span className="font-np-mono text-[9px] text-ink-7 uppercase tracking-widest">
           Esta semana
         </span>
-        <span className="w-1.5 h-1.5 rounded-full bg-[color:var(--np-success)] animate-pulse" />
+        <span aria-hidden="true" className="font-np-mono text-[9px] text-ink-6 tracking-wider">
+          7 redes
+        </span>
       </div>
       <div className="grid grid-cols-7 gap-1">
         {["L", "M", "X", "J", "V", "S", "D"].map((d) => (

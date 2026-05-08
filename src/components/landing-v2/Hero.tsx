@@ -53,7 +53,7 @@ export function Hero() {
         className="absolute inset-0 z-0 pointer-events-none"
         style={{
           backgroundImage:
-            "linear-gradient(to right, rgba(79,124,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(79,124,255,0.04) 1px, transparent 1px)",
+            "linear-gradient(to right, rgba(255,106,44,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,106,44,0.04) 1px, transparent 1px)",
           backgroundSize: "64px 64px",
           maskImage: "radial-gradient(ellipse at center, black 30%, transparent 70%)",
           WebkitMaskImage: "radial-gradient(ellipse at center, black 30%, transparent 70%)",
@@ -125,13 +125,13 @@ export function Hero() {
             href="/signup"
             className={cn(
               "inline-flex items-center justify-center h-[56px] px-6 gap-3 rounded-lg",
-              "bg-pri text-ink-10 font-medium text-np-body",
-              "shadow-[var(--np-shadow-sm),var(--np-glow-blue)]",
-              "hover:bg-pri-dim hover:-translate-y-px",
+              "bg-accent text-ink-0 font-medium text-np-body",
+              "shadow-md",
+              "hover:bg-accent-hover hover:-translate-y-px",
               "transition-all duration-200 ease-[var(--np-ease-out)]"
             )}
           >
-            <span>Comenzar gratis</span>
+            <span>Empezar 7 días gratis</span>
             <span aria-hidden="true">→</span>
           </Link>
           <a
@@ -147,30 +147,30 @@ export function Hero() {
           </a>
         </div>
 
-        {/* Stats inline */}
+        {/* Capabilities reales (no stats infladas). */}
         <div
           className="flex items-center gap-8 flex-wrap justify-center np-anim-hero-fade"
           style={{ animationDelay: "0.7s" }}
         >
-          <Stat value="12.4M+" label="posts publicados" />
-          <span aria-hidden="true" className="hidden sm:block w-px h-8 bg-ink-3" />
-          <Stat value="8.7s" label="carpeta procesada" />
-          <span aria-hidden="true" className="hidden sm:block w-px h-8 bg-ink-3" />
-          <Stat value="47" label="redes conectadas" />
+          <Capability label="7 redes" sub="Instagram · TikTok · LinkedIn · X · YouTube · Threads · Facebook" />
+          <span aria-hidden="true" className="hidden md:block w-px h-8 bg-ink-3" />
+          <Capability label="Sin permanencia" sub="Cancelas cuando quieras" />
+          <span aria-hidden="true" className="hidden md:block w-px h-8 bg-ink-3" />
+          <Capability label="7 días gratis" sub="Sin tarjeta hasta el día 7" />
         </div>
       </div>
     </section>
   );
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
+function Capability({ label, sub }: { label: string; sub: string }) {
   return (
-    <div className="text-center">
-      <div className="font-np-sans font-semibold text-ink-9 leading-none" style={{ fontSize: "32px", letterSpacing: "-0.02em" }}>
-        {value}
-      </div>
-      <div className="font-np-mono text-np-caption text-ink-6 uppercase tracking-wider mt-2">
+    <div className="text-center max-w-[260px]">
+      <div className="font-sans font-semibold text-ink-9 leading-none text-xl tracking-tight">
         {label}
+      </div>
+      <div className="text-xs text-ink-6 mt-2 leading-snug">
+        {sub}
       </div>
     </div>
   );

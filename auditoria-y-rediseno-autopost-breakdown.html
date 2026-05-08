@@ -1,0 +1,1722 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auditoría y Rediseño Autopost</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Backgrounds */
+  --color-bg: #FAF7F2;
+  --color-bg-warm: #F5F0E8;
+  --color-bg-code: #1E1E2E;
+  --color-text: #2C2A28;
+  --color-text-secondary: #6B6560;
+  --color-text-muted: #9E9790;
+  --color-border: #E5DFD6;
+  --color-border-light: #EEEBE5;
+  --color-surface: #FFFFFF;
+  --color-surface-warm: #FDF9F3;
+
+  /* Accent — vermillion */
+  --color-accent: #D94F30;
+  --color-accent-hover: #C4432A;
+  --color-accent-light: #FDEEE9;
+  --color-accent-muted: #E8836C;
+
+  /* Semantic */
+  --color-success: #2D8B55;
+  --color-success-light: #E8F5EE;
+  --color-error: #C93B3B;
+  --color-error-light: #FDE8E8;
+  --color-info: #2A7B9B;
+  --color-info-light: #E4F2F7;
+
+  /* Section colors */
+  --color-section-1: #D94F30;
+  --color-section-2: #2A7B9B;
+  --color-section-3: #7B6DAA;
+  --color-section-4: #D4A843;
+  --color-section-5: #2D8B55;
+
+  /* Fonts */
+  --font-display: 'Bricolage Grotesque', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* Type scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+
+  /* Line heights */
+  --leading-tight: 1.15;
+  --leading-snug: 1.3;
+  --leading-normal: 1.6;
+  --leading-loose: 1.8;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  --content-width: 800px;
+  --content-width-wide: 1000px;
+  --nav-height: 50px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
+  --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+  --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.1);
+  --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --stagger-delay: 120ms;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--color-bg);
+  background-image: radial-gradient(ellipse at 20% 50%, rgba(217, 79, 48, 0.03) 0%, transparent 50%);
+  font-family: var(--font-body);
+  color: var(--color-text);
+  margin: 0;
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: var(--radius-full); }
+
+pre, code { white-space: pre-wrap; word-break: break-word; overflow-x: hidden; }
+pre {
+  background: var(--color-bg-code);
+  color: #CDD6F4;
+  padding: var(--space-6);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  box-shadow: var(--shadow-md);
+  margin: var(--space-6) 0;
+}
+code { font-family: var(--font-mono); font-size: 0.9em; }
+p code { background: var(--color-border-light); padding: 1px 6px; border-radius: 4px; }
+
+/* Nav */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--nav-height);
+  background: rgba(250, 247, 242, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 100;
+  border-bottom: 1px solid var(--color-border-light);
+}
+.nav-inner {
+  max-width: var(--content-width-wide);
+  margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 100%;
+  padding: 0 var(--space-6);
+}
+.nav-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+.progress-bar {
+  position: absolute; top: 0; left: 0;
+  height: 3px;
+  background: var(--color-accent);
+  width: 0%;
+  transition: width 100ms linear;
+  z-index: 101;
+}
+.nav-dots { display: flex; gap: var(--space-3); }
+.nav-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--color-text-muted);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: all var(--duration-fast);
+  position: relative;
+}
+.nav-dot::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-bg-code);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast);
+  font-family: var(--font-body);
+  font-weight: 500;
+}
+.nav-dot:hover::after { opacity: 1; }
+.nav-dot.active { border-color: var(--color-accent); background: var(--color-accent); box-shadow: 0 0 8px rgba(217,79,48,0.3); }
+.nav-dot.visited { background: var(--color-accent); border-color: var(--color-accent); opacity: 0.5; }
+
+/* Sections */
+.section {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--space-16) var(--space-6);
+  padding-top: calc(var(--nav-height) + var(--space-12));
+  display: flex;
+  flex-direction: column;
+}
+.section:nth-child(even) { background: var(--color-bg-warm); }
+.section-content {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  width: 100%;
+  flex: 1;
+}
+.section-header { margin-bottom: var(--space-12); }
+.section-number {
+  font-family: var(--font-display);
+  font-size: var(--text-6xl);
+  font-weight: 800;
+  color: var(--color-accent);
+  opacity: 0.18;
+  line-height: 1;
+  display: block;
+  margin-bottom: var(--space-2);
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+  color: var(--color-text);
+  margin: 0 0 var(--space-3);
+}
+.section-subtitle {
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-normal);
+  margin: 0;
+  max-width: 640px;
+}
+.screen { margin-bottom: var(--space-10); }
+.screen-heading {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  margin: 0 0 var(--space-4);
+}
+.screen p { margin: var(--space-3) 0; }
+.screen-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+  display: block;
+}
+
+/* Hero */
+.hero-section {
+  display: flex;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-accent);
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+  display: block;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: var(--text-5xl);
+  font-weight: 800;
+  line-height: var(--leading-tight);
+  margin: 0 0 var(--space-4);
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+.hero-title .accent { color: var(--color-accent); }
+.hero-description {
+  font-size: var(--text-xl);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-normal);
+  margin: 0 0 var(--space-8);
+  max-width: 600px;
+}
+
+/* Animations */
+.animate-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity var(--duration-slow) var(--ease-out),
+              transform var(--duration-slow) var(--ease-out);
+}
+.animate-in.visible { opacity: 1; transform: translateY(0); }
+.stagger-children > .animate-in {
+  transition-delay: calc(var(--stagger-index, 0) * var(--stagger-delay));
+}
+
+/* Stat badges */
+.stat-badges {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin: var(--space-6) 0;
+}
+.stat-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border-light);
+  min-width: 90px;
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-xl);
+  color: var(--color-accent);
+  line-height: 1.1;
+}
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+  text-align: center;
+}
+
+/* Pattern cards */
+.pattern-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+  margin: var(--space-6) 0;
+}
+.pattern-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal);
+  border-top: 3px solid;
+}
+.pattern-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.pattern-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: white;
+  margin-bottom: var(--space-3);
+}
+.pattern-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-base);
+  margin: 0 0 var(--space-2);
+}
+.pattern-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: var(--leading-normal);
+}
+
+/* Flow steps */
+.flow-steps {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  margin: var(--space-8) 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.flow-step {
+  flex: 1;
+  min-width: 160px;
+  max-width: 260px;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+  border-top: 3px solid;
+}
+.flow-step-label {
+  display: inline-block;
+  color: white;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-3);
+}
+.flow-step p {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: var(--leading-normal);
+}
+.flow-step strong { color: var(--color-text); display: block; margin-bottom: 4px; font-family: var(--font-display); }
+.flow-arrow {
+  display: flex; align-items: center;
+  font-size: var(--text-2xl);
+  color: var(--color-text-muted);
+  font-weight: 300;
+  padding: 0 var(--space-1);
+}
+
+/* Vertical flow */
+.flow-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: var(--space-8) 0;
+  padding-left: var(--space-2);
+}
+.flow-v-step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  width: 100%;
+}
+.flow-v-num {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  color: white;
+  font-weight: 700;
+  font-family: var(--font-display);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: var(--text-base);
+}
+.flow-v-content { padding-bottom: var(--space-4); padding-top: 4px; }
+.flow-v-content strong { font-family: var(--font-display); font-size: var(--text-base); }
+.flow-v-content p {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  margin: var(--space-1) 0 0;
+}
+.flow-v-line {
+  width: 2px;
+  height: 20px;
+  background: var(--color-border);
+  margin-left: 17px;
+}
+
+/* Step cards */
+.step-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-6) 0;
+}
+.step-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-accent);
+  box-shadow: var(--shadow-sm);
+}
+.step-num {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: white;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  flex-shrink: 0;
+  font-size: var(--text-sm);
+}
+.step-body strong { font-family: var(--font-display); font-size: var(--text-base); }
+.step-body p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+.step-body code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--color-bg-warm);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* Callout */
+.callout {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  margin: var(--space-6) 0;
+}
+.callout-icon { font-size: 1.5rem; flex-shrink: 0; line-height: 1; }
+.callout-title {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+.callout p { margin: 0; font-size: var(--text-sm); line-height: var(--leading-normal); color: var(--color-text-secondary); }
+.callout-accent { background: var(--color-accent-light); border-left: 4px solid var(--color-accent); }
+.callout-accent .callout-title { color: var(--color-accent); }
+.callout-info { background: var(--color-info-light); border-left: 4px solid var(--color-info); }
+.callout-info .callout-title { color: var(--color-info); }
+.callout-warning { background: var(--color-error-light); border-left: 4px solid var(--color-error); }
+.callout-warning .callout-title { color: var(--color-error); }
+.callout-success { background: var(--color-success-light); border-left: 4px solid var(--color-success); }
+.callout-success .callout-title { color: var(--color-success); }
+
+/* Expandable cards */
+.expandable-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin: var(--space-3) 0;
+  border: 1px solid var(--color-border-light);
+}
+.expandable-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  text-align: left;
+  transition: background var(--duration-fast);
+  gap: var(--space-3);
+}
+.expandable-header:hover { background: var(--color-surface-warm); }
+.expandable-title-row {
+  display: flex; align-items: center; gap: var(--space-3);
+  flex: 1;
+}
+.expandable-icon {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  color: var(--color-accent);
+  font-weight: 700;
+  width: 24px;
+  text-align: center;
+  transition: transform var(--duration-normal) var(--ease-out);
+  flex-shrink: 0;
+}
+.expandable-card.open .expandable-icon { transform: rotate(45deg); }
+.expandable-hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+.expandable-card.open .expandable-hint { display: none; }
+.expandable-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--duration-slow) var(--ease-out), padding var(--duration-slow) var(--ease-out);
+  padding: 0 var(--space-5);
+}
+.expandable-card.open .expandable-body {
+  max-height: 3000px;
+  padding: 0 var(--space-5) var(--space-5);
+}
+.expandable-body p { color: var(--color-text-secondary); font-size: var(--text-sm); line-height: var(--leading-normal); margin: var(--space-2) 0; }
+.expandable-body ul { padding-left: var(--space-5); color: var(--color-text-secondary); font-size: var(--text-sm); }
+.expandable-body li { margin-bottom: var(--space-2); line-height: var(--leading-normal); }
+.expandable-body li code { background: var(--color-bg-warm); }
+.expandable-body strong { color: var(--color-text); }
+
+/* Comparison table */
+.comparison-table { margin: var(--space-6) 0; overflow-x: auto; }
+.comparison-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.comparison-table th {
+  font-family: var(--font-display);
+  font-weight: 600;
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  border-bottom: 2px solid var(--color-border);
+  background: var(--color-bg-warm);
+  font-size: var(--text-sm);
+}
+.comparison-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-light);
+  color: var(--color-text-secondary);
+  vertical-align: top;
+}
+.comparison-table tr:last-child td { border-bottom: none; }
+.comp-label { font-weight: 600; color: var(--color-text) !important; font-family: var(--font-display); }
+.comp-highlight { color: var(--color-accent) !important; font-weight: 500; }
+
+/* File trace */
+.file-trace {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  background: var(--color-bg-warm);
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Severity tags */
+.tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  margin-right: 6px;
+}
+.tag-critical { background: var(--color-error-light); color: var(--color-error); }
+.tag-high { background: #FFE9CC; color: #B8651A; }
+.tag-medium { background: var(--color-info-light); color: var(--color-info); }
+.tag-low { background: var(--color-bg-warm); color: var(--color-text-muted); }
+.tag-good { background: var(--color-success-light); color: var(--color-success); }
+
+/* Review */
+.review-bar {
+  margin-top: var(--space-8);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-light);
+}
+.review-actions { display: flex; gap: var(--space-2); align-items: center; }
+.review-btn {
+  width: 40px; height: 40px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--duration-fast);
+}
+.review-btn:hover { border-color: var(--color-text-secondary); color: var(--color-text); background: var(--color-surface-warm); }
+.review-up.active { background: var(--color-success-light); border-color: var(--color-success); color: var(--color-success); }
+.review-down.active { background: var(--color-error-light); border-color: var(--color-error); color: var(--color-error); }
+.review-comment-btn.has-comment { background: var(--color-info-light); border-color: var(--color-info); color: var(--color-info); }
+.review-comment-box { margin-top: var(--space-3); }
+.review-textarea {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background: var(--color-surface);
+  resize: vertical;
+  min-height: 60px;
+  line-height: var(--leading-normal);
+  transition: border-color var(--duration-fast);
+  box-sizing: border-box;
+}
+.review-textarea:focus { outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(217, 79, 48, 0.1); }
+.review-textarea::placeholder { color: var(--color-text-muted); }
+
+.copy-review-btn {
+  position: fixed;
+  bottom: var(--space-6); right: var(--space-6);
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-bg-code);
+  color: #CDD6F4;
+  border: none;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  transition: transform var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal);
+  z-index: 200;
+}
+.copy-review-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-xl); }
+.review-count {
+  background: var(--color-accent);
+  color: white;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.toast {
+  position: fixed;
+  bottom: calc(var(--space-6) + 56px);
+  right: var(--space-6);
+  background: var(--color-success);
+  color: white;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity var(--duration-normal), transform var(--duration-normal);
+  pointer-events: none;
+  z-index: 201;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* Two-column for blocks */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  margin: var(--space-6) 0;
+}
+.col-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+.col-card h4 {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  margin: 0 0 var(--space-3);
+  color: var(--color-accent);
+}
+.col-card ul { padding-left: var(--space-5); margin: 0; }
+.col-card li { font-size: var(--text-sm); color: var(--color-text-secondary); margin-bottom: var(--space-1); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  :root {
+    --text-4xl: 1.875rem;
+    --text-5xl: 2.25rem;
+    --text-6xl: 3rem;
+  }
+  .flow-steps { flex-direction: column; align-items: center; }
+  .flow-step { max-width: 100%; width: 100%; }
+  .flow-arrow { transform: rotate(90deg); }
+  .pattern-cards { grid-template-columns: 1fr 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .nav-dots { gap: var(--space-2); }
+  .nav-title { display: none; }
+}
+@media (max-width: 480px) {
+  :root {
+    --text-4xl: 1.5rem;
+    --text-5xl: 1.875rem;
+    --text-6xl: 2.25rem;
+  }
+  .section { padding: var(--space-8) var(--space-4); padding-top: calc(var(--nav-height) + var(--space-8)); }
+  .pattern-cards { grid-template-columns: 1fr; }
+  .copy-review-btn { bottom: var(--space-4); right: var(--space-4); }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="progress-bar" role="progressbar" aria-valuenow="0"></div>
+  <div class="nav-inner">
+    <span class="nav-title">Auditoría · Autopost</span>
+    <div class="nav-dots" role="tablist">
+      <button class="nav-dot" data-target="section-hero" data-tooltip="Inicio" role="tab" aria-label="Inicio"></button>
+      <button class="nav-dot" data-target="section-1" data-tooltip="El problema" role="tab" aria-label="El problema"></button>
+      <button class="nav-dot" data-target="section-2" data-tooltip="Decisiones" role="tab" aria-label="Decisiones"></button>
+      <button class="nav-dot" data-target="section-3" data-tooltip="Hallazgos" role="tab" aria-label="Hallazgos"></button>
+      <button class="nav-dot" data-target="section-4" data-tooltip="Bloque A · Diseño" role="tab" aria-label="Bloque A"></button>
+      <button class="nav-dot" data-target="section-5" data-tooltip="Bloque B · Venta" role="tab" aria-label="Bloque B"></button>
+      <button class="nav-dot" data-target="section-6" data-tooltip="Bloque C · Pulido" role="tab" aria-label="Bloque C"></button>
+      <button class="nav-dot" data-target="section-7" data-tooltip="Verificación" role="tab" aria-label="Verificación"></button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="section hero-section" id="section-hero">
+  <div class="section-content">
+    <div class="hero-content animate-in">
+      <span class="hero-eyebrow">Plan maestro · Mayo 2026</span>
+      <h1 class="hero-title">Auditoría y rediseño <span class="accent">Autopost</span> — para vender el producto.</h1>
+      <p class="hero-description">El frontend tiene una propuesta de valor sólida ("Tira la carpeta. El resto va solo.") pero <strong>no convierte</strong>. Cuatro problemas estructurales, tres bloques de cambios, un objetivo: que cualquier persona no técnica entienda qué hace, cuánto cuesta y cómo empezar en menos de 30 segundos.</p>
+      <div class="stat-badges">
+        <div class="stat-badge"><span class="stat-value">4</span><span class="stat-label">Sistemas en paralelo</span></div>
+        <div class="stat-badge"><span class="stat-value">7</span><span class="stat-label">Rutas a limpiar</span></div>
+        <div class="stat-badge"><span class="stat-value">€5–€10</span><span class="stat-label">Pricing semanal</span></div>
+        <div class="stat-badge"><span class="stat-value">3</span><span class="stat-label">Bloques</span></div>
+        <div class="stat-badge"><span class="stat-value">21–31h</span><span class="stat-label">Esfuerzo total</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="review-bar" data-section="section-hero">
+    <div class="review-actions">
+      <button class="review-btn review-up" onclick="setReaction(this, 'up')" aria-label="Me gusta">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+      </button>
+      <button class="review-btn review-down" onclick="setReaction(this, 'down')" aria-label="No me gusta">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/></svg>
+      </button>
+      <button class="review-btn review-comment-btn" onclick="toggleComment(this)" aria-label="Añadir comentario">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </button>
+    </div>
+    <div class="review-comment-box" style="display:none">
+      <textarea class="review-textarea" placeholder="Comentario sobre esta sección…" rows="2" oninput="saveComment(this)"></textarea>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 1: EL PROBLEMA -->
+<section class="section" id="section-1">
+  <div class="section-content">
+    <header class="section-header animate-in">
+      <span class="section-number">01</span>
+      <h1 class="section-title">El problema, en cuatro frentes</h1>
+      <p class="section-subtitle">Lo que se ve bien por dentro no convierte por fuera. Estas son las cuatro causas estructurales por las que la web actual no vende.</p>
+    </header>
+
+    <div class="section-body">
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-section-1)">
+          <div class="pattern-icon" style="background: var(--color-section-1)">01</div>
+          <h4 class="pattern-title">Cuatro sistemas de diseño en paralelo</h4>
+          <p class="pattern-desc">Editorial print-zine, np-* dark-first, Aluminum Studio (muerto) y Hatch Apple coexisten en <code>tailwind.config.ts</code>. 8 archivos mezclan dos sistemas en el mismo componente.</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-section-2)">
+          <div class="pattern-icon" style="background: var(--color-section-2)">02</div>
+          <h4 class="pattern-title">Datos inflados que delatan IA</h4>
+          <p class="pattern-desc">Hero presume "12.4M+ posts · 8.7s · 47 redes". Footer "99.98% uptime" con punto verde animado. Si un comprador investiga, mata la confianza.</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-section-3)">
+          <div class="pattern-icon" style="background: var(--color-section-3)">03</div>
+          <h4 class="pattern-title">Sin flujo de compra real</h4>
+          <p class="pattern-desc">Pricing en €19 / 49 / 149 mensual pero <strong>cero integración Stripe</strong>. CTA "Comenzar gratis" contradice los precios. Botones de "Empezar" llevan al signup gratis.</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-section-4)">
+          <div class="pattern-icon" style="background: var(--color-section-4)">04</div>
+          <h4 class="pattern-title">Onboarding sin contrato visual</h4>
+          <p class="pattern-desc">El paso 3 acepta carpetas pero no enseña qué deben contener. La README pide <code>caption.txt + meta.json</code> pero el usuario no lo sabe — riesgo de carga rota → error → abandono.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">📚</div>
+        <div class="callout-content">
+          <strong class="callout-title">Lo bueno: hay base sobre la que construir</strong>
+          <p>El copy del hero ("Tira la carpeta. El resto va solo.") es brutalmente claro y diferenciador. La estructura del onboarding en 5 pasos es correcta. Los mensajes de error en auth ya están humanizados. No estamos partiendo de cero conceptual — estamos haciendo cirugía.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="review-bar" data-section="section-1">
+    <div class="review-actions">
+      <button class="review-btn review-up" onclick="setReaction(this, 'up')" aria-label="Me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg></button>
+      <button class="review-btn review-down" onclick="setReaction(this, 'down')" aria-label="No me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/></svg></button>
+      <button class="review-btn review-comment-btn" onclick="toggleComment(this)" aria-label="Añadir comentario"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+    </div>
+    <div class="review-comment-box" style="display:none"><textarea class="review-textarea" placeholder="Comentario sobre esta sección…" rows="2" oninput="saveComment(this)"></textarea></div>
+  </div>
+</section>
+
+<!-- SECTION 2: DECISIONES TOMADAS -->
+<section class="section" id="section-2">
+  <div class="section-content">
+    <header class="section-header animate-in">
+      <span class="section-number">02</span>
+      <h1 class="section-title">Cuatro decisiones, ya tomadas</h1>
+      <p class="section-subtitle">Resueltas con el usuario antes de finalizar el plan. Estas decisiones marcan el alcance real del rediseño.</p>
+    </header>
+
+    <div class="section-body">
+      <div class="comparison-table animate-in">
+        <table>
+          <thead>
+            <tr>
+              <th>Tema</th>
+              <th>Elección</th>
+              <th>Implicación</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="comp-label">Monetización</td>
+              <td><strong class="comp-highlight">Pricing semanal</strong><br>Básico €5/sem · Pro €7/sem · Agency €10/sem</td>
+              <td>Stripe con <code>interval: week</code>; reescribir Pricing.tsx; resolver el "Comenzar gratis" como trial 7 días</td>
+            </tr>
+            <tr>
+              <td class="comp-label">Sistema de diseño</td>
+              <td><strong class="comp-highlight">Empezar de cero</strong></td>
+              <td>No adoptar <code>branding-redesign/</code>, no continuar <code>np-*</code>. Definir paleta, tipografía, spacing y componentes nuevos</td>
+            </tr>
+            <tr>
+              <td class="comp-label">Rutas variantes</td>
+              <td><strong class="comp-highlight">Mover a /lab/* + noindex</strong></td>
+              <td>Reagrupar <code>/demo</code>, <code>/editorial</code>, <code>/hero-preview</code>, <code>/palette-preview</code>, <code>/brand-lab</code>, <code>/comparar</code> · robots.txt · redirect</td>
+            </tr>
+            <tr>
+              <td class="comp-label">Stats hero</td>
+              <td><strong class="comp-highlight">Sustituir por capabilities reales</strong></td>
+              <td>Quitar 12.4M+ / 8.7s / 47. Reemplazar por hechos verificables o quitar el bloque</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">🎨</div>
+        <div class="callout-content">
+          <strong class="callout-title">Regla del usuario, registrada</strong>
+          <p>"No decides paleta unilateralmente — ofrece 3-4 direcciones vía <code>AskUserQuestion</code> antes." Aplicará al definir paleta y tipografía durante la implementación del Bloque A. Mismo criterio para tipografía: 2-3 stacks distintos, ninguno con Inter por defecto.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-warning animate-in">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-content">
+          <strong class="callout-title">Restricciones no negociables</strong>
+          <p>Sin gradientes decorativos · sin glassmorphism por defecto · sin glows o "AI shimmer" · sin clones de Stripe/Linear · sin testimonios o estadísticas inventadas · sin Inter por defecto · sin dependencias nuevas sin justificar (única excepción aprobada: <code>stripe</code>). Commits atómicos por cambio, push tras cerrar cada bloque.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="review-bar" data-section="section-2">
+    <div class="review-actions">
+      <button class="review-btn review-up" onclick="setReaction(this, 'up')" aria-label="Me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg></button>
+      <button class="review-btn review-down" onclick="setReaction(this, 'down')" aria-label="No me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/></svg></button>
+      <button class="review-btn review-comment-btn" onclick="toggleComment(this)" aria-label="Añadir comentario"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+    </div>
+    <div class="review-comment-box" style="display:none"><textarea class="review-textarea" placeholder="Comentario sobre esta sección…" rows="2" oninput="saveComment(this)"></textarea></div>
+  </div>
+</section>
+
+<!-- SECTION 3: HALLAZGOS CRÍTICOS -->
+<section class="section" id="section-3">
+  <div class="section-content">
+    <header class="section-header animate-in">
+      <span class="section-number">03</span>
+      <h1 class="section-title">Hallazgos críticos con archivo y línea</h1>
+      <p class="section-subtitle">Tres categorías, ordenadas por gravedad. Cada hallazgo apunta al archivo concreto que hay que tocar.</p>
+    </header>
+
+    <div class="section-body">
+      <div class="screen animate-in">
+        <span class="screen-eyebrow">A · Olor a IA</span>
+        <h2 class="screen-heading">Patrones que delatan que la web la hizo una máquina</h2>
+
+        <div class="expandable-card animate-in">
+          <button class="expandable-header" onclick="toggleExpand(this)" aria-expanded="false">
+            <div class="expandable-title-row">
+              <span class="expandable-icon">+</span>
+              <strong><span class="tag tag-critical">Crítico</span> Stats infladas en el hero</strong>
+            </div>
+            <span class="expandable-hint">Click para ver</span>
+          </button>
+          <div class="expandable-body">
+            <p><span class="file-trace">src/components/landing-v2/Hero.tsx:155-159</span></p>
+            <p>El bloque presume "12.4M+ posts publicados", "8.7s carpeta procesada", "47 redes conectadas". Ninguna métrica es real (47 redes no existen ni a nivel teórico). Si un comprador googlea "Autopost 12 millones de posts", no encuentra nada — y le suena a humo. Sustituir por capabilities reales o quitar el bloque.</p>
+          </div>
+        </div>
+
+        <div class="expandable-card animate-in">
+          <button class="expandable-header" onclick="toggleExpand(this)" aria-expanded="false">
+            <div class="expandable-title-row">
+              <span class="expandable-icon">+</span>
+              <strong><span class="tag tag-critical">Crítico</span> Uptime falso con punto animado en footer</strong>
+            </div>
+            <span class="expandable-hint">Click para ver</span>
+          </button>
+          <div class="expandable-body">
+            <p><span class="file-trace">src/components/landing-v2/Footer.tsx:45</span></p>
+            <p>"Estado · 99.98% uptime" con un punto verde <code>animate-pulse</code> que finge feed en tiempo real. El producto no tiene status page público ni mediciones reales. Eliminar el indicador o sustituir por enlace a una status page real cuando exista.</p>
+          </div>
+        </div>
+
+        <div class="expandable-card animate-in">
+          <button class="expandable-header" onclick="toggleExpand(this)" aria-expanded="false">
+            <div class="expandable-title-row">
+              <span class="expandable-icon">+</span>
+              <strong><span class="tag tag-critical">Crítico</span> Indicador "live" falso en HowItWorks</strong>
+            </div>
+            <span class="expandable-hint">Click para ver</span>
+          </button>
+          <div class="expandable-body">
+            <p><span class="file-trace">src/components/landing-v2/HowItWorks.tsx:173</span></p>
+            <p><code>animate-pulse</code> sobre datos completamente estáticos para sugerir actividad en vivo. Es la misma trampa visual que el uptime: simula realidad donde no la hay. Eliminar la animación o sustituir por un mockup honestamente etiquetado como ejemplo.</p>
+          </div>
+        </div>
+
+        <div class="expandable-card animate-in">
+          <button class="expandable-header" onclick="toggleExpand(this)" aria-expanded="false">
+            <div class="expandable-title-row">
+              <span class="expandable-icon">+</span>
+              <strong><span class="tag tag-high">Alto</span> Grid de 6 feature-cards con icono Lucide (patrón SaaS genérico)</strong>
+            </div>
+            <span class="expandable-hint">Click para ver</span>
+          </button>
+          <div class="expandable-body">
+            <p><span class="file-trace">src/components/ui/hero-scroll-animation.tsx:138-162</span></p>
+            <p>Es el patrón más reconocible de "landing hecha con IA": gradient icon box + título + 1 línea, x6, en grid 3-columnas. Reescribir con menos iconos y más prueba visual del producto, o eliminar y sustituir por capturas reales del dashboard.</p>
+          </div>
+        </div>
+
+        <div class="expandable-card animate-in">
+          <button class="expandable-header" onclick="toggleExpand(this)" aria-expanded="false">
+            <div class="expandable-title-row">
+              <span class="expandable-icon">+</span>
+              <strong><span class="tag tag-high">Alto</span> Hero v1 con scroll cinematográfico de 300vh</strong>
+            </div>
+            <span class="expandable-hint">Click para ver</span>
+          </button>
+          <div class="expandable-body">
+            <p><span class="file-trace">src/components/landing/hatch-hero.tsx</span></p>
+            <p>Pinned scroll a lo Apple Mac Studio, 4 actos, MotionValue tracking, low-end device detection. Es legacy (el hero productivo es <code>landing-v2/Hero.tsx</code>). Hay que retirarlo del repo cuando borremos <code>src/components/landing/</code>.</p>
+          </div>
+        </div>
+
+        <div class="expandable-card animate-in">
+          <button class="expandable-header" onclick="toggleExpand(this)" aria-expanded="false">
+            <div class="expandable-title-row">
+              <span class="expandable-icon">+</span>
+              <strong><span class="tag tag-high">Alto</span> Gradients violet/cyan decorativos en stats-strip</strong>
+            </div>
+            <span class="expandable-hint">Click para ver</span>
+          </button>
+          <div class="expandable-body">
+            <p><span class="file-trace">src/components/landing/stats-strip.tsx:8,9</span></p>
+            <p>Color como decoración pura, sin función semántica. Forma parte del legacy v1 y desaparece con la limpieza del Bloque A.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="screen animate-in">
+        <span class="screen-eyebrow">B · Sistema de diseño</span>
+        <h2 class="screen-heading">El caos en <code>tailwind.config.ts</code></h2>
+
+        <div class="flow-steps">
+          <div class="flow-step" style="border-top-color: var(--color-section-1)">
+            <span class="flow-step-label" style="background: var(--color-section-1)">Editorial</span>
+            <strong>brand · accent · surface</strong>
+            <p>Off-bone paper, tomato stamp, olive, mustard. Print-zine legacy.</p>
+          </div>
+          <div class="flow-step" style="border-top-color: var(--color-section-2)">
+            <span class="flow-step-label" style="background: var(--color-section-2)">np-* rebrand</span>
+            <strong>ink · pri · ai</strong>
+            <p>Dark-first, azul eléctrico + violeta IA. Rebrand fase 1.</p>
+          </div>
+          <div class="flow-step" style="border-top-color: var(--color-section-3)">
+            <span class="flow-step-label" style="background: var(--color-section-3)">Aluminum</span>
+            <strong>success · warning · error · info</strong>
+            <p>Tokens semánticos. Definidos pero no usados — sistema muerto.</p>
+          </div>
+          <div class="flow-step" style="border-top-color: var(--color-section-4)">
+            <span class="flow-step-label" style="background: var(--color-section-4)">Hatch</span>
+            <strong>graphite · athens · cobalt</strong>
+            <p>Apple-style. Solo referencia documental, sin implementación.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-warning animate-in">
+          <div class="callout-icon">🩻</div>
+          <div class="callout-content">
+            <strong class="callout-title">8 archivos mezclan dos sistemas a la vez</strong>
+            <p>Ejemplo: <code>src/app/(auth)/login/page.tsx:32</code> usa <code>bg-surface-card</code> (editorial) con <code>text-ink-9</code> (rebrand) en la misma tarjeta. Resultado: incoherencia visual entre rutas, mantenimiento doble, y nadie sabe qué token es el "bueno".</p>
+          </div>
+        </div>
+
+        <p>De las 18 animaciones definidas en Tailwind, ~5 se usan realmente. El resto (<code>glow-pulse</code>, <code>shimmer</code>, <code>border-flow</code>, <code>cta-pulse</code>, <code>mockup-blink</code>) son "AI shimmer" puro — efectos decorativos sin función — y desaparecen en el Bloque A.</p>
+      </div>
+
+      <div class="screen animate-in">
+        <span class="screen-eyebrow">C · Claridad para no técnicos</span>
+        <h2 class="screen-heading">Qué entiende y qué no entiende la madre del usuario</h2>
+
+        <div class="comparison-table">
+          <table>
+            <thead>
+              <tr><th>Elemento</th><th>Estado</th><th>Acción</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="comp-label">Hero copy "Tira la carpeta"</td>
+                <td><span class="tag tag-good">Conservar</span> Brutalmente claro</td>
+                <td>Solo cambiar el bloque de stats falsas que lleva debajo</td>
+              </tr>
+              <tr>
+                <td class="comp-label">Pricing tier Studio</td>
+                <td><span class="tag tag-high">Reescribir</span> "API + webhooks", "SSO + auditoría"</td>
+                <td>"Conexión con Zapier/Make", "Inicio de sesión con Google"</td>
+              </tr>
+              <tr>
+                <td class="comp-label">Onboarding paso 3</td>
+                <td><span class="tag tag-critical">Romper</span> No explica qué debe contener la carpeta</td>
+                <td>Visual "qué hay dentro" + descargar plantilla de ejemplo</td>
+              </tr>
+              <tr>
+                <td class="comp-label">"ZIP" en /demo público</td>
+                <td><span class="tag tag-medium">Sustituir</span> Usuario no técnico no sabe qué es</td>
+                <td>"Carpeta" en superficie pública. /demo se mueve a /lab</td>
+              </tr>
+              <tr>
+                <td class="comp-label">FAQ menciona "OAuth"</td>
+                <td><span class="tag tag-medium">Reescribir</span> Sin contexto</td>
+                <td>"Como cuando entras con Google, de forma segura"</td>
+              </tr>
+              <tr>
+                <td class="comp-label">Mensajes de error auth</td>
+                <td><span class="tag tag-good">Conservar</span> Tono humano en español</td>
+                <td>Ya validado: "Email o contraseña incorrectos", etc.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="review-bar" data-section="section-3">
+    <div class="review-actions">
+      <button class="review-btn review-up" onclick="setReaction(this, 'up')" aria-label="Me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg></button>
+      <button class="review-btn review-down" onclick="setReaction(this, 'down')" aria-label="No me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/></svg></button>
+      <button class="review-btn review-comment-btn" onclick="toggleComment(this)" aria-label="Añadir comentario"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+    </div>
+    <div class="review-comment-box" style="display:none"><textarea class="review-textarea" placeholder="Comentario sobre esta sección…" rows="2" oninput="saveComment(this)"></textarea></div>
+  </div>
+</section>
+
+<!-- SECTION 4: BLOQUE A -->
+<section class="section" id="section-4">
+  <div class="section-content">
+    <header class="section-header animate-in">
+      <span class="section-number">04</span>
+      <h1 class="section-title">Bloque A · Sistema de diseño desde cero</h1>
+      <p class="section-subtitle">Una sola fuente de verdad visual. Eliminar el caos de cuatro sistemas, definir paleta y tipografía con criterio, limpiar el repo. <strong>Bloqueante para B y C.</strong> Esfuerzo: 6–9h.</p>
+    </header>
+
+    <div class="section-body">
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body"><strong>Discovery de dirección — antes de tocar nada</strong><p><code>AskUserQuestion</code> con 3-4 direcciones de paleta (ninguna derivada de azul/violeta/morado por defecto) + 2-3 stacks tipográficos (ninguno con Inter por defecto). Cada opción con preview y razón.</p></div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body"><strong>Reescritura de <code>tailwind.config.ts</code></strong><p>Eliminar <code>brand-*</code>, <code>accent-*</code>, <code>surface-*</code>, <code>hatch-*</code>, <code>ink-*</code>, <code>pri-*</code>, <code>ai-*</code>, <code>np-*</code>. Sustituir por sistema nuevo: <code>bg</code>, <code>fg</code>, <code>accent</code>, <code>success/warning/error/info</code> semánticos.</p></div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body"><strong>Reescritura de <code>globals.css</code> con <code>next/font</code></strong><p>Carga real de fuentes (no Google Fonts CDN suelto), preload del peso principal, eliminación de variables muertas. Cero <code>@font-face</code> hardcodeados.</p></div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">4</div>
+          <div class="step-body"><strong>Tokens de motion: 18 → 4-5 animaciones</strong><p>Conservar <code>fade-in</code>, <code>fade-up</code>, <code>subtle-pulse</code>, <code>slide-up</code>. Eliminar <code>glow-pulse</code>, <code>shimmer</code>, <code>border-flow</code>, <code>cta-pulse</code>, <code>mockup-blink</code>.</p></div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">5</div>
+          <div class="step-body"><strong>Limpieza de rutas</strong><p>Mover 7 rutas (<code>/demo</code>, <code>/editorial</code>, <code>/hero-preview</code>, <code>/hero-preview/static</code>, <code>/palette-preview</code>, <code>/brand-lab</code>, <code>/comparar/[competidor]</code>) a <code>/lab/*</code>. Añadir <code>metadata.robots.index = false</code> + <code>public/robots.txt</code>.</p></div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">6</div>
+          <div class="step-body"><strong>Borrado de legacy</strong><p>Eliminar <code>src/components/landing/</code> (v1), <code>src/components/editorial/</code>, <code>src/components/hero-3d/</code>, los HTML sueltos en raíz (159KB), las 3 auditorías previas (consolidadas en <code>AUDIT.md</code> nuevo, archivadas en <code>docs/archive/</code>).</p></div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">7</div>
+          <div class="step-body"><strong>Auditar <code>src/components/motion/</code></strong><p>Los 16 componentes (<code>motion-magnetic</code>, <code>motion-spotlight</code>, <code>motion-beam</code>, etc.) — borrar los no usados, dejar solo los que el rediseño usa.</p></div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">8</div>
+          <div class="step-body"><strong>Reescritura de componentes UI base</strong><p><code>Button</code>, <code>Card</code>, <code>Input</code>, <code>Badge</code>, <code>Toast</code>. Una sola variante "primaria" + "secundaria" + "ghost". Estados completos (hover, focus, active, disabled, loading).</p></div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">🎯</div>
+        <div class="callout-content">
+          <strong class="callout-title">Archivos críticos del Bloque A</strong>
+          <p><code>tailwind.config.ts</code> (reescritura) · <code>src/app/globals.css</code> (reescritura) · <code>src/app/layout.tsx</code> (next/font) · <code>src/components/ui/*.tsx</code> · 7 <code>page.tsx</code> mover a <code>/lab/</code> · borrar 3 carpetas legacy · crear <code>public/robots.txt</code></p>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">✅</div>
+        <div class="callout-content">
+          <strong class="callout-title">Cómo se verifica que el bloque está cerrado</strong>
+          <p><code>npm run type-check</code> · <code>npm run lint</code> · <code>npm run dev</code> sin error · grep por clases viejas (<code>brand-*</code>, <code>surface-*</code>, <code>ink-*</code>, <code>pri-*</code>, <code>ai-*</code>) → 0 resultados · <code>/lab/demo</code> y demás cargan, las URLs viejas redirigen · <code>robots.txt</code> bloquea correctamente.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="review-bar" data-section="section-4">
+    <div class="review-actions">
+      <button class="review-btn review-up" onclick="setReaction(this, 'up')" aria-label="Me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg></button>
+      <button class="review-btn review-down" onclick="setReaction(this, 'down')" aria-label="No me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/></svg></button>
+      <button class="review-btn review-comment-btn" onclick="toggleComment(this)" aria-label="Añadir comentario"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+    </div>
+    <div class="review-comment-box" style="display:none"><textarea class="review-textarea" placeholder="Comentario sobre esta sección…" rows="2" oninput="saveComment(this)"></textarea></div>
+  </div>
+</section>
+
+<!-- SECTION 5: BLOQUE B -->
+<section class="section" id="section-5">
+  <div class="section-content">
+    <header class="section-header animate-in">
+      <span class="section-number">05</span>
+      <h1 class="section-title">Bloque B · Claridad de mensaje + flujo de venta</h1>
+      <p class="section-subtitle">Que cualquier persona no técnica entienda qué hace, cuánto cuesta y cómo empezar en menos de 30 segundos. Aquí entra Stripe. Esfuerzo: 10–14h.</p>
+    </header>
+
+    <div class="section-body">
+      <div class="screen animate-in">
+        <span class="screen-eyebrow">Pricing semanal · Flujo de compra</span>
+        <h2 class="screen-heading">Del "Comenzar gratis" incoherente a Stripe Checkout real</h2>
+
+        <div class="flow-steps">
+          <div class="flow-step" style="border-top-color: var(--color-section-1)">
+            <span class="flow-step-label" style="background: var(--color-section-1)">Landing</span>
+            <strong>Hero + Pricing</strong>
+            <p>Pricing semanal real: €5 / €7 / €10. Badge "7 días gratis · sin tarjeta".</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step" style="border-top-color: var(--color-section-2)">
+            <span class="flow-step-label" style="background: var(--color-section-2)">Checkout</span>
+            <strong>Stripe Session</strong>
+            <p>POST <code>/api/stripe/checkout</code> con <code>trial_period_days: 7</code>.</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step" style="border-top-color: var(--color-section-3)">
+            <span class="flow-step-label" style="background: var(--color-section-3)">Webhook</span>
+            <strong>BD sync</strong>
+            <p>Tabla <code>Subscription</code> en Prisma. Estado vigente, trial, periodo.</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step" style="border-top-color: var(--color-section-5)">
+            <span class="flow-step-label" style="background: var(--color-section-5)">Producto</span>
+            <strong>Dashboard</strong>
+            <p>Acceso por tier. Trial visible en UI. Cancelación auto-servicio.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="screen animate-in">
+        <span class="screen-eyebrow">Cambios concretos en componentes</span>
+        <h2 class="screen-heading">10 cambios atómicos, archivo por archivo</h2>
+
+        <div class="flow-vertical">
+          <div class="flow-v-step"><div class="flow-v-num" style="background: var(--color-section-1)">1</div><div class="flow-v-content"><strong>Hero</strong><p>Preservar copy. Sustituir bloque de stats por: 7 redes soportadas · Sin permanencia · 7 días gratis. <span class="file-trace">src/components/landing-v2/Hero.tsx</span></p></div></div>
+          <div class="flow-v-line"></div>
+          <div class="flow-v-step"><div class="flow-v-num" style="background: var(--color-section-1)">2</div><div class="flow-v-content"><strong>HowItWorks</strong><p>Eliminar el <code>animate-pulse</code> verde sobre "Esta semana" que finge live data. <span class="file-trace">HowItWorks.tsx:173</span></p></div></div>
+          <div class="flow-v-line"></div>
+          <div class="flow-v-step"><div class="flow-v-num" style="background: var(--color-section-2)">3</div><div class="flow-v-content"><strong>InsideTour</strong><p>Reescribir con foco en mostrar producto real (capturas del dashboard) en vez de cards conceptuales. <span class="file-trace">InsideTour.tsx</span></p></div></div>
+          <div class="flow-v-line"></div>
+          <div class="flow-v-step"><div class="flow-v-num" style="background: var(--color-section-2)">4</div><div class="flow-v-content"><strong>Pricing — reescritura completa</strong><p>Semanal €5 / €7 / €10. Sustituir "API + webhooks" por "Conexión con Zapier/Make"; "SSO + auditoría" por "Inicio con Google + historial". Badge "7 días gratis · sin tarjeta". <span class="file-trace">Pricing.tsx</span></p></div></div>
+          <div class="flow-v-line"></div>
+          <div class="flow-v-step"><div class="flow-v-num" style="background: var(--color-section-3)">5</div><div class="flow-v-content"><strong>Integración Stripe</strong><p>3 productos con <code>interval: week</code> · <code>STRIPE_*</code> envvars · checkout endpoint · webhook handler · tabla <code>Subscription</code> en Prisma · migración · páginas <code>/billing/success</code> y <code>/billing/cancel</code>.</p></div></div>
+          <div class="flow-v-line"></div>
+          <div class="flow-v-step"><div class="flow-v-num" style="background: var(--color-section-3)">6</div><div class="flow-v-content"><strong>CTA cohesión</strong><p>Hero, Footer, Pricing, sticky-cta unificados a "Empezar 7 días gratis". Quitar el "Comenzar gratis" suelto.</p></div></div>
+          <div class="flow-v-line"></div>
+          <div class="flow-v-step"><div class="flow-v-num" style="background: var(--color-section-4)">7</div><div class="flow-v-content"><strong>FAQ</strong><p>Conservar las 5 preguntas. Añadir 2: "¿Cómo organizo mi carpeta?" (con visual) y "¿Cómo cancelo?". Reescribir OAuth: "Como cuando entras con Google". <span class="file-trace">Faq.tsx</span></p></div></div>
+          <div class="flow-v-line"></div>
+          <div class="flow-v-step"><div class="flow-v-num" style="background: var(--color-section-4)">8</div><div class="flow-v-content"><strong>Onboarding paso 3</strong><p>Bloque visual "Qué puede haber en la carpeta": imagen → post · vídeo → reel · 5 imágenes → carrusel · texto suelto → leyenda. Botón "Descargar carpeta de ejemplo" con plantilla real. <span class="file-trace">onboarding/3/page.tsx</span></p></div></div>
+          <div class="flow-v-line"></div>
+          <div class="flow-v-step"><div class="flow-v-num" style="background: var(--color-section-5)">9</div><div class="flow-v-content"><strong>Mensajes de error</strong><p>Pasada por todos los <code>.tsx</code> con <code>error</code>/<code>fallo</code>. Auth ya tiene tono humano (validado). Pulir admin y onboarding.</p></div></div>
+          <div class="flow-v-line"></div>
+          <div class="flow-v-step"><div class="flow-v-num" style="background: var(--color-section-5)">10</div><div class="flow-v-content"><strong>Eliminar "ZIP" de superficie pública</strong><p>Reescribir <span class="file-trace">src/app/demo/page.tsx:108</span> de "Arrastra tu ZIP" → "Arrastra tu carpeta". Si <code>/demo</code> se mueve a <code>/lab</code> en Bloque A, queda fuera del problema.</p></div></div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">💳</div>
+        <div class="callout-content">
+          <strong class="callout-title">Dependencia nueva: <code>stripe</code></strong>
+          <p>Justificación: no hay alternativa nativa para checkout recurrente con trial. Lemon Squeezy descartado para mantener control y evitar comisiones extra. Es la única dependencia nueva del rediseño.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">✅</div>
+        <div class="callout-content">
+          <strong class="callout-title">Verificación end-to-end</strong>
+          <p>Flujo completo manual: <code>/</code> → ver pricing semanal → click "Empezar" → Stripe Checkout en modo test (tarjeta <code>4242 4242 4242 4242</code>) → trial activa → webhook actualiza BD → dashboard accesible. Onboarding paso 3 con visual de carpeta funcional.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="review-bar" data-section="section-5">
+    <div class="review-actions">
+      <button class="review-btn review-up" onclick="setReaction(this, 'up')" aria-label="Me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg></button>
+      <button class="review-btn review-down" onclick="setReaction(this, 'down')" aria-label="No me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/></svg></button>
+      <button class="review-btn review-comment-btn" onclick="toggleComment(this)" aria-label="Añadir comentario"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+    </div>
+    <div class="review-comment-box" style="display:none"><textarea class="review-textarea" placeholder="Comentario sobre esta sección…" rows="2" oninput="saveComment(this)"></textarea></div>
+  </div>
+</section>
+
+<!-- SECTION 6: BLOQUE C -->
+<section class="section" id="section-6">
+  <div class="section-content">
+    <header class="section-header animate-in">
+      <span class="section-number">06</span>
+      <h1 class="section-title">Bloque C · Pulido + accesibilidad + responsive</h1>
+      <p class="section-subtitle">Cero detalles que delaten falta de oficio. WCAG AA real, responsive verificado, performance percibida cuidada. Esfuerzo: 5–8h.</p>
+    </header>
+
+    <div class="section-body">
+      <div class="two-col">
+        <div class="col-card animate-in">
+          <h4>Accesibilidad WCAG AA</h4>
+          <ul>
+            <li>Contraste de <code>text-ink-6/7</code> sobre <code>bg-ink-0/1</code> (auditoría flagged 2.74:1)</li>
+            <li>Focus visible en <code>&lt;button&gt;</code>, <code>&lt;a&gt;</code>, <code>&lt;Link&gt;</code></li>
+            <li>Labels en todos los inputs</li>
+            <li><code>aria-label</code> en botones icon-only</li>
+            <li>Skip-to-content link en <code>layout.tsx</code></li>
+          </ul>
+        </div>
+        <div class="col-card animate-in">
+          <h4>Estados de componentes</h4>
+          <ul>
+            <li>Hover, focus, active, disabled, loading</li>
+            <li><code>Button</code>: spinner inline durante carga</li>
+            <li><code>Input</code>: error visible con mensaje claro</li>
+            <li><code>Card</code>: hover sutil sin glassmorphism</li>
+            <li><code>Toast</code>: aparición y desaparición consistentes</li>
+          </ul>
+        </div>
+        <div class="col-card animate-in">
+          <h4>Responsive real</h4>
+          <ul>
+            <li>375px · iPhone SE</li>
+            <li>768px · iPad portrait</li>
+            <li>1440px · MacBook 14"</li>
+            <li>Pricing grid: stack vertical en mobile, plan featured destacado</li>
+            <li>Footer 5-col → 2-col → 1-col en breakpoints</li>
+          </ul>
+        </div>
+        <div class="col-card animate-in">
+          <h4>Microinteracciones funcionales</h4>
+          <ul>
+            <li>Drag & drop con feedback visual claro</li>
+            <li>Spinner inline en submit</li>
+            <li>Toast tras eliminar/guardar/conectar</li>
+            <li>Cero animaciones decorativas sin función</li>
+          </ul>
+        </div>
+        <div class="col-card animate-in">
+          <h4>Performance percibida</h4>
+          <ul>
+            <li>Skeletons en dashboard y posts</li>
+            <li><code>&lt;Suspense&gt;</code> con loading donde Next 14 lo permita</li>
+            <li><code>next/image</code> con <code>priority</code> en hero</li>
+            <li>Eliminar imports no usados en bundle</li>
+          </ul>
+        </div>
+        <div class="col-card animate-in">
+          <h4>SEO básico</h4>
+          <ul>
+            <li><code>title</code> + <code>meta description</code> por página</li>
+            <li>Open Graph + Twitter Card en landing</li>
+            <li><code>src/app/sitemap.ts</code> nuevo</li>
+            <li><code>robots.txt</code> ya creado en Bloque A</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">📐</div>
+        <div class="callout-content">
+          <strong class="callout-title">Consistencia final de tokens</strong>
+          <p>Spacing scale solo 9 valores: <code>4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 · 96px</code>. Border radii solo 5: <code>4 · 8 · 12 · 16 · 24px (full)</code>. Cualquier valor ad-hoc fuera de la escala se reescribe.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-success animate-in">
+        <div class="callout-icon">🏁</div>
+        <div class="callout-content">
+          <strong class="callout-title">Cómo se cierra el Bloque C (y el rediseño)</strong>
+          <p><code>npx @axe-core/cli http://localhost:3000</code> con 0 violaciones críticas · DevTools 375/768/1440 sin scroll horizontal · Lighthouse a11y ≥ 95 · Lighthouse perf ≥ 80 · navegación por teclado completa en la landing.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="review-bar" data-section="section-6">
+    <div class="review-actions">
+      <button class="review-btn review-up" onclick="setReaction(this, 'up')" aria-label="Me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg></button>
+      <button class="review-btn review-down" onclick="setReaction(this, 'down')" aria-label="No me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/></svg></button>
+      <button class="review-btn review-comment-btn" onclick="toggleComment(this)" aria-label="Añadir comentario"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+    </div>
+    <div class="review-comment-box" style="display:none"><textarea class="review-textarea" placeholder="Comentario sobre esta sección…" rows="2" oninput="saveComment(this)"></textarea></div>
+  </div>
+</section>
+
+<!-- SECTION 7: VERIFICACIÓN + DECISIONES PENDIENTES -->
+<section class="section" id="section-7">
+  <div class="section-content">
+    <header class="section-header animate-in">
+      <span class="section-number">07</span>
+      <h1 class="section-title">Verificación, decisiones pendientes y orden de ejecución</h1>
+      <p class="section-subtitle">Lo que se mide, lo que aún se decide con el usuario, y los pasos exactos al aprobar este plan.</p>
+    </header>
+
+    <div class="section-body">
+      <div class="screen animate-in">
+        <span class="screen-eyebrow">Decisiones que pediré durante la ejecución</span>
+        <h2 class="screen-heading">5 puntos donde no decido yo</h2>
+        <div class="step-cards stagger-children">
+          <div class="step-card animate-in"><div class="step-num">1</div><div class="step-body"><strong>Paleta · Bloque A</strong><p>3-4 direcciones con preview, ninguna derivada de azul/violeta/morado por defecto.</p></div></div>
+          <div class="step-card animate-in"><div class="step-num">2</div><div class="step-body"><strong>Tipografía · Bloque A</strong><p>2-3 stacks distintos, NO Inter, con razón y previews.</p></div></div>
+          <div class="step-card animate-in"><div class="step-num">3</div><div class="step-body"><strong>Reemplazo de stats hero · Bloque B</strong><p>2-3 alternativas: lista de capabilities · screenshot animado · nada.</p></div></div>
+          <div class="step-card animate-in"><div class="step-num">4</div><div class="step-body"><strong>Studio/Agency tier features · Bloque B</strong><p>Qué dejar realmente vs qué quitar. ¿"API + webhooks" es MVP o post-launch?</p></div></div>
+          <div class="step-card animate-in"><div class="step-num">5</div><div class="step-body"><strong>Cleanup agresivo vs conservador · Bloque A</strong><p>Confirmar borrado de <code>landing/</code> v1 y <code>editorial/</code>, o si se conservan en <code>docs/archive/</code>.</p></div></div>
+        </div>
+      </div>
+
+      <div class="screen animate-in">
+        <span class="screen-eyebrow">Delegación a agentes especializados (optativa)</span>
+        <h2 class="screen-heading">Si quieres acelerar y subir calidad</h2>
+
+        <div class="expandable-card">
+          <button class="expandable-header" onclick="toggleExpand(this)" aria-expanded="false">
+            <div class="expandable-title-row"><span class="expandable-icon">+</span><strong>Bloque A · paleta + tipografía</strong></div>
+            <span class="expandable-hint">Click para ver</span>
+          </button>
+          <div class="expandable-body">
+            <p><code>design-brand-guardian</code> para validar identidad coherente · <code>design-ui-designer</code> para tokens. Pediré permiso explícito antes de invocar.</p>
+          </div>
+        </div>
+        <div class="expandable-card">
+          <button class="expandable-header" onclick="toggleExpand(this)" aria-expanded="false">
+            <div class="expandable-title-row"><span class="expandable-icon">+</span><strong>Bloque B · copy del Pricing/FAQ/Onboarding</strong></div>
+            <span class="expandable-hint">Click para ver</span>
+          </button>
+          <div class="expandable-body">
+            <p><code>marketing-content-creator</code> para copy más vendedor sin caer en clichés SaaS. El hero ya está bien — la pregunta es si reescribir HowItWorks y Pricing.</p>
+          </div>
+        </div>
+        <div class="expandable-card">
+          <button class="expandable-header" onclick="toggleExpand(this)" aria-expanded="false">
+            <div class="expandable-title-row"><span class="expandable-icon">+</span><strong>Bloque B · Stripe integration</strong></div>
+            <span class="expandable-hint">Click para ver</span>
+          </button>
+          <div class="expandable-body">
+            <p><code>engineering-backend-architect</code> para flujo webhook robusto, validación de signatures, manejo de eventos <code>checkout.session.completed</code>, <code>customer.subscription.updated</code>, <code>customer.subscription.deleted</code>, idempotencia.</p>
+          </div>
+        </div>
+        <div class="expandable-card">
+          <button class="expandable-header" onclick="toggleExpand(this)" aria-expanded="false">
+            <div class="expandable-title-row"><span class="expandable-icon">+</span><strong>Bloque C · accesibilidad</strong></div>
+            <span class="expandable-hint">Click para ver</span>
+          </button>
+          <div class="expandable-body">
+            <p><code>testing-accessibility-auditor</code> para WCAG AA completo + screen reader test (VoiceOver / NVDA) en flujos críticos: signup, pricing checkout, onboarding paso 3, dashboard.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="screen animate-in">
+        <span class="screen-eyebrow">Próximos pasos al aprobar el plan</span>
+        <h2 class="screen-heading">Cómo arranca la ejecución</h2>
+
+        <div class="flow-vertical">
+          <div class="flow-v-step"><div class="flow-v-num" style="background: var(--color-section-1)">1</div><div class="flow-v-content"><strong>Generar <code>AUDIT.md</code></strong><p>Informe extenso, brutal, en castellano. Estructura: inventario · olor a IA por categorías · claridad para no-técnicos · Nielsen + WCAG · jerarquía visual · consistencia · performance · conflictos entre auditorías previas · veredicto.</p></div></div>
+          <div class="flow-v-line"></div>
+          <div class="flow-v-step"><div class="flow-v-num" style="background: var(--color-section-2)">2</div><div class="flow-v-content"><strong>Generar <code>PLAN.md</code></strong><p>Versión completa de los 3 bloques con checklists, archivos, esfuerzo. Mismo turno que <code>AUDIT.md</code>.</p></div></div>
+          <div class="flow-v-line"></div>
+          <div class="flow-v-step"><div class="flow-v-num" style="background: var(--color-section-3)">3</div><div class="flow-v-content"><strong>Esperar aprobación de <code>PLAN.md</code></strong><p>Punto de control con el usuario antes de tocar código.</p></div></div>
+          <div class="flow-v-line"></div>
+          <div class="flow-v-step"><div class="flow-v-num" style="background: var(--color-section-4)">4</div><div class="flow-v-content"><strong>Bloque A</strong><p>Empezar con <code>AskUserQuestion</code> para paleta + tipografía. Después: tailwind config, globals.css, motion tokens, /lab/* cleanup, borrado legacy, UI base.</p></div></div>
+          <div class="flow-v-line"></div>
+          <div class="flow-v-step"><div class="flow-v-num" style="background: var(--color-section-5)">5</div><div class="flow-v-content"><strong>Confirmar y avanzar a Bloque B → Bloque C</strong><p>Punto de control entre cada bloque. Commit + push tras cerrar cada uno.</p></div></div>
+        </div>
+      </div>
+
+      <div class="callout callout-warning animate-in">
+        <div class="callout-icon">🚫</div>
+        <div class="callout-content">
+          <strong class="callout-title">Fuera de alcance, declarado</strong>
+          <p>Logo / glifo proprietario · Hero 3D con Three.js · Tema light · Integración real con Meta Graph API en demo público · Paridad i18n EN nueva · App Review de Meta. Cualquiera de estos se puede abordar después como iteración separada.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="review-bar" data-section="section-7">
+    <div class="review-actions">
+      <button class="review-btn review-up" onclick="setReaction(this, 'up')" aria-label="Me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg></button>
+      <button class="review-btn review-down" onclick="setReaction(this, 'down')" aria-label="No me gusta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/></svg></button>
+      <button class="review-btn review-comment-btn" onclick="toggleComment(this)" aria-label="Añadir comentario"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+    </div>
+    <div class="review-comment-box" style="display:none"><textarea class="review-textarea" placeholder="Comentario sobre esta sección…" rows="2" oninput="saveComment(this)"></textarea></div>
+  </div>
+</section>
+
+<button class="copy-review-btn" id="copyReviewBtn" onclick="copyReview()" style="display:none">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+  <span>Copiar review</span>
+  <span class="review-count" id="reviewCount">0</span>
+</button>
+
+<div class="toast" id="toast">Review copiada al portapapeles — pégala en Claude</div>
+
+<script>
+(function(){
+  // Stagger indexes
+  document.querySelectorAll('.stagger-children').forEach(parent => {
+    Array.from(parent.children).forEach((child, i) => {
+      child.style.setProperty('--stagger-index', i);
+    });
+  });
+
+  // Reveal animations
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+  document.querySelectorAll('.animate-in').forEach(el => revealObserver.observe(el));
+
+  // Progress bar
+  const progressBar = document.querySelector('.progress-bar');
+  let ticking = false;
+  function updateProgressBar() {
+    const scrollTop = window.scrollY;
+    const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+    progressBar.style.width = progress + '%';
+    ticking = false;
+  }
+  window.addEventListener('scroll', () => {
+    if (!ticking) { requestAnimationFrame(updateProgressBar); ticking = true; }
+  }, { passive: true });
+
+  // Dot click
+  document.querySelectorAll('.nav-dot').forEach(dot => {
+    dot.addEventListener('click', () => {
+      const target = document.getElementById(dot.dataset.target);
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // Active dot tracking
+  const sections = document.querySelectorAll('.section');
+  const dots = document.querySelectorAll('.nav-dot');
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const index = Array.from(sections).indexOf(entry.target);
+        dots.forEach((d, i) => {
+          d.classList.remove('active');
+          if (i < index) d.classList.add('visited'); else d.classList.remove('visited');
+        });
+        if (dots[index]) dots[index].classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -70% 0px' });
+  sections.forEach(s => sectionObserver.observe(s));
+
+  // Keyboard nav
+  function getCurrentSectionIdx() {
+    const scrollY = window.scrollY;
+    let current = 0;
+    sections.forEach((s, i) => {
+      if (s.offsetTop - 100 <= scrollY) current = i;
+    });
+    return current;
+  }
+  function nextSection() {
+    const i = getCurrentSectionIdx();
+    if (sections[i + 1]) sections[i + 1].scrollIntoView({ behavior: 'smooth' });
+  }
+  function prevSection() {
+    const i = getCurrentSectionIdx();
+    if (sections[i - 1]) sections[i - 1].scrollIntoView({ behavior: 'smooth' });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { nextSection(); e.preventDefault(); }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { prevSection(); e.preventDefault(); }
+  });
+
+  // Expandable
+  window.toggleExpand = function(btn) {
+    const card = btn.closest('.expandable-card');
+    card.classList.toggle('open');
+    btn.setAttribute('aria-expanded', card.classList.contains('open'));
+  };
+
+  // Review system
+  const REVIEW_KEY = 'visualplanner-review-' + document.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+  let reviewData = JSON.parse(localStorage.getItem(REVIEW_KEY) || '{}');
+
+  function saveReviewData() {
+    localStorage.setItem(REVIEW_KEY, JSON.stringify(reviewData));
+    updateCopyButton();
+  }
+  function updateCopyButton() {
+    const btn = document.getElementById('copyReviewBtn');
+    const count = document.getElementById('reviewCount');
+    const total = Object.keys(reviewData).filter(k => reviewData[k].reaction || (reviewData[k].comment && reviewData[k].comment.trim())).length;
+    count.textContent = total;
+    btn.style.display = total > 0 ? 'flex' : 'none';
+  }
+
+  window.setReaction = function(btn, type) {
+    const bar = btn.closest('.review-bar');
+    const section = bar.dataset.section;
+    if (!reviewData[section]) reviewData[section] = {};
+    if (reviewData[section].reaction === type) {
+      reviewData[section].reaction = null;
+      bar.querySelector('.review-up').classList.remove('active');
+      bar.querySelector('.review-down').classList.remove('active');
+    } else {
+      reviewData[section].reaction = type;
+      bar.querySelector('.review-up').classList.toggle('active', type === 'up');
+      bar.querySelector('.review-down').classList.toggle('active', type === 'down');
+    }
+    saveReviewData();
+  };
+
+  window.toggleComment = function(btn) {
+    const bar = btn.closest('.review-bar');
+    const box = bar.querySelector('.review-comment-box');
+    const isOpen = box.style.display !== 'none';
+    box.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) box.querySelector('textarea').focus();
+  };
+
+  window.saveComment = function(textarea) {
+    const bar = textarea.closest('.review-bar');
+    const section = bar.dataset.section;
+    if (!reviewData[section]) reviewData[section] = {};
+    reviewData[section].comment = textarea.value;
+    const commentBtn = bar.querySelector('.review-comment-btn');
+    commentBtn.classList.toggle('has-comment', textarea.value.trim().length > 0);
+    saveReviewData();
+  };
+
+  window.copyReview = function() {
+    const sections = document.querySelectorAll('.section[id]');
+    let output = '# Plan Review: ' + document.title + '\n\n';
+    let hasContent = false;
+    sections.forEach(section => {
+      const id = section.id;
+      const data = reviewData[id];
+      if (!data || (!data.reaction && !(data.comment && data.comment.trim()))) return;
+      hasContent = true;
+      const title = section.querySelector('.section-title, .hero-title');
+      const titleText = title ? title.textContent.trim() : id;
+      output += '## ' + titleText + '\n';
+      if (data.reaction) {
+        output += '- **Reacción:** ' + (data.reaction === 'up' ? '👍' : '👎') + '\n';
+      }
+      if (data.comment && data.comment.trim()) {
+        output += '- **Comentario:** "' + data.comment.trim() + '"\n';
+      }
+      output += '\n';
+    });
+    if (!hasContent) return;
+    navigator.clipboard.writeText(output).then(() => {
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    });
+  };
+
+  function restoreReviewState() {
+    document.querySelectorAll('.review-bar').forEach(bar => {
+      const section = bar.dataset.section;
+      const data = reviewData[section];
+      if (!data) return;
+      if (data.reaction === 'up') bar.querySelector('.review-up').classList.add('active');
+      if (data.reaction === 'down') bar.querySelector('.review-down').classList.add('active');
+      if (data.comment) {
+        const textarea = bar.querySelector('.review-textarea');
+        textarea.value = data.comment;
+        bar.querySelector('.review-comment-btn').classList.toggle('has-comment', data.comment.trim().length > 0);
+      }
+    });
+    updateCopyButton();
+  }
+  restoreReviewState();
+})();
+</script>
+</body>
+</html>

@@ -161,10 +161,7 @@ function AiStage() {
   return (
     <div className="flex items-center gap-6 p-2">
       <div
-        className="w-[110px] h-[140px] rounded-lg shadow-md flex-shrink-0 relative"
-        style={{
-          background: "linear-gradient(135deg, rgba(79,124,255,0.5), rgba(168,85,247,0.5))",
-        }}
+        className="w-[110px] h-[140px] rounded-lg shadow-md flex-shrink-0 relative bg-ink-3 border border-ink-4"
       />
       <dl className="flex flex-col gap-2 flex-1">
         <LabelRow label="Tipo" pills={[{ text: "Carrusel · 3 imágenes" }]} />

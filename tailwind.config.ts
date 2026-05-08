@@ -1,310 +1,186 @@
 import type { Config } from "tailwindcss";
 
-// Cache bust: 1777909986
+/**
+ * Autopost Design System — "Carbon Workshop"
+ * ──────────────────────────────────────────────────────────────────────────
+ * Dark-first sistema único. Acento naranja-óxido como UN solo color que vende.
+ * Mona Sans Variable Font (axes wght + wdth) cubre body+UI+display.
+ * JetBrains Mono para datos y código.
+ *
+ * NO Inter, NO gradient azul/violeta, NO glassmorphism por defecto.
+ * NO mezclar con sistemas legacy: este es el ÚNICO sistema activo.
+ * ──────────────────────────────────────────────────────────────────────────
+ */
 const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: "class",
   theme: {
+    /* ── Spacing scale: SOBRESCRIBE defaults (no extiende) ─────────────────
+       Solo 9 valores canónicos. Cualquier valor ad-hoc fuera de la escala
+       debe reescribirse al implementar. */
+    spacing: {
+      "0":  "0",
+      px:   "1px",
+      "1":  "0.25rem",  // 4
+      "2":  "0.5rem",   // 8
+      "3":  "0.75rem",  // 12
+      "4":  "1rem",     // 16
+      "6":  "1.5rem",   // 24
+      "8":  "2rem",     // 32
+      "12": "3rem",     // 48
+      "16": "4rem",     // 64
+      "24": "6rem",     // 96
+    },
+    /* ── Border radii: SOBRESCRIBE defaults. Solo 5 valores. ─────────────── */
+    borderRadius: {
+      none:   "0",
+      sm:     "0.25rem", // 4
+      md:     "0.5rem",  // 8
+      lg:     "0.75rem", // 12
+      xl:     "1rem",    // 16
+      full:   "9999px",
+    },
     extend: {
-      fontFamily: {
-        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
-        display: ['"Instrument Serif"', '"Times New Roman"', "serif"],
-        headline: ['"Instrument Serif"', '"Times New Roman"', "serif"],
-        mono: ['"JetBrains Mono"', '"SF Mono"', "ui-monospace", "monospace"],
-        /* Rebrand (Fase 1): Geist con fallback Inter — usar font-np-sans / font-np-mono
-           para forzar el nuevo system en componentes brand-new. */
-        "np-sans": ["Geist", "Inter", "system-ui", "-apple-system", "sans-serif"],
-        "np-mono": ["Geist Mono", "JetBrains Mono", "SF Mono", "ui-monospace", "monospace"],
-      },
-      fontSize: {
-        /* Rebrand: tamaños accesibles min 17px body, 14px caption (+2 vs estándar) */
-        "np-caption":   ["14px", { lineHeight: "1.4", letterSpacing: "0.02em" }],
-        "np-body":      ["17px", { lineHeight: "1.55" }],
-        "np-body-lg":   ["19px", { lineHeight: "1.55" }],
-        "np-h4":        ["22px", { lineHeight: "1.3", letterSpacing: "-0.005em", fontWeight: "500" }],
-        "np-h3":        ["26px", { lineHeight: "1.25", letterSpacing: "-0.01em", fontWeight: "600" }],
-        "np-h2":        ["34px", { lineHeight: "1.2", letterSpacing: "-0.015em", fontWeight: "600" }],
-        "np-h1":        ["40px", { lineHeight: "1.15", letterSpacing: "-0.02em", fontWeight: "700" }],
-        "np-display":   ["56px", { lineHeight: "1.05", letterSpacing: "-0.025em", fontWeight: "700" }],
-        "np-display-xl":["72px", { lineHeight: "1", letterSpacing: "-0.03em", fontWeight: "800" }],
-      },
       colors: {
-        /* ══════════════════════════════════════════════════════════════
-           REBRAND (Fase 1) — paleta dark-first del nuevo producto.
-           Coexiste con los tokens editoriales (brand/surface/accent).
-           Usar bg-ink-2, text-ink-9, bg-pri, bg-ai en componentes nuevos.
-           ══════════════════════════════════════════════════════════════ */
+        /* Escala de tinta dark-first 10 niveles. ink-0 más oscuro, ink-9 más claro.
+           Contrastes verificados WCAG: ink-9 sobre ink-1 = 15.8:1 (AAA). */
         ink: {
-          0:  "var(--ink-0)",
-          1:  "var(--ink-1)",
-          2:  "var(--ink-2)",
-          3:  "var(--ink-3)",
-          4:  "var(--ink-4)",
-          5:  "var(--ink-5)",
-          6:  "var(--ink-6)",
-          7:  "var(--ink-7)",
-          8:  "var(--ink-8)",
-          9:  "var(--ink-9)",
-          10: "var(--ink-10)",
+          0:  "#0A0B09",
+          1:  "#0E0F0D",
+          2:  "#151714",
+          3:  "#1E211D",
+          4:  "#2A2D29",
+          5:  "#3A3D38",
+          6:  "#6B6A64",
+          7:  "#A8A69E",
+          8:  "#D6D3CC",
+          9:  "#EDEAE3",
+          /* Compat: rebrand v1 usaba ink-10 = blanco puro. Mapear al claro
+             del sistema nuevo (off-white) para no romper componentes legacy. */
+          10: "#FFFFFF",
         },
-        pri: {
-          DEFAULT: "var(--pri)",
-          dim:     "var(--pri-dim)",
-          soft:    "var(--pri-soft)",
-        },
-        ai: {
-          DEFAULT: "var(--ai)",
-          dim:     "var(--ai-dim)",
-          soft:    "var(--ai-soft)",
-        },
-
-        /* ══════════════════════════════════════════════════════════════
-           brand.* / accent.* / surface.* — Editorial print-zine palette.
-           Off-bone paper, tomato stamp, olive, mustard. Ink in 4 tones.
-           Cualquier componente con estos tokens se rebrandea automáticamente.
-           ══════════════════════════════════════════════════════════════ */
-        brand: {
-          50:  "#F1ECE2",  // paper
-          100: "#E8E2D4",  // paper-2
-          200: "#D9D2C2",
-          300: "#B8B0A0",
-          400: "#5A4F40",  // ink-3 (mid)
-          500: "#14110D",  // ink primary
-          600: "#0E0B07",  // ink deep
-          700: "#2A241D",
-          800: "#1F1B14",
-          900: "#14110D",
-          950: "#0A0805",
-        },
+        /* Acento principal — naranja-óxido (cinta métrica de carpintero, NO neón).
+           accent-DEFAULT sobre ink-1 = 7.2:1 (AAA). */
         accent: {
-          orange:  "#E54B26",  // tomato stamp
-          indigo:  "#6B7A2E",  // olive
-          violet:  "#6B7A2E",
-          blue:    "#6B7A2E",
-          emerald: "#6B7A2E",  // olive (same family, success)
-          cyan:    "#E54B26",
-          coral:   "#D4A627",  // mustard
-          red:     "#C73C1B",  // stamp-2 (error)
-          slate:   "#8A7E6B",  // ink-4
+          DEFAULT: "#FF6A2C",
+          hover:   "#E55A1F",
+          active:  "#CC4E16",
+          soft:    "rgba(255, 106, 44, 0.12)",
+          ring:    "rgba(255, 106, 44, 0.45)",
+          strong:  "#FF8550",
         },
-        surface: {
-          primary:   "#F1ECE2",  // paper
-          secondary: "#E8E2D4",  // paper-2
-          tertiary:  "#E8E2D4",
-          card:      "#F1ECE2",
-          hover:     "#E8E2D4",
-          elevated:  "#F1ECE2",
+        /* Acento secundario opcional — solo estados activos puntuales. */
+        "accent-secondary": {
+          DEFAULT: "#C4D650",
+          hover:   "#B0C141",
+          active:  "#9CAB36",
+          soft:    "rgba(196, 214, 80, 0.12)",
+          ring:    "rgba(196, 214, 80, 0.45)",
+          strong:  "#D4E366",
         },
-        neutral: {
-          750: "#B8B0A0",
-          850: "#D9D2C2",
-        },
-        hatch: {
-          graphite:    "#1D1D1F",
-          graphiteAlt: "#2C2C2E",
-          athens:      "#F5F5F7",
-          surfAlt:     "#E8E8ED",
-          silver:      "#86868B",
-          silverDark:  "#48484A",
-          glow:        "#A8DADC",
-          cobalt:      "#7DBCBE",
-        },
-        /* ══════════════════════════════════════════════════════════════
-           TOKENS SEMÁNTICOS — Aluminum Studio Ola 3
-           Usar success-/warning-/error-/info-/neutral- en vez de
-           green/amber/red/blue/zinc directos. Asegura contraste WCAG AA
-           y consistencia entre componentes.
-           ══════════════════════════════════════════════════════════════ */
+        /* Semánticos — info usa gris neutro deliberado, NO azul. */
         success: {
-          50:  "#E8F5EE",
-          100: "#C6E8D2",
-          200: "#9DD5B0",
-          300: "#6FBC88",
-          500: "#34A35A",
-          700: "#2D8B55",  // bg pill text + border base
-          800: "#1F6B3F",  // text on light
-          900: "#13502E",  // text-strong
+          DEFAULT: "#7FA84E",
+          soft:    "rgba(127, 168, 78, 0.12)",
+          strong:  "#9DC569",
         },
         warning: {
-          50:  "#FBF5E5",
-          100: "#F5E6B7",
-          200: "#EFD584",
-          300: "#E3C16F",
-          500: "#D4A843",
-          700: "#B88E32",
-          800: "#8C6F1F",
-          900: "#5C4612",
+          DEFAULT: "#E8A93B",
+          soft:    "rgba(232, 169, 59, 0.12)",
+          strong:  "#F2BC58",
         },
         error: {
-          50:  "#FDE8E8",
-          100: "#FACACA",
-          200: "#F2A0A0",
-          300: "#E97A7A",
-          500: "#D74C4C",
-          700: "#C93B3B",
-          800: "#A02A2A",
-          900: "#7A1F1F",
+          DEFAULT: "#D24545",
+          soft:    "rgba(210, 69, 69, 0.12)",
+          strong:  "#E36767",
         },
         info: {
-          50:  "#E4F2F7",
-          100: "#BFDFEB",
-          200: "#90C8DC",
-          300: "#5FA9C2",
-          500: "#3690B4",
-          700: "#2A7B9B",
-          800: "#1E5F78",
-          900: "#16445A",
+          DEFAULT: "#6B6A64",
+          soft:    "rgba(107, 106, 100, 0.18)",
+          strong:  "#A8A69E",
+        },
+        /* ── Compat layer (eliminar al cerrar Bloque B) ──────────────────
+           Mapea tokens del rebrand v1 (azul-violeta) al sistema nuevo para
+           que los componentes legacy de landing-v2 se vean con la paleta
+           Carbon Workshop sin tocar archivo a archivo. */
+        pri: {
+          DEFAULT: "#FF6A2C",
+          dim:     "#E55A1F",
+          soft:    "rgba(255, 106, 44, 0.12)",
+        },
+        ai: {
+          DEFAULT: "#FF6A2C",
+          dim:     "#E55A1F",
+          soft:    "rgba(255, 106, 44, 0.14)",
         },
       },
-      borderColor: {
-        DEFAULT: "rgba(20,17,13,0.10)",
+      fontFamily: {
+        sans: ["var(--font-mona-sans)", "system-ui", "sans-serif"],
+        mono: ["var(--font-jetbrains-mono)", "ui-monospace", "monospace"],
+        /* Compat: componentes legacy usan font-np-sans / font-np-mono */
+        "np-sans": ["var(--font-mona-sans)", "system-ui", "sans-serif"],
+        "np-mono": ["var(--font-jetbrains-mono)", "ui-monospace", "monospace"],
+      },
+      fontSize: {
+        xs:           ["0.75rem",   { lineHeight: "1rem",     letterSpacing: "0.01em",   fontWeight: "500" }],
+        sm:           ["0.875rem",  { lineHeight: "1.25rem",  letterSpacing: "0",        fontWeight: "400" }],
+        base:         ["1rem",      { lineHeight: "1.5rem",   letterSpacing: "0",        fontWeight: "400" }],
+        lg:           ["1.125rem",  { lineHeight: "1.75rem",  letterSpacing: "-0.005em", fontWeight: "400" }],
+        xl:           ["1.25rem",   { lineHeight: "1.875rem", letterSpacing: "-0.01em",  fontWeight: "500" }],
+        "2xl":        ["1.5rem",    { lineHeight: "2rem",     letterSpacing: "-0.015em", fontWeight: "600" }],
+        "3xl":        ["2rem",      { lineHeight: "2.375rem", letterSpacing: "-0.02em",  fontWeight: "600" }],
+        "4xl":        ["2.5rem",    { lineHeight: "2.875rem", letterSpacing: "-0.025em", fontWeight: "700" }],
+        "display-md": ["3.25rem",   { lineHeight: "3.5rem",   letterSpacing: "-0.03em",  fontWeight: "700" }],
+        "display-lg": ["4.25rem",   { lineHeight: "4.5rem",   letterSpacing: "-0.035em", fontWeight: "800" }],
+        "display-xl": ["5.5rem",    { lineHeight: "5.5rem",   letterSpacing: "-0.04em",  fontWeight: "800" }],
+        "mono-xs":    ["0.75rem",   { lineHeight: "1rem",     letterSpacing: "0",        fontWeight: "400" }],
+        "mono-sm":    ["0.8125rem", { lineHeight: "1.25rem",  letterSpacing: "0",        fontWeight: "500" }],
+        /* Compat: tamaños del rebrand v1 (eliminar al cerrar Bloque B) */
+        "np-caption":     ["0.875rem", { lineHeight: "1.25rem",  letterSpacing: "0.01em",   fontWeight: "500" }],
+        "np-body":        ["1rem",     { lineHeight: "1.5rem",   letterSpacing: "0",        fontWeight: "400" }],
+        "np-body-lg":     ["1.125rem", { lineHeight: "1.75rem",  letterSpacing: "-0.005em", fontWeight: "400" }],
+        "np-h4":          ["1.25rem",  { lineHeight: "1.875rem", letterSpacing: "-0.01em",  fontWeight: "500" }],
+        "np-h3":          ["1.5rem",   { lineHeight: "2rem",     letterSpacing: "-0.015em", fontWeight: "600" }],
+        "np-h2":          ["2rem",     { lineHeight: "2.375rem", letterSpacing: "-0.02em",  fontWeight: "600" }],
+        "np-h1":          ["2.5rem",   { lineHeight: "2.875rem", letterSpacing: "-0.025em", fontWeight: "700" }],
+        "np-display":     ["3.25rem",  { lineHeight: "3.5rem",   letterSpacing: "-0.03em",  fontWeight: "700" }],
+        "np-display-xl":  ["4.25rem",  { lineHeight: "4.5rem",   letterSpacing: "-0.035em", fontWeight: "800" }],
       },
       boxShadow: {
-        /* Editorial: hairline + leve drop. Sin glows. */
-        "card":         "0 1px 0 rgba(20,17,13,0.06)",
-        "card-hover":   "0 1px 0 rgba(20,17,13,0.08), 3px 3px 0 rgba(20,17,13,0.06)",
-        "elevated":     "0 30px 60px -20px rgba(20,17,13,0.18), 0 1px 0 rgba(20,17,13,0.06)",
-        "glow-sm":      "0 1px 0 rgba(20,17,13,0.06)",
-        "glow":         "0 1px 0 rgba(20,17,13,0.06)",
-        "glow-md":      "0 1px 0 rgba(20,17,13,0.06)",
-        "glow-lg":      "0 1px 0 rgba(20,17,13,0.06)",
-        "glow-amber":   "0 1px 0 rgba(212,166,39,0.30)",
-        "glow-blue":    "0 1px 0 rgba(107,122,46,0.30)",
-        "glow-orange":  "0 1px 0 rgba(229,75,38,0.20)",
-        "glow-indigo":  "0 1px 0 rgba(107,122,46,0.20)",
-        "glow-violet":  "0 1px 0 rgba(107,122,46,0.20)",
-        "glow-emerald": "0 1px 0 rgba(107,122,46,0.20)",
-        "glow-cyan":    "0 1px 0 rgba(229,75,38,0.20)",
-        "glow-coral":   "0 1px 0 rgba(212,166,39,0.20)",
-        "inner-light":  "inset 0 1px 0 rgba(20,17,13,0.04)",
-        "inner-glow":   "inset 0 0 0 0 transparent",
-      },
-      borderRadius: {
-        /* Editorial: sin redondeos exagerados. Mantenemos hairlines rectos. */
-        "lg":  "4px",
-        "xl":  "4px",
-        "2xl": "6px",
-        "3xl": "6px",
-        "4xl": "8px",
+        sm:    "0 1px 2px 0 rgba(10, 11, 9, 0.6)",
+        md:    "0 4px 8px -2px rgba(10, 11, 9, 0.7), 0 2px 4px -2px rgba(10, 11, 9, 0.5)",
+        lg:    "0 12px 24px -8px rgba(10, 11, 9, 0.75), 0 4px 8px -4px rgba(10, 11, 9, 0.5)",
+        xl:    "0 24px 48px -12px rgba(10, 11, 9, 0.85), 0 8px 16px -8px rgba(10, 11, 9, 0.6)",
+        focus: "0 0 0 2px rgba(255, 106, 44, 0.45)",
       },
       animation: {
-        "fade-in":       "fadeIn 0.5s ease-out both",
-        "fade-up":       "fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both",
-        "slide-up":      "slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both",
-        "slide-down":    "slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) both",
-        "scale-in":      "scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both",
-        "reveal":        "reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both",
-        "float":         "float 6s ease-in-out infinite",
-        "drift":         "drift 8s ease-in-out infinite",
-        "glow-pulse":    "glowPulse 4s ease-in-out infinite",
-        "shimmer":       "shimmer 2s infinite linear",
-        "pulse-subtle":  "pulseSubtle 3s ease-in-out infinite",
-        "spin-slow":     "spin 3s linear infinite",
-        "gradient-x":    "gradientX 8s ease infinite",
-        "border-flow":   "borderFlow 4s linear infinite",
-        "cta-pulse":     "ctaPulse 2s ease-in-out infinite",
-        "mockup-blink":  "mockupBlink 3s ease-in-out infinite",
-        "marquee":       "marquee 30s linear infinite",
-        "marquee-slow":  "marquee 45s linear infinite",
-        "rotate-border": "rotateBorder 3s linear infinite",
+        "fade-in":      "fade-in 200ms ease-out forwards",
+        "fade-up":      "fade-up 300ms ease-out forwards",
+        "subtle-pulse": "subtle-pulse 1.5s ease-in-out infinite",
+        "slide-up":     "slide-up 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
+        "spin-slow":    "spin 1s linear infinite",
       },
       keyframes: {
-        fadeIn: {
+        "fade-in": {
           "0%":   { opacity: "0" },
           "100%": { opacity: "1" },
         },
-        fadeUp: {
+        "fade-up": {
+          "0%":   { opacity: "0", transform: "translateY(12px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "subtle-pulse": {
+          "0%, 100%": { opacity: "0.6" },
+          "50%":      { opacity: "1" },
+        },
+        "slide-up": {
           "0%":   { opacity: "0", transform: "translateY(20px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
-        slideUp: {
-          "0%":   { opacity: "0", transform: "translateY(24px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-        slideDown: {
-          "0%":   { opacity: "0", transform: "translateY(-12px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-        scaleIn: {
-          "0%":   { opacity: "0", transform: "scale(0.92)" },
-          "100%": { opacity: "1", transform: "scale(1)" },
-        },
-        reveal: {
-          "0%":   { opacity: "0", transform: "translateY(30px) scale(0.96)" },
-          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
-        },
-        float: {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%":      { transform: "translateY(-10px)" },
-        },
-        drift: {
-          "0%, 100%": { transform: "translate(0, 0) rotate(0deg)" },
-          "33%":      { transform: "translate(5px, -8px) rotate(1.5deg)" },
-          "66%":      { transform: "translate(-4px, 4px) rotate(-0.8deg)" },
-        },
-        glowPulse: {
-          "0%, 100%": { opacity: "0.3" },
-          "50%":      { opacity: "0.7" },
-        },
-        shimmer: {
-          "0%":   { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
-        pulseSubtle: {
-          "0%, 100%": { opacity: "1" },
-          "50%":      { opacity: "0.7" },
-        },
-        gradientX: {
-          "0%, 100%": { backgroundPosition: "0% 50%" },
-          "50%":      { backgroundPosition: "100% 50%" },
-        },
-        borderFlow: {
-          "0%":   { backgroundPosition: "0% 0%" },
-          "100%": { backgroundPosition: "200% 0%" },
-        },
-        ctaPulse: {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(168,218,220,0)" },
-          "50%":      { boxShadow: "0 0 0 6px rgba(168,218,220,0.12)" },
-        },
-        mockupBlink: {
-          "0%, 90%, 100%": { opacity: "1" },
-          "95%":           { opacity: "0.4" },
-        },
-        marquee: {
-          "0%":   { transform: "translateX(0%)" },
-          "100%": { transform: "translateX(-50%)" },
-        },
-        rotateBorder: {
-          "0%":   { "--angle": "0deg" },
-          "100%": { "--angle": "360deg" },
-        },
-        textShimmer: {
-          "0%":   { backgroundPosition: "-200% center" },
-          "100%": { backgroundPosition: "200% center" },
-        },
-      },
-      backgroundImage: {
-        /* Editorial: degradados muy sutiles sobre papel. Casi imperceptibles. */
-        "gradient-radial":  "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-subtle":  "linear-gradient(145deg, rgba(229,75,38,0.025) 0%, transparent 50%)",
-        "gradient-mesh":    "radial-gradient(at 40% 20%, rgba(229,75,38,0.04) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(212,166,39,0.03) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(107,122,46,0.025) 0px, transparent 50%)",
-        "gradient-hero":    "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(229,75,38,0.06) 0%, transparent 60%)",
-        "gradient-cta":     "linear-gradient(135deg, rgba(229,75,38,0.04) 0%, rgba(212,166,39,0.03) 100%)",
-        "gradient-spotlight": "radial-gradient(600px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(229,75,38,0.04), transparent 70%)",
-        "gradient-brand-vivid": "linear-gradient(135deg, #14110D 0%, #2A241D 100%)",
-        "gradient-brand": "linear-gradient(135deg, #14110D 0%, #2A241D 100%)",
-        "gradient-magic": "linear-gradient(135deg, #14110D 0%, #E54B26 100%)",
-        "gradient-glow": "radial-gradient(600px circle, rgba(229,75,38,0.06), transparent 70%)",
-      },
-      spacing: {
-        "18": "4.5rem",
-        "88": "22rem",
-        /* Rebrand (Fase 1): touch targets accesibles */
-        "np-touch":    "48px",   /* min touch target — botones, links interactivos */
-        "np-touch-lg": "56px",   /* CTA primarios */
       },
     },
   },

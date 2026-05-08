@@ -58,6 +58,7 @@ model AdminUser {
 
   auditLogs AuditLog[]
   chats     AiChat[]
+  subscription Subscription?
 
   @@map("admin_users")
 }
@@ -635,4 +636,92 @@ model SystemConfig {
   updatedAt   DateTime @updatedAt
 
   @@map("system_configs")
+}
+
+// ─────────────────────────────────────────
+// SUBSCRIPTION
+// Suscripción de Stripe asociada a un AdminUser. 1:1 — un user solo puede
+// tener una subscripción activa a la vez. Cancelar y resubscribir crea una
+// fila NUEVA (Stripe usa subscription IDs distintos), pero solo la última
+// es la "vigente" — el lookup se hace por adminUserId con el order desc.
+//
+// `tier` y `period` son los valores derivados del price_id en el momento
+// del checkout. Se almacenan denormalizados para evitar lookup constante
+// del map en stripe.ts.
+//
+// Sincronización: el webhook upsertea aquí en cada evento relevante.
+// La fuente de verdad sigue siendo Stripe — esto es un mirror para evitar
+// llamar a la API en cada render del dashboard.
+// ─────────────────────────────────────────
+model Subscription {
+  id                    String   @id @default(cuid())
+  adminUserId           String   @unique
+  stripeSubscriptionId  String   @unique
+  stripeCustomerId      String
+  stripePriceId         String
+
+  // Estado denormalizado de Stripe.
+  // active | trialing | past_due | canceled | incomplete | incomplete_expired | unpaid | paused
+  status                String
+
+  // Tier interno y period — derivados del price en el checkout.
+  // null si el price_id no coincide con ninguno conocido (legacy/manual).
+  tier                  String?  // basic | pro | agency
+  period                String?  // weekly | yearly
+
+  // Ventana actual de facturación (Unix timestamp × 1000).
+  currentPeriodStart    DateTime
+  currentPeriodEnd      DateTime
+  cancelAtPeriodEnd     Boolean  @default(false)
+
+  // Trial — solo poblado mientras está en trial.
+  trialEnd              DateTime?
+
+  // Diagnóstico — último error de pago (vacío si todo bien).
+  lastPaymentError      String?
+
+  // Cuándo se canceló (vacío hasta el evento subscription.deleted).
+  canceledAt            DateTime?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  adminUser             AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([stripeCustomerId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+// ─────────────────────────────────────────
+// WEBHOOK EVENT
+// Tabla de idempotencia para webhooks de Stripe. La PK es `event.id`
+// (formato evt_xxx) — Stripe garantiza que el id es único por evento, así
+// que insertarlo de entrada con `db.webhookEvent.create()` actúa como
+// distributed lock natural.
+//
+// Si la inserción falla con P2002 (unique violation), el evento ya fue
+// procesado y devolvemos 200 sin re-ejecutar el handler.
+//
+// Almacenamos el payload completo como JSON para auditoría y replay si
+// algún handler tiene un bug que requiera reprocesar.
+//
+// Limpieza: tras 30 días puedes purgar processedAt < NOW() - 30d. Por
+// ahora no implementamos cleanup automático — la tabla crece linealmente
+// pero es despreciable (estimado <1k eventos/mes en early stage).
+// ─────────────────────────────────────────
+model WebhookEvent {
+  id          String   @id  // event.id de Stripe (evt_xxx)
+  type        String       // event.type (checkout.session.completed, etc.)
+  payload     Json         // event completo de Stripe — útil para replay
+
+  // Estado de procesamiento.
+  processedAt DateTime?    // null = todavía no procesado o falló
+  lastError   String?      // mensaje del último error si el handler falló
+
+  createdAt   DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@index([processedAt])
+  @@map("webhook_events")
 }

@@ -1,0 +1,18 @@
+# Autopost — robots.txt
+# Bloquea rutas internas (admin), de invitación efímera, y el laboratorio
+# de previews/showcases que no deben indexarse.
+
+User-agent: *
+Allow: /
+Disallow: /lab/
+Disallow: /aprobar/
+Disallow: /informe/
+Disallow: /onboarding/
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /businesses
+
+# Demo asset folder (HTML standalone, no es producción)
+Disallow: /branding-redesign/
+
+Sitemap: https://autopost-production-cd57.up.railway.app/sitemap.xml
