@@ -15,6 +15,7 @@ import {
   Globe,
   FileText,
   BarChart2,
+  UserCircle,
 } from "lucide-react";
 import { useLocale } from "@/lib/i18n";
 
@@ -59,7 +60,8 @@ const navItems: Array<{
           }
         : null,
   },
-  { href: "/settings", label: "Configuracion", icon: Settings },
+  { href: "/account", label: "Mi cuenta", icon: UserCircle },
+  { href: "/settings", label: "Configuración", icon: Settings },
 ];
 
 export function Sidebar({
