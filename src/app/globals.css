@@ -116,6 +116,9 @@
     font-feature-settings: "kern", "liga", "calt", "ss01";
     font-variation-settings: "wdth" 100;
     min-height: 100vh;
+    /* Defensa contra elementos que se salgan del viewport en mobile
+       (gradient blobs del Hero, fixed elements posicionados con offsets). */
+    overflow-x: hidden;
   }
 
   /* Focus visible global: ring naranja-óxido sobre ink-1.

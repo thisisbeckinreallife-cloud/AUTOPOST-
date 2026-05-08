@@ -5,8 +5,8 @@ export function Footer() {
   return (
     <footer className="bg-ink-1 border-t border-ink-3 px-6 py-16">
       <div className="max-w-[1200px] mx-auto">
-        <div className="grid md:grid-cols-[2fr_repeat(4,1fr)] gap-8 mb-12">
-          <div>
+        <div className="grid grid-cols-2 md:grid-cols-[2fr_repeat(4,1fr)] gap-8 mb-12">
+          <div className="col-span-2 md:col-span-1">
             <div className="font-np-mono text-np-h3 text-ink-9 tracking-tight font-semibold mb-3">
               autopost<span className="text-pri">.</span>
             </div>
