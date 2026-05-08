@@ -49,7 +49,7 @@ export default async function AccountPage() {
     label: tierLabel(tier, user.language as "es" | "en"),
     priceWeekly: tierPriceWeekly(tier),
     features: {
-      canHideWatermark: FEATURES.canHideWatermark(tier),
+      hasWatermark: FEATURES.hasWatermark(tier),
       maxAccounts: FEATURES.maxAccounts(tier),
       postsPerMonth: FEATURES.postsPerMonth(tier),
       teamSize: FEATURES.teamSize(tier),
@@ -92,7 +92,7 @@ export default async function AccountPage() {
         <ProfileSection profile={profile} />
         <PreferencesSection
           preferences={preferences}
-          canHideWatermark={plan.features.canHideWatermark}
+          hasWatermark={plan.features.hasWatermark}
         />
         <SecuritySection profile={profile} />
         <DangerZoneSection email={profile.email} />

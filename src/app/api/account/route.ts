@@ -45,7 +45,7 @@ export async function GET() {
         label: tierLabel(tier, user.language as "es" | "en"),
         priceWeekly: tierPriceWeekly(tier),
         features: {
-          canHideWatermark: FEATURES.canHideWatermark(tier),
+          hasWatermark: FEATURES.hasWatermark(tier),
           maxAccounts: FEATURES.maxAccounts(tier),
           postsPerMonth: FEATURES.postsPerMonth(tier),
           teamSize: FEATURES.teamSize(tier),
@@ -89,20 +89,11 @@ export async function PATCH(req: Request) {
     }
     const data = parsed.data;
 
-    // Server-side guard: hideWatermark solo se puede activar con plan ≥ PRO.
-    // Si el usuario manda hideWatermark=true pero su plan no lo permite,
-    // ignoramos el cambio sin error (UI ya lo bloquea).
-    if (data.hideWatermark === true) {
-      const user = await db.adminUser.findUnique({
-        where: { id: session.adminUserId },
-        include: { subscription: true },
-      });
-      if (user) {
-        const tier = getEffectiveTier(user, user.subscription);
-        if (!FEATURES.canHideWatermark(tier)) {
-          delete data.hideWatermark; // silently ignore
-        }
-      }
+    // hideWatermark ya no es relevante: la lógica del watermark se decide
+    // automáticamente por tier (FREE → watermark · paid → sin). El toggle
+    // se ignora de la entrada para evitar confusión con clientes legacy.
+    if ("hideWatermark" in data) {
+      delete data.hideWatermark;
     }
 
     const updated = await db.adminUser.update({
