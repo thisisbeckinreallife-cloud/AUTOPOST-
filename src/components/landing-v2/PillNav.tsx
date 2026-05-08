@@ -64,33 +64,35 @@ export function PillNav() {
           </span>
         </Link>
 
-        {/* Pill nav (desktop only) */}
-        <ul
-          ref={pillRef}
-          onMouseLeave={hideCursor}
-          className={cn(
-            "hidden md:flex relative items-center p-1 gap-1",
-            "border border-ink-3 rounded-full bg-ink-1/60 backdrop-blur-sm"
-          )}
-        >
-          {LINKS.map((link) => (
-            <PillItem key={link.href} link={link} onEnter={moveCursor} />
-          ))}
-          <li
-            aria-hidden="true"
+        {/* Pill nav (desktop only) — landmark <nav> para screen readers */}
+        <nav aria-label="Principal" className="hidden md:block">
+          <ul
+            ref={pillRef}
+            onMouseLeave={hideCursor}
             className={cn(
-              "absolute z-0 top-1 bottom-1 left-0 rounded-full pointer-events-none",
-              "bg-gradient-to-br from-pri to-ai shadow-[var(--np-glow-blue)]"
+              "flex relative items-center p-1 gap-1",
+              "border border-ink-3 rounded-full bg-ink-1/60 backdrop-blur-sm"
             )}
-            style={{
-              left: `${cursor.left}px`,
-              width: `${cursor.width}px`,
-              opacity: cursor.opacity,
-              transition:
-                "left 280ms cubic-bezier(0.16,1,0.3,1), width 280ms cubic-bezier(0.16,1,0.3,1), opacity 200ms cubic-bezier(0.65,0,0.35,1)",
-            }}
-          />
-        </ul>
+          >
+            {LINKS.map((link) => (
+              <PillItem key={link.href} link={link} onEnter={moveCursor} />
+            ))}
+            <li
+              aria-hidden="true"
+              className={cn(
+                "absolute z-0 top-1 bottom-1 left-0 rounded-full pointer-events-none",
+                "bg-accent shadow-md"
+              )}
+              style={{
+                left: `${cursor.left}px`,
+                width: `${cursor.width}px`,
+                opacity: cursor.opacity,
+                transition:
+                  "left 280ms cubic-bezier(0.16,1,0.3,1), width 280ms cubic-bezier(0.16,1,0.3,1), opacity 200ms cubic-bezier(0.65,0,0.35,1)",
+              }}
+            />
+          </ul>
+        </nav>
 
         {/* Right actions */}
         <div className="flex items-center gap-2">

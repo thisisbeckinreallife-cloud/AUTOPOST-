@@ -55,7 +55,7 @@ const config: Config = {
           3:  "#1E211D",
           4:  "#2A2D29",
           5:  "#3A3D38",
-          6:  "#6B6A64",
+          6:  "#8A8980",
           7:  "#A8A69E",
           8:  "#D6D3CC",
           9:  "#EDEAE3",
@@ -99,8 +99,8 @@ const config: Config = {
           strong:  "#E36767",
         },
         info: {
-          DEFAULT: "#6B6A64",
-          soft:    "rgba(107, 106, 100, 0.18)",
+          DEFAULT: "#8A8980",
+          soft:    "rgba(138, 137, 128, 0.18)",
           strong:  "#A8A69E",
         },
         /* ── Compat layer (eliminar al cerrar Bloque B) ──────────────────

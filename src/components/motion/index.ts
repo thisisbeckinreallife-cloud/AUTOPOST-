@@ -1,16 +1,9 @@
 export { MotionReveal } from "./MotionReveal";
 export { MotionStagger, MotionStaggerItem } from "./MotionStagger";
 export { MotionCounter } from "./MotionCounter";
-export { MotionText } from "./MotionText";
-export { MotionParallax } from "./MotionParallax";
 export { MotionMagnetic } from "./MotionMagnetic";
-export { MotionGlow } from "./MotionGlow";
-export { MotionFloat } from "./MotionFloat";
-export { TextScramble } from "./TextScramble";
 export { BorderBeam } from "./BorderBeam";
-export { AnimatedGridPattern } from "./AnimatedGridPattern";
 export { NumberTicker, PriceMorph } from "./NumberTicker";
-export { GlowingStars } from "./GlowingStars";
 export { Meteors } from "./Meteors";
 export {
   EASE_OUT_EXPO,

@@ -93,7 +93,7 @@ export default function RootLayout({
           Saltar al contenido
         </a>
         <Providers>
-          <div id="main-content">{children}</div>
+          <main id="main-content" tabIndex={-1}>{children}</main>
         </Providers>
       </body>
     </html>
