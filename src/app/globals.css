@@ -15,7 +15,7 @@
   --font-jetbrains-mono:  "JetBrains Mono", ui-monospace, monospace;
 
   /* Tokens auxiliares (los principales viven en tailwind.config.ts) */
-  --ring-accent:    rgba(255, 106, 44, 0.45);
+  --ring-accent:    rgba(255, 106, 44, 0.95);  /* sólido — pasa WCAG 1.4.11 contraste no-textual sobre ink-1 */
   --motion-fast:    150ms;
   --motion-base:    200ms;
   --motion-slow:    400ms;
@@ -38,7 +38,7 @@
   --ink-3:             #1E211D;
   --ink-4:             #2A2D29;
   --ink-5:             #3A3D38;
-  --ink-6:             #6B6A64;
+  --ink-6:             #8A8980;  /* Subido de #6B6A64 para pasar WCAG AA contraste 4.5:1 */
   --ink-7:             #A8A69E;
   --ink-8:             #D6D3CC;
   --ink-9:             #EDEAE3;
