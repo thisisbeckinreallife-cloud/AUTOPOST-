@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/brand/Button";
 import { Input } from "@/components/brand/Input";
 import { AuthError } from "@/components/auth/AuthError";
@@ -123,9 +124,10 @@ export function SignupForm() {
             type="button"
             onClick={() => setShowPw((v) => !v)}
             aria-label={showPw ? "Ocultar contraseña" : "Mostrar contraseña"}
-            className="w-10 h-10 flex items-center justify-center text-ink-6 hover:text-ink-9 rounded-md transition-colors"
+            aria-pressed={showPw}
+            className="w-10 h-10 flex items-center justify-center text-ink-6 hover:text-ink-9 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring"
           >
-            {showPw ? "🙈" : "👁"}
+            {showPw ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
           </button>
         }
       />
@@ -142,25 +144,35 @@ export function SignupForm() {
         required
       />
 
-      <label className="flex items-start gap-3 mt-2 text-np-caption text-ink-7 cursor-pointer">
+      <label
+        htmlFor="signup-terms"
+        className="flex items-start gap-3 mt-2 text-np-caption text-ink-7 cursor-pointer"
+      >
         <input
+          id="signup-terms"
           type="checkbox"
           checked={acceptedTerms}
           onChange={(e) => setAcceptedTerms(e.target.checked)}
-          className="mt-0.5 w-4 h-4 accent-[color:var(--pri)] cursor-pointer"
+          aria-describedby={serverError?.includes("términos") ? "signup-terms-error" : undefined}
+          className="mt-0.5 w-4 h-4 accent-[color:var(--accent)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring rounded-sm"
         />
         <span>
           Acepto los{" "}
-          <a href="/legal/terms" target="_blank" className="text-ink-9 underline hover:text-pri">
+          <a href="/legal/terms" target="_blank" className="text-ink-9 underline hover:text-accent">
             términos
           </a>{" "}
           y la{" "}
-          <a href="/legal/privacy" target="_blank" className="text-ink-9 underline hover:text-pri">
+          <a href="/legal/privacy" target="_blank" className="text-ink-9 underline hover:text-accent">
             política de privacidad
           </a>
           .
         </span>
       </label>
+      {serverError?.includes("términos") ? (
+        <p id="signup-terms-error" role="alert" className="text-xs text-error-strong -mt-2">
+          {serverError}
+        </p>
+      ) : null}
 
       <Button
         type="submit"

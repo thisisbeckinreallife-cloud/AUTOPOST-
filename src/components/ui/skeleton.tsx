@@ -1,12 +1,20 @@
 import { cn } from "@/lib/utils";
 
+/**
+ * Skeleton — Carbon Workshop.
+ * Bloque hueco con pulso sutil mientras carga datos. Sin shimmer
+ * gradient (movimiento más calmado, menos AI-shimmer-y). Usa
+ * subtle-pulse del nuevo motion system.
+ */
 export function Skeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "rounded bg-zinc-800/60 bg-gradient-to-r from-zinc-800/60 via-zinc-700/40 to-zinc-800/60 bg-[length:200%_100%] animate-shimmer",
+        "rounded-md bg-ink-3 animate-subtle-pulse",
         className
       )}
+      role="status"
+      aria-label="Cargando…"
     />
   );
 }
@@ -20,26 +28,26 @@ export function BatchDetailSkeleton() {
       </div>
       <div className="grid grid-cols-3 gap-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="rounded-xl border border-white/[0.06] bg-surface-card p-4 text-center">
-            <Skeleton className="h-9 w-12 mx-auto mb-2" />
+          <div key={i} className="rounded-md border border-ink-4 bg-ink-2 p-4 text-center">
+            <Skeleton className="h-8 w-12 mx-auto mb-2" />
             <Skeleton className="h-3 w-20 mx-auto" />
           </div>
         ))}
       </div>
-      <div className="rounded-xl border border-white/[0.06] bg-surface-card p-5">
+      <div className="rounded-md border border-ink-4 bg-ink-2 p-5">
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1">
             <Skeleton className="h-5 w-48 mb-2" />
             <Skeleton className="h-3 w-32" />
           </div>
-          <Skeleton className="h-10 w-32 rounded-lg" />
+          <Skeleton className="h-10 w-32 rounded-md" />
         </div>
       </div>
       <div>
         <Skeleton className="h-5 w-28 mb-3" />
         <div className="space-y-2">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex items-center gap-3 rounded-lg border border-white/[0.04] bg-surface-card px-4 py-3">
+            <div key={i} className="flex items-center gap-3 rounded-md border border-ink-4 bg-ink-2 px-4 py-3">
               <Skeleton className="h-5 w-5 rounded shrink-0" />
               <div className="flex-1 min-w-0">
                 <Skeleton className="h-4 w-40 mb-1.5" />
@@ -65,10 +73,10 @@ export function PostDetailSkeleton() {
         </div>
         <div className="flex items-center gap-2">
           <Skeleton className="h-6 w-20 rounded-full" />
-          <Skeleton className="h-8 w-24 rounded-lg" />
+          <Skeleton className="h-8 w-24 rounded-md" />
         </div>
       </div>
-      <div className="rounded-xl border border-white/[0.06] bg-surface-card">
+      <div className="rounded-md border border-ink-4 bg-ink-2">
         <div className="p-6">
           <Skeleton className="h-5 w-32 mb-4" />
         </div>
@@ -81,7 +89,7 @@ export function PostDetailSkeleton() {
           ))}
         </div>
       </div>
-      <div className="rounded-xl border border-white/[0.06] bg-surface-card">
+      <div className="rounded-md border border-ink-4 bg-ink-2">
         <div className="p-6">
           <Skeleton className="h-5 w-20 mb-4" />
         </div>
@@ -91,7 +99,7 @@ export function PostDetailSkeleton() {
           <Skeleton className="h-4 w-3/4" />
         </div>
       </div>
-      <div className="rounded-xl border border-white/[0.06] bg-surface-card">
+      <div className="rounded-md border border-ink-4 bg-ink-2">
         <div className="p-6">
           <Skeleton className="h-5 w-40 mb-4" />
         </div>
