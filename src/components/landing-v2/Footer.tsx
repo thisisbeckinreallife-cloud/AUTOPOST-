@@ -65,7 +65,7 @@ function FooterCol({
           <li key={link.href}>
             <Link
               href={link.href}
-              className="text-np-body text-ink-7 hover:text-ink-9 transition-colors"
+              className="text-np-body text-ink-7 hover:text-ink-9 focus-visible:text-ink-9 transition-colors"
             >
               {link.label}
             </Link>
