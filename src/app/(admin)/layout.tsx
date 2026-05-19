@@ -44,10 +44,29 @@ async function checkOnboarding(adminUserId: string) {
       select: { onboardingCompleted: true, onboardingStep: true },
     });
     if (!user) return;
-    if (!user.onboardingCompleted) {
-      const step = Math.max(1, Math.min(5, user.onboardingStep || 1));
-      redirect(`/onboarding/${step}`);
+    if (user.onboardingCompleted) return; // ya completado, seguir
+
+    // Defensa contra cuentas legacy / wizard que nunca llamó a
+    // /api/onboarding/complete: si la instancia YA tiene negocios, el
+    // onboarding evidentemente se hizo (single-tenant — los negocios son
+    // compartidos). Forzarlo de nuevo al entrar desde otro dispositivo es
+    // un bug. Auto-completamos para que no vuelva a ocurrir y dejamos pasar.
+    const businessCount = await db.business.count();
+    if (businessCount > 0) {
+      await db.adminUser
+        .update({
+          where: { id: adminUserId },
+          data: { onboardingCompleted: true },
+        })
+        .catch(() => {
+          /* si falla el update no bloqueamos: el usuario igual pasa */
+        });
+      return;
     }
+
+    // Cuenta nueva sin negocios → sí tiene sentido el wizard.
+    const step = Math.max(1, Math.min(5, user.onboardingStep || 1));
+    redirect(`/onboarding/${step}`);
   } catch (err) {
     // Re-lanzar redirect (Next.js usa una excepción especial)
     if (err instanceof Error && err.message.includes("NEXT_REDIRECT")) throw err;
