@@ -50,11 +50,33 @@ export default async function BusinessLayout({
   if (!business) notFound();
 
   const igConnected = business.metaConnection?.status === "ACTIVE";
-  const tokenExpiringSoon =
+  let tokenExpiringSoon =
     igConnected &&
     business.metaConnection?.tokenExpiresAt != null &&
     new Date(business.metaConnection.tokenExpiresAt).getTime() <
       Date.now() + 7 * 24 * 60 * 60 * 1000;
+
+  // Auto-refresh oportunista: si el usuario abre el panel y el token está
+  // cerca de expirar (<30d), intentamos renovarlo silenciosamente antes
+  // de renderizar. Bloquea ~500ms-1s en el peor caso. Si funciona, el
+  // usuario nunca ve el aviso "Renovar token". Si Meta rechaza el refresh
+  // (token totalmente caducado, app revoked), la connection se marca
+  // TOKEN_EXPIRED y el botón "Renovar" sigue ahí para reconexión manual.
+  if (igConnected && business.metaConnection) {
+    const { refreshMetaToken, shouldRefresh } = await import("@/lib/social/meta/refresh");
+    const fullConn = await db.metaConnection.findUnique({
+      where: { businessId: business.id },
+    });
+    if (fullConn && shouldRefresh(fullConn)) {
+      const result = await refreshMetaToken(fullConn);
+      if (result.refreshed && result.expiresAt) {
+        // El usuario verá la página con el token renovado.
+        business.metaConnection.tokenExpiresAt = result.expiresAt;
+        tokenExpiringSoon =
+          new Date(result.expiresAt).getTime() < Date.now() + 7 * 24 * 60 * 60 * 1000;
+      }
+    }
+  }
   const switcherOptions = allBusinesses.map((b) => ({
     id: b.id,
     name: b.name,

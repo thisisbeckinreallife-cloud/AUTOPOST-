@@ -526,6 +526,51 @@ setTimeout(() => {
   setInterval(cleanupStaleChats, CHAT_CLEANUP_INTERVAL_MS);
 }, 5 * 60 * 1000);
 
+// ─────────────────────────────────────────
+// AUTO-REFRESH META TOKENS — corre cada 12h sin servicio externo.
+// Renueva proactivamente cualquier MetaConnection con tokenExpiresAt < 30
+// días para que el usuario nunca tenga que reconectar manualmente.
+// Si el token ya caducó del todo, el refresh falla y la connection se
+// marca TOKEN_EXPIRED → la UI lo muestra y solo entonces hay que OAuth.
+// ─────────────────────────────────────────
+const META_REFRESH_INTERVAL_MS = 12 * 60 * 60 * 1000; // 12 horas
+
+async function refreshAllMetaTokens(): Promise<void> {
+  try {
+    const candidates = await db.metaConnection.findMany({
+      where: {
+        status: "ACTIVE",
+        tokenExpiresAt: {
+          not: null,
+          lt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        },
+      },
+    });
+    if (candidates.length === 0) return;
+
+    let refreshed = 0;
+    let failed = 0;
+    for (const conn of candidates) {
+      if (!shouldRefreshMeta(conn)) continue;
+      const result = await refreshMetaToken(conn);
+      if (result.refreshed) refreshed += 1;
+      else failed += 1;
+    }
+    console.log(
+      `[MetaRefresh] ${refreshed} tokens renovados · ${failed} fallaron · ${candidates.length} candidatos`,
+    );
+  } catch (err) {
+    console.error("[MetaRefresh] error:", err);
+  }
+}
+
+// Primera pasada a los 2 min de arrancar el worker (deja que el deploy
+// se estabilice). Después cada 12h en bucle perpetuo.
+setTimeout(() => {
+  refreshAllMetaTokens();
+  setInterval(refreshAllMetaTokens, META_REFRESH_INTERVAL_MS);
+}, 2 * 60 * 1000);
+
 // Graceful shutdown — only register if running standalone (not inside Next.js)
 const isStandalone = !process.env.NEXT_RUNTIME;
 if (isStandalone) {
