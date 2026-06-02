@@ -220,6 +220,7 @@ export default async function SettingsPage({
             label="Instagram"
             icon={<Instagram className="h-5 w-5" />}
             connected={igConnected}
+            expiringSoon={!!tokenExpiringSoon}
             detail={
               igConnected
                 ? `@${meta?.igUsername}${tokenExpiringSoon ? " · token expira pronto" : ""}`
@@ -231,6 +232,7 @@ export default async function SettingsPage({
             label="Facebook"
             icon={<Facebook className="h-5 w-5" />}
             connected={!!meta?.fbPageName}
+            expiringSoon={!!tokenExpiringSoon}
             detail={meta?.fbPageName ?? "Se conecta junto con Instagram"}
             connectHref={`/businesses/${params.slug}/connect`}
           />
@@ -316,22 +318,27 @@ function LegacyChannelCard({
   label,
   icon,
   connected,
+  expiringSoon = false,
   detail,
   connectHref,
 }: {
   label: string;
   icon: React.ReactNode;
   connected: boolean;
+  expiringSoon?: boolean;
   detail: string;
   connectHref: string;
 }) {
+  const needsAttention = connected && expiringSoon;
   return (
     <div
       style={{
         background: "var(--ap-paper-2)",
-        border: connected
-          ? "1px solid #6B7A2E"
-          : "1px solid var(--ap-line-2)",
+        border: needsAttention
+          ? "1px solid var(--ap-stamp)"
+          : connected
+            ? "1px solid #6B7A2E"
+            : "1px solid var(--ap-line-2)",
         padding: "14px 16px",
         display: "flex",
         alignItems: "center",
@@ -362,14 +369,32 @@ function LegacyChannelCard({
           style={{
             margin: "2px 0 0",
             fontSize: 10,
-            color: connected ? "#6B7A2E" : "var(--ap-ink-3)",
+            color: needsAttention
+              ? "var(--ap-stamp)"
+              : connected
+                ? "#6B7A2E"
+                : "var(--ap-ink-3)",
             letterSpacing: "0.1em",
           }}
         >
           {detail}
         </p>
       </div>
-      {connected ? (
+      {needsAttention ? (
+        <a
+          href={connectHref}
+          className="ap-btn ap-btn--stamp"
+          style={{
+            padding: "8px 12px",
+            fontSize: 10,
+            fontFamily: "var(--ap-font-mono)",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+          }}
+        >
+          Reconectar
+        </a>
+      ) : connected ? (
         <span
           className="ap-mono"
           style={{
