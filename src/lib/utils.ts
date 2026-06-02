@@ -6,7 +6,10 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatDate(date: Date | string): string {
-  return new Intl.DateTimeFormat("en-GB", {
+  // es-ES, sin sufijo de zona horaria. "3 jun 2026, 12:00" — natural y claro
+  // para usuarios españoles. Si en el futuro queremos UI en EN, pasaremos
+  // el locale como argumento desde el caller.
+  return new Intl.DateTimeFormat("es-ES", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -16,14 +19,31 @@ export function formatDate(date: Date | string): string {
 }
 
 export function formatDateInTz(date: Date | string, tz: string): string {
-  return new Intl.DateTimeFormat("en-GB", {
+  // Mismo formato que formatDate pero forzando una zona horaria concreta
+  // (timezone del business, p.ej. "Europe/Madrid"). NO añadimos
+  // timeZoneName porque "CEST"/"CET" confunde al usuario final — la
+  // hora ya está en su zona porque el business.timezone lo define.
+  return new Intl.DateTimeFormat("es-ES", {
     year: "numeric",
     month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
     timeZone: tz,
-    timeZoneName: "short",
+  }).format(new Date(date));
+}
+
+/**
+ * Solo la hora (HH:MM) en la timezone del business. Útil en celdas de
+ * calendario donde el día ya se sabe por la columna y no hay espacio
+ * para fecha completa.
+ */
+export function formatTimeInTz(date: Date | string, tz: string): string {
+  return new Intl.DateTimeFormat("es-ES", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: tz,
+    hour12: false,
   }).format(new Date(date));
 }
 
