@@ -31,7 +31,7 @@ export default async function BusinessLayout({
       where: { slug: params.slug },
       include: {
         metaConnection: {
-          select: { igUsername: true, status: true },
+          select: { igUsername: true, status: true, tokenExpiresAt: true },
         },
       },
     }),
@@ -50,6 +50,11 @@ export default async function BusinessLayout({
   if (!business) notFound();
 
   const igConnected = business.metaConnection?.status === "ACTIVE";
+  const tokenExpiringSoon =
+    igConnected &&
+    business.metaConnection?.tokenExpiresAt != null &&
+    new Date(business.metaConnection.tokenExpiresAt).getTime() <
+      Date.now() + 7 * 24 * 60 * 60 * 1000;
   const switcherOptions = allBusinesses.map((b) => ({
     id: b.id,
     name: b.name,
@@ -97,18 +102,35 @@ export default async function BusinessLayout({
               <p
                 style={{
                   fontSize: 14,
-                  color: "var(--ap-ink-3)",
+                  color: tokenExpiringSoon ? "var(--ap-stamp)" : "var(--ap-ink-3)",
                   fontStyle: "italic",
                   margin: "8px 0 0",
                 }}
               >
-                {igConnected
-                  ? `@${business.metaConnection?.igUsername} · Instagram conectado`
-                  : "Instagram no conectado"}
+                {!igConnected
+                  ? "Instagram no conectado"
+                  : tokenExpiringSoon
+                    ? `@${business.metaConnection?.igUsername} · token expira pronto, reconecta para seguir publicando`
+                    : `@${business.metaConnection?.igUsername} · Instagram conectado`}
               </p>
             </div>
 
             {igConnected && (
+              tokenExpiringSoon ? (
+                <a
+                  href={`/businesses/${params.slug}/connect`}
+                  className="ap-btn ap-btn--stamp"
+                  style={{
+                    fontSize: 10,
+                    fontFamily: "var(--ap-font-mono)",
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    padding: "5px 10px",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  ⚠ Renovar token</a>
+              ) : (
               <span
                 className="ap-mono"
                 style={{
@@ -123,6 +145,7 @@ export default async function BusinessLayout({
               >
                 ✓ Activo
               </span>
+              )
             )}
           </div>
 

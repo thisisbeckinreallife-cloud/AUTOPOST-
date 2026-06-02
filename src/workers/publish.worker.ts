@@ -28,6 +28,7 @@ import { sendEmail, publishedEmailHtml, failedEmailHtml } from "@/lib/email";
 import { dispatchPublish, PlatformPublishError } from "@/lib/social/adapters";
 import { getValidAccessToken } from "@/lib/social/oauth/refresh";
 import { appendWatermark } from "@/lib/billing/watermark";
+import { refreshMetaToken, shouldRefresh as shouldRefreshMeta } from "@/lib/social/meta/refresh";
 
 const CONCURRENCY = parseInt(process.env.WORKER_CONCURRENCY ?? "3", 10);
 const LOCK_DURATION_MS = 5 * 60 * 1000; // 5 minutes
@@ -97,7 +98,7 @@ async function processPublishJob(job: Job<PublishJobPayload>): Promise<void> {
 
   try {
     // ─── 5. Get Meta connection ───
-    const connection = await db.metaConnection.findUnique({
+    let connection = await db.metaConnection.findUnique({
       where: { businessId },
     });
 
@@ -109,6 +110,18 @@ async function processPublishJob(job: Job<PublishJobPayload>): Promise<void> {
       throw new Error(
         `MetaConnection status is "${connection.status}". Token may be expired.`
       );
+    }
+
+    // ─── 5a. Lazy refresh del long-lived token si está cerca de expirar ───
+    // Refrescamos a <30 días para dar margen. Si falla, seguimos con el
+    // token actual: aún puede funcionar. Si está caducado de verdad, el
+    // refresh marcará TOKEN_EXPIRED y la publicación fallará abajo.
+    if (shouldRefreshMeta(connection)) {
+      const result = await refreshMetaToken(connection);
+      if (result.refreshed) {
+        // Recargar connection con el token nuevo
+        connection = await db.metaConnection.findUnique({ where: { businessId } }) ?? connection;
+      }
     }
 
     // ─── 5b. Watermark "Programado con autopost.app" si plan FREE/BASIC ───
