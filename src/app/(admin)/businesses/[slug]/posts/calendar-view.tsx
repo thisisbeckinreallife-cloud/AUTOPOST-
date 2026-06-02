@@ -1,12 +1,25 @@
+"use client";
+
+import { useState, useTransition, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { formatDateInTz } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, Film, Image as ImageIcon, Layers } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Film,
+  Image as ImageIcon,
+  Layers,
+  X,
+  Calendar as CalendarIcon,
+  Check,
+} from "lucide-react";
 
 export interface CalendarPost {
   id: string;
   postType: "IMAGE" | "CAROUSEL" | "REEL" | string;
   caption: string;
-  publishAt: Date;
+  publishAt: Date | string;
   status: string;
   firstMedia: { storageUrl: string; mimeType: string } | null;
   mediaCount: number;
@@ -18,6 +31,8 @@ const MONTH_ES = [
 ];
 
 const DAY_ES = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+const RESCHEDULABLE = new Set(["DRAFT", "VALIDATED", "READY", "SCHEDULED"]);
 
 function parseMonth(m: string | undefined): { year: number; month: number } {
   if (m && /^\d{4}-\d{2}$/.test(m)) {
@@ -36,7 +51,8 @@ function statusColor(status: string): string {
   if (status === "PUBLISHED") return "bg-emerald-500";
   if (status === "FAILED" || status === "CANCELLED") return "bg-red-500";
   if (status === "PUBLISHING") return "bg-amber-500";
-  return "bg-blue-500";
+  if (status === "VALIDATED" || status === "READY" || status === "DRAFT") return "bg-zinc-500";
+  return "bg-blue-500"; // SCHEDULED
 }
 
 function typeIcon(postType: string) {
@@ -45,8 +61,17 @@ function typeIcon(postType: string) {
   return <ImageIcon className="h-2.5 w-2.5" />;
 }
 
+/** Formato YYYY-MM-DDTHH:MM para <input type="datetime-local">. */
+function toLocalDatetimeInput(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
+    `T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  );
+}
+
 export function CalendarView({
-  posts,
+  posts: initialPosts,
   slug,
   timezone,
   monthParam,
@@ -58,23 +83,49 @@ export function CalendarView({
   monthParam: string | undefined;
   preservedQuery: string;
 }) {
+  const router = useRouter();
+  const [, startTransition] = useTransition();
+
+  // Estado local — permite update optimista antes de que el servidor confirme.
+  // Las fechas llegan como Date desde el RSC, pero se serializan a string en
+  // el cruce; las normalizamos siempre a Date local.
+  const [posts, setPosts] = useState<CalendarPost[]>(() =>
+    initialPosts.map((p) => ({ ...p, publishAt: new Date(p.publishAt) })),
+  );
+  const [editing, setEditing] = useState<CalendarPost | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOverDay, setDragOverDay] = useState<number | null>(null);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [savedFlash, setSavedFlash] = useState(false);
+
+  // Sincronizar si llega nueva data desde server (e.g. tras router.refresh()).
+  useEffect(() => {
+    setPosts(initialPosts.map((p) => ({ ...p, publishAt: new Date(p.publishAt) })));
+  }, [initialPosts]);
+
   const { year, month } = parseMonth(monthParam);
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   const daysInMonth = lastDay.getDate();
-
-  // Monday=0 ... Sunday=6
   const firstWeekday = (firstDay.getDay() + 6) % 7;
   const totalCells = Math.ceil((firstWeekday + daysInMonth) / 7) * 7;
 
-  // Filter posts in visible month
-  const postsByDay = new Map<number, CalendarPost[]>();
-  posts.forEach((p) => {
-    if (p.publishAt.getFullYear() !== year || p.publishAt.getMonth() !== month) return;
-    const day = p.publishAt.getDate();
-    if (!postsByDay.has(day)) postsByDay.set(day, []);
-    postsByDay.get(day)!.push(p);
-  });
+  const postsByDay = useMemo(() => {
+    const map = new Map<number, CalendarPost[]>();
+    for (const p of posts) {
+      const d = p.publishAt as Date;
+      if (d.getFullYear() !== year || d.getMonth() !== month) continue;
+      const day = d.getDate();
+      if (!map.has(day)) map.set(day, []);
+      map.get(day)!.push(p);
+    }
+    // Ordenar dentro del día por hora
+    for (const list of map.values()) {
+      list.sort((a, b) => (a.publishAt as Date).getTime() - (b.publishAt as Date).getTime());
+    }
+    return map;
+  }, [posts, year, month]);
 
   const prevMonth = month === 0 ? { year: year - 1, month: 11 } : { year, month: month - 1 };
   const nextMonth = month === 11 ? { year: year + 1, month: 0 } : { year, month: month + 1 };
@@ -90,10 +141,91 @@ export function CalendarView({
     return `/businesses/${slug}/posts?${params.toString()}`;
   }
 
+  async function reschedule(post: CalendarPost, newDate: Date) {
+    if (!RESCHEDULABLE.has(post.status)) {
+      setError(`No se puede reagendar un post en estado ${post.status}.`);
+      return;
+    }
+    setPending(true);
+    setError(null);
+
+    // Update optimista
+    const prevPublishAt = post.publishAt as Date;
+    setPosts((curr) =>
+      curr.map((p) => (p.id === post.id ? { ...p, publishAt: newDate } : p)),
+    );
+
+    try {
+      const res = await fetch("/api/posts/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "reschedule",
+          ids: [post.id],
+          publishAt: newDate.toISOString(),
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? `HTTP ${res.status}`);
+      }
+      setSavedFlash(true);
+      setTimeout(() => setSavedFlash(false), 1500);
+      startTransition(() => router.refresh());
+    } catch (err) {
+      // Rollback
+      setPosts((curr) =>
+        curr.map((p) => (p.id === post.id ? { ...p, publishAt: prevPublishAt } : p)),
+      );
+      setError(err instanceof Error ? err.message : "Error reagendando");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  function onDragStart(e: React.DragEvent, post: CalendarPost) {
+    if (!RESCHEDULABLE.has(post.status)) {
+      e.preventDefault();
+      return;
+    }
+    setDragId(post.id);
+    e.dataTransfer.effectAllowed = "move";
+    // En Firefox hace falta setData para que el drag funcione
+    e.dataTransfer.setData("text/plain", post.id);
+  }
+
+  function onDragEnd() {
+    setDragId(null);
+    setDragOverDay(null);
+  }
+
+  function onDayDragOver(e: React.DragEvent, day: number) {
+    if (!dragId) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverDay !== day) setDragOverDay(day);
+  }
+
+  function onDayDrop(e: React.DragEvent, day: number) {
+    e.preventDefault();
+    const id = dragId ?? e.dataTransfer.getData("text/plain");
+    if (!id) return;
+    const post = posts.find((p) => p.id === id);
+    if (!post) return;
+    const oldDate = post.publishAt as Date;
+    const newDate = new Date(oldDate);
+    newDate.setFullYear(year, month, day);
+    // Mantener la hora original al arrastrar entre días
+    setDragId(null);
+    setDragOverDay(null);
+    if (newDate.getTime() === oldDate.getTime()) return; // sin cambio
+    void reschedule(post, newDate);
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Link
             href={urlFor(prevMonth.year, prevMonth.month)}
@@ -102,7 +234,7 @@ export function CalendarView({
           >
             <ChevronLeft className="h-4 w-4" />
           </Link>
-          <h2 className="font-display text-lg font-bold text-zinc-900 tabular-nums min-w-[180px]">
+          <h2 className="text-base font-semibold text-zinc-900 min-w-[140px] text-center tabular-nums">
             {MONTH_ES[month]} {year}
           </h2>
           <Link
@@ -113,19 +245,24 @@ export function CalendarView({
             <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
-        {!isSameMonth && (
-          <Link
-            href={urlFor(today.getFullYear(), today.getMonth())}
-            className="px-3 py-1.5 rounded-md text-xs font-semibold bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
-          >
-            Hoy
-          </Link>
+        <p className="text-xs text-zinc-500">
+          Arrastra un post a otro día · clic para cambiar fecha y hora exacta
+        </p>
+        {savedFlash && (
+          <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-medium">
+            <Check className="h-3 w-3" /> Guardado
+          </span>
         )}
       </div>
 
-      {/* Grid */}
+      {error && (
+        <div role="alert" className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">
+          {error}
+        </div>
+      )}
+
       <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden">
-        <div className="grid grid-cols-7 border-b border-zinc-200 bg-zinc-50">
+        <div className="grid grid-cols-7 bg-zinc-50 border-b border-zinc-100">
           {DAY_ES.map((d) => (
             <div key={d} className="px-2 py-2 text-[10px] font-bold text-zinc-600 uppercase tracking-widest text-center">
               {d}
@@ -138,11 +275,21 @@ export function CalendarView({
             const inMonth = dayNum >= 1 && dayNum <= daysInMonth;
             const dayPosts = inMonth ? postsByDay.get(dayNum) ?? [] : [];
             const isToday = dayNum === todayDay;
+            const isDragOver = dragOverDay === dayNum && dragId !== null;
             return (
               <div
                 key={i}
-                className={`border-r border-b border-zinc-100 last:border-r-0 p-1.5 overflow-hidden ${
-                  !inMonth ? "bg-zinc-50" : isToday ? "bg-cyan-50" : ""
+                onDragOver={inMonth ? (e) => onDayDragOver(e, dayNum) : undefined}
+                onDrop={inMonth ? (e) => onDayDrop(e, dayNum) : undefined}
+                onDragLeave={() => setDragOverDay((d) => (d === dayNum ? null : d))}
+                className={`border-r border-b border-zinc-100 last:border-r-0 p-1.5 overflow-hidden transition-colors ${
+                  !inMonth
+                    ? "bg-zinc-50"
+                    : isDragOver
+                      ? "bg-cyan-100 ring-2 ring-cyan-400 ring-inset"
+                      : isToday
+                        ? "bg-cyan-50"
+                        : ""
                 }`}
               >
                 {inMonth && (
@@ -164,36 +311,51 @@ export function CalendarView({
                       )}
                     </div>
                     <div className="space-y-1">
-                      {dayPosts.slice(0, 2).map((post) => (
-                        <Link
-                          key={post.id}
-                          href={`/businesses/${slug}/posts/${post.id}`}
-                          className="group flex items-center gap-1.5 rounded-md bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 px-1 py-0.5 transition-colors overflow-hidden"
-                          title={`${post.caption.slice(0, 80)}${post.caption.length > 80 ? "…" : ""}`}
-                        >
-                          <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${statusColor(post.status)}`} />
-                          {post.firstMedia?.mimeType.startsWith("image/") && (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={post.firstMedia.storageUrl}
-                              alt=""
-                              className="h-4 w-4 shrink-0 rounded object-cover"
-                              loading="lazy"
-                            />
-                          )}
-                          {post.firstMedia?.mimeType.startsWith("video/") && (
-                            <div className="h-4 w-4 shrink-0 rounded bg-zinc-700 flex items-center justify-center">
-                              <Film className="h-2 w-2 text-white" />
-                            </div>
-                          )}
-                          {!post.firstMedia && (
-                            <span className="text-zinc-500">{typeIcon(post.postType)}</span>
-                          )}
-                          <span className="text-[10px] text-zinc-700 truncate flex-1 tabular-nums">
-                            {formatDateInTz(post.publishAt, timezone).split(" ").slice(-2).join(" ")}
-                          </span>
-                        </Link>
-                      ))}
+                      {dayPosts.slice(0, 2).map((post) => {
+                        const canDrag = RESCHEDULABLE.has(post.status);
+                        return (
+                          <button
+                            key={post.id}
+                            type="button"
+                            draggable={canDrag}
+                            onDragStart={(e) => onDragStart(e, post)}
+                            onDragEnd={onDragEnd}
+                            onClick={() => canDrag && setEditing(post)}
+                            disabled={pending}
+                            title={
+                              canDrag
+                                ? `${post.caption.slice(0, 80)}${post.caption.length > 80 ? "…" : ""}\n\nClic para editar fecha/hora · arrastra para mover de día`
+                                : `${post.status} — no editable`
+                            }
+                            className={`group w-full flex items-center gap-1.5 rounded-md bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 px-1 py-0.5 transition-colors overflow-hidden text-left ${
+                              dragId === post.id ? "opacity-30" : ""
+                            } ${!canDrag ? "cursor-not-allowed opacity-70" : "cursor-grab active:cursor-grabbing"}`}
+                          >
+                            <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${statusColor(post.status)}`} />
+                            {post.firstMedia?.mimeType.startsWith("image/") && (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={post.firstMedia.storageUrl}
+                                alt=""
+                                className="h-4 w-4 shrink-0 rounded object-cover"
+                                loading="lazy"
+                                draggable={false}
+                              />
+                            )}
+                            {post.firstMedia?.mimeType.startsWith("video/") && (
+                              <div className="h-4 w-4 shrink-0 rounded bg-zinc-700 flex items-center justify-center">
+                                <Film className="h-2 w-2 text-white" />
+                              </div>
+                            )}
+                            {!post.firstMedia && (
+                              <span className="text-zinc-500">{typeIcon(post.postType)}</span>
+                            )}
+                            <span className="text-[10px] text-zinc-700 truncate flex-1 tabular-nums">
+                              {formatDateInTz(post.publishAt as Date, timezone).split(" ").slice(-2).join(" ")}
+                            </span>
+                          </button>
+                        );
+                      })}
                       {dayPosts.length > 2 && (
                         <Link
                           href={`/businesses/${slug}/posts?view=list&date=${year}-${String(month + 1).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`}
@@ -214,6 +376,9 @@ export function CalendarView({
       {/* Legend */}
       <div className="flex flex-wrap items-center gap-4 text-[11px] text-zinc-600">
         <span className="inline-flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-zinc-500" /> Borrador / Validado
+        </span>
+        <span className="inline-flex items-center gap-1.5">
           <span className="h-1.5 w-1.5 rounded-full bg-blue-500" /> Programado
         </span>
         <span className="inline-flex items-center gap-1.5">
@@ -226,6 +391,152 @@ export function CalendarView({
           <span className="h-1.5 w-1.5 rounded-full bg-red-500" /> Fallido / Cancelado
         </span>
       </div>
+
+      {editing && (
+        <EditPostModal
+          post={editing}
+          slug={slug}
+          timezone={timezone}
+          onClose={() => setEditing(null)}
+          onSave={async (newDate) => {
+            await reschedule(editing, newDate);
+            setEditing(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function EditPostModal({
+  post,
+  slug,
+  timezone,
+  onClose,
+  onSave,
+}: {
+  post: CalendarPost;
+  slug: string;
+  timezone: string;
+  onClose: () => void;
+  onSave: (newDate: Date) => Promise<void>;
+}) {
+  const initial = post.publishAt as Date;
+  const [value, setValue] = useState<string>(toLocalDatetimeInput(initial));
+  const [saving, setSaving] = useState(false);
+
+  // Esc cierra
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (saving) return;
+    const newDate = new Date(value);
+    if (isNaN(newDate.getTime())) return;
+    setSaving(true);
+    try {
+      await onSave(newDate);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const previewLabel = (() => {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? "—" : formatDateInTz(d, timezone);
+  })();
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="edit-title"
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+    >
+      <button
+        type="button"
+        aria-label="Cerrar"
+        onClick={onClose}
+        className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"
+      />
+      <form
+        onSubmit={handleSave}
+        className="relative z-10 w-full max-w-md bg-white border border-zinc-200 rounded-xl shadow-2xl p-6"
+      >
+        <div className="flex items-start justify-between mb-4 gap-4">
+          <div>
+            <h3 id="edit-title" className="text-lg font-semibold text-zinc-900 tracking-tight">
+              Reagendar publicación
+            </h3>
+            <p className="text-xs text-zinc-500 mt-1">
+              {post.postType} · {post.mediaCount} archivo{post.mediaCount === 1 ? "" : "s"}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="h-8 w-8 inline-flex items-center justify-center rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {post.caption && (
+          <p className="text-sm text-zinc-700 bg-zinc-50 border border-zinc-200 rounded-md px-3 py-2 mb-4 line-clamp-3">
+            {post.caption}
+          </p>
+        )}
+
+        <label htmlFor="publish-at" className="block text-sm font-medium text-zinc-800 mb-2">
+          <CalendarIcon className="h-4 w-4 inline mr-1.5 -mt-0.5" />
+          Fecha y hora de publicación
+        </label>
+        <input
+          id="publish-at"
+          type="datetime-local"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          className="w-full h-11 px-3 rounded-md border border-zinc-300 bg-white text-sm text-zinc-900 focus-visible:outline-none focus-visible:border-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-200"
+          required
+        />
+        <p className="text-xs text-zinc-500 mt-2">
+          Vista previa: <span className="font-medium text-zinc-700">{previewLabel}</span>
+        </p>
+
+        <div className="flex gap-2 justify-end mt-6">
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex items-center justify-center h-10 px-4 rounded-md border border-zinc-300 text-zinc-800 font-medium text-sm hover:bg-zinc-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="inline-flex items-center justify-center h-10 px-4 rounded-md bg-cyan-700 text-white font-medium text-sm hover:bg-cyan-800 disabled:opacity-50"
+          >
+            {saving ? "Guardando…" : "Guardar fecha"}
+          </button>
+        </div>
+
+        <p className="text-[11px] text-zinc-500 mt-4">
+          <Link href={`/businesses/${slug}/posts/${post.id}`} className="underline hover:text-zinc-900">
+            Ver detalle del post →
+          </Link>
+        </p>
+      </form>
     </div>
   );
 }
