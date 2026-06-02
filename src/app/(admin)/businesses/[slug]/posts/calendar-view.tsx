@@ -13,6 +13,7 @@ import {
   X,
   Calendar as CalendarIcon,
   Check,
+  Trash2,
 } from "lucide-react";
 
 export interface CalendarPost {
@@ -102,6 +103,8 @@ export function CalendarView({
   const [savedFlash, setSavedFlash] = useState(false);
   const [activating, setActivating] = useState(false);
   const [activateResult, setActivateResult] = useState<{ scheduled: number; failed: number } | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelConfirm, setCancelConfirm] = useState(false);
 
   // Sincronizar si llega nueva data desde server (e.g. tras router.refresh()).
   useEffect(() => {
@@ -155,6 +158,48 @@ export function CalendarView({
     () => Array.from(new Set(validatedPosts.map((p) => p.batchId))),
     [validatedPosts],
   );
+
+  // Cancelables = todo lo que está en cola pero aún no publicado.
+  // Si el user trae captions mal o quiere empezar de cero, esto barre la mesa.
+  const cancellablePosts = useMemo(
+    () =>
+      posts.filter((p) =>
+        ["DRAFT", "VALIDATED", "READY", "SCHEDULED"].includes(p.status),
+      ),
+    [posts],
+  );
+
+  async function cancelAll() {
+    if (cancelling || cancellablePosts.length === 0) return;
+    setCancelling(true);
+    setError(null);
+    setCancelConfirm(false);
+
+    try {
+      const ids = cancellablePosts.map((p) => p.id);
+      const res = await fetch("/api/posts/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "cancel", ids }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+
+      // Optimistic: marca todos como CANCELLED localmente
+      setPosts((curr) =>
+        curr.map((p) =>
+          ids.includes(p.id) ? { ...p, status: "CANCELLED" } : p,
+        ),
+      );
+      setSavedFlash(true);
+      setTimeout(() => setSavedFlash(false), 2000);
+      startTransition(() => router.refresh());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error cancelando");
+    } finally {
+      setCancelling(false);
+    }
+  }
 
   async function activateAll() {
     if (activating || validatedBatchIds.length === 0) return;
@@ -305,11 +350,24 @@ export function CalendarView({
             <Check className="h-3 w-3" /> Guardado
           </span>
         )}
+        {cancellablePosts.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setCancelConfirm(true)}
+            disabled={cancelling || activating}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-md border border-red-300 text-red-700 font-medium text-sm hover:bg-red-50 disabled:opacity-50 transition-all"
+          >
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
+            {cancelling
+              ? "Cancelando…"
+              : `Cancelar ${cancellablePosts.length} ${cancellablePosts.length === 1 ? "post" : "posts"}`}
+          </button>
+        )}
         {validatedPosts.length > 0 && (
           <button
             type="button"
             onClick={activateAll}
-            disabled={activating}
+            disabled={activating || cancelling}
             className="inline-flex items-center gap-2 h-10 px-4 rounded-md bg-emerald-700 text-white font-medium text-sm shadow-md hover:bg-emerald-800 disabled:opacity-50 transition-all"
           >
             <Check className="h-4 w-4" aria-hidden="true" />
@@ -319,6 +377,38 @@ export function CalendarView({
           </button>
         )}
       </div>
+
+      {cancelConfirm && (
+        <div
+          role="alertdialog"
+          aria-labelledby="cancel-confirm-title"
+          className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 flex items-center justify-between flex-wrap gap-3"
+        >
+          <div className="flex items-center gap-2 text-sm text-red-800">
+            <Trash2 className="h-4 w-4" />
+            <span id="cancel-confirm-title">
+              ¿Cancelar {cancellablePosts.length} {cancellablePosts.length === 1 ? "post" : "posts"}?
+              Se quitarán del calendario y no se publicarán.
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setCancelConfirm(false)}
+              className="inline-flex items-center h-9 px-3 rounded-md border border-zinc-300 text-zinc-800 font-medium text-sm hover:bg-zinc-100"
+            >
+              No
+            </button>
+            <button
+              type="button"
+              onClick={cancelAll}
+              className="inline-flex items-center h-9 px-3 rounded-md bg-red-700 text-white font-medium text-sm hover:bg-red-800"
+            >
+              Sí, cancelar todos
+            </button>
+          </div>
+        </div>
+      )}
 
       {activateResult && (
         <div
