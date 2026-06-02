@@ -85,6 +85,7 @@ export default async function PostsPage({
       caption: p.caption,
       publishAt: p.publishAt,
       status: p.status,
+      batchId: p.batchId,
       mediaCount: p._count.mediaAssets,
       firstMedia: p.mediaAssets[0]
         ? { storageUrl: p.mediaAssets[0].storageUrl, mimeType: p.mediaAssets[0].mimeType }

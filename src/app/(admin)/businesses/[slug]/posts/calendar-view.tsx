@@ -21,6 +21,8 @@ export interface CalendarPost {
   caption: string;
   publishAt: Date | string;
   status: string;
+  /** Batch al que pertenece el post. Necesario para activar via /api/batches/[id]/confirm. */
+  batchId: string;
   firstMedia: { storageUrl: string; mimeType: string } | null;
   mediaCount: number;
 }
@@ -98,6 +100,8 @@ export function CalendarView({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState(false);
+  const [activating, setActivating] = useState(false);
+  const [activateResult, setActivateResult] = useState<{ scheduled: number; failed: number } | null>(null);
 
   // Sincronizar si llega nueva data desde server (e.g. tras router.refresh()).
   useEffect(() => {
@@ -139,6 +143,54 @@ export function CalendarView({
     params.set("view", "calendar");
     params.set("month", fmtMonth(y, m));
     return `/businesses/${slug}/posts?${params.toString()}`;
+  }
+
+  // Posts en estado VALIDATED/READY (= borradores listos pero no programados).
+  // Estos son los que el botón "Activar" pasa a SCHEDULED + encola.
+  const validatedPosts = useMemo(
+    () => posts.filter((p) => p.status === "VALIDATED" || p.status === "READY"),
+    [posts],
+  );
+  const validatedBatchIds = useMemo(
+    () => Array.from(new Set(validatedPosts.map((p) => p.batchId))),
+    [validatedPosts],
+  );
+
+  async function activateAll() {
+    if (activating || validatedBatchIds.length === 0) return;
+    setActivating(true);
+    setError(null);
+    setActivateResult(null);
+
+    let totalScheduled = 0;
+    let totalFailed = 0;
+    const errors: string[] = [];
+
+    // Confirmar cada batch en serie. /api/batches/[id]/confirm reusa la
+    // misma lógica que el botón "Activar" del detalle del batch.
+    for (const batchId of validatedBatchIds) {
+      try {
+        const res = await fetch(`/api/batches/${batchId}/confirm`, { method: "POST" });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          errors.push(json.error ?? `Batch ${batchId.slice(0, 8)}: HTTP ${res.status}`);
+          continue;
+        }
+        const data = json.data ?? json;
+        totalScheduled += data.scheduled ?? 0;
+        totalFailed += data.failed ?? 0;
+      } catch (err) {
+        errors.push(err instanceof Error ? err.message : "Error de red");
+      }
+    }
+
+    setActivating(false);
+    setActivateResult({ scheduled: totalScheduled, failed: totalFailed });
+    if (errors.length > 0) setError(errors.join(" · "));
+
+    // Refrescar para que los posts pasen visualmente a SCHEDULED.
+    startTransition(() => router.refresh());
+    setTimeout(() => setActivateResult(null), 5000);
   }
 
   async function reschedule(post: CalendarPost, newDate: Date) {
@@ -245,7 +297,7 @@ export function CalendarView({
             <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-zinc-500 flex-1 min-w-[200px]">
           Arrastra un post a otro día · clic para cambiar fecha y hora exacta
         </p>
         {savedFlash && (
@@ -253,7 +305,31 @@ export function CalendarView({
             <Check className="h-3 w-3" /> Guardado
           </span>
         )}
+        {validatedPosts.length > 0 && (
+          <button
+            type="button"
+            onClick={activateAll}
+            disabled={activating}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-md bg-emerald-700 text-white font-medium text-sm shadow-md hover:bg-emerald-800 disabled:opacity-50 transition-all"
+          >
+            <Check className="h-4 w-4" aria-hidden="true" />
+            {activating
+              ? "Activando…"
+              : `Activar ${validatedPosts.length} ${validatedPosts.length === 1 ? "post" : "posts"}`}
+          </button>
+        )}
       </div>
+
+      {activateResult && (
+        <div
+          role="status"
+          className="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700 flex items-center gap-2 animate-fade-in"
+        >
+          <Check className="h-4 w-4" />
+          {activateResult.scheduled} publicaciones programadas correctamente
+          {activateResult.failed > 0 && ` · ${activateResult.failed} fallaron`}
+        </div>
+      )}
 
       {error && (
         <div role="alert" className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">
