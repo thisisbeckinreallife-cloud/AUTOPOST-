@@ -3,7 +3,7 @@
 import { useState, useTransition, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { formatDateInTz } from "@/lib/utils";
+import { formatDateInTz, formatTimeInTz } from "@/lib/utils";
 import {
   ChevronLeft,
   ChevronRight,
@@ -427,7 +427,7 @@ export function CalendarView({
                               <span className="text-zinc-500">{typeIcon(post.postType)}</span>
                             )}
                             <span className="text-[10px] text-zinc-700 truncate flex-1 tabular-nums">
-                              {formatDateInTz(post.publishAt as Date, timezone).split(" ").slice(-2).join(" ")}
+                              {formatTimeInTz(post.publishAt as Date, timezone)}
                             </span>
                           </button>
                         );
