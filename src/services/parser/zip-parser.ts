@@ -231,11 +231,51 @@ function discoverBuckets(zip: JSZip): PostBucket[] {
   const folderBuckets = new Map<string, PostBucket>();
   const rootFiles: Array<{ basename: string; entry: JSZip.JSZipObject }> = [];
 
+  // ── Detectar y descartar carpeta-wrapper raíz ────────────────────────────
+  // Muchos ZIPs (sobre todo de macOS al comprimir una carpeta) tienen
+  // forma "proyecto/01/...", "proyecto/02/...". Si TODOS los archivos
+  // no-ignorados comparten el mismo prefijo, tratamos ese prefijo como
+  // wrapper y descendemos. Repetir hasta encontrar diversidad.
+  //
+  // Sin este strip, "proyecto/01..20/foo.png" agruparía 20 carpetas
+  // en UN solo bucket "proyecto" → un único post detectado en vez de 20.
+  let stripPrefix = "";
+  {
+    const nonIgnoredPaths: string[] = [];
+    zip.forEach((relativePath, file) => {
+      if (file.dir) return;
+      if (isIgnored(relativePath)) return;
+      nonIgnoredPaths.push(relativePath);
+    });
+
+    while (nonIgnoredPaths.length > 0) {
+      const firstSegments = new Set<string>();
+      let anyAtRoot = false;
+      for (const p of nonIgnoredPaths) {
+        const parts = p.slice(stripPrefix.length).split("/").filter(Boolean);
+        if (parts.length === 1) {
+          anyAtRoot = true;
+          break;
+        }
+        firstSegments.add(parts[0]);
+      }
+      // Si hay algún archivo a nivel raíz (post-strip) o más de 1 prefijo
+      // distinto → no se descarta más.
+      if (anyAtRoot || firstSegments.size !== 1) break;
+      stripPrefix += `${[...firstSegments][0]}/`;
+    }
+  }
+
   zip.forEach((relativePath, file) => {
     if (file.dir) return;
     if (isIgnored(relativePath)) return;
 
-    const parts = relativePath.split("/").filter(Boolean);
+    // Aplicar el strip del wrapper raíz si lo hay
+    const effectivePath =
+      stripPrefix && relativePath.startsWith(stripPrefix)
+        ? relativePath.slice(stripPrefix.length)
+        : relativePath;
+    const parts = effectivePath.split("/").filter(Boolean);
 
     if (parts.length === 1) {
       // Root-level file
@@ -366,14 +406,16 @@ async function parseBucket(
     return { error: "No valid media files found after filtering" };
   }
 
-  // ── Parse optional caption.txt ───────────────────────────────────────────
+  // ── Parse optional caption.txt o caption.md ──────────────────────────────
+  // Aceptamos ambas extensiones. .md se trata como texto plano (Markdown
+  // ligero es OK en Instagram, los símbolos se ven raw pero no rompen).
 
   let caption = "";
-  const captionEntry = files.get("caption.txt");
+  const captionEntry = files.get("caption.txt") ?? files.get("caption.md");
   if (captionEntry) {
     caption = (await captionEntry.async("string")).trim();
   } else {
-    warnings.push("No caption.txt found – caption left empty");
+    warnings.push("No caption.txt/caption.md found – caption left empty");
   }
 
   // ── Parse optional meta.json or generate defaults ────────────────────────

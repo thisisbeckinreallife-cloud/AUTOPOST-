@@ -70,17 +70,20 @@ export async function POST(request: NextRequest) {
 
     const fileHash = hashSHA256(zipBuffer);
 
-    // Prevent reprocessing the same ZIP
+    // Política: NO bloqueamos re-uploads del mismo ZIP. Antes devolvíamos
+    // 409 Conflict si businessId+fileHash existía — útil contra subidas
+    // duplicadas accidentales, pero molesto cuando el usuario quiere
+    // re-procesar tras un fix del parser o cambios en su contenido.
+    // Cada upload crea un batch independiente con su propio id; el storage
+    // S3 maneja la duplicación sin problema.
     const existingBatch = await db.uploadBatch.findFirst({
       where: { businessId: business.id, fileHash },
+      select: { id: true },
+      orderBy: { createdAt: "desc" },
     });
     if (existingBatch) {
-      return NextResponse.json(
-        {
-          error: "Este ZIP ya fue subido anteriormente.",
-          data: { batchId: existingBatch.id, status: existingBatch.status },
-        },
-        { status: 409 }
+      console.log(
+        `[Batches] Re-upload del mismo ZIP (hash ${fileHash.slice(0, 12)}…) — batch previo ${existingBatch.id}, creando nuevo`,
       );
     }
 
