@@ -167,29 +167,107 @@ export const analyzeUploadedBatchHandler: ToolHandler<
       mediaCount: number;
       captionStart: string;
     }>;
+    _meta?: {
+      batchStatus: string;
+      stillProcessing: boolean;
+      message: string;
+    };
   }
 > = async (input, ctx) => {
-  const batch = await db.uploadBatch.findFirst({
-    where: { id: input.batchId, businessId: ctx.businessId },
-    include: {
-      postDrafts: {
-        where: { status: { in: ["DRAFT", "VALIDATED", "READY"] } },
-        orderBy: { sourceFolderName: "asc" },
-        select: {
-          sourceFolderName: true,
-          postType: true,
-          caption: true,
-          publishAt: true,
-          _count: { select: { mediaAssets: true } },
+  // El parsing es asíncrono: tras subir el ZIP, el batch pasa por
+  // UPLOADED → PARSING → PARSED en 5-15s. Si esta tool corre demasiado
+  // pronto, no hay PostDraft todavía y la IA reportaría "0 posts".
+  // Hacemos polling hasta 30s (15 intentos × 2s) esperando PARSED o
+  // VALIDATION_FAILED. Si tras el timeout sigue UPLOADED/PARSING, devolvemos
+  // estado claro para que la IA escriba "está procesando, dame un momento".
+  const POLL_INTERVAL_MS = 2000;
+  const POLL_MAX_ATTEMPTS = 15;
+
+  type BatchWithDrafts = NonNullable<
+    Awaited<ReturnType<typeof loadBatch>>
+  >;
+
+  async function loadBatch() {
+    return db.uploadBatch.findFirst({
+      where: { id: input.batchId, businessId: ctx.businessId },
+      include: {
+        postDrafts: {
+          where: { status: { notIn: ["CANCELLED", "FAILED"] } },
+          orderBy: { sourceFolderName: "asc" },
+          select: {
+            sourceFolderName: true,
+            postType: true,
+            caption: true,
+            publishAt: true,
+            _count: { select: { mediaAssets: true } },
+          },
         },
       },
-    },
-  });
+    });
+  }
+
+  let batch: BatchWithDrafts | null = await loadBatch();
 
   if (!batch) {
     throw new Error(
       `Batch ${input.batchId} no encontrado o pertenece a otro negocio`,
     );
+  }
+
+  // Si está en UPLOADED o PARSING, esperamos a que termine
+  let attempts = 0;
+  while (
+    (batch.status === "UPLOADED" || batch.status === "PARSING") &&
+    attempts < POLL_MAX_ATTEMPTS
+  ) {
+    await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+    attempts++;
+    batch = await loadBatch();
+    if (!batch) {
+      throw new Error(`Batch ${input.batchId} desapareció durante el polling`);
+    }
+  }
+
+  if (batch.status === "UPLOADED" || batch.status === "PARSING") {
+    // Aún no terminó tras 30s → muy raro, devolvemos estado para que la IA
+    // avise al user con calma en vez de alucinar.
+    return {
+      batchId: batch.id,
+      totalPosts: 0,
+      distribution: { IMAGE: 0, CAROUSEL: 0, REEL: 0 },
+      withoutCaption: 0,
+      withWarnings: 0,
+      parserDateRange: { earliest: null, latest: null, note: "" },
+      captionsPreview: [],
+      _meta: {
+        batchStatus: batch.status,
+        stillProcessing: true,
+        message:
+          "El ZIP todavía se está procesando. Espera 30-60s y vuelve a pedir el análisis (la IA puede reintentar llamando analyze_uploaded_batch otra vez).",
+      },
+    };
+  }
+
+  if (batch.status === "VALIDATION_FAILED" || batch.postDrafts.length === 0) {
+    return {
+      batchId: batch.id,
+      totalPosts: 0,
+      distribution: { IMAGE: 0, CAROUSEL: 0, REEL: 0 },
+      withoutCaption: 0,
+      withWarnings: Array.isArray(batch.parseWarnings)
+        ? batch.parseWarnings.length
+        : 0,
+      parserDateRange: { earliest: null, latest: null, note: "" },
+      captionsPreview: [],
+      _meta: {
+        batchStatus: batch.status,
+        stillProcessing: false,
+        message:
+          batch.status === "VALIDATION_FAILED"
+            ? "El parser no pudo procesar el ZIP. Revisa parseErrors del batch para detalles."
+            : "El ZIP se procesó pero no contiene posts válidos. Revisa la estructura de carpetas.",
+      },
+    };
   }
 
   const distribution = { IMAGE: 0, CAROUSEL: 0, REEL: 0 };

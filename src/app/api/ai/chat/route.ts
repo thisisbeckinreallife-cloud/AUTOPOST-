@@ -504,6 +504,8 @@ function buildSystemPrompt(
     "      'He detectado N posts: X carruseles, Y imágenes, Z reels. <Comentario sobre captions o problemas>. Primer caption: \"...\".' ",
     "      Termina con: '¿Cuándo empezamos a publicar?'",
     "  → No llames más tools en este turno. Solo presenta lo detectado.",
+    "  → CRÍTICO: Si la respuesta de analyze_uploaded_batch incluye `_meta.stillProcessing: true`, NO digas '¿estás seguro del ID?' ni listes otros batches. El ZIP todavía está procesándose (asíncrono). Escribe textualmente algo como: 'El ZIP está terminando de procesarse — espera 30-60s y vuelvo a mirarlo'. Después vuelve a llamar a analyze_uploaded_batch(batchId) con el MISMO id que tienes. No inventes otros IDs.",
+    "  → Si `_meta.stillProcessing: false` y `totalPosts: 0`, el ZIP terminó pero no tiene posts válidos: explica al user que la estructura del ZIP no se reconoció y pídele que revise (no listes batches viejos, no asumas que el ID está mal).",
     "",
     "TURN 2 (user te da fecha): puedes pedir aclaración si le falta algo crítico (postsPerDay, horas). Idealmente conviértelo todo en 1-2 preguntas combinadas, no 4 turnos seguidos.",
     "",
