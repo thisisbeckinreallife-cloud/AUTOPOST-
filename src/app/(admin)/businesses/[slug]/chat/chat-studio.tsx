@@ -14,8 +14,9 @@
  * Auto-scroll al fondo cuando llegan deltas.
  */
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
-import { Paperclip, Loader2, Check } from "lucide-react";
+import { Paperclip, Loader2, Check, CalendarCheck, ExternalLink } from "lucide-react";
 import { CalendarPreview, type SchedulePost } from "@/components/admin/CalendarPreview";
 
 interface Props {
@@ -45,11 +46,48 @@ const VALID_TOOL_NAMES = new Set([
   "update_brand_profile",
   "analyze_format_compatibility",
   "regroup_batch_with_ai",
+  // Asistente conversacional (flow nuevo post-upload)
+  "analyze_uploaded_batch",
+  "propose_schedule",
+  "apply_schedule",
   // legacy / planned
   "suggest_caption",
   "suggest_hashtags",
   "confirm_schedule",
 ]);
+
+/**
+ * Una assignment concreta tal cual la devuelve `propose_schedule`.
+ * Mantengo el shape acotado en el cliente para evitar tipos `any`.
+ */
+interface ScheduleAssignment {
+  postId: string;
+  sourceFolderName: string;
+  postType: string;
+  publishAt: string;
+  dayLabel: string;
+}
+
+interface ScheduleProposalData {
+  batchId: string;
+  timezone: string;
+  assignments: ScheduleAssignment[];
+  summary: {
+    totalPosts: number;
+    firstAt: string | null;
+    lastAt: string | null;
+    span: string;
+  };
+  /** true cuando ya el user pulsó "Aplicar" y la tool apply_schedule terminó */
+  applied?: boolean;
+  appliedResult?: {
+    scheduled: number;
+    failed: number;
+    activated: boolean;
+    calendarUrl: string;
+    monthLabel: string;
+  };
+}
 
 interface Message {
   id: string;
@@ -66,6 +104,8 @@ interface Message {
     batchId: string;
     approved?: boolean;
   };
+  /** Si propose_schedule devolvió assignments deterministas, lo renderizamos inline */
+  scheduleProposal?: ScheduleProposalData;
 }
 
 export function ChatStudio({
@@ -76,6 +116,12 @@ export function ChatStudio({
   brandNiche,
 }: Props) {
   const { toast } = useToast();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialBatchId = searchParams?.get("batchId") ?? null;
+  // Para evitar disparar el auto-trigger dos veces (React StrictMode dobla
+  // los efectos en dev y la hidratación puede correr en paralelo).
+  const autoTriggeredRef = useRef(false);
   const [chatId, setChatId] = useState<string | null>(null);
 
   const welcomeMessage: Message = {
@@ -118,7 +164,10 @@ export function ChatStudio({
         }
         setChatId(chat.id);
 
-        // Reconstruir mensajes desde el histórico
+        // Reconstruir mensajes desde el histórico. Además de los toolCalls,
+        // si encontramos un `propose_schedule` / `apply_schedule` con output,
+        // poblamos `scheduleProposal` para que el ScheduleProposalCard
+        // vuelva a renderizarse (o aparezca como ya aplicado).
         const restored: Message[] = chat.messages
           .filter((m: { role: string }) => m.role !== "tool")
           .map((m: {
@@ -130,6 +179,64 @@ export function ChatStudio({
             const tcRaw = m.toolCalls as
               | Array<{ name: string; input: unknown; output?: unknown }>
               | null;
+            let scheduleProposal: ScheduleProposalData | undefined;
+            if (Array.isArray(tcRaw)) {
+              const proposeCall = tcRaw.find(
+                (tc) => tc.name === "propose_schedule" && tc.output,
+              );
+              if (proposeCall) {
+                const out = proposeCall.output as {
+                  batchId?: string;
+                  timezone?: string;
+                  assignments?: ScheduleAssignment[];
+                  summary?: ScheduleProposalData["summary"];
+                };
+                if (
+                  out.batchId &&
+                  Array.isArray(out.assignments) &&
+                  out.assignments.length > 0
+                ) {
+                  scheduleProposal = {
+                    batchId: out.batchId,
+                    timezone: out.timezone ?? "UTC",
+                    assignments: out.assignments,
+                    summary: out.summary ?? {
+                      totalPosts: out.assignments.length,
+                      firstAt: out.assignments[0]?.publishAt ?? null,
+                      lastAt:
+                        out.assignments[out.assignments.length - 1]
+                          ?.publishAt ?? null,
+                      span: "",
+                    },
+                  };
+                }
+              }
+              const applyCall = tcRaw.find(
+                (tc) => tc.name === "apply_schedule" && tc.output,
+              );
+              if (applyCall && scheduleProposal) {
+                const out = applyCall.output as {
+                  scheduled?: number;
+                  failed?: number;
+                  activated?: boolean;
+                  calendarUrl?: string;
+                  monthLabel?: string;
+                };
+                if ((out.scheduled ?? 0) > 0) {
+                  scheduleProposal = {
+                    ...scheduleProposal,
+                    applied: true,
+                    appliedResult: {
+                      scheduled: out.scheduled ?? 0,
+                      failed: out.failed ?? 0,
+                      activated: out.activated ?? false,
+                      calendarUrl: out.calendarUrl ?? "",
+                      monthLabel: out.monthLabel ?? "",
+                    },
+                  };
+                }
+              }
+            }
             return {
               id: m.id,
               role: m.role as "user" | "assistant",
@@ -142,6 +249,7 @@ export function ChatStudio({
                   }))
                 : undefined,
               pending: false,
+              scheduleProposal,
             };
           });
 
@@ -166,6 +274,45 @@ export function ChatStudio({
     if (!messagesRef.current) return;
     messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
   }, [messages]);
+
+  // Auto-trigger del asistente cuando llega un `?batchId=` del upload.
+  // Solo arranca tras hidratar (para no competir con el chat-reciente) y
+  // una única vez por mount. Tras disparar, limpia el query param de la URL
+  // para que recargar la página no re-dispare.
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!initialBatchId) return;
+    if (autoTriggeredRef.current) return;
+    if (sending) return;
+    autoTriggeredRef.current = true;
+
+    const uploadMsg: Message = {
+      id: `u-auto-${Date.now()}`,
+      role: "user",
+      content: `He subido un batch nuevo (id: ${initialBatchId}). Cuéntame qué has detectado y propónme cuándo publicar.`,
+    };
+    const pendingMsg: Message = {
+      id: `a-auto-${Date.now()}`,
+      role: "assistant",
+      content: "",
+      toolCalls: [],
+      pending: true,
+    };
+    setMessages((m) => [...m, uploadMsg, pendingMsg]);
+
+    streamChat(
+      `Acabo de subir el batch "${initialBatchId}". Inicia el Flow ASISTENTE DE PROGRAMACIÓN AHORA: ` +
+        `1) Llama analyze_uploaded_batch con ese batchId. ` +
+        `2) Presenta el resumen en 3-4 frases naturales (totales, tipos, preview del primer caption). ` +
+        `3) Termina preguntando "¿cuándo empezamos a publicar?". ` +
+        `NO llames más tools en este turno.`,
+      initialBatchId,
+    );
+
+    // Limpiar el query param sin recargar
+    router.replace(`/businesses/${businessSlug}/chat`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, initialBatchId, sending]);
 
   /**
    * Sube archivos desde el chat. Acepta:
@@ -322,13 +469,12 @@ export function ChatStudio({
         setMessages((m) => [...m, uploadMsg, pendingMsg]);
 
         await streamChat(
-          `He subido un ZIP nuevo. batchId: "${presignData.batchId}". Por favor sigue el flow del producto:\n` +
-            `1. analyze_batch con ese batchId.\n` +
-            `2. Si la respuesta tiene recommendsRegrouping=true, llama AUTOMÁTICAMENTE a regroup_batch_with_ai sin preguntarme — solo avísame: "voy a reagrupar visualmente porque...".\n` +
-            `3. Tras (re)agrupar, llama analyze_format_compatibility para 1-3 posts representativos.\n` +
-            `4. Resume en lenguaje natural: cuántos posts, tipos, qué carruseles detectaste y por qué, problemas de formato por plataforma.\n` +
-            `5. Si tengo brand profile sin configurar, pregunta lo esencial (nicho, tono, audiencia) antes de proponer calendario.\n` +
-            `6. Propón calendario con suggest_schedule y enséñamelo. Espera mi confirmación expresa antes de llamar confirm_batch_schedule.`,
+          `He subido un ZIP nuevo. batchId: "${presignData.batchId}". Inicia el Flow ASISTENTE DE PROGRAMACIÓN:\n` +
+            `1. Llama analyze_uploaded_batch con ese batchId.\n` +
+            `2. Presenta en 3-4 frases naturales lo que has detectado (totales, tipos, preview del primer caption).\n` +
+            `3. Termina preguntando "¿cuándo empezamos a publicar?". NO llames más tools este turno.\n` +
+            `Después, en los siguientes turnos, sigue el flow normal: propose_schedule cuando tengas {startDate, postsPerDay, hours} → apply_schedule cuando el user confirme.`,
+          presignData.batchId,
         );
 
         setTimeout(() => setUpload(null), 3000);
@@ -508,9 +654,13 @@ export function ChatStudio({
    * Streamea una respuesta del chat con un mensaje arbitrario.
    * Usado tanto por sendMessage (input user) como por uploadFiles
    * (mensaje sintético post-upload).
+   *
+   * `contextBatchId` opcional: si lo pasas, el system prompt del backend
+   * incluirá "el user está hablando del batch X" y disparará el flow
+   * asistente automáticamente.
    */
   const streamChat = useCallback(
-    async (text: string) => {
+    async (text: string, contextBatchId?: string) => {
       setSending(true);
       try {
         // Construir body OMITIENDO chatId si es null (Zod .optional() no
@@ -521,6 +671,7 @@ export function ChatStudio({
           message: text,
         };
         if (chatId) requestBody.chatId = chatId;
+        if (contextBatchId) requestBody.batchId = contextBatchId;
 
         const res = await fetch("/api/ai/chat", {
           method: "POST",
@@ -615,6 +766,90 @@ export function ChatStudio({
                 updateLastAssistant(setMessages, () => ({
                   toolCalls: [...accToolCalls],
                 }));
+              }
+
+              // 📅 Si fue propose_schedule con éxito, guardamos las
+              // assignments en scheduleProposal para que el front pinte
+              // la tabla bonita + botón "Aplicar y activar".
+              if (
+                toolName === "propose_schedule" &&
+                payload.output &&
+                typeof payload.output === "object"
+              ) {
+                const out = payload.output as {
+                  batchId?: string;
+                  timezone?: string;
+                  assignments?: ScheduleAssignment[];
+                  summary?: ScheduleProposalData["summary"];
+                };
+                if (
+                  out.batchId &&
+                  Array.isArray(out.assignments) &&
+                  out.assignments.length > 0
+                ) {
+                  updateLastAssistant(setMessages, () => ({
+                    scheduleProposal: {
+                      batchId: out.batchId!,
+                      timezone: out.timezone ?? "UTC",
+                      assignments: out.assignments!,
+                      summary: out.summary ?? {
+                        totalPosts: out.assignments!.length,
+                        firstAt: out.assignments![0]?.publishAt ?? null,
+                        lastAt:
+                          out.assignments![out.assignments!.length - 1]
+                            ?.publishAt ?? null,
+                        span: "",
+                      },
+                    },
+                  }));
+                }
+              }
+
+              // ✅ Si fue apply_schedule con éxito, marcamos el último
+              // scheduleProposal como aplicado y guardamos el calendarUrl
+              if (
+                toolName === "apply_schedule" &&
+                payload.output &&
+                typeof payload.output === "object"
+              ) {
+                const out = payload.output as {
+                  scheduled?: number;
+                  failed?: number;
+                  activated?: boolean;
+                  calendarUrl?: string;
+                  monthLabel?: string;
+                };
+                if ((out.scheduled ?? 0) > 0) {
+                  // Hay que actualizar la proposal del MENSAJE PREVIO,
+                  // no del actual (la proposal vive en el turn anterior).
+                  setMessages((prev) => {
+                    const arr = [...prev];
+                    for (let i = arr.length - 1; i >= 0; i--) {
+                      if (
+                        arr[i].role === "assistant" &&
+                        arr[i].scheduleProposal &&
+                        !arr[i].scheduleProposal?.applied
+                      ) {
+                        arr[i] = {
+                          ...arr[i],
+                          scheduleProposal: {
+                            ...arr[i].scheduleProposal!,
+                            applied: true,
+                            appliedResult: {
+                              scheduled: out.scheduled ?? 0,
+                              failed: out.failed ?? 0,
+                              activated: out.activated ?? false,
+                              calendarUrl: out.calendarUrl ?? "",
+                              monthLabel: out.monthLabel ?? "",
+                            },
+                          },
+                        };
+                        break;
+                      }
+                    }
+                    return arr;
+                  });
+                }
               }
 
               // 🎯 Si fue suggest_schedule con éxito, extraer el calendario
@@ -881,6 +1116,34 @@ export function ChatStudio({
                 `He aprobado el calendario propuesto. Llama AHORA a confirm_batch_schedule con batchId="${preview.batchId}" y schedule=${scheduleJson}. Después confírmame que quedó programado y dime cuántos posts entraron en la cola.`,
               );
             }}
+            onApplyProposal={(proposal) => {
+              if (sending) return;
+              const N = proposal.assignments.length;
+              const userMsg: Message = {
+                id: `u-apply-${Date.now()}`,
+                role: "user",
+                content: `✓ Aplicar y activar ${N} ${N === 1 ? "post" : "posts"}`,
+              };
+              const pendingMsg: Message = {
+                id: `a-${Date.now()}`,
+                role: "assistant",
+                content: "",
+                toolCalls: [],
+                pending: true,
+              };
+              setMessages((prev) => [...prev, userMsg, pendingMsg]);
+              // Pasamos las assignments al modelo como JSON serializado.
+              // Es la misma estructura que apply_schedule espera.
+              const assignmentsJson = JSON.stringify(
+                proposal.assignments.map((a) => ({
+                  postId: a.postId,
+                  publishAt: a.publishAt,
+                })),
+              );
+              streamChat(
+                `Confirmado. Aplica el calendario llamando a apply_schedule con batchId="${proposal.batchId}", activate=true y estas assignments: ${assignmentsJson}. Tras la tool, responde con UN párrafo corto confirmando y termina con el calendarUrl.`,
+              );
+            }}
             onRequestChanges={() => {
               textareaRef.current?.focus();
             }}
@@ -1140,11 +1403,13 @@ function updateLastAssistant(
 function MessageBubble({
   message,
   onApprove,
+  onApplyProposal,
   onRequestChanges,
   sending,
 }: {
   message: Message;
   onApprove?: (preview: NonNullable<Message["schedulePreview"]>) => void;
+  onApplyProposal?: (proposal: NonNullable<Message["scheduleProposal"]>) => void;
   onRequestChanges?: () => void;
   sending?: boolean;
 }) {
@@ -1245,6 +1510,18 @@ function MessageBubble({
           )}
         </div>
       )}
+
+      {/* Propuesta determinista de propose_schedule — tabla + botón aplicar */}
+      {message.scheduleProposal && (
+        <div style={{ marginTop: 10, width: "100%", maxWidth: 720 }}>
+          <ScheduleProposalCard
+            proposal={message.scheduleProposal}
+            onApply={() => onApplyProposal?.(message.scheduleProposal!)}
+            onRequestChanges={onRequestChanges}
+            disabled={sending}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -1326,6 +1603,9 @@ function ToolCallChip({
     analyze_format_compatibility: "🎯 Verificando compatibilidad por plataforma",
     analyze_media_with_vision: "👁 Analizando media con vision",
     regroup_batch_with_ai: "🔍 Reagrupando con visión IA",
+    analyze_uploaded_batch: "📋 Revisando lo que subiste",
+    propose_schedule: "🗓 Calculando fechas",
+    apply_schedule: "🚀 Programando y activando",
   };
   const label = labels[call.name] ?? call.name;
   const finished = call.output !== undefined || call.error !== undefined;
@@ -1350,6 +1630,340 @@ function ToolCallChip({
           {call.error}
         </span>
       )}
+    </div>
+  );
+}
+
+/**
+ * Card que renderiza la propuesta determinista de `propose_schedule`.
+ * Tabla con todos los posts + fecha asignada + botón verde grande
+ * "✓ Aplicar y activar N posts" que dispara `apply_schedule` vía chat.
+ *
+ * Si `proposal.applied` es true, en su lugar muestra el banner de éxito
+ * con enlace al calendario del mes correspondiente.
+ */
+function ScheduleProposalCard({
+  proposal,
+  onApply,
+  onRequestChanges,
+  disabled,
+}: {
+  proposal: ScheduleProposalData;
+  onApply: () => void;
+  onRequestChanges?: () => void;
+  disabled?: boolean;
+}) {
+  // Si ya está aplicado, banner de éxito + link al calendario
+  if (proposal.applied && proposal.appliedResult) {
+    const { scheduled, failed, activated, calendarUrl, monthLabel } =
+      proposal.appliedResult;
+    return (
+      <div
+        style={{
+          marginTop: 8,
+          padding: "14px 18px",
+          background: "rgba(107,122,46,0.08)",
+          border: "1.5px solid #6B7A2E",
+          borderLeft: "4px solid #6B7A2E",
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 12,
+        }}
+      >
+        <span
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            background: "#6B7A2E",
+            color: "var(--ap-paper)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 18,
+            fontWeight: 700,
+            flexShrink: 0,
+          }}
+        >
+          ✓
+        </span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p
+            className="ap-mono"
+            style={{
+              margin: 0,
+              fontSize: 11,
+              color: "#6B7A2E",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              fontWeight: 600,
+            }}
+          >
+            {activated ? "Activado" : "Programado"} · {scheduled}{" "}
+            {scheduled === 1 ? "post" : "posts"}
+            {failed > 0 ? ` · ${failed} con error` : ""}
+          </p>
+          <p
+            style={{
+              margin: "3px 0 10px",
+              fontSize: 13,
+              color: "var(--ap-ink-2)",
+              lineHeight: 1.45,
+            }}
+          >
+            {activated
+              ? "Tus posts se publicarán solos en su hora. Puedes cerrar la pestaña."
+              : "Posts reprogramados. El batch ya estaba activo o no requirió activación."}
+          </p>
+          {calendarUrl && (
+            <a
+              href={calendarUrl}
+              className="ap-btn ap-btn--ghost"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "8px 14px",
+                fontSize: 11,
+                fontFamily: "var(--ap-font-mono)",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                textDecoration: "none",
+              }}
+            >
+              <CalendarCheck strokeWidth={1.8} style={{ width: 12, height: 12 }} />
+              Ver en calendario {monthLabel ? `· ${monthLabel}` : ""}
+              <ExternalLink strokeWidth={1.8} style={{ width: 11, height: 11 }} />
+            </a>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Tabla + botón aplicar
+  const { assignments, timezone, summary } = proposal;
+  return (
+    <div
+      style={{
+        marginTop: 12,
+        background: "var(--ap-paper-2)",
+        border: "1px solid var(--ap-line-2)",
+        padding: "16px 18px",
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 14,
+        }}
+      >
+        <CalendarCheck
+          strokeWidth={1.8}
+          style={{ width: 16, height: 16, color: "var(--ap-stamp)" }}
+        />
+        <p
+          className="ap-mono"
+          style={{
+            margin: 0,
+            fontSize: 11,
+            color: "var(--ap-stamp)",
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            fontWeight: 600,
+          }}
+        >
+          Programación propuesta · {assignments.length}{" "}
+          {assignments.length === 1 ? "post" : "posts"}
+          {summary.span ? ` · ${summary.span}` : ""}
+        </p>
+        <span
+          className="ap-mono"
+          style={{
+            marginLeft: "auto",
+            fontSize: 9,
+            color: "var(--ap-ink-4)",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+          }}
+        >
+          {timezone}
+        </span>
+      </div>
+
+      {/* Tabla */}
+      <div
+        role="table"
+        aria-label="Programación propuesta"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
+          background: "var(--ap-line-2)",
+          border: "1px solid var(--ap-line-2)",
+          maxHeight: 360,
+          overflowY: "auto",
+        }}
+      >
+        {/* Header row */}
+        <div
+          role="row"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "44px 1fr 1.2fr 90px",
+            gap: 12,
+            padding: "8px 12px",
+            background: "var(--ap-paper-2)",
+            fontSize: 10,
+            fontFamily: "var(--ap-font-mono)",
+            color: "var(--ap-ink-4)",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+          }}
+        >
+          <span>#</span>
+          <span>Post</span>
+          <span>Fecha y hora</span>
+          <span style={{ textAlign: "right" }}>Tipo</span>
+        </div>
+        {assignments.map((a, idx) => (
+          <div
+            key={a.postId}
+            role="row"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "44px 1fr 1.2fr 90px",
+              gap: 12,
+              padding: "10px 12px",
+              background: "var(--ap-paper)",
+              fontSize: 13,
+              color: "var(--ap-ink)",
+              alignItems: "center",
+            }}
+          >
+            <span
+              className="ap-mono"
+              style={{
+                fontSize: 11,
+                color: "var(--ap-ink-3)",
+                letterSpacing: "0.04em",
+              }}
+            >
+              {String(idx + 1).padStart(2, "0")}
+            </span>
+            <span
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+              title={a.sourceFolderName}
+            >
+              {a.sourceFolderName}
+            </span>
+            <span
+              className="ap-mono"
+              style={{
+                fontSize: 12,
+                color: "var(--ap-ink-2)",
+                letterSpacing: "0.02em",
+              }}
+            >
+              {a.dayLabel}
+            </span>
+            <span
+              className="ap-mono"
+              style={{
+                fontSize: 10,
+                color: "var(--ap-ink-3)",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                textAlign: "right",
+              }}
+            >
+              {a.postType === "CAROUSEL"
+                ? "Carrusel"
+                : a.postType === "REEL"
+                  ? "Reel"
+                  : "Imagen"}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer + CTA */}
+      <div
+        style={{
+          marginTop: 16,
+          paddingTop: 14,
+          borderTop: "1px solid var(--ap-line-2)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 10,
+          flexWrap: "wrap",
+        }}
+      >
+        <p
+          style={{
+            margin: 0,
+            fontSize: 12,
+            color: "var(--ap-ink-3)",
+            fontStyle: "italic",
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
+          O dime qué cambiar (ej:{" "}
+          <em>&ldquo;mueve el del jueves a las 19&rdquo;</em>,{" "}
+          <em>&ldquo;empezamos el lunes&rdquo;</em>).
+        </p>
+
+        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+          {onRequestChanges && (
+            <button
+              type="button"
+              onClick={onRequestChanges}
+              disabled={disabled}
+              className="ap-btn ap-btn--ghost"
+              style={{
+                padding: "10px 14px",
+                fontSize: 12,
+                fontFamily: "var(--ap-font-mono)",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                opacity: disabled ? 0.5 : 1,
+              }}
+            >
+              Pedir cambios
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onApply}
+            disabled={disabled}
+            className="ap-btn ap-btn--stamp"
+            style={{
+              padding: "12px 22px",
+              fontSize: 13,
+              fontFamily: "var(--ap-font-mono)",
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              fontWeight: 700,
+              opacity: disabled ? 0.5 : 1,
+              background: "#6B7A2E",
+              color: "var(--ap-paper)",
+              border: "1.5px solid #6B7A2E",
+            }}
+          >
+            ✓ Aplicar y activar {assignments.length}{" "}
+            {assignments.length === 1 ? "post" : "posts"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
