@@ -23,19 +23,20 @@ export const WATERMARK_TEXT = "—\n📲 Programado con autopost.app";
 /**
  * Devuelve el watermark a aplicar (string) o null si no procede.
  *
- * Reglas en orden:
- *  1. Si la variable de entorno WATERMARK_DISABLED="1" → null SIEMPRE.
- *     Pensado para self-hosting / instancias del owner del producto que
- *     no quieren marca en sus propias publicaciones aunque su plan en BD
- *     sea FREE (sin Stripe configurado todavía).
- *  2. Plan FREE → watermark. Cualquier plan de pago → null.
+ * Default actual: marca DESACTIVADA por código. Esta función devuelve
+ * null SIEMPRE — ningún post lleva la marca "Programado con autopost.app",
+ * sin importar el plan.
+ *
+ * Para reactivar (cuando vendamos como SaaS público con plan FREE con
+ * marca): poner WATERMARK_ENABLED="1" en las variables de entorno.
+ * Entonces vuelve la regla original: tier === "FREE" → marca, paid → sin.
  */
 export function getWatermarkFor(
   user: Pick<AdminUser, "plan">,
   subscription?: Pick<Subscription, "status" | "tier"> | null
 ): string | null {
-  // Kill-switch global vía env var. Útil para self-host / instancias del owner.
-  if (process.env.WATERMARK_DISABLED === "1") return null;
+  // Default: marca off. Se activa explícitamente con env var.
+  if (process.env.WATERMARK_ENABLED !== "1") return null;
 
   const tier = getEffectiveTier(user, subscription);
   return tier === "FREE" ? WATERMARK_TEXT : null;
