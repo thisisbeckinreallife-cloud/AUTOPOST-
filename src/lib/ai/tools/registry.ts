@@ -19,8 +19,21 @@
  *   - update_brand_profile   → guarda info que el user da en el chat
  *   - suggest_caption        → sugiere caption para un media específico
  *   - suggest_hashtags       → sugiere hashtags para un caption
+ *
+ * Asistente conversacional (post-upload, flow nuevo):
+ *   - analyze_uploaded_batch → resumen narrativo para arrancar la conversación
+ *   - propose_schedule       → calcula DETERMINISTAMENTE las fechas concretas
+ *   - apply_schedule         → ejecuta el reschedule + activa el batch
  */
 import { db } from "@/lib/db";
+import {
+  analyzeUploadedBatchTool,
+  analyzeUploadedBatchHandler,
+  proposeScheduleTool,
+  proposeScheduleHandler,
+  applyScheduleTool,
+  applyScheduleHandler,
+} from "./schedule-assistant";
 
 export interface ToolDefinition {
   name: string;
@@ -951,6 +964,18 @@ export const TOOLS = {
   regroup_batch_with_ai: {
     def: regroupBatchTool,
     handler: regroupBatchHandler,
+  },
+  analyze_uploaded_batch: {
+    def: analyzeUploadedBatchTool,
+    handler: analyzeUploadedBatchHandler,
+  },
+  propose_schedule: {
+    def: proposeScheduleTool,
+    handler: proposeScheduleHandler,
+  },
+  apply_schedule: {
+    def: applyScheduleTool,
+    handler: applyScheduleHandler,
   },
 } as const;
 
