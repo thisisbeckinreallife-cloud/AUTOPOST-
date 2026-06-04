@@ -683,7 +683,7 @@ export default function SettingsPage() {
             <div>
               <p className="text-xs font-bold text-ink-7 mb-2">Primero, copia esta dirección:</p>
               <div className="flex items-center gap-2 bg-ink-3 border-2 border-accent/30 rounded-xl px-3 py-3">
-                <code className="flex-1 text-xs text-accent break-all font-mono font-bold">
+                <code className="flex-1 text-xs text-accent-strong break-all font-mono font-bold">
                   {redirectUri || "Cargando..."}
                 </code>
                 {redirectUri && <CopyButton text={redirectUri} />}
@@ -773,7 +773,7 @@ export default function SettingsPage() {
             <div>
               <p className="text-xs font-bold text-ink-7 mb-2">La misma URL de antes:</p>
               <div className="flex items-center gap-2 bg-ink-3 border-2 border-accent/30 rounded-xl px-3 py-3">
-                <code className="flex-1 text-xs text-accent break-all font-mono font-bold">
+                <code className="flex-1 text-xs text-accent-strong break-all font-mono font-bold">
                   {redirectUri || "Cargando..."}
                 </code>
                 {redirectUri && <CopyButton text={redirectUri} />}

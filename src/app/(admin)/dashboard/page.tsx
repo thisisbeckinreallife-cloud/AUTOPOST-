@@ -261,7 +261,7 @@ export default async function DashboardPage() {
             >
               <Upload className="h-6 w-6 text-ink-6" aria-hidden="true" />
               <p className="text-sm text-ink-8">Suelta una carpeta y la semana se programa sola.</p>
-              <span className="text-sm text-accent font-medium">{ctaLabel} →</span>
+              <span className="text-sm text-accent-strong font-medium">{ctaLabel} →</span>
             </Link>
           ) : (
             <div className="rounded-lg border border-ink-4 bg-ink-2 overflow-hidden">
@@ -322,7 +322,7 @@ export default async function DashboardPage() {
           {/* Próximo destacado */}
           {nextPublication && (
             <section className="rounded-lg border border-ink-4 bg-ink-2 p-4">
-              <p className="font-mono text-[11px] text-accent uppercase tracking-wider mb-3">
+              <p className="font-mono text-[11px] text-accent-strong uppercase tracking-wider mb-3">
                 Próxima publicación
               </p>
               <div className="flex items-center gap-3">

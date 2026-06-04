@@ -76,7 +76,7 @@ export default async function AccountPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
       <header className="mb-12">
-        <p className="font-mono text-xs text-accent uppercase tracking-widest mb-2">
+        <p className="font-mono text-xs text-accent-strong uppercase tracking-widest mb-2">
           Mi cuenta
         </p>
         <h1 className="text-3xl font-semibold text-ink-9 tracking-tight mb-2">

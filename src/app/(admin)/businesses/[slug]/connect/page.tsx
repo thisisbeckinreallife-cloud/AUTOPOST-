@@ -92,7 +92,7 @@ export default function ConnectPage() {
               <div className="border border-accent/30 bg-accent/[0.04] rounded-xl p-4 text-center space-y-2">
                 <Building2 className="h-6 w-6 mx-auto text-ink-9" />
                 <div>
-                  <p className="text-xs font-semibold text-accent">Profesional</p>
+                  <p className="text-xs font-semibold text-accent-strong">Profesional</p>
                   <p className="text-[11px] text-ink-9/60">Empresa o Creador</p>
                 </div>
               </div>
@@ -107,7 +107,7 @@ export default function ConnectPage() {
                 href="https://help.instagram.com/502981923235522"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-ink-9 hover:text-accent font-medium transition-colors"
+                className="inline-flex items-center gap-1 text-xs text-ink-9 hover:text-accent-strong font-medium transition-colors"
               >
                 Ver como cambiarla <ExternalLink className="h-3 w-3" />
               </a>
