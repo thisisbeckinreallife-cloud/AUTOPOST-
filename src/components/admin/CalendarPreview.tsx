@@ -166,7 +166,7 @@ export function CalendarPreview({
             margin: 0,
             fontSize: 11,
             color: "var(--ap-stamp)",
-            letterSpacing: "0.18em",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
             fontWeight: 600,
           }}
@@ -230,7 +230,7 @@ export function CalendarPreview({
             margin: 0,
             fontSize: 12,
             color: "var(--ap-ink-3)",
-            fontStyle: "italic",
+            fontStyle: "normal",
             flex: 1,
             minWidth: 0,
           }}
@@ -436,7 +436,7 @@ function PostCard({ post, onClick }: { post: SchedulePost; onClick: () => void }
               margin: 0,
               fontSize: 12,
               color: "var(--ap-ink-3)",
-              fontStyle: "italic",
+              fontStyle: "normal",
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -492,7 +492,7 @@ function PostCard({ post, onClick }: { post: SchedulePost; onClick: () => void }
                   alignItems: "center",
                   gap: 3,
                   fontSize: 9,
-                  color: "#6B7A2E",
+                  color: "var(--ap-olive)",
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
                 }}
@@ -510,7 +510,7 @@ function PostCard({ post, onClick }: { post: SchedulePost; onClick: () => void }
               alignItems: "center",
               gap: 3,
               fontSize: 9,
-              color: "#6B7A2E",
+              color: "var(--ap-olive)",
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               marginTop: 2,
@@ -656,7 +656,7 @@ function PostPreviewModal({
             margin: "0 0 6px",
             fontSize: 10,
             color: "var(--ap-ink-4)",
-            letterSpacing: "0.18em",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
           }}
         >
@@ -667,7 +667,7 @@ function PostPreviewModal({
           style={{
             margin: "0 0 18px",
             fontSize: 22,
-            fontStyle: "italic",
+            fontStyle: "normal",
             color: "var(--ap-ink)",
             letterSpacing: "-0.01em",
           }}
@@ -710,7 +710,7 @@ function PostPreviewModal({
               margin: "0 0 10px",
               fontSize: 10,
               color: "var(--ap-ink-4)",
-              letterSpacing: "0.18em",
+              letterSpacing: "0.08em",
               textTransform: "uppercase",
             }}
           >
@@ -774,7 +774,7 @@ function IssueLine({
       ? "var(--ap-stamp)"
       : issue.severity === "warning"
         ? "#D4A627"
-        : "#6B7A2E";
+        : "var(--ap-olive)";
 
   return (
     <div
@@ -797,7 +797,7 @@ function IssueLine({
         </span>{" "}
         {issue.message}
         {issue.recommendation && (
-          <p style={{ margin: "3px 0 0", fontSize: 11, color: "var(--ap-ink-3)", fontStyle: "italic" }}>
+          <p style={{ margin: "3px 0 0", fontSize: 11, color: "var(--ap-ink-3)", fontStyle: "normal" }}>
             → {issue.recommendation}
           </p>
         )}

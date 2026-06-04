@@ -83,7 +83,7 @@ export default async function SettingsPage({
           style={{
             fontSize: 11,
             color: "var(--ap-ink-4)",
-            letterSpacing: "0.18em",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
             margin: 0,
           }}
@@ -94,7 +94,7 @@ export default async function SettingsPage({
           className="ap-display"
           style={{
             fontSize: "clamp(28px, 4vw, 40px)",
-            fontStyle: "italic",
+            fontStyle: "normal",
             lineHeight: 1,
             margin: "10px 0 8px",
             color: "var(--ap-ink)",
@@ -109,10 +109,10 @@ export default async function SettingsPage({
         <div
           style={{
             background: "var(--ap-paper-2)",
-            borderLeft: "3px solid #6B7A2E",
+            borderLeft: "3px solid var(--ap-olive)",
             padding: "12px 16px",
             fontSize: 14,
-            color: "#6B7A2E",
+            color: "var(--ap-olive)",
           }}
         >
           ✓ Plataforma conectada correctamente
@@ -139,7 +139,7 @@ export default async function SettingsPage({
           style={{
             fontSize: 10,
             color: "var(--ap-ink-4)",
-            letterSpacing: "0.18em",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
             margin: "0 0 14px",
           }}
@@ -169,7 +169,7 @@ export default async function SettingsPage({
           {business.description && (
             <>
               <dt style={{ color: "var(--ap-ink-4)" }}>Descripción</dt>
-              <dd style={{ margin: 0, color: "var(--ap-ink-2)", fontStyle: "italic" }}>
+              <dd style={{ margin: 0, color: "var(--ap-ink-2)", fontStyle: "normal" }}>
                 {business.description}
               </dd>
             </>
@@ -184,7 +184,7 @@ export default async function SettingsPage({
           style={{
             fontSize: 10,
             color: "var(--ap-ink-4)",
-            letterSpacing: "0.18em",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
             margin: "0 0 14px",
           }}
@@ -275,7 +275,7 @@ export default async function SettingsPage({
           style={{
             fontSize: 10,
             color: "var(--ap-stamp)",
-            letterSpacing: "0.18em",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
             margin: "0 0 8px",
             fontWeight: 600,
@@ -301,7 +301,7 @@ export default async function SettingsPage({
                 margin: "2px 0 0",
                 fontSize: 11,
                 color: "var(--ap-ink-3)",
-                fontStyle: "italic",
+                fontStyle: "normal",
               }}
             >
               Borra todos los posts, batches, conexiones sociales. Irreversible.
@@ -337,7 +337,7 @@ function LegacyChannelCard({
         border: needsAttention
           ? "1px solid var(--ap-stamp)"
           : connected
-            ? "1px solid #6B7A2E"
+            ? "1px solid var(--ap-olive)"
             : "1px solid var(--ap-line-2)",
         padding: "14px 16px",
         display: "flex",
@@ -372,7 +372,7 @@ function LegacyChannelCard({
             color: needsAttention
               ? "var(--ap-stamp)"
               : connected
-                ? "#6B7A2E"
+                ? "var(--ap-olive)"
                 : "var(--ap-ink-3)",
             letterSpacing: "0.1em",
           }}
@@ -399,10 +399,10 @@ function LegacyChannelCard({
           className="ap-mono"
           style={{
             fontSize: 9,
-            color: "#6B7A2E",
-            letterSpacing: "0.16em",
+            color: "var(--ap-olive)",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
-            border: "1px solid #6B7A2E",
+            border: "1px solid var(--ap-olive)",
             padding: "3px 8px",
           }}
         >

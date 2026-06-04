@@ -94,30 +94,27 @@ export function Sidebar({
     <aside
       className="fixed left-0 top-0 h-full w-64 flex flex-col z-40"
       style={{
-        background: "#1D1D1F",
-        borderRight: "1px solid rgba(168,218,220,0.10)",
-        color: "#F5F5F7",
+        background: "#12161F",
+        borderRight: "1px solid rgba(232,117,89,0.10)",
+        color: "#EDEFF4",
       }}
       onKeyDown={handleKeyDown}
     >
       {/* Logo */}
       <div
         className="flex items-center gap-2.5 px-5 h-16"
-        style={{ borderBottom: "1px solid rgba(168,218,220,0.08)" }}
+        style={{ borderBottom: "1px solid rgba(232,117,89,0.08)" }}
       >
         <div
           className="relative flex h-8 w-8 items-center justify-center rounded-md"
-          style={{
-            background: "linear-gradient(135deg, #A8DADC 0%, #7DBCBE 100%)",
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 6px rgba(168,218,220,0.18)",
-          }}
+          style={{ background: "#E87559" }}
           aria-hidden="true"
         >
           <span
             className="font-black text-[13px] leading-none"
             style={{
-              color: "#1D1D1F",
-              fontFamily: "Satoshi, Inter, system-ui, sans-serif",
+              color: "#1A0E0A",
+              fontFamily: "var(--font-mona-sans)",
               letterSpacing: "-0.04em",
             }}
           >
@@ -127,12 +124,12 @@ export function Sidebar({
         <span
           className="font-bold text-sm tracking-tight"
           style={{
-            color: "#F5F5F7",
+            color: "#EDEFF4",
             letterSpacing: "-0.01em",
-            fontFamily: "Satoshi, Inter, system-ui, sans-serif",
+            fontFamily: "var(--font-mona-sans)",
           }}
         >
-          AutoPost
+          autopost<span style={{ color: "#E87559" }}>.</span>
         </span>
       </div>
 
@@ -146,17 +143,17 @@ export function Sidebar({
               key={href}
               href={href}
               onClick={() => setMobileOpen(false)}
-              className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900"
+              className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-1"
               style={{
-                background: isActive ? "rgba(168,218,220,0.10)" : "transparent",
-                border: isActive ? "1px solid rgba(168,218,220,0.22)" : "1px solid transparent",
-                color: isActive ? "#F5F5F7" : "#D1D1D6",
+                background: isActive ? "rgba(232,117,89,0.10)" : "transparent",
+                border: isActive ? "1px solid rgba(232,117,89,0.22)" : "1px solid transparent",
+                color: isActive ? "#EDEFF4" : "#A3ABBA",
               }}
               aria-current={isActive ? "page" : undefined}
             >
               <Icon
                 className="h-[18px] w-[18px] transition-colors"
-                style={{ color: isActive ? "#A8DADC" : "#D1D1D6" }}
+                style={{ color: isActive ? "#E87559" : "#A3ABBA" }}
                 aria-hidden="true"
               />
               <span className="flex-1">{label}</span>
@@ -164,8 +161,8 @@ export function Sidebar({
                 <span
                   className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full text-[10px] font-bold tabular-nums ${
                     b.kind === "error"
-                      ? "bg-red-500 text-white"
-                      : "bg-amber-400 text-zinc-900"
+                      ? "bg-error text-ink-9"
+                      : "bg-warning text-ink-0"
                   }`}
                   title={b.tooltip}
                   aria-label={b.tooltip}
@@ -177,8 +174,8 @@ export function Sidebar({
                 <div
                   className="h-1.5 w-1.5 rounded-full"
                   style={{
-                    background: "#A8DADC",
-                    boxShadow: "0 0 8px rgba(168,218,220,0.55)",
+                    background: "#E87559",
+                    
                   }}
                   aria-hidden="true"
                 />
@@ -191,12 +188,12 @@ export function Sidebar({
       {/* Bottom */}
       <div
         className="px-3 py-3 space-y-0.5"
-        style={{ borderTop: "1px solid rgba(168,218,220,0.08)" }}
+        style={{ borderTop: "1px solid rgba(232,117,89,0.08)" }}
       >
         <button
           onClick={toggleLocale}
           className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-white/[0.04]"
-          style={{ color: "#D1D1D6" }}
+          style={{ color: "#A3ABBA" }}
           title={locale === "es" ? "Switch to English" : "Cambiar a Espanol"}
         >
           <Globe className="h-[18px] w-[18px]" />
@@ -207,7 +204,7 @@ export function Sidebar({
           target="_blank"
           rel="noopener noreferrer"
           className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-white/[0.04]"
-          style={{ color: "#D1D1D6" }}
+          style={{ color: "#A3ABBA" }}
         >
           <HelpCircle className="h-[18px] w-[18px]" />
           {locale === "es" ? "Ayuda" : "Help"}
@@ -215,7 +212,7 @@ export function Sidebar({
         <button
           onClick={handleLogout}
           className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-red-500/[0.08] hover:text-red-400"
-          style={{ color: "#D1D1D6" }}
+          style={{ color: "#A3ABBA" }}
         >
           <LogOut className="h-[18px] w-[18px]" />
           {locale === "es" ? "Cerrar sesion" : "Log out"}

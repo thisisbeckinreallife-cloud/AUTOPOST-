@@ -262,7 +262,7 @@ export function AiCaptionStudio({
             style={{
               fontSize: 11,
               color: "var(--ap-stamp)",
-              letterSpacing: "0.18em",
+              letterSpacing: "0.08em",
               textTransform: "uppercase",
               margin: 0,
             }}
@@ -273,7 +273,7 @@ export function AiCaptionStudio({
             className="ap-display"
             style={{
               fontSize: "clamp(22px, 3vw, 28px)",
-              fontStyle: "italic",
+              fontStyle: "normal",
               lineHeight: 1,
               color: "var(--ap-ink)",
               margin: "6px 0 0",
@@ -287,7 +287,7 @@ export function AiCaptionStudio({
               fontSize: 13,
               color: "var(--ap-ink-3)",
               margin: "8px 0 0",
-              fontStyle: "italic",
+              fontStyle: "normal",
             }}
           >
             Aprende la voz de tus últimos 30 posts publicados.
@@ -429,7 +429,7 @@ export function AiCaptionStudio({
             }}
           >
             {streamedText || (
-              <span style={{ color: "var(--ap-ink-4)", fontStyle: "italic" }}>
+              <span style={{ color: "var(--ap-ink-4)", fontStyle: "normal" }}>
                 Esperando primer fragmento…
               </span>
             )}

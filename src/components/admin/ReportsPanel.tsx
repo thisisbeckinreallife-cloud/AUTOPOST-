@@ -140,7 +140,7 @@ export function ReportsPanel({ businessSlug, appUrl }: Props) {
           style={{
             fontSize: 11,
             color: "var(--ap-stamp)",
-            letterSpacing: "0.18em",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
             margin: 0,
           }}
@@ -151,7 +151,7 @@ export function ReportsPanel({ businessSlug, appUrl }: Props) {
           className="ap-display"
           style={{
             fontSize: "clamp(22px, 3vw, 28px)",
-            fontStyle: "italic",
+            fontStyle: "normal",
             lineHeight: 1,
             color: "var(--ap-ink)",
             margin: "6px 0 0",
@@ -165,7 +165,7 @@ export function ReportsPanel({ businessSlug, appUrl }: Props) {
             fontSize: 13,
             color: "var(--ap-ink-3)",
             margin: "8px 0 0",
-            fontStyle: "italic",
+            fontStyle: "normal",
           }}
         >
           Resumen imprimible (Cmd+P → Save as PDF) listo para compartir con el cliente.
@@ -302,7 +302,7 @@ export function ReportsPanel({ businessSlug, appUrl }: Props) {
                         margin: 0,
                         fontSize: 14,
                         color: "var(--ap-ink-2)",
-                        fontStyle: "italic",
+                        fontStyle: "normal",
                       }}
                     >
                       {period}

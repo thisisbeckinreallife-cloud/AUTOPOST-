@@ -212,15 +212,15 @@ export default async function DashboardPage() {
           <h1
             className="ap-display"
             style={{
-              fontSize: "clamp(40px, 6vw, 64px)",
-              margin: "0 0 10px",
+              fontSize: "clamp(28px, 3.5vw, 36px)",
+              margin: "0 0 8px",
               letterSpacing: "-0.02em",
               color: "var(--ap-ink)",
-              lineHeight: 0.95,
+              lineHeight: 1.1,
             }}
           >
             {greetingTime},{" "}
-            <span style={{ fontStyle: "italic" }}>
+            <span style={{ color: "var(--ap-stamp)" }}>
               {firstName || "amigo"}.
             </span>
           </h1>
@@ -229,7 +229,7 @@ export default async function DashboardPage() {
               fontSize: 14,
               color: "var(--ap-ink-3)",
               margin: 0,
-              fontStyle: "italic",
+              fontStyle: "normal",
             }}
           >
             {subtitle}
@@ -287,7 +287,7 @@ export default async function DashboardPage() {
                 style={{
                   fontSize: 26,
                   margin: 0,
-                  fontStyle: "italic",
+                  fontStyle: "normal",
                   color: "var(--ap-ink)",
                 }}
               >
@@ -322,7 +322,7 @@ export default async function DashboardPage() {
                     fontSize: 14,
                     color: "var(--ap-ink-3)",
                     margin: 0,
-                    fontStyle: "italic",
+                    fontStyle: "normal",
                   }}
                 >
                   Suelta una carpeta y la semana se programa sola.
@@ -406,7 +406,7 @@ export default async function DashboardPage() {
                       style={{
                         fontSize: 11,
                         color: stateColor,
-                        fontStyle: "italic",
+                        fontStyle: "normal",
                       }}
                     >
                       {stateLabel}
@@ -444,7 +444,7 @@ export default async function DashboardPage() {
                 className="ap-display"
                 style={{
                   fontSize: 22,
-                  fontStyle: "italic",
+                  fontStyle: "normal",
                   lineHeight: 1.25,
                   color: "var(--ap-ink)",
                   marginBottom: 14,
@@ -519,7 +519,7 @@ export default async function DashboardPage() {
                   style={{
                     fontSize: 13,
                     color: "var(--ap-ink-4)",
-                    fontStyle: "italic",
+                    fontStyle: "normal",
                     margin: 0,
                   }}
                 >
@@ -617,7 +617,7 @@ function KPI({
         className="ap-display"
         style={{
           fontSize: "clamp(34px, 4vw, 46px)",
-          fontStyle: "italic",
+          fontStyle: "normal",
           lineHeight: 1,
           color: "var(--ap-ink)",
           letterSpacing: "-0.02em",

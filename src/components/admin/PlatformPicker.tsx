@@ -134,7 +134,7 @@ export function PlatformPicker({
         style={{
           fontSize: 10,
           color: "var(--ap-ink-4)",
-          letterSpacing: "0.18em",
+          letterSpacing: "0.08em",
           textTransform: "uppercase",
           margin: "0 0 14px",
         }}
@@ -206,7 +206,7 @@ export function PlatformPicker({
           marginTop: 14,
           fontSize: 11,
           color: "var(--ap-ink-3)",
-          fontStyle: "italic",
+          fontStyle: "normal",
           lineHeight: 1.4,
         }}
       >

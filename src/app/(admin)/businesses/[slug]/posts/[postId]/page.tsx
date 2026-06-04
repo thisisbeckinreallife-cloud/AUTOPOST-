@@ -666,7 +666,7 @@ function SocialPublicationRow({ pub }: { pub: SocialPublicationDetail }) {
   };
 
   const statusColor: Record<string, string> = {
-    PUBLISHED: "#6B7A2E",
+    PUBLISHED: "var(--ap-olive)",
     PUBLISHING: "#D4A627",
     PENDING: "var(--ap-ink-3)",
     FAILED: "var(--ap-stamp)",

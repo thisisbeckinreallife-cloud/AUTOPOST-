@@ -142,7 +142,7 @@ export function RequestApprovalPanel({
             style={{
               fontSize: 11,
               color: "var(--ap-stamp)",
-              letterSpacing: "0.18em",
+              letterSpacing: "0.08em",
               textTransform: "uppercase",
               margin: 0,
             }}
@@ -153,7 +153,7 @@ export function RequestApprovalPanel({
             className="ap-display"
             style={{
               fontSize: "clamp(22px, 3vw, 28px)",
-              fontStyle: "italic",
+              fontStyle: "normal",
               lineHeight: 1,
               color: "var(--ap-ink)",
               margin: "6px 0 0",
@@ -167,7 +167,7 @@ export function RequestApprovalPanel({
               fontSize: 13,
               color: "var(--ap-ink-3)",
               margin: "8px 0 0",
-              fontStyle: "italic",
+              fontStyle: "normal",
             }}
           >
             Tu cliente revisa y aprueba sin necesidad de iniciar sesión.
@@ -395,8 +395,8 @@ function ApprovalStatusBadge({
     APPROVED: {
       label: "Aprobado",
       bg: "var(--ap-paper)",
-      fg: "#6B7A2E",
-      border: "#6B7A2E",
+      fg: "var(--ap-olive)",
+      border: "var(--ap-olive)",
     },
     REJECTED: {
       label: "Rechazado",
@@ -442,7 +442,7 @@ function RequestStatusPill({ request }: { request: ApprovalEntry }) {
   let color = "var(--ap-ink-3)";
   if (request.respondedAt) {
     label = request.decision === "APPROVED" ? "Aprobado" : "Rechazado";
-    color = request.decision === "APPROVED" ? "#6B7A2E" : "var(--ap-stamp)";
+    color = request.decision === "APPROVED" ? "var(--ap-olive)" : "var(--ap-stamp)";
   } else if (expired) {
     label = "Expirado";
     color = "var(--ap-ink-4)";

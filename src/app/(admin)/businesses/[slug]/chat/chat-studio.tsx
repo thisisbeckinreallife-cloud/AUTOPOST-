@@ -1025,7 +1025,7 @@ export function ChatStudio({
             className="ap-display"
             style={{
               fontSize: 28,
-              fontStyle: "italic",
+              fontStyle: "normal",
               color: "var(--ap-ink)",
               margin: 0,
             }}
@@ -1037,7 +1037,7 @@ export function ChatStudio({
             style={{
               fontSize: 10,
               color: "var(--ap-ink-3)",
-              letterSpacing: "0.18em",
+              letterSpacing: "0.08em",
               textTransform: "uppercase",
               margin: 0,
             }}
@@ -1054,7 +1054,7 @@ export function ChatStudio({
           style={{
             fontSize: 11,
             color: "var(--ap-stamp)",
-            letterSpacing: "0.18em",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
             margin: 0,
           }}
@@ -1277,7 +1277,7 @@ function UploadProgressBanner({ upload }: { upload: UploadProgress }) {
         padding: "10px 14px",
         background: "var(--ap-paper-2)",
         border: `1px solid ${
-          isDone ? "#6B7A2E" : isError ? "var(--ap-stamp)" : "var(--ap-line-2)"
+          isDone ? "var(--ap-olive)" : isError ? "var(--ap-stamp)" : "var(--ap-line-2)"
         }`,
         display: "flex",
         alignItems: "center",
@@ -1285,7 +1285,7 @@ function UploadProgressBanner({ upload }: { upload: UploadProgress }) {
       }}
     >
       {isDone ? (
-        <Check strokeWidth={2} style={{ width: 14, height: 14, color: "#6B7A2E" }} />
+        <Check strokeWidth={2} style={{ width: 14, height: 14, color: "var(--ap-olive)" }} />
       ) : isError ? (
         <span style={{ fontSize: 14, color: "var(--ap-stamp)" }}>!</span>
       ) : (
@@ -1453,7 +1453,7 @@ function MessageBubble({
         style={{
           fontSize: 9,
           color: "var(--ap-ink-4)",
-          letterSpacing: "0.16em",
+          letterSpacing: "0.08em",
           textTransform: "uppercase",
           margin: "0 0 4px",
         }}
@@ -1533,8 +1533,8 @@ function ApprovedCalendarBanner({ count }: { count: number }) {
         marginTop: 8,
         padding: "14px 18px",
         background: "rgba(107,122,46,0.08)",
-        border: "1.5px solid #6B7A2E",
-        borderLeft: "4px solid #6B7A2E",
+        border: "1.5px solid var(--ap-olive)",
+        borderLeft: "4px solid var(--ap-olive)",
         display: "flex",
         alignItems: "center",
         gap: 12,
@@ -1545,7 +1545,7 @@ function ApprovedCalendarBanner({ count }: { count: number }) {
           width: 32,
           height: 32,
           borderRadius: "50%",
-          background: "#6B7A2E",
+          background: "var(--ap-olive)",
           color: "var(--ap-paper)",
           display: "flex",
           alignItems: "center",
@@ -1563,8 +1563,8 @@ function ApprovedCalendarBanner({ count }: { count: number }) {
           style={{
             margin: 0,
             fontSize: 11,
-            color: "#6B7A2E",
-            letterSpacing: "0.18em",
+            color: "var(--ap-olive)",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
             fontWeight: 600,
           }}
@@ -1663,8 +1663,8 @@ function ScheduleProposalCard({
           marginTop: 8,
           padding: "14px 18px",
           background: "rgba(107,122,46,0.08)",
-          border: "1.5px solid #6B7A2E",
-          borderLeft: "4px solid #6B7A2E",
+          border: "1.5px solid var(--ap-olive)",
+          borderLeft: "4px solid var(--ap-olive)",
           display: "flex",
           alignItems: "flex-start",
           gap: 12,
@@ -1675,7 +1675,7 @@ function ScheduleProposalCard({
             width: 32,
             height: 32,
             borderRadius: "50%",
-            background: "#6B7A2E",
+            background: "var(--ap-olive)",
             color: "var(--ap-paper)",
             display: "flex",
             alignItems: "center",
@@ -1693,8 +1693,8 @@ function ScheduleProposalCard({
             style={{
               margin: 0,
               fontSize: 11,
-              color: "#6B7A2E",
-              letterSpacing: "0.18em",
+              color: "var(--ap-olive)",
+              letterSpacing: "0.08em",
               textTransform: "uppercase",
               fontWeight: 600,
             }}
@@ -1771,7 +1771,7 @@ function ScheduleProposalCard({
             margin: 0,
             fontSize: 11,
             color: "var(--ap-stamp)",
-            letterSpacing: "0.18em",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
             fontWeight: 600,
           }}
@@ -1912,7 +1912,7 @@ function ScheduleProposalCard({
             margin: 0,
             fontSize: 12,
             color: "var(--ap-ink-3)",
-            fontStyle: "italic",
+            fontStyle: "normal",
             flex: 1,
             minWidth: 0,
           }}
@@ -1954,9 +1954,9 @@ function ScheduleProposalCard({
               textTransform: "uppercase",
               fontWeight: 700,
               opacity: disabled ? 0.5 : 1,
-              background: "#6B7A2E",
+              background: "var(--ap-olive)",
               color: "var(--ap-paper)",
-              border: "1.5px solid #6B7A2E",
+              border: "1.5px solid var(--ap-olive)",
             }}
           >
             ✓ Aplicar y activar {assignments.length}{" "}

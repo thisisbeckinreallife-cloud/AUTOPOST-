@@ -111,9 +111,10 @@ export default async function BusinessLayout({
               <h1
                 className="ap-display"
                 style={{
-                  fontSize: "clamp(36px, 5vw, 56px)",
-                  fontStyle: "italic",
-                  lineHeight: 1,
+                  fontSize: "clamp(26px, 3vw, 32px)",
+                  fontStyle: "normal",
+                  fontWeight: 600,
+                  lineHeight: 1.1,
                   margin: 0,
                   letterSpacing: "-0.02em",
                   color: "var(--ap-ink)",
@@ -125,8 +126,8 @@ export default async function BusinessLayout({
                 style={{
                   fontSize: 14,
                   color: tokenExpiringSoon ? "var(--ap-stamp)" : "var(--ap-ink-3)",
-                  fontStyle: "italic",
-                  margin: "8px 0 0",
+                  fontStyle: "normal",
+                  margin: "6px 0 0",
                 }}
               >
                 {!igConnected
@@ -145,7 +146,7 @@ export default async function BusinessLayout({
                   style={{
                     fontSize: 10,
                     fontFamily: "var(--ap-font-mono)",
-                    letterSpacing: "0.18em",
+                    letterSpacing: "0.08em",
                     textTransform: "uppercase",
                     padding: "5px 10px",
                     whiteSpace: "nowrap",
@@ -157,10 +158,10 @@ export default async function BusinessLayout({
                 className="ap-mono"
                 style={{
                   fontSize: 10,
-                  color: "#6B7A2E",
-                  letterSpacing: "0.18em",
+                  color: "var(--ap-olive)",
+                  letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  border: "1px solid #6B7A2E",
+                  border: "1px solid var(--ap-olive)",
                   padding: "5px 10px",
                   whiteSpace: "nowrap",
                 }}

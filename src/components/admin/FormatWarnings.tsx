@@ -100,7 +100,7 @@ export function FormatWarnings({
         style={{
           fontSize: 10,
           color: "var(--ap-ink-4)",
-          letterSpacing: "0.18em",
+          letterSpacing: "0.08em",
           textTransform: "uppercase",
           margin: "0 0 14px",
         }}
@@ -122,7 +122,7 @@ function AllGoodCard({ count }: { count: number }) {
     <div
       style={{
         background: "var(--ap-paper-2)",
-        border: "1px solid #6B7A2E",
+        border: "1px solid var(--ap-olive)",
         padding: "12px 16px",
         display: "flex",
         alignItems: "center",
@@ -131,14 +131,14 @@ function AllGoodCard({ count }: { count: number }) {
     >
       <CheckCircle2
         strokeWidth={1.8}
-        style={{ width: 16, height: 16, color: "#6B7A2E", flexShrink: 0 }}
+        style={{ width: 16, height: 16, color: "var(--ap-olive)", flexShrink: 0 }}
       />
       <p
         className="ap-mono"
         style={{
           margin: 0,
           fontSize: 11,
-          color: "#6B7A2E",
+          color: "var(--ap-olive)",
           letterSpacing: "0.12em",
           textTransform: "uppercase",
         }}
@@ -173,7 +173,7 @@ function PlatformReport({ report }: { report: CompatibilityReport }) {
     ? "var(--ap-stamp)"
     : warnings.length
       ? "#D4A627"
-      : "#6B7A2E";
+      : "var(--ap-olive)";
 
   return (
     <div
@@ -211,8 +211,8 @@ function PlatformReport({ report }: { report: CompatibilityReport }) {
               ? "var(--ap-stamp)"
               : warnings.length
                 ? "#D4A627"
-                : "#6B7A2E",
-            letterSpacing: "0.16em",
+                : "var(--ap-olive)",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
           }}
         >
@@ -244,7 +244,7 @@ function IssueLine({ issue }: { issue: CompatibilityIssue }) {
       ? "var(--ap-stamp)"
       : issue.severity === "warning"
         ? "#D4A627"
-        : "#6B7A2E";
+        : "var(--ap-olive)";
 
   return (
     <li
@@ -276,7 +276,7 @@ function IssueLine({ issue }: { issue: CompatibilityIssue }) {
               margin: "4px 0 0",
               fontSize: 12,
               color: "var(--ap-ink-3)",
-              fontStyle: "italic",
+              fontStyle: "normal",
             }}
           >
             → {issue.recommendation}

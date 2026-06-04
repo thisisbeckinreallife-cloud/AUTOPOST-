@@ -50,7 +50,7 @@ export function BusinessSwitcher({ currentSlug, businesses }: Props) {
         style={{
           fontSize: 10,
           color: "var(--ap-ink-4)",
-          letterSpacing: "0.18em",
+          letterSpacing: "0.08em",
           textTransform: "uppercase",
           textDecoration: "none",
         }}
@@ -72,7 +72,7 @@ export function BusinessSwitcher({ currentSlug, businesses }: Props) {
           padding: "6px 10px 6px 12px",
           fontSize: 10,
           color: "var(--ap-ink-3)",
-          letterSpacing: "0.16em",
+          letterSpacing: "0.08em",
           textTransform: "uppercase",
           cursor: "pointer",
           display: "inline-flex",
@@ -136,7 +136,7 @@ export function BusinessSwitcher({ currentSlug, businesses }: Props) {
                   style={{
                     margin: "2px 0 0",
                     fontSize: 9,
-                    color: current.igConnected ? "#6B7A2E" : "var(--ap-ink-4)",
+                    color: current.igConnected ? "var(--ap-olive)" : "var(--ap-ink-4)",
                     letterSpacing: "0.1em",
                   }}
                 >
@@ -155,7 +155,7 @@ export function BusinessSwitcher({ currentSlug, businesses }: Props) {
                   margin: "8px 12px 4px",
                   fontSize: 9,
                   color: "var(--ap-ink-4)",
-                  letterSpacing: "0.18em",
+                  letterSpacing: "0.08em",
                   textTransform: "uppercase",
                 }}
               >
@@ -200,7 +200,7 @@ export function BusinessSwitcher({ currentSlug, businesses }: Props) {
                       style={{
                         margin: "2px 0 0",
                         fontSize: 9,
-                        color: b.igConnected ? "#6B7A2E" : "var(--ap-ink-4)",
+                        color: b.igConnected ? "var(--ap-olive)" : "var(--ap-ink-4)",
                         letterSpacing: "0.1em",
                       }}
                     >
@@ -247,7 +247,7 @@ export function BusinessSwitcher({ currentSlug, businesses }: Props) {
                 color: "var(--ap-ink-3)",
                 textDecoration: "none",
                 fontSize: 9,
-                letterSpacing: "0.18em",
+                letterSpacing: "0.08em",
                 textTransform: "uppercase",
               }}
             >
