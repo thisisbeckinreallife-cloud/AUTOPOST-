@@ -510,7 +510,7 @@ export function CalendarView({
                             )}
                             {post.firstMedia?.mimeType.startsWith("video/") && (
                               <div className="h-4 w-4 shrink-0 rounded bg-ink-4 flex items-center justify-center">
-                                <Film className="h-2 w-2 text-white" />
+                                <Film className="h-2 w-2 text-ink-7" />
                               </div>
                             )}
                             {!post.firstMedia && (

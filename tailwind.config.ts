@@ -47,73 +47,66 @@ const config: Config = {
     extend: {
       colors: {
         /* ════════════════════════════════════════════════════════════════
-           PALETA "INK & RUST" — dark-first.
-           Base azul-tinta nocturno (casi negro de imprenta, NO indigo-SaaS)
-           + acento óxido-coral cálido + dorado para datos secundarios.
-           Contrastes WCAG AA verificados: ink-9/ink-1 = 16.3:1 (AAA).
+           TOKENS THEMEABLES — RGB triplets vía CSS variables.
+           :root define los valores DARK (Ink & Rust — landing).
+           .ap-root (scope dashboard) los sobrescribe a LIGHT (Resend).
+           Misma clase `bg-ink-2` rinde dark en landing, light en dashboard.
+           Formato `rgb(var(--x) / <alpha-value>)` preserva las opacidades
+           de Tailwind (bg-ink-2/60, border-error/30, etc.).
            ════════════════════════════════════════════════════════════════ */
         ink: {
-          0:  "#08090E",  // más oscuro — modales, pozos
-          1:  "#0B0E14",  // bg-base — fondo de página
-          2:  "#12161F",  // surface-1 — card
-          3:  "#1A1F2B",  // surface-2 — elevado, hover, dropdown, sidebar activo
-          4:  "#262D3B",  // border — divisores, bordes de card
-          5:  "#36404F",  // border-strong — inputs, foco de elemento
-          6:  "#757E8E",  // text-low — captions, meta (4.5:1, mínimo legible)
-          7:  "#A3ABBA",  // text-mid — body secundario (7.5:1)
-          8:  "#C5CBD6",  // text-mid-high
-          9:  "#EDEFF4",  // text-high — títulos, datos (16.3:1)
-          10: "#FFFFFF",
+          0:  "rgb(var(--ink-0) / <alpha-value>)",
+          1:  "rgb(var(--ink-1) / <alpha-value>)",
+          2:  "rgb(var(--ink-2) / <alpha-value>)",
+          3:  "rgb(var(--ink-3) / <alpha-value>)",
+          4:  "rgb(var(--ink-4) / <alpha-value>)",
+          5:  "rgb(var(--ink-5) / <alpha-value>)",
+          6:  "rgb(var(--ink-6) / <alpha-value>)",
+          7:  "rgb(var(--ink-7) / <alpha-value>)",
+          8:  "rgb(var(--ink-8) / <alpha-value>)",
+          9:  "rgb(var(--ink-9) / <alpha-value>)",
+          10: "rgb(var(--ink-10) / <alpha-value>)",
         },
-        /* Acento principal — óxido-coral terroso. Marca + CTAs.
-           accent sobre ink-1 = 6.8:1 (AA). Úsalo con disciplina: un CTA
-           primario por vista, estado activo. */
         accent: {
-          DEFAULT: "#E87559",
-          hover:   "#F08A70",
-          active:  "#D45F44",
-          soft:    "rgba(232, 117, 89, 0.12)",
-          ring:    "rgba(232, 117, 89, 0.45)",
-          strong:  "#F49B82",
+          DEFAULT: "rgb(var(--accent) / <alpha-value>)",
+          hover:   "rgb(var(--accent-hover) / <alpha-value>)",
+          active:  "rgb(var(--accent-active) / <alpha-value>)",
+          soft:    "rgb(var(--accent) / 0.12)",
+          ring:    "rgb(var(--accent) / 0.45)",
+          strong:  "rgb(var(--accent-strong) / <alpha-value>)",
         },
-        /* Acento secundario — DORADO apagado. Datos/highlights/KPIs grandes.
-           NUNCA en CTAs (eso es el coral). */
         "accent-secondary": {
-          DEFAULT: "#E3B85C",
-          hover:   "#EDC772",
-          active:  "#CFA547",
-          soft:    "rgba(227, 184, 92, 0.12)",
-          ring:    "rgba(227, 184, 92, 0.45)",
-          strong:  "#EDC772",
+          DEFAULT: "rgb(var(--gold) / <alpha-value>)",
+          hover:   "rgb(var(--gold-strong) / <alpha-value>)",
+          active:  "rgb(var(--gold) / <alpha-value>)",
+          soft:    "rgb(var(--gold) / 0.12)",
+          ring:    "rgb(var(--gold) / 0.45)",
+          strong:  "rgb(var(--gold-strong) / <alpha-value>)",
         },
-        /* Alias semántico del dorado para usar como bg-gold/text-gold. */
         gold: {
-          DEFAULT: "#E3B85C",
-          soft:    "rgba(227, 184, 92, 0.12)",
-          strong:  "#EDC772",
+          DEFAULT: "rgb(var(--gold) / <alpha-value>)",
+          soft:    "rgb(var(--gold) / 0.12)",
+          strong:  "rgb(var(--gold-strong) / <alpha-value>)",
         },
-        /* Semánticos — verde-jade frío, rojo-óxido, dorado warning, azul info.
-           El azul SÍ se admite aquí (info) porque NO es el acento de marca:
-           es estructural/informativo, separado del coral. */
         success: {
-          DEFAULT: "#4FB286",
-          soft:    "rgba(79, 178, 134, 0.12)",
-          strong:  "#6BC79E",
+          DEFAULT: "rgb(var(--success) / <alpha-value>)",
+          soft:    "rgb(var(--success) / 0.12)",
+          strong:  "rgb(var(--success-strong) / <alpha-value>)",
         },
         warning: {
-          DEFAULT: "#E3B85C",
-          soft:    "rgba(227, 184, 92, 0.12)",
-          strong:  "#EDC772",
+          DEFAULT: "rgb(var(--warning) / <alpha-value>)",
+          soft:    "rgb(var(--warning) / 0.12)",
+          strong:  "rgb(var(--warning-strong) / <alpha-value>)",
         },
         error: {
-          DEFAULT: "#E2574A",
-          soft:    "rgba(226, 87, 74, 0.12)",
-          strong:  "#EC7468",
+          DEFAULT: "rgb(var(--error) / <alpha-value>)",
+          soft:    "rgb(var(--error) / 0.12)",
+          strong:  "rgb(var(--error-strong) / <alpha-value>)",
         },
         info: {
-          DEFAULT: "#6E92C4",
-          soft:    "rgba(110, 146, 196, 0.14)",
-          strong:  "#8DABD6",
+          DEFAULT: "rgb(var(--info) / <alpha-value>)",
+          soft:    "rgb(var(--info) / 0.12)",
+          strong:  "rgb(var(--info-strong) / <alpha-value>)",
         },
         /* ── Compat layer ────────────────────────────────────────────────
            Tokens legacy de landing-v2 (pri/ai) → ahora apuntan al coral
@@ -162,12 +155,15 @@ const config: Config = {
         "np-display":     ["3.25rem",  { lineHeight: "3.5rem",   letterSpacing: "-0.03em",  fontWeight: "700" }],
         "np-display-xl":  ["4.25rem",  { lineHeight: "4.5rem",   letterSpacing: "-0.035em", fontWeight: "800" }],
       },
+      /* Sombras neutras y sutiles estilo Resend/Untitled-UI. Correctas sobre
+         blanco (dashboard) y discretas sobre el azul-tinta de la landing
+         (que de todos modos se apoya en bordes, no en sombras duras). */
       boxShadow: {
-        sm:    "0 1px 2px 0 rgba(10, 11, 9, 0.6)",
-        md:    "0 4px 8px -2px rgba(10, 11, 9, 0.7), 0 2px 4px -2px rgba(10, 11, 9, 0.5)",
-        lg:    "0 12px 24px -8px rgba(10, 11, 9, 0.75), 0 4px 8px -4px rgba(10, 11, 9, 0.5)",
-        xl:    "0 24px 48px -12px rgba(10, 11, 9, 0.85), 0 8px 16px -8px rgba(10, 11, 9, 0.6)",
-        focus: "0 0 0 2px rgba(255, 106, 44, 0.45)",
+        sm:    "0 1px 2px 0 rgb(16 24 40 / 0.05)",
+        md:    "0 1px 3px 0 rgb(16 24 40 / 0.10), 0 1px 2px -1px rgb(16 24 40 / 0.06)",
+        lg:    "0 4px 8px -2px rgb(16 24 40 / 0.10), 0 2px 4px -2px rgb(16 24 40 / 0.06)",
+        xl:    "0 12px 16px -4px rgb(16 24 40 / 0.08), 0 4px 6px -2px rgb(16 24 40 / 0.04)",
+        focus: "0 0 0 2px rgb(232 117 89 / 0.45)",
       },
       animation: {
         "fade-in":      "fade-in 200ms ease-out forwards",

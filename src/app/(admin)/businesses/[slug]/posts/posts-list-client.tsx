@@ -244,7 +244,7 @@ export function PostsListClient({
                         !canSelect
                           ? "border-ink-4 bg-ink-2 opacity-40 cursor-not-allowed"
                           : isSel
-                          ? "border-ink-5 bg-ink-3 text-white"
+                          ? "border-accent bg-accent text-white"
                           : "border-ink-4 bg-ink-2 hover:border-ink-5"
                       }`}
                       title={canSelect ? undefined : `No seleccionable en estado ${post.status}`}
@@ -340,7 +340,7 @@ export function PostsListClient({
             className={`flex items-center gap-3 rounded-xl px-4 py-3 shadow-xl border ${
               toast.kind === "success"
                 ? "bg-success border-success/40 text-white"
-                : "bg-ink-3 border-ink-4 text-white"
+                : "bg-ink-9 border-ink-9 text-white"
             }`}
           >
             {toast.kind === "success" ? (
@@ -376,7 +376,7 @@ export function PostsListClient({
       {/* Sticky bulk action toolbar */}
       {selected.size > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-lg px-4">
-          <div className="rounded-2xl bg-ink-3 text-white shadow-xl border border-ink-4 overflow-hidden">
+          <div className="rounded-2xl bg-ink-9 text-white shadow-xl border border-ink-9 overflow-hidden">
             {/* Top: selection summary + actions */}
             <div className="flex items-center gap-2 px-4 py-3">
               <span className="text-sm font-semibold flex-1">
@@ -388,7 +388,7 @@ export function PostsListClient({
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   action === "reschedule_relative" || action === "reschedule"
                     ? "bg-ink-2 text-ink-9"
-                    : "bg-ink-3 hover:bg-ink-4 text-white"
+                    : "bg-white/5 hover:bg-white/10 text-white"
                 }`}
               >
                 <CalendarIcon className="h-3.5 w-3.5" />
@@ -400,7 +400,7 @@ export function PostsListClient({
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   action === "cancel"
                     ? "bg-error text-white"
-                    : "bg-ink-3 hover:bg-error/90 hover:text-white text-ink-8"
+                    : "bg-white/5 hover:bg-error text-white/70 hover:text-white"
                 }`}
               >
                 <XCircle className="h-3.5 w-3.5" />
@@ -409,7 +409,7 @@ export function PostsListClient({
               <button
                 type="button"
                 onClick={clearSelection}
-                className="p-1.5 rounded-lg hover:bg-ink-3 text-ink-6 hover:text-white"
+                className="p-1.5 rounded-lg hover:bg-white/10 text-white/60 hover:text-white"
                 aria-label="Cerrar"
               >
                 <XIcon className="h-4 w-4" />
@@ -434,7 +434,7 @@ export function PostsListClient({
             )}
             {(action === "reschedule_relative" || action === "reschedule") && (
               <div className="px-4 pb-3 border-t border-ink-4 pt-3 space-y-2">
-                <div className="flex gap-1 bg-ink-3 rounded-lg p-1">
+                <div className="flex gap-1 bg-white/5 rounded-lg p-1">
                   <button
                     type="button"
                     onClick={() => setAction("reschedule_relative")}
@@ -456,7 +456,7 @@ export function PostsListClient({
                       type="number"
                       value={offsetHours}
                       onChange={(e) => setOffsetHours(parseInt(e.target.value || "0", 10))}
-                      className="w-20 bg-ink-3 border border-ink-4 rounded-md px-2 py-1.5 text-sm text-white focus:outline-none focus:border-accent"
+                      className="w-20 bg-white/10 border border-white/15 rounded-md px-2 py-1.5 text-sm text-white focus:outline-none focus:border-accent"
                       aria-label="Horas a desplazar"
                     />
                     <p className="text-xs text-ink-7 flex-1">
@@ -477,7 +477,7 @@ export function PostsListClient({
                       type="datetime-local"
                       value={publishAt}
                       onChange={(e) => setPublishAt(e.target.value)}
-                      className="flex-1 bg-ink-3 border border-ink-4 rounded-md px-2 py-1.5 text-sm text-white focus:outline-none focus:border-accent"
+                      className="flex-1 bg-white/10 border border-white/15 rounded-md px-2 py-1.5 text-sm text-white focus:outline-none focus:border-accent"
                     />
                     <button
                       type="button"
