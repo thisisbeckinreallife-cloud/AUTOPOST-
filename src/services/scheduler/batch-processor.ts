@@ -187,24 +187,25 @@ export async function createPostDraftFromParsed(
   const assetHashes = post.mediaFiles.map((f) => f.fileHash);
   const contentHash = computeContentHash(post.caption, assetHashes);
 
-  // Check for exact duplicates (same business + content)
+  // Dedup SOLO within-batch: dos posts idénticos dentro del MISMO ZIP se
+  // saltan, pero el mismo contenido subido en un batch nuevo SÍ se acepta.
+  // Esto permite al user iterar (re-subir versiones del mismo ZIP arreglando
+  // captions o renombrando carpetas) sin que el sistema rechace silenciosamente.
+  //
+  // Antes: dedup global por businessId + contentHash → bloqueaba re-uploads
+  // legítimos del mismo material en batches separados.
   const existing = await db.postDraft.findFirst({
     where: {
       businessId,
+      batchId, // ← clave: solo mismo batch
       contentHash,
     },
   });
 
   if (existing) {
-    // If the existing post is cancelled or failed, delete it so we can re-create
-    if (["CANCELLED", "FAILED"].includes(existing.status)) {
-      await db.publishJob.deleteMany({ where: { postDraftId: existing.id } });
-      await db.mediaAsset.deleteMany({ where: { postDraftId: existing.id } });
-      await db.postDraft.delete({ where: { id: existing.id } });
-    } else {
-      // Active duplicate — skip
-      return;
-    }
+    // Dedup dentro del mismo batch: ignoramos. No tiene sentido tener dos
+    // PostDraft con idéntico hash en el mismo batch.
+    return;
   }
 
   const publishAt = parseISO(post.metaJson.publish_at);
