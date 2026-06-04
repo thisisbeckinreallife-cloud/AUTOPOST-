@@ -36,7 +36,7 @@ function rangeStart(range: Range): Date | null {
 
 function actionTone(action: string): string {
   if (action.includes("FAILED") || action.includes("DELETED") || action.includes("REVOKED") || action.includes("ERROR")) {
-    return "bg-red-100 text-red-800 border-red-300";
+    return "bg-error-soft text-error border-red-300";
   }
   if (action.includes("PUBLISHED") || action.includes("CREATED") || action.includes("CONFIRMED")) {
     return "bg-green-100 text-green-800 border-green-300";
@@ -44,7 +44,7 @@ function actionTone(action: string): string {
   if (action.includes("UPDATED") || action.includes("SCHEDULED") || action.includes("UPLOADED")) {
     return "bg-blue-100 text-blue-800 border-blue-300";
   }
-  return "bg-zinc-100 text-zinc-700 border-zinc-300";
+  return "bg-ink-3 text-ink-8 border-ink-4";
 }
 
 function groupByDay(logs: Array<{ createdAt: Date }>): Map<string, number[]> {
@@ -154,11 +154,11 @@ export default async function LogsPage({
       <div className="flex items-center justify-between gap-3 animate-fade-up">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200">
-            <FileText className="h-5 w-5 text-zinc-700" />
+            <FileText className="h-5 w-5 text-ink-8" />
           </div>
           <div>
-            <h1 className="font-display text-xl font-bold text-zinc-900">Actividad</h1>
-            <p className="text-zinc-600 text-sm mt-0.5">
+            <h1 className="font-display text-xl font-bold text-ink-9">Actividad</h1>
+            <p className="text-ink-7 text-sm mt-0.5">
               {total} {total === 1 ? "registro" : "registros"}
               {(actionFilter || category !== "all" || range !== "all" || q) && " (filtrado)"}
             </p>
@@ -171,7 +171,7 @@ export default async function LogsPage({
             ...(range !== "all" ? { range } : {}),
             ...(q ? { q } : {}),
           }).toString()}`}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-semibold hover:border-zinc-300 hover:bg-zinc-50 transition-colors shrink-0"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ink-2 border border-ink-4 text-ink-8 text-xs font-semibold hover:border-ink-4 hover:bg-ink-2 transition-colors shrink-0"
           title="Descargar CSV con los filtros aplicados"
         >
           <Download className="h-3.5 w-3.5" />
@@ -182,34 +182,34 @@ export default async function LogsPage({
       {/* Search + Range */}
       <form className="flex flex-col sm:flex-row gap-2" action="/logs" method="get">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-6 pointer-events-none" />
           <input
             type="search"
             name="q"
             defaultValue={q}
             placeholder="Buscar por ID o texto de acción..."
-            className="w-full pl-9 pr-9 py-2 rounded-lg bg-white border border-zinc-200 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-200"
+            className="w-full pl-9 pr-9 py-2 rounded-lg bg-ink-2 border border-ink-4 text-sm text-ink-9 placeholder-zinc-400 focus:outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-200"
           />
           {q && (
             <Link
               href={urlWith({ q: "", page: 1 })}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-zinc-100"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-ink-3"
               title="Limpiar búsqueda"
             >
-              <X className="h-3.5 w-3.5 text-zinc-500" />
+              <X className="h-3.5 w-3.5 text-ink-6" />
             </Link>
           )}
         </div>
         {category !== "all" && <input type="hidden" name="category" value={category} />}
         {range !== "all" && <input type="hidden" name="range" value={range} />}
 
-        <div className="flex gap-1 bg-white border border-zinc-200 rounded-lg p-1" role="group" aria-label="Rango de fechas">
+        <div className="flex gap-1 bg-ink-2 border border-ink-4 rounded-lg p-1" role="group" aria-label="Rango de fechas">
           {(["today", "7d", "30d", "all"] as Range[]).map((r) => (
             <Link
               key={r}
               href={urlWith({ range: r, page: 1 })}
               className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-                range === r ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900"
+                range === r ? "bg-ink-3 text-ink-9" : "text-ink-7 hover:text-ink-9"
               }`}
               aria-pressed={range === r}
             >
@@ -227,8 +227,8 @@ export default async function LogsPage({
             href={urlWith({ category: c.key, action: null, page: 1 })}
             className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
               category === c.key
-                ? "bg-zinc-900 text-white border-zinc-900"
-                : "bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
+                ? "bg-ink-3 text-ink-9 border-ink-5"
+                : "bg-ink-2 text-ink-8 border-ink-4 hover:border-ink-4 hover:bg-ink-2"
             }`}
             aria-pressed={category === c.key}
           >
@@ -243,7 +243,7 @@ export default async function LogsPage({
           <Link
             href={urlWith({ action: null, page: 1 })}
             className={`px-2.5 py-1 rounded-md text-[10px] font-mono font-semibold transition-all ${
-              !actionFilter ? "bg-zinc-200 text-zinc-900" : "bg-zinc-50 text-zinc-600 hover:bg-zinc-100"
+              !actionFilter ? "bg-ink-3 text-ink-9" : "bg-ink-2 text-ink-7 hover:bg-ink-3"
             }`}
           >
             Todas
@@ -253,7 +253,7 @@ export default async function LogsPage({
               key={action}
               href={urlWith({ action, page: 1 })}
               className={`px-2.5 py-1 rounded-md text-[10px] font-mono font-semibold transition-all ${
-                actionFilter === action ? "bg-zinc-200 text-zinc-900" : "bg-zinc-50 text-zinc-600 hover:bg-zinc-100"
+                actionFilter === action ? "bg-ink-3 text-ink-9" : "bg-ink-2 text-ink-7 hover:bg-ink-3"
               }`}
             >
               {action}
@@ -264,9 +264,9 @@ export default async function LogsPage({
 
       {/* Log table grouped by day */}
       {logs.length === 0 ? (
-        <div className="rounded-xl border border-zinc-200 bg-white py-16 text-center">
-          <FileText className="h-8 w-8 mx-auto mb-3 text-zinc-400" />
-          <p className="text-zinc-500 text-sm">No se encontraron registros con estos filtros.</p>
+        <div className="rounded-xl border border-ink-4 bg-ink-2 py-16 text-center">
+          <FileText className="h-8 w-8 mx-auto mb-3 text-ink-6" />
+          <p className="text-ink-6 text-sm">No se encontraron registros con estos filtros.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -274,10 +274,10 @@ export default async function LogsPage({
             if (indexes.length === 0) return null;
             return (
               <div key={dayLabel}>
-                <h2 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2 px-1">
+                <h2 className="text-[10px] font-bold uppercase tracking-widest text-ink-6 mb-2 px-1">
                   {dayLabel} · {indexes.length}
                 </h2>
-                <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden">
+                <div className="rounded-xl border border-ink-4 bg-ink-2 overflow-hidden">
                   <table className="w-full text-sm">
                     <tbody>
                       {indexes.map((idx) => {
@@ -285,9 +285,9 @@ export default async function LogsPage({
                         return (
                           <tr
                             key={log.id}
-                            className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50 transition-colors"
+                            className="border-b border-ink-3 last:border-0 hover:bg-ink-2 transition-colors"
                           >
-                            <td className="px-4 py-2.5 text-zinc-600 whitespace-nowrap text-xs tabular-nums w-[160px]">
+                            <td className="px-4 py-2.5 text-ink-7 whitespace-nowrap text-xs tabular-nums w-[160px]">
                               {formatDate(log.createdAt)}
                             </td>
                             <td className="px-4 py-2.5">
@@ -299,18 +299,18 @@ export default async function LogsPage({
                               {log.business ? (
                                 <Link
                                   href={`/businesses/${log.business.slug}`}
-                                  className="text-zinc-900 hover:underline font-medium"
+                                  className="text-ink-9 hover:underline font-medium"
                                 >
                                   {log.business.name}
                                 </Link>
                               ) : (
-                                <span className="text-zinc-400">—</span>
+                                <span className="text-ink-6">—</span>
                               )}
                             </td>
-                            <td className="px-4 py-2.5 text-zinc-600 text-xs">
+                            <td className="px-4 py-2.5 text-ink-7 text-xs">
                               {log.entityType && (
                                 <span className="inline-flex items-center gap-2">
-                                  <span className="text-zinc-500">{log.entityType}</span>
+                                  <span className="text-ink-6">{log.entityType}</span>
                                   {log.entityId && <CopyIdButton value={log.entityId} label="ID de entidad" />}
                                 </span>
                               )}
@@ -334,7 +334,7 @@ export default async function LogsPage({
             <Link key={p} href={urlWith({ page: p })} aria-current={p === page ? "page" : undefined}>
               <span
                 className={`inline-block px-3 py-1.5 rounded-md text-sm font-semibold transition-all ${
-                  p === page ? "bg-zinc-900 text-white" : "bg-white text-zinc-600 hover:bg-zinc-100 border border-zinc-200"
+                  p === page ? "bg-ink-3 text-ink-9" : "bg-ink-2 text-ink-7 hover:bg-ink-3 border border-ink-4"
                 }`}
               >
                 {p}

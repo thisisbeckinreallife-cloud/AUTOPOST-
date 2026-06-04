@@ -51,11 +51,11 @@ function fmtMonth(year: number, month: number): string {
 }
 
 function statusColor(status: string): string {
-  if (status === "PUBLISHED") return "bg-emerald-500";
-  if (status === "FAILED" || status === "CANCELLED") return "bg-red-500";
-  if (status === "PUBLISHING") return "bg-amber-500";
-  if (status === "VALIDATED" || status === "READY" || status === "DRAFT") return "bg-zinc-500";
-  return "bg-blue-500"; // SCHEDULED
+  if (status === "PUBLISHED") return "bg-success";
+  if (status === "FAILED" || status === "CANCELLED") return "bg-error";
+  if (status === "PUBLISHING") return "bg-warning";
+  if (status === "VALIDATED" || status === "READY" || status === "DRAFT") return "bg-ink-20";
+  return "bg-info"; // SCHEDULED
 }
 
 function typeIcon(postType: string) {
@@ -326,27 +326,27 @@ export function CalendarView({
         <div className="flex items-center gap-2">
           <Link
             href={urlFor(prevMonth.year, prevMonth.month)}
-            className="p-1.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 transition-colors"
+            className="p-1.5 rounded-lg border border-ink-4 bg-ink-2 hover:bg-ink-2 text-ink-8 transition-colors"
             aria-label="Mes anterior"
           >
             <ChevronLeft className="h-4 w-4" />
           </Link>
-          <h2 className="text-base font-semibold text-zinc-900 min-w-[140px] text-center tabular-nums">
+          <h2 className="text-base font-semibold text-ink-9 min-w-[140px] text-center tabular-nums">
             {MONTH_ES[month]} {year}
           </h2>
           <Link
             href={urlFor(nextMonth.year, nextMonth.month)}
-            className="p-1.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 transition-colors"
+            className="p-1.5 rounded-lg border border-ink-4 bg-ink-2 hover:bg-ink-2 text-ink-8 transition-colors"
             aria-label="Mes siguiente"
           >
             <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
-        <p className="text-xs text-zinc-500 flex-1 min-w-[200px]">
+        <p className="text-xs text-ink-6 flex-1 min-w-[200px]">
           Arrastra un post a otro día · clic para cambiar fecha y hora exacta
         </p>
         {savedFlash && (
-          <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-medium">
+          <span className="inline-flex items-center gap-1 text-xs text-success font-medium">
             <Check className="h-3 w-3" /> Guardado
           </span>
         )}
@@ -355,7 +355,7 @@ export function CalendarView({
             type="button"
             onClick={() => setCancelConfirm(true)}
             disabled={cancelling || activating}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-md border border-red-300 text-red-700 font-medium text-sm hover:bg-red-50 disabled:opacity-50 transition-all"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-md border border-red-300 text-error font-medium text-sm hover:bg-error-soft disabled:opacity-50 transition-all"
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
             {cancelling
@@ -368,7 +368,7 @@ export function CalendarView({
             type="button"
             onClick={activateAll}
             disabled={activating || cancelling}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-md bg-emerald-700 text-white font-medium text-sm shadow-md hover:bg-emerald-800 disabled:opacity-50 transition-all"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-md bg-success text-white font-medium text-sm shadow-md hover:bg-success disabled:opacity-50 transition-all"
           >
             <Check className="h-4 w-4" aria-hidden="true" />
             {activating
@@ -382,9 +382,9 @@ export function CalendarView({
         <div
           role="alertdialog"
           aria-labelledby="cancel-confirm-title"
-          className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 flex items-center justify-between flex-wrap gap-3"
+          className="rounded-xl bg-error-soft border border-error/30 px-4 py-3 flex items-center justify-between flex-wrap gap-3"
         >
-          <div className="flex items-center gap-2 text-sm text-red-800">
+          <div className="flex items-center gap-2 text-sm text-error">
             <Trash2 className="h-4 w-4" />
             <span id="cancel-confirm-title">
               ¿Cancelar {cancellablePosts.length} {cancellablePosts.length === 1 ? "post" : "posts"}?
@@ -395,7 +395,7 @@ export function CalendarView({
             <button
               type="button"
               onClick={() => setCancelConfirm(false)}
-              className="inline-flex items-center h-9 px-3 rounded-md border border-zinc-300 text-zinc-800 font-medium text-sm hover:bg-zinc-100"
+              className="inline-flex items-center h-9 px-3 rounded-md border border-ink-4 text-ink-9 font-medium text-sm hover:bg-ink-3"
             >
               No
             </button>
@@ -413,7 +413,7 @@ export function CalendarView({
       {activateResult && (
         <div
           role="status"
-          className="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700 flex items-center gap-2 animate-fade-in"
+          className="rounded-xl bg-success-soft border border-success/30 px-4 py-3 text-sm text-success flex items-center gap-2 animate-fade-in"
         >
           <Check className="h-4 w-4" />
           {activateResult.scheduled} publicaciones programadas correctamente
@@ -422,15 +422,15 @@ export function CalendarView({
       )}
 
       {error && (
-        <div role="alert" className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">
+        <div role="alert" className="rounded-xl bg-error-soft border border-error/30 px-3 py-2 text-xs text-error">
           {error}
         </div>
       )}
 
-      <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden">
-        <div className="grid grid-cols-7 bg-zinc-50 border-b border-zinc-100">
+      <div className="rounded-xl border border-ink-4 bg-ink-2 overflow-hidden">
+        <div className="grid grid-cols-7 bg-ink-2 border-b border-ink-3">
           {DAY_ES.map((d) => (
-            <div key={d} className="px-2 py-2 text-[10px] font-bold text-zinc-600 uppercase tracking-widest text-center">
+            <div key={d} className="px-2 py-2 text-[10px] font-bold text-ink-7 uppercase tracking-widest text-center">
               {d}
             </div>
           ))}
@@ -448,13 +448,13 @@ export function CalendarView({
                 onDragOver={inMonth ? (e) => onDayDragOver(e, dayNum) : undefined}
                 onDrop={inMonth ? (e) => onDayDrop(e, dayNum) : undefined}
                 onDragLeave={() => setDragOverDay((d) => (d === dayNum ? null : d))}
-                className={`border-r border-b border-zinc-100 last:border-r-0 p-1.5 overflow-hidden transition-colors ${
+                className={`border-r border-b border-ink-3 last:border-r-0 p-1.5 overflow-hidden transition-colors ${
                   !inMonth
-                    ? "bg-zinc-50"
+                    ? "bg-ink-2"
                     : isDragOver
-                      ? "bg-cyan-100 ring-2 ring-cyan-400 ring-inset"
+                      ? "bg-accent-soft ring-2 ring-accent ring-inset"
                       : isToday
-                        ? "bg-cyan-50"
+                        ? "bg-accent-soft"
                         : ""
                 }`}
               >
@@ -464,14 +464,14 @@ export function CalendarView({
                       <span
                         className={`text-[11px] font-semibold tabular-nums ${
                           isToday
-                            ? "bg-cyan-700 text-white px-1.5 py-0.5 rounded-full"
-                            : "text-zinc-700"
+                            ? "bg-accent text-white px-1.5 py-0.5 rounded-full"
+                            : "text-ink-8"
                         }`}
                       >
                         {dayNum}
                       </span>
                       {dayPosts.length > 2 && (
-                        <span className="text-[9px] font-bold text-zinc-400 font-mono">
+                        <span className="text-[9px] font-bold text-ink-6 font-mono">
                           {dayPosts.length}
                         </span>
                       )}
@@ -493,7 +493,7 @@ export function CalendarView({
                                 ? `${post.caption.slice(0, 80)}${post.caption.length > 80 ? "…" : ""}\n\nClic para editar fecha/hora · arrastra para mover de día`
                                 : `${post.status} — no editable`
                             }
-                            className={`group w-full flex items-center gap-1.5 rounded-md bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 px-1 py-0.5 transition-colors overflow-hidden text-left ${
+                            className={`group w-full flex items-center gap-1.5 rounded-md bg-ink-2 hover:bg-ink-3 border border-ink-4 px-1 py-0.5 transition-colors overflow-hidden text-left ${
                               dragId === post.id ? "opacity-30" : ""
                             } ${!canDrag ? "cursor-not-allowed opacity-70" : "cursor-grab active:cursor-grabbing"}`}
                           >
@@ -509,14 +509,14 @@ export function CalendarView({
                               />
                             )}
                             {post.firstMedia?.mimeType.startsWith("video/") && (
-                              <div className="h-4 w-4 shrink-0 rounded bg-zinc-700 flex items-center justify-center">
+                              <div className="h-4 w-4 shrink-0 rounded bg-ink-4 flex items-center justify-center">
                                 <Film className="h-2 w-2 text-white" />
                               </div>
                             )}
                             {!post.firstMedia && (
-                              <span className="text-zinc-500">{typeIcon(post.postType)}</span>
+                              <span className="text-ink-6">{typeIcon(post.postType)}</span>
                             )}
-                            <span className="text-[10px] text-zinc-700 truncate flex-1 tabular-nums">
+                            <span className="text-[10px] text-ink-8 truncate flex-1 tabular-nums">
                               {formatTimeInTz(post.publishAt as Date, timezone)}
                             </span>
                           </button>
@@ -525,7 +525,7 @@ export function CalendarView({
                       {dayPosts.length > 2 && (
                         <Link
                           href={`/businesses/${slug}/posts?view=list&date=${year}-${String(month + 1).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`}
-                          className="block text-[10px] text-zinc-500 hover:text-zinc-900 px-1 font-medium"
+                          className="block text-[10px] text-ink-6 hover:text-ink-9 px-1 font-medium"
                         >
                           +{dayPosts.length - 2} más
                         </Link>
@@ -540,21 +540,21 @@ export function CalendarView({
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center gap-4 text-[11px] text-zinc-600">
+      <div className="flex flex-wrap items-center gap-4 text-[11px] text-ink-7">
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-zinc-500" /> Borrador / Validado
+          <span className="h-1.5 w-1.5 rounded-full bg-ink-20" /> Borrador / Validado
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-blue-500" /> Programado
+          <span className="h-1.5 w-1.5 rounded-full bg-info" /> Programado
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Publicando
+          <span className="h-1.5 w-1.5 rounded-full bg-warning" /> Publicando
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Publicado
+          <span className="h-1.5 w-1.5 rounded-full bg-success" /> Publicado
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-red-500" /> Fallido / Cancelado
+          <span className="h-1.5 w-1.5 rounded-full bg-error" /> Fallido / Cancelado
         </span>
       </div>
 
@@ -633,18 +633,18 @@ function EditPostModal({
         type="button"
         aria-label="Cerrar"
         onClick={onClose}
-        className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-ink-0/80 backdrop-blur-sm"
       />
       <form
         onSubmit={handleSave}
-        className="relative z-10 w-full max-w-md bg-white border border-zinc-200 rounded-xl shadow-2xl p-6"
+        className="relative z-10 w-full max-w-md bg-ink-2 border border-ink-4 rounded-xl shadow-2xl p-6"
       >
         <div className="flex items-start justify-between mb-4 gap-4">
           <div>
-            <h3 id="edit-title" className="text-lg font-semibold text-zinc-900 tracking-tight">
+            <h3 id="edit-title" className="text-lg font-semibold text-ink-9 tracking-tight">
               Reagendar publicación
             </h3>
-            <p className="text-xs text-zinc-500 mt-1">
+            <p className="text-xs text-ink-6 mt-1">
               {post.postType} · {post.mediaCount} archivo{post.mediaCount === 1 ? "" : "s"}
             </p>
           </div>
@@ -652,19 +652,19 @@ function EditPostModal({
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="h-8 w-8 inline-flex items-center justify-center rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"
+            className="h-8 w-8 inline-flex items-center justify-center rounded-md text-ink-6 hover:text-ink-9 hover:bg-ink-3"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {post.caption && (
-          <p className="text-sm text-zinc-700 bg-zinc-50 border border-zinc-200 rounded-md px-3 py-2 mb-4 line-clamp-3">
+          <p className="text-sm text-ink-8 bg-ink-2 border border-ink-4 rounded-md px-3 py-2 mb-4 line-clamp-3">
             {post.caption}
           </p>
         )}
 
-        <label htmlFor="publish-at" className="block text-sm font-medium text-zinc-800 mb-2">
+        <label htmlFor="publish-at" className="block text-sm font-medium text-ink-9 mb-2">
           <CalendarIcon className="h-4 w-4 inline mr-1.5 -mt-0.5" />
           Fecha y hora de publicación
         </label>
@@ -673,32 +673,32 @@ function EditPostModal({
           type="datetime-local"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="w-full h-11 px-3 rounded-md border border-zinc-300 bg-white text-sm text-zinc-900 focus-visible:outline-none focus-visible:border-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-200"
+          className="w-full h-11 px-3 rounded-md border border-ink-4 bg-ink-2 text-sm text-ink-9 focus-visible:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent"
           required
         />
-        <p className="text-xs text-zinc-500 mt-2">
-          Vista previa: <span className="font-medium text-zinc-700">{previewLabel}</span>
+        <p className="text-xs text-ink-6 mt-2">
+          Vista previa: <span className="font-medium text-ink-8">{previewLabel}</span>
         </p>
 
         <div className="flex gap-2 justify-end mt-6">
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center justify-center h-10 px-4 rounded-md border border-zinc-300 text-zinc-800 font-medium text-sm hover:bg-zinc-50"
+            className="inline-flex items-center justify-center h-10 px-4 rounded-md border border-ink-4 text-ink-9 font-medium text-sm hover:bg-ink-2"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center justify-center h-10 px-4 rounded-md bg-cyan-700 text-white font-medium text-sm hover:bg-cyan-800 disabled:opacity-50"
+            className="inline-flex items-center justify-center h-10 px-4 rounded-md bg-accent text-white font-medium text-sm hover:bg-accent disabled:opacity-50"
           >
             {saving ? "Guardando…" : "Guardar fecha"}
           </button>
         </div>
 
-        <p className="text-[11px] text-zinc-500 mt-4">
-          <Link href={`/businesses/${slug}/posts/${post.id}`} className="underline hover:text-zinc-900">
+        <p className="text-[11px] text-ink-6 mt-4">
+          <Link href={`/businesses/${slug}/posts/${post.id}`} className="underline hover:text-ink-9">
             Ver detalle del post →
           </Link>
         </p>

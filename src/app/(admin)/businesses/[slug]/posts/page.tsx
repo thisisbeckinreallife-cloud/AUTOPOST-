@@ -152,11 +152,11 @@ export default async function PostsPage({
 
       <div className="flex items-start justify-between animate-fade-up gap-4">
         <div>
-          <h1 className="font-display text-xl font-bold text-zinc-900">
+          <h1 className="font-display text-xl font-bold text-ink-9">
             {business.name} — Posts
           </h1>
-          <p className="text-zinc-600 mt-1 text-sm">
-            <span className="text-zinc-900 font-semibold">{total}</span> post{total !== 1 ? "s" : ""}
+          <p className="text-ink-7 mt-1 text-sm">
+            <span className="text-ink-9 font-semibold">{total}</span> post{total !== 1 ? "s" : ""}
             {statusFilter && <> · filtrado por {statusFilter}</>}
             {view === "calendar" && <> · vista calendario</>}
           </p>
@@ -164,11 +164,11 @@ export default async function PostsPage({
 
         <div className="flex items-center gap-2">
           {/* View toggle */}
-          <div className="flex gap-1 bg-white border border-zinc-200 rounded-lg p-1" role="group" aria-label="Vista">
+          <div className="flex gap-1 bg-ink-2 border border-ink-4 rounded-lg p-1" role="group" aria-label="Vista">
             <Link
               href={urlWith({ view: "list" })}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-                view === "list" ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900"
+                view === "list" ? "bg-ink-3 text-ink-9" : "text-ink-7 hover:text-ink-9"
               }`}
               aria-pressed={view === "list"}
             >
@@ -178,7 +178,7 @@ export default async function PostsPage({
             <Link
               href={urlWith({ view: "calendar" })}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-                view === "calendar" ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900"
+                view === "calendar" ? "bg-ink-3 text-ink-9" : "text-ink-7 hover:text-ink-9"
               }`}
               aria-pressed={view === "calendar"}
             >
@@ -188,7 +188,7 @@ export default async function PostsPage({
           </div>
           <a
             href={`/api/exports/posts.csv?slug=${slug}${statusFilter ? `&status=${statusFilter}` : ""}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-zinc-200 text-zinc-700 text-xs font-semibold hover:border-zinc-300 hover:bg-zinc-50 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ink-2 border border-ink-4 text-ink-8 text-xs font-semibold hover:border-ink-4 hover:bg-ink-2 transition-colors"
             title="Descargar CSV con los posts filtrados"
           >
             <Download className="h-3.5 w-3.5" />
@@ -203,8 +203,8 @@ export default async function PostsPage({
           href={`/businesses/${params.slug}/posts`}
           className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
             !statusFilter
-              ? "bg-zinc-900 text-white border-zinc-900"
-              : "bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
+              ? "bg-ink-3 text-ink-9 border-ink-5"
+              : "bg-ink-2 text-ink-8 border-ink-4 hover:border-ink-4 hover:bg-ink-2"
           }`}
           aria-pressed={!statusFilter}
         >
@@ -216,8 +216,8 @@ export default async function PostsPage({
             href={`/businesses/${params.slug}/posts?status=${s}`}
             className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border font-mono ${
               statusFilter === s
-                ? "bg-zinc-900 text-white border-zinc-900"
-                : "bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
+                ? "bg-ink-3 text-ink-9 border-ink-5"
+                : "bg-ink-2 text-ink-8 border-ink-4 hover:border-ink-4 hover:bg-ink-2"
             }`}
             aria-pressed={statusFilter === s}
           >
@@ -235,12 +235,12 @@ export default async function PostsPage({
           preservedQuery={preservedQuery.toString()}
         />
       ) : listPosts.length === 0 ? (
-        <div className="text-center py-20 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 animate-fade-up">
-          <div className="w-14 h-14 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center mx-auto mb-4">
-            <Search className="h-7 w-7 text-zinc-400" />
+        <div className="text-center py-20 rounded-2xl border border-dashed border-ink-4 bg-ink-2 animate-fade-up">
+          <div className="w-14 h-14 rounded-2xl bg-ink-2 border border-ink-4 flex items-center justify-center mx-auto mb-4">
+            <Search className="h-7 w-7 text-ink-6" />
           </div>
-          <h3 className="text-base font-semibold text-zinc-900 mb-1">No se encontraron posts</h3>
-          <p className="text-zinc-600 text-sm">Prueba cambiando los filtros</p>
+          <h3 className="text-base font-semibold text-ink-9 mb-1">No se encontraron posts</h3>
+          <p className="text-ink-7 text-sm">Prueba cambiando los filtros</p>
         </div>
       ) : (
         <PostsListClient posts={listPosts} slug={params.slug} timezone={business.timezone} />
@@ -258,8 +258,8 @@ export default async function PostsPage({
               aria-current={p === page ? "page" : undefined}
               className={`inline-block px-3 py-1.5 rounded-md text-sm font-semibold transition-all ${
                 p === page
-                  ? "bg-zinc-900 text-white"
-                  : "bg-white text-zinc-600 hover:bg-zinc-100 border border-zinc-200"
+                  ? "bg-ink-3 text-ink-9"
+                  : "bg-ink-2 text-ink-7 hover:bg-ink-3 border border-ink-4"
               }`}
             >
               {p}

@@ -225,7 +225,7 @@ export default function PostDetailPage() {
   }
 
   if (!post) {
-    return <div className="text-zinc-500">Post no encontrado.</div>;
+    return <div className="text-ink-6">Post no encontrado.</div>;
   }
 
   return (
@@ -239,10 +239,10 @@ export default function PostDetailPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-display text-xl font-bold text-zinc-900">
+          <h1 className="font-display text-xl font-bold text-ink-9">
             {post.sourceFolderName}
           </h1>
-          <p className="text-zinc-600 text-sm mt-1">
+          <p className="text-ink-7 text-sm mt-1">
             {post.business.name} &middot; {post.postType}
           </p>
         </div>
@@ -269,7 +269,7 @@ export default function PostDetailPage() {
       </div>
 
       {error && (
-        <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+        <div className="rounded-xl bg-error-soft border border-error/30 px-4 py-3 text-sm text-error">
           {error}
         </div>
       )}
@@ -292,9 +292,9 @@ export default function PostDetailPage() {
 
       {/* Last error */}
       {post.lastError && (
-        <div className="rounded-xl bg-red-50 border border-red-300 px-4 py-3 flex items-start gap-2">
-          <AlertTriangle className="h-4 w-4 text-red-700 mt-0.5 shrink-0" />
-          <p className="text-sm text-red-800">{post.lastError}</p>
+        <div className="rounded-xl bg-error-soft border border-red-300 px-4 py-3 flex items-start gap-2">
+          <AlertTriangle className="h-4 w-4 text-error mt-0.5 shrink-0" />
+          <p className="text-sm text-error">{post.lastError}</p>
         </div>
       )}
 
@@ -334,7 +334,7 @@ export default function PostDetailPage() {
           <CardTitle className="text-base">Caption</CardTitle>
         </CardHeader>
         <CardContent>
-          <pre className="whitespace-pre-wrap text-sm text-zinc-800 font-sans leading-relaxed">
+          <pre className="whitespace-pre-wrap text-sm text-ink-9 font-sans leading-relaxed">
             {post.caption}
           </pre>
         </CardContent>
@@ -444,7 +444,7 @@ export default function PostDetailPage() {
             <Row label="Batch">
               <a
                 href={`/businesses/${slug}/batches/${post.batch.id}`}
-                className="text-zinc-900 hover:underline font-medium"
+                className="text-ink-9 hover:underline font-medium"
               >
                 {post.batch.originalFilename}
               </a>
@@ -464,14 +464,14 @@ export default function PostDetailPage() {
               <div key={job.id} className="mb-4 last:mb-0">
                 <div className="flex items-center gap-2 mb-2">
                   <StatusBadge status={job.status} />
-                  <span className="text-xs text-zinc-600">
+                  <span className="text-xs text-ink-7">
                     Job <span className="font-mono">{job.id.slice(0, 8)}</span> · Programado {formatDate(job.scheduledFor)}
                   </span>
                 </div>
                 {job.attempts.map((attempt) => (
                   <div
                     key={attempt.id}
-                    className="ml-4 pl-4 border-l border-zinc-200 py-1.5"
+                    className="ml-4 pl-4 border-l border-ink-4 py-1.5"
                   >
                     <div className="flex items-center gap-2 text-xs">
                       <span
@@ -479,18 +479,18 @@ export default function PostDetailPage() {
                           attempt.success === true
                             ? "text-green-700 font-semibold"
                             : attempt.success === false
-                            ? "text-red-700 font-semibold"
-                            : "text-zinc-600 font-semibold"
+                            ? "text-error font-semibold"
+                            : "text-ink-7 font-semibold"
                         }
                       >
                         Intento #{attempt.attemptNumber}
                       </span>
-                      <span className="text-zinc-500">
+                      <span className="text-ink-6">
                         {formatDate(attempt.startedAt)}
                       </span>
                     </div>
                     {attempt.errorMessage && (
-                      <p className="text-xs text-red-700 mt-1">
+                      <p className="text-xs text-error mt-1">
                         {attempt.errorCode && (
                           <span className="font-mono mr-1">[{attempt.errorCode}]</span>
                         )}
@@ -517,7 +517,7 @@ export default function PostDetailPage() {
           <button
             type="button"
             onClick={closeLightbox}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+            className="absolute top-4 right-4 p-2 rounded-full bg-ink-2/10 hover:bg-ink-2/20 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             aria-label="Cerrar (Escape)"
           >
             <XCircle className="h-6 w-6" />
@@ -528,7 +528,7 @@ export default function PostDetailPage() {
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); lightboxPrev(); }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-ink-2/10 hover:bg-ink-2/20 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                 aria-label="Anterior (flecha izquierda)"
               >
                 <ChevronLeft className="h-6 w-6" />
@@ -536,7 +536,7 @@ export default function PostDetailPage() {
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); lightboxNext(); }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-ink-2/10 hover:bg-ink-2/20 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                 aria-label="Siguiente (flecha derecha)"
               >
                 <ChevronRight className="h-6 w-6" />
@@ -585,12 +585,12 @@ function MediaThumb({ asset, onOpen }: { asset: MediaAsset; onOpen: () => void }
 
   if (broken || (!isImage && !isVideo)) {
     return (
-      <div className="aspect-square rounded-lg border border-zinc-200 bg-zinc-50 flex flex-col items-center justify-center text-center p-3">
-        {isVideo ? <Film className="h-6 w-6 text-zinc-400 mb-2" /> : <ImageIcon className="h-6 w-6 text-zinc-400 mb-2" />}
-        <p className="text-[11px] text-zinc-600 font-medium truncate w-full" title={asset.originalFilename}>
+      <div className="aspect-square rounded-lg border border-ink-4 bg-ink-2 flex flex-col items-center justify-center text-center p-3">
+        {isVideo ? <Film className="h-6 w-6 text-ink-6 mb-2" /> : <ImageIcon className="h-6 w-6 text-ink-6 mb-2" />}
+        <p className="text-[11px] text-ink-7 font-medium truncate w-full" title={asset.originalFilename}>
           {asset.originalFilename}
         </p>
-        <p className="text-[10px] text-zinc-500 mt-0.5">
+        <p className="text-[10px] text-ink-6 mt-0.5">
           {asset.mimeType} · {sizeKb} KB
         </p>
       </div>
@@ -601,7 +601,7 @@ function MediaThumb({ asset, onOpen }: { asset: MediaAsset; onOpen: () => void }
     <button
       type="button"
       onClick={onOpen}
-      className="group relative block w-full rounded-lg overflow-hidden border border-zinc-200 bg-zinc-100 hover:border-zinc-400 hover:shadow-md transition-all"
+      className="group relative block w-full rounded-lg overflow-hidden border border-ink-4 bg-ink-3 hover:border-zinc-400 hover:shadow-md transition-all"
       title={asset.originalFilename}
       style={{ aspectRatio: "1 / 1" }}
     >
@@ -651,8 +651,8 @@ function Row({
 }) {
   return (
     <div className="flex gap-4">
-      <dt className="w-36 text-zinc-600 shrink-0">{label}</dt>
-      <dd className="text-zinc-900 font-medium">{children}</dd>
+      <dt className="w-36 text-ink-7 shrink-0">{label}</dt>
+      <dd className="text-ink-9 font-medium">{children}</dd>
     </div>
   );
 }
