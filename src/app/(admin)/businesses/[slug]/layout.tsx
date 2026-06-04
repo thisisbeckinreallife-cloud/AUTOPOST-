@@ -86,7 +86,7 @@ export default async function BusinessLayout({
   }));
 
   return (
-    <div className="ap-root" style={{ background: "var(--ap-paper)", minHeight: "100vh" }}>
+    <div data-theme="light" className="ap-root" style={{ background: "var(--ap-paper)", minHeight: "100vh" }}>
       {/* Header del negocio */}
       <div
         style={{

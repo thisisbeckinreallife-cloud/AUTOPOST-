@@ -87,7 +87,7 @@ export default async function AdminLayout({
   const status = await getSidebarStatus();
 
   return (
-    <div className="ap-root min-h-screen bg-ink-1 relative">
+    <div data-theme="light" className="ap-root min-h-screen bg-ink-1 relative">
       {/* Skip link for keyboard users (WCAG AA) */}
       <a
         href="#main-content"

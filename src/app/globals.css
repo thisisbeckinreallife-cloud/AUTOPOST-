@@ -21,28 +21,46 @@
   --motion-slow:    400ms;
   --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* ── Ink & Rust como CSS vars (componentes que usan var(--ink-N)) ── */
-  --ink-0:             #08090E;
-  --ink-1:             #0B0E14;
-  --ink-2:             #12161F;
-  --ink-3:             #1A1F2B;
-  --ink-4:             #262D3B;
-  --ink-5:             #36404F;
-  --ink-6:             #757E8E;
-  --ink-7:             #A3ABBA;
-  --ink-8:             #C5CBD6;
-  --ink-9:             #EDEFF4;
-  --ink-10:            #FFFFFF;
+  /* ══════════════════════════════════════════════════════════════════
+     TOKENS THEMEABLES (triplets RGB) — Tailwind los lee como
+     rgb(var(--x) / <alpha-value>). :root = DARK (Ink & Rust, landing).
+     [data-theme="light"] (más abajo) los reapunta a LIGHT estilo Resend
+     SOLO dentro del área admin/dashboard. Misma clase `bg-ink-2` rinde
+     dark en la landing, blanco en el dashboard. */
+  --ink-0:   8 9 14;
+  --ink-1:   11 14 20;
+  --ink-2:   18 22 31;
+  --ink-3:   26 31 43;
+  --ink-4:   38 45 59;
+  --ink-5:   54 64 79;
+  --ink-6:   117 126 142;
+  --ink-7:   163 171 186;
+  --ink-8:   197 203 214;
+  --ink-9:   237 239 244;
+  --ink-10:  255 255 255;
 
-  /* Acento coral + dorado como CSS vars */
+  --accent:         232 117 89;
+  --accent-hover:   240 138 112;
+  --accent-active:  212 95 68;
+  --accent-strong:  244 155 130;
+  --gold:           227 184 92;
+  --gold-strong:    237 199 114;
+  --success:        79 178 134;
+  --success-strong: 107 199 158;
+  --warning:        227 184 92;
+  --warning-strong: 237 199 114;
+  --error:          226 87 74;
+  --error-strong:   236 116 104;
+  --info:           110 146 196;
+  --info-strong:    141 171 214;
+
+  /* Acento coral como color directo (landing/auth usan var(--pri)/var(--ai)) */
   --pri:               #E87559;
   --pri-dim:           #D45F44;
   --pri-soft:          rgba(232, 117, 89, 0.12);
   --ai:                #E87559;
   --ai-dim:            #D45F44;
   --ai-soft:           rgba(232, 117, 89, 0.14);
-  --gold:              #E3B85C;
-  --gold-soft:         rgba(227, 184, 92, 0.12);
 
   /* Semánticos como CSS vars (compat con componentes np-*) */
   --np-success:        #4FB286;
@@ -95,6 +113,66 @@
   --ap-spring: cubic-bezier(.34,1.56,.64,1);
 
   color-scheme: dark;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TEMA LIGHT "RESEND" — SOLO ÁREA ADMIN/DASHBOARD.
+   Se activa con [data-theme="light"] en el layout (admin). La landing,
+   auth, legal y páginas públicas NO lo llevan → siguen en dark Ink & Rust.
+   Fondo blanco nítido, hairlines #EBEBEB, tinta neutra, coral AA #C2410C.
+   La escala ink se invierte semánticamente: 1/2 = lienzo/card blancos,
+   7/8/9 = tinta oscura, 4/5 = bordes. ink-0 queda oscuro (backdrops +
+   texto sobre acento).
+   ══════════════════════════════════════════════════════════════════════════ */
+[data-theme="light"] {
+  --ink-0:   26 26 26;     /* #1A1A1A — backdrops de modal, texto sobre coral */
+  --ink-1:   255 255 255;  /* #FFFFFF — lienzo de página */
+  --ink-2:   255 255 255;  /* #FFFFFF — card (la define el borde ink-4) */
+  --ink-3:   250 250 250;  /* #FAFAFA — surface-2: sidebar, hover, header tabla */
+  --ink-4:   235 235 235;  /* #EBEBEB — hairline / borde de card */
+  --ink-5:   212 212 212;  /* #D4D4D4 — borde fuerte / inputs */
+  --ink-6:   138 138 138;  /* #8A8A8A — texto bajo / meta */
+  --ink-7:   115 115 115;  /* #737373 — texto medio */
+  --ink-8:   64 64 64;     /* #404040 — body */
+  --ink-9:   26 26 26;     /* #1A1A1A — texto alto / títulos */
+  --ink-10:  26 26 26;
+
+  --accent:         232 117 89;  /* #E87559 — coral de marca: rellenos, puntos */
+  --accent-hover:   212 95 68;   /* #D45F44 */
+  --accent-active:  194 65 12;   /* #C2410C */
+  --accent-strong:  194 65 12;   /* #C2410C — coral AA para texto sobre blanco */
+  --gold:           180 83 9;    /* #B45309 — ámbar legible (datos/KPI) */
+  --gold-strong:    146 64 14;   /* #92400E */
+  --success:        6 118 71;    /* #067647 */
+  --success-strong: 4 120 87;    /* #047857 */
+  --warning:        181 71 8;    /* #B54708 */
+  --warning-strong: 146 64 14;   /* #92400E */
+  --error:          180 35 24;   /* #B42318 */
+  --error-strong:   145 32 24;   /* #912018 */
+  --info:           71 84 103;   /* #475467 — gris-azul neutro (estado "programado") */
+  --info-strong:    52 64 84;    /* #344054 */
+
+  /* Sistema --ap-* reapuntado a light */
+  --ap-paper:    #FFFFFF;
+  --ap-paper-2:  #FAFAFA;
+  --ap-ink:      #1A1A1A;
+  --ap-ink-2:    #404040;
+  --ap-ink-3:    #737373;
+  --ap-ink-4:    #8A8A8A;
+  --ap-rule:     #EBEBEB;
+  --ap-night:    #FFFFFF;
+  --ap-night-2:  #FAFAFA;
+  --ap-night-3:  #F2F4F7;
+  --ap-stamp:    #C2410C;   /* coral AA: legible como texto y como relleno sobre blanco */
+  --ap-stamp-2:  #9A3412;
+  --ap-olive:    #067647;
+  --ap-mustard:  #B45309;
+  --ap-line:     #EBEBEB;
+  --ap-line-2:   #E1E1E1;
+
+  color-scheme: light;
+  background: #FFFFFF;
+  color: #404040;
 }
 
 /* ── Clases del sistema editorial (.ap-*) DEFINIDAS por fin ──────────────

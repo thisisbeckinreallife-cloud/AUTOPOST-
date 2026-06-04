@@ -93,7 +93,7 @@ export function Hero() {
           <span
             className="inline-block"
             style={{
-              background: "linear-gradient(135deg, var(--ink-9) 0%, var(--pri) 60%, var(--ai) 100%)",
+              background: "linear-gradient(135deg, rgb(var(--ink-9)) 0%, var(--pri) 60%, var(--ai) 100%)",
               WebkitBackgroundClip: "text",
               backgroundClip: "text",
               WebkitTextFillColor: "transparent",

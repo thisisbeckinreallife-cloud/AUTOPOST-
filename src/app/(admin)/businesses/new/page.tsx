@@ -78,7 +78,7 @@ export default function NewBusinessPage() {
   return (
     <div className="max-w-lg">
       <div className="mb-6 animate-fade-up">
-        <h1 className="font-display text-xl font-bold text-white">Nueva cuenta</h1>
+        <h1 className="font-display text-xl font-bold text-ink-9">Nueva cuenta</h1>
         <p className="text-ink-6 mt-1">Anade una nueva cuenta de Instagram</p>
       </div>
 

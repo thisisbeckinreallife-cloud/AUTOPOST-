@@ -124,7 +124,7 @@ export function OnboardingTour() {
               <p className="text-xs text-accent font-semibold">
                 Paso {step + 1} de {steps.length}
               </p>
-              <h2 className="font-display font-bold text-white text-lg leading-tight">
+              <h2 className="font-display font-bold text-ink-9 text-lg leading-tight">
                 {current.title}
               </h2>
               <p className="text-sm text-ink-6 leading-relaxed">
