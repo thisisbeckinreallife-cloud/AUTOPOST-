@@ -1,48 +1,72 @@
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import Link from "next/link";
-import { formatDateInTz } from "@/lib/utils";
+import {
+  LayoutGrid,
+  CalendarClock,
+  CheckCircle2,
+  Link2,
+  AlertTriangle,
+  ArrowRight,
+  Upload,
+  Calendar,
+  Image as ImageIcon,
+  Film,
+  Layers,
+} from "lucide-react";
 import { getHealthReport } from "@/lib/health";
-import { ChannelChip, type IconName } from "@/components/editorial/atoms";
 
 export const dynamic = "force-dynamic";
 
-const SPANISH_DAYS = ["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"];
-const SPANISH_MONTHS = [
-  "ENE", "FEB", "MAR", "ABR", "MAY", "JUN",
-  "JUL", "AGO", "SEP", "OCT", "NOV", "DIC",
-];
+const SHORT_DAYS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
 
-function spanishGreeting(d: Date): string {
-  const h = d.getHours();
-  if (h < 6) return "Buenas noches";
-  if (h < 13) return "Buenos días";
-  if (h < 21) return "Buenas tardes";
-  return "Buenas noches";
+/** "mié 14:30" en la timezone del negocio. */
+function shortDateTime(date: Date, tz: string): string {
+  try {
+    const fmt = new Intl.DateTimeFormat("es-ES", {
+      weekday: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: tz,
+      hour12: false,
+    });
+    return fmt.format(date).replace(",", "");
+  } catch {
+    const d = SHORT_DAYS[date.getDay()];
+    return `${d} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+  }
 }
 
-function spanishKicker(d: Date): string {
-  const day = SPANISH_DAYS[d.getDay()];
-  const dayNum = String(d.getDate()).padStart(2, "0");
-  const month = SPANISH_MONTHS[d.getMonth()];
-  return `HOY · ${day} · ${dayNum} ${month}`;
+function todayLabel(d: Date): string {
+  const fmt = new Intl.DateTimeFormat("es-ES", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+  const s = fmt.format(d);
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 function formatCountdown(target: Date, now: Date): string {
   const diffMs = target.getTime() - now.getTime();
-  if (diffMs <= 0) return "Ya";
+  if (diffMs <= 0) return "ahora";
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 60) return `${diffMin} min`;
+  if (diffMin < 60) return `en ${diffMin} min`;
   const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr} h`;
+  if (diffHr < 24) return `en ${diffHr} h`;
   const diffDays = Math.floor(diffHr / 24);
-  if (diffDays < 7) return `${diffDays} d`;
-  const diffWeeks = Math.floor(diffDays / 7);
-  return `${diffWeeks} sem`;
+  if (diffDays < 7) return `en ${diffDays} d`;
+  return `en ${Math.floor(diffDays / 7)} sem`;
+}
+
+function typeIcon(mime: string | undefined, count: number) {
+  if (mime?.startsWith("video/")) return <Film className="h-4 w-4" />;
+  if (count > 1) return <Layers className="h-4 w-4" />;
+  return <ImageIcon className="h-4 w-4" />;
 }
 
 export default async function DashboardPage() {
-  const session = await requireAuth();
+  await requireAuth();
 
   const now = new Date();
   const weekAhead = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -71,9 +95,17 @@ export default async function DashboardPage() {
         publishAt: { gte: now },
         status: { in: ["SCHEDULED", "READY", "VALIDATED"] },
       },
-      include: { business: true },
+      include: {
+        business: { include: { metaConnection: true } },
+        _count: { select: { mediaAssets: true } },
+        mediaAssets: {
+          take: 1,
+          orderBy: { sortOrder: "asc" },
+          select: { storageUrl: true, mimeType: true },
+        },
+      },
       orderBy: { publishAt: "asc" },
-      take: 4,
+      take: 6,
     }),
     db.postDraft.count({
       where: {
@@ -83,23 +115,23 @@ export default async function DashboardPage() {
     }),
     db.postDraft.count({ where: { status: "FAILED" } }),
     db.postDraft.count({
-      where: {
-        status: "PUBLISHED",
-        updatedAt: { gte: startOfToday, lt: endOfToday },
-      },
+      where: { status: "PUBLISHED", updatedAt: { gte: startOfToday, lt: endOfToday } },
     }),
-    db.postDraft.count({
-      where: {
-        status: "PUBLISHED",
-        updatedAt: { gte: startOfYear },
-      },
-    }),
+    db.postDraft.count({ where: { status: "PUBLISHED", updatedAt: { gte: startOfYear } } }),
     db.postDraft.findFirst({
       where: {
         publishAt: { gte: now },
         status: { in: ["SCHEDULED", "READY", "VALIDATED"] },
       },
-      include: { business: true },
+      include: {
+        business: { include: { metaConnection: true } },
+        _count: { select: { mediaAssets: true } },
+        mediaAssets: {
+          take: 1,
+          orderBy: { sortOrder: "asc" },
+          select: { storageUrl: true, mimeType: true },
+        },
+      },
       orderBy: { publishAt: "asc" },
     }),
     db.postDraft.count({
@@ -111,422 +143,220 @@ export default async function DashboardPage() {
   ]);
 
   const hasBusinesses = businesses.length > 0;
-  const activeBusinesses = businesses.filter(
-    (b) => b.metaConnection?.status === "ACTIVE",
-  );
+  const activeBusinesses = businesses.filter((b) => b.metaConnection?.status === "ACTIVE");
   const hasConnected = activeBusinesses.length > 0;
   const primaryBiz = activeBusinesses[0] ?? businesses[0];
-  const uploadHref = primaryBiz
-    ? `/businesses/${primaryBiz.slug}/chat`
-    : "/businesses/new";
-
-  const firstName = session.email?.split("@")[0] ?? "";
-  const greetingTime = spanishGreeting(now);
-  const kicker = spanishKicker(now);
-
-  const subtitle = !hasBusinesses
-    ? "Conecta tu primer negocio para empezar."
-    : !hasConnected
-      ? "Conecta Instagram para empezar."
-      : queuedTotal === 0
-        ? "Todo en orden. La cola está vacía."
-        : queuedTotal === 1
-          ? "Un post en cola."
-          : `${queuedTotal} posts en cola.`;
+  const uploadHref = primaryBiz ? `/businesses/${primaryBiz.slug}/chat` : "/businesses/new";
+  const calendarHref = primaryBiz ? `/businesses/${primaryBiz.slug}/posts?view=calendar` : "/businesses";
 
   const failedChecks =
-    health && !health.ok
-      ? Object.entries(health.checks).filter(([, c]) => !c.ok)
-      : [];
+    health && !health.ok ? Object.entries(health.checks).filter(([, c]) => !c.ok) : [];
 
-  const nextLabel = nextPublication
-    ? formatCountdown(nextPublication.publishAt, now)
-    : null;
+  const ctaLabel = !hasBusinesses
+    ? "Crear negocio"
+    : !hasConnected
+      ? "Conectar Instagram"
+      : "Subir carpeta";
+  const ctaHref = !hasBusinesses
+    ? "/businesses/new"
+    : !hasConnected && primaryBiz
+      ? `/businesses/${primaryBiz.slug}/connect`
+      : uploadHref;
 
   return (
-    <div
-      className="ap-root -mx-5 md:-mx-8 -mt-16 md:-mt-8 min-h-[calc(100vh-0px)]"
-      style={{ background: "var(--ap-paper)" }}
-    >
-      <div className="px-5 md:px-12 pt-16 md:pt-12 pb-16 max-w-5xl">
-        {/* ── Banner crítico ─────────────────────────── */}
-        {failedChecks.length > 0 && (
+    <div className="text-ink-9">
+      {/* ── Page header (compacto) ─────────────────────────────── */}
+      <header className="flex items-start justify-between gap-4 flex-wrap mb-6 pb-5 border-b border-ink-4">
+        <div>
+          <h1 className="text-xl font-semibold text-ink-9 tracking-tight">Inicio</h1>
+          <p className="text-[13px] text-ink-7 mt-0.5">{todayLabel(now)}</p>
+        </div>
+        <div className="flex items-center gap-2">
           <Link
-            href="/settings"
-            className="block mb-10 transition-opacity hover:opacity-90"
-            style={{
-              padding: "14px 18px",
-              border: "1.5px solid var(--ap-stamp)",
-              background: "rgba(229,75,38,0.06)",
-              color: "var(--ap-ink)",
-            }}
+            href={calendarHref}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-lg border border-ink-5 text-ink-9 font-medium text-sm hover:bg-ink-3 transition-colors"
           >
-            <div style={{ display: "flex", alignItems: "baseline", gap: 14 }}>
-              <span
-                className="ap-mono"
-                style={{
-                  fontSize: 11,
-                  letterSpacing: "0.14em",
-                  color: "var(--ap-stamp)",
-                  fontWeight: 600,
-                }}
-              >
-                ATENCIÓN ·
-              </span>
-              <span style={{ fontSize: 14, lineHeight: 1.45 }}>
-                {failedChecks.length === 1
-                  ? "Falta 1 pieza de configuración para publicar"
-                  : `Faltan ${failedChecks.length} piezas de configuración para publicar`}{" "}
-                <span style={{ color: "var(--ap-ink-3)" }}>
-                  ({failedChecks.map(([k]) => k.replace(/_/g, " ")).join(" · ")})
-                </span>
-                <span
-                  className="ap-mono"
-                  style={{
-                    marginLeft: 8,
-                    fontSize: 11,
-                    color: "var(--ap-stamp)",
-                    letterSpacing: "0.1em",
-                  }}
-                >
-                  → AJUSTES
-                </span>
-              </span>
-            </div>
+            <Calendar className="h-4 w-4" aria-hidden="true" />
+            Calendario
           </Link>
-        )}
-
-        {/* ── Encabezado editorial ─────────────────── */}
-        <div style={{ marginBottom: 48 }}>
-          <div
-            className="ap-mono"
-            style={{
-              fontSize: 10,
-              color: "var(--ap-ink-4)",
-              letterSpacing: "0.14em",
-              marginBottom: 14,
-            }}
+          <Link
+            href={ctaHref}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-accent text-ink-0 font-medium text-sm shadow-md hover:bg-accent-hover transition-all"
           >
-            {kicker}
-          </div>
-          <h1
-            className="ap-display"
-            style={{
-              fontSize: "clamp(28px, 3.5vw, 36px)",
-              margin: "0 0 8px",
-              letterSpacing: "-0.02em",
-              color: "var(--ap-ink)",
-              lineHeight: 1.1,
-            }}
-          >
-            {greetingTime},{" "}
-            <span style={{ color: "var(--ap-stamp)" }}>
-              {firstName || "amigo"}.
-            </span>
-          </h1>
-          <p
-            style={{
-              fontSize: 14,
-              color: "var(--ap-ink-3)",
-              margin: 0,
-              fontStyle: "normal",
-            }}
-          >
-            {subtitle}
-          </p>
+            <Upload className="h-4 w-4" aria-hidden="true" />
+            {ctaLabel}
+          </Link>
         </div>
+      </header>
 
-        {/* ── KPIs ─────────────────────────────────── */}
-        <div
-          className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10"
-          style={{
-            marginBottom: 56,
-            paddingBottom: 32,
-            borderBottom: "1px solid var(--ap-line)",
-          }}
+      {/* ── Banner alertas (solo si hay) ───────────────────────── */}
+      {(failedPosts > 0 || failedChecks.length > 0) && (
+        <Link
+          href={
+            failedPosts > 0 && primaryBiz
+              ? `/businesses/${primaryBiz.slug}/posts?status=FAILED`
+              : "/settings"
+          }
+          className="flex items-center justify-between gap-4 mb-6 px-4 py-3 rounded-lg bg-error-soft border border-error/20 hover:border-error/40 transition-colors"
         >
-          <KPI
-            n={String(publishedThisYear)}
-            label="Posts este año"
-            delta={null}
-          />
-          <KPI
-            n={String(scheduledThisWeek)}
-            label="Programados · 7d"
-            delta={scheduledThisWeek > 0 ? "+activos" : null}
-          />
-          <KPI
-            n={String(publishedToday)}
-            label="Publicados hoy"
-            delta={publishedToday > 0 ? "✓ live" : null}
-          />
-          <KPI
-            n={String(activeBusinesses.length)}
-            label="Conexiones activas"
-            delta={
-              failedPosts > 0 ? `${failedPosts} con error` : null
-            }
-            deltaColor={failedPosts > 0 ? "var(--ap-stamp)" : "var(--ap-olive)"}
-          />
-        </div>
+          <div className="flex items-center gap-2.5 text-sm text-ink-9 min-w-0">
+            <AlertTriangle className="h-4 w-4 text-error shrink-0" aria-hidden="true" />
+            <span className="truncate">
+              {failedPosts > 0
+                ? `${failedPosts} ${failedPosts === 1 ? "post falló" : "posts fallaron"} al publicar`
+                : `${failedChecks.length} ${failedChecks.length === 1 ? "pieza de configuración pendiente" : "piezas de configuración pendientes"}`}
+            </span>
+          </div>
+          <span className="inline-flex items-center gap-1 text-sm text-error-strong font-medium shrink-0">
+            Revisar <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+          </span>
+        </Link>
+      )}
 
-        {/* ── Today + Suggestion + Channels ────────── */}
-        <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-10 md:gap-14">
-          {/* Today list */}
-          <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "baseline",
-                justifyContent: "space-between",
-                marginBottom: 24,
-              }}
+      {/* ── KPI row ────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <KpiCard
+          icon={<LayoutGrid className="h-4 w-4" />}
+          value={publishedThisYear}
+          label="Posts este año"
+          accent="gold"
+        />
+        <KpiCard
+          icon={<CalendarClock className="h-4 w-4" />}
+          value={scheduledThisWeek}
+          label="Programados · 7 días"
+        />
+        <KpiCard
+          icon={<CheckCircle2 className="h-4 w-4" />}
+          value={publishedToday}
+          label="Publicados hoy"
+          accent={publishedToday > 0 ? "success" : undefined}
+        />
+        <KpiCard
+          icon={<Link2 className="h-4 w-4" />}
+          value={activeBusinesses.length}
+          label="Conexiones activas"
+          delta={failedPosts > 0 ? `${failedPosts} con error` : undefined}
+          deltaTone="error"
+        />
+      </div>
+
+      {/* ── Grid: cola + lateral ───────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
+        {/* Próximas publicaciones */}
+        <section aria-labelledby="upcoming-h">
+          <div className="flex items-center justify-between mb-3">
+            <h2 id="upcoming-h" className="text-base font-semibold text-ink-9">
+              Próximas publicaciones
+            </h2>
+            <span className="font-mono text-xs text-ink-6">
+              {queuedTotal === 0 ? "0 en cola" : `${queuedTotal} en cola`}
+            </span>
+          </div>
+
+          {upcomingPosts.length === 0 ? (
+            <Link
+              href={ctaHref}
+              className="flex flex-col items-center justify-center text-center gap-2 rounded-lg border border-dashed border-ink-5 bg-ink-2 px-6 py-10 hover:border-accent hover:bg-accent-soft transition-colors"
             >
-              <h2
-                className="ap-display"
-                style={{
-                  fontSize: 26,
-                  margin: 0,
-                  fontStyle: "normal",
-                  color: "var(--ap-ink)",
-                }}
-              >
-                Próximos
-              </h2>
-              <span
-                className="ap-mono"
-                style={{
-                  fontSize: 10,
-                  color: "var(--ap-ink-4)",
-                  letterSpacing: "0.1em",
-                }}
-              >
-                {upcomingPosts.length === 0
-                  ? "0 PROGRAMADOS"
-                  : `${queuedTotal} EN COLA`}
-              </span>
-            </div>
-
-            {upcomingPosts.length === 0 ? (
-              <Link
-                href={uploadHref}
-                className="block"
-                style={{
-                  padding: "26px 22px",
-                  border: "1px dashed var(--ap-line-2)",
-                  background: "transparent",
-                }}
-              >
-                <p
-                  style={{
-                    fontSize: 14,
-                    color: "var(--ap-ink-3)",
-                    margin: 0,
-                    fontStyle: "normal",
-                  }}
-                >
-                  Suelta una carpeta y la semana se programa sola.
-                </p>
-                <p
-                  className="ap-mono"
-                  style={{
-                    marginTop: 10,
-                    fontSize: 11,
-                    color: "var(--ap-stamp)",
-                    letterSpacing: "0.12em",
-                  }}
-                >
-                  SUBIR CARPETA →
-                </p>
-              </Link>
-            ) : (
-              upcomingPosts.map((post, i, arr) => {
+              <Upload className="h-6 w-6 text-ink-6" aria-hidden="true" />
+              <p className="text-sm text-ink-8">Suelta una carpeta y la semana se programa sola.</p>
+              <span className="text-sm text-accent font-medium">{ctaLabel} →</span>
+            </Link>
+          ) : (
+            <div className="rounded-lg border border-ink-4 bg-ink-2 overflow-hidden">
+              {upcomingPosts.map((post, i, arr) => {
                 const tz = post.business.timezone ?? "UTC";
-                const time = formatDateInTz(post.publishAt, tz);
-                const ch: IconName = "instagram"; // canal único soportado
-                const stateColor =
-                  post.status === "SCHEDULED"
-                    ? "var(--ap-stamp)"
-                    : post.status === "VALIDATED"
-                      ? "var(--ap-olive)"
-                      : "var(--ap-ink-4)";
-                const stateLabel =
-                  post.status === "SCHEDULED"
-                    ? "programado"
-                    : post.status === "VALIDATED"
-                      ? "validado"
-                      : "listo";
+                const media = post.mediaAssets[0];
                 return (
                   <Link
                     key={post.id}
                     href={`/businesses/${post.business.slug}/posts/${post.id}`}
-                    className="grid items-center gap-4 transition-opacity hover:opacity-80"
-                    style={{
-                      gridTemplateColumns: "auto 22px 1fr auto",
-                      padding: "18px 0",
-                      borderBottom:
-                        i < arr.length - 1
-                          ? "1px solid var(--ap-line)"
-                          : "none",
-                      color: "var(--ap-ink)",
-                    }}
+                    className={`flex items-center gap-3 px-3 h-14 hover:bg-ink-3/60 transition-colors ${
+                      i < arr.length - 1 ? "border-b border-ink-4" : ""
+                    }`}
                   >
-                    <div
-                      className="ap-mono"
-                      style={{
-                        fontSize: 12,
-                        color: "var(--ap-ink-3)",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {time}
+                    {/* Thumbnail */}
+                    <div className="h-10 w-10 shrink-0 rounded-md bg-ink-3 border border-ink-4 overflow-hidden flex items-center justify-center text-ink-6">
+                      {media?.storageUrl && media.mimeType?.startsWith("image/") ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={media.storageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+                      ) : (
+                        typeIcon(media?.mimeType, post._count.mediaAssets)
+                      )}
                     </div>
-                    <ChannelChip channel={ch} size={18} />
-                    <div
-                      style={{
-                        fontSize: 14,
-                        color: "var(--ap-ink)",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {post.caption?.slice(0, 80) || "Sin texto"}
-                      <span
-                        style={{
-                          color: "var(--ap-ink-4)",
-                          marginLeft: 8,
-                          fontSize: 12,
-                        }}
-                      >
-                        · {post.business.name}
-                      </span>
+                    {/* Caption + marca */}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm text-ink-9 truncate">
+                        {post.caption?.trim() ? post.caption.slice(0, 90) : "Sin texto"}
+                      </p>
+                      <p className="text-xs text-ink-6 truncate mt-0.5">
+                        {post.business.metaConnection?.igUsername
+                          ? `@${post.business.metaConnection.igUsername}`
+                          : post.business.name}
+                      </p>
                     </div>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: stateColor,
-                        fontStyle: "normal",
-                      }}
-                    >
-                      {stateLabel}
+                    {/* Hora */}
+                    <span className="font-mono text-[13px] text-ink-7 tabular-nums shrink-0 hidden sm:block">
+                      {shortDateTime(post.publishAt, tz)}
                     </span>
+                    {/* Badge */}
+                    <StatusDot status={post.status} />
                   </Link>
                 );
-              })
-            )}
-          </div>
-
-          {/* Right column */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
-            {/* Suggestion card */}
-            <div>
-              <div
-                className="ap-mono"
-                style={{
-                  fontSize: 10,
-                  color: "var(--ap-stamp)",
-                  letterSpacing: "0.14em",
-                  marginBottom: 10,
-                }}
-              >
-                {failedPosts > 0
-                  ? "AVISO"
-                  : !hasBusinesses
-                    ? "PRIMERA TAREA"
-                    : !hasConnected
-                      ? "CONFIGURACIÓN"
-                      : nextPublication
-                        ? "PRÓXIMA PUBLICACIÓN"
-                        : "SUGERENCIA"}
-              </div>
-              <div
-                className="ap-display"
-                style={{
-                  fontSize: 22,
-                  fontStyle: "normal",
-                  lineHeight: 1.25,
-                  color: "var(--ap-ink)",
-                  marginBottom: 14,
-                }}
-              >
-                {failedPosts > 0
-                  ? `${failedPosts} ${failedPosts === 1 ? "post falló" : "posts fallaron"} — revisar y reintentar.`
-                  : !hasBusinesses
-                    ? "Crea tu primer negocio para empezar."
-                    : !hasConnected
-                      ? "Conecta Instagram en menos de 30 segundos."
-                      : nextPublication
-                        ? `${nextPublication.business.name} — sale en ${nextLabel}.`
-                        : "Sube una carpeta y programamos 30 días."}
-              </div>
-              <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+              })}
+              {queuedTotal > upcomingPosts.length && primaryBiz && (
                 <Link
-                  href={
-                    failedPosts > 0 && primaryBiz
-                      ? `/businesses/${primaryBiz.slug}/posts?status=FAILED`
-                      : !hasBusinesses
-                        ? "/businesses/new"
-                        : !hasConnected && primaryBiz
-                          ? `/businesses/${primaryBiz.slug}/connect`
-                          : nextPublication
-                            ? `/businesses/${nextPublication.business.slug}/posts/${nextPublication.id}`
-                            : uploadHref
-                  }
-                  style={{
-                    fontSize: 12,
-                    color: "var(--ap-stamp)",
-                    borderBottom: "1px solid var(--ap-stamp)",
-                    paddingBottom: 1,
-                  }}
+                  href={`/businesses/${primaryBiz.slug}/posts`}
+                  className="flex items-center justify-center h-11 text-sm text-ink-7 hover:text-ink-9 hover:bg-ink-3 transition-colors border-t border-ink-4"
                 >
-                  {failedPosts > 0
-                    ? "Revisar fallos"
-                    : !hasBusinesses
-                      ? "Crear negocio"
-                      : !hasConnected
-                        ? "Conectar"
-                        : nextPublication
-                          ? "Ver post"
-                          : "Subir carpeta"}
+                  Ver todas ({queuedTotal})
                 </Link>
-                {hasConnected && primaryBiz && (
-                  <Link
-                    href={`/businesses/${primaryBiz.slug}/posts`}
-                    style={{ fontSize: 12, color: "var(--ap-ink-4)" }}
-                  >
-                    Ver todos
-                  </Link>
-                )}
-              </div>
+              )}
             </div>
+          )}
+        </section>
 
-            {/* Channels */}
-            <div>
-              <div
-                className="ap-mono"
-                style={{
-                  fontSize: 10,
-                  color: "var(--ap-ink-4)",
-                  letterSpacing: "0.14em",
-                  marginBottom: 14,
-                }}
-              >
-                CANALES
+        {/* Lateral */}
+        <aside className="flex flex-col gap-6">
+          {/* Próximo destacado */}
+          {nextPublication && (
+            <section className="rounded-lg border border-ink-4 bg-ink-2 p-4">
+              <p className="font-mono text-[11px] text-accent uppercase tracking-wider mb-3">
+                Próxima publicación
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 shrink-0 rounded-md bg-ink-3 border border-ink-4 overflow-hidden flex items-center justify-center text-ink-6">
+                  {nextPublication.mediaAssets[0]?.storageUrl &&
+                  nextPublication.mediaAssets[0].mimeType?.startsWith("image/") ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={nextPublication.mediaAssets[0].storageUrl} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    typeIcon(nextPublication.mediaAssets[0]?.mimeType, nextPublication._count.mediaAssets)
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-ink-9 truncate">
+                    {nextPublication.business.name}
+                  </p>
+                  <p className="text-xs text-gold mt-0.5">
+                    Sale {formatCountdown(nextPublication.publishAt, now)}
+                  </p>
+                </div>
               </div>
-              {!hasBusinesses ? (
-                <p
-                  style={{
-                    fontSize: 13,
-                    color: "var(--ap-ink-4)",
-                    fontStyle: "normal",
-                    margin: 0,
-                  }}
-                >
-                  Aún sin canales conectados.
-                </p>
-              ) : (
-                businesses.slice(0, 6).map((b) => {
+            </section>
+          )}
+
+          {/* Salud de conexiones */}
+          <section className="rounded-lg border border-ink-4 bg-ink-2 p-4">
+            <p className="font-mono text-[11px] text-ink-6 uppercase tracking-wider mb-3">
+              Conexiones
+            </p>
+            {!hasBusinesses ? (
+              <p className="text-sm text-ink-6">Aún sin canales conectados.</p>
+            ) : (
+              <div className="flex flex-col divide-y divide-ink-4">
+                {businesses.slice(0, 6).map((b) => {
                   const isActive = b.metaConnection?.status === "ACTIVE";
                   const handle = b.metaConnection?.igUsername
                     ? `@${b.metaConnection.igUsername}`
@@ -534,119 +364,83 @@ export default async function DashboardPage() {
                   return (
                     <Link
                       key={b.id}
-                      href={`/businesses/${b.slug}/posts`}
-                      className="transition-opacity hover:opacity-70"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 12,
-                        padding: "9px 0",
-                        color: "var(--ap-ink)",
-                      }}
+                      href={`/businesses/${b.slug}/settings`}
+                      className="flex items-center gap-2.5 py-2.5 first:pt-0 last:pb-0 group"
                     >
-                      <ChannelChip channel="instagram" size={16} />
                       <span
-                        style={{
-                          flex: 1,
-                          fontSize: 13,
-                          color: isActive
-                            ? "var(--ap-ink)"
-                            : "var(--ap-ink-4)",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
+                        className={`h-2 w-2 rounded-full shrink-0 ${isActive ? "bg-success" : "bg-ink-5"}`}
+                        aria-hidden="true"
+                      />
+                      <span className="flex-1 text-sm text-ink-8 truncate group-hover:text-ink-9">
                         {handle}
                       </span>
                       <span
-                        className="ap-mono"
-                        style={{
-                          fontSize: 10,
-                          color: isActive
-                            ? "var(--ap-olive)"
-                            : "var(--ap-ink-4)",
-                          letterSpacing: "0.08em",
-                        }}
+                        className={`font-mono text-[10px] uppercase tracking-wide ${isActive ? "text-success" : "text-ink-6"}`}
                       >
-                        {isActive ? "ACTIVO" : "—"}
+                        {isActive ? "Activo" : "—"}
                       </span>
                     </Link>
                   );
-                })
-              )}
-            </div>
-
-            {/* Primary CTA — print magazine button */}
-            <Link
-              href={uploadHref}
-              className="ap-btn ap-btn--stamp"
-              style={{
-                padding: "14px 18px",
-                fontSize: 13,
-                width: "fit-content",
-              }}
-            >
-              {hasBusinesses && hasConnected
-                ? "Subir carpeta →"
-                : !hasBusinesses
-                  ? "Crear negocio →"
-                  : "Conectar Instagram →"}
-            </Link>
-          </div>
-        </div>
+                })}
+              </div>
+            )}
+          </section>
+        </aside>
       </div>
     </div>
   );
 }
 
-function KPI({
-  n,
+/* ── Componentes ───────────────────────────────────────────────── */
+
+function KpiCard({
+  icon,
+  value,
   label,
   delta,
-  deltaColor = "var(--ap-olive)",
+  deltaTone = "neutral",
+  accent,
 }: {
-  n: string;
+  icon: React.ReactNode;
+  value: number;
   label: string;
-  delta: string | null;
-  deltaColor?: string;
+  delta?: string;
+  deltaTone?: "neutral" | "success" | "error";
+  accent?: "gold" | "success";
 }) {
+  const valueColor =
+    accent === "gold" ? "text-gold" : accent === "success" ? "text-success" : "text-ink-9";
+  const deltaColor =
+    deltaTone === "error" ? "text-error" : deltaTone === "success" ? "text-success" : "text-ink-6";
   return (
-    <div>
-      <div
-        className="ap-display"
-        style={{
-          fontSize: "clamp(34px, 4vw, 46px)",
-          fontStyle: "normal",
-          lineHeight: 1,
-          color: "var(--ap-ink)",
-          letterSpacing: "-0.02em",
-        }}
-      >
-        {n}
+    <div className="rounded-lg border border-ink-4 bg-ink-2 p-4">
+      <div className="text-ink-6 mb-3">{icon}</div>
+      <div className={`font-mono text-[28px] font-semibold leading-none tabular-nums tracking-tight ${valueColor}`}>
+        {value}
       </div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "baseline",
-          gap: 8,
-          marginTop: 10,
-        }}
-      >
-        <span style={{ fontSize: 12, color: "var(--ap-ink-3)" }}>{label}</span>
-        {delta && (
-          <span
-            className="ap-mono"
-            style={{
-              fontSize: 10,
-              color: deltaColor,
-              letterSpacing: "0.06em",
-            }}
-          >
-            {delta}
-          </span>
-        )}
+      <div className="flex items-baseline gap-2 mt-2">
+        <span className="text-xs text-ink-7">{label}</span>
+        {delta && <span className={`font-mono text-[11px] ${deltaColor}`}>{delta}</span>}
       </div>
     </div>
+  );
+}
+
+function StatusDot({ status }: { status: string }) {
+  const map: Record<string, { label: string; cls: string }> = {
+    SCHEDULED: { label: "Programado", cls: "bg-info-soft text-info-strong border-info/30" },
+    READY: { label: "Listo", cls: "bg-ink-3 text-ink-7 border-ink-4" },
+    VALIDATED: { label: "Validado", cls: "bg-ink-3 text-ink-7 border-ink-4" },
+    PUBLISHED: { label: "Publicado", cls: "bg-success-soft text-success-strong border-success/30" },
+    PUBLISHING: { label: "Publicando", cls: "bg-warning-soft text-warning-strong border-warning/30" },
+    FAILED: { label: "Fallido", cls: "bg-error-soft text-error-strong border-error/30" },
+  };
+  const s = map[status] ?? { label: status, cls: "bg-ink-3 text-ink-7 border-ink-4" };
+  return (
+    <span
+      className={`hidden md:inline-flex items-center px-2.5 h-6 rounded-full border text-[11px] font-medium shrink-0 ${s.cls}`}
+    >
+      {s.label}
+    </span>
   );
 }
