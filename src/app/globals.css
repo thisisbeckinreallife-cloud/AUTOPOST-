@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 /* ══════════════════════════════════════════════════════════════════════════
-   AUTOPOST · Design System "Carbon Workshop"
-   Dark-first · operador silencioso · Mona Sans VF · acento naranja-óxido.
+   AUTOPOST · Design System "Ink & Rust"
+   Dark-first · azul-tinta nocturno + acento óxido-coral + dorado para datos.
    Cero gradientes decorativos · cero glassmorphism por defecto · cero glow.
    ══════════════════════════════════════════════════════════════════════════ */
 
@@ -15,63 +15,154 @@
   --font-jetbrains-mono:  "JetBrains Mono", ui-monospace, monospace;
 
   /* Tokens auxiliares (los principales viven en tailwind.config.ts) */
-  --ring-accent:    rgba(255, 106, 44, 0.95);  /* sólido — pasa WCAG 1.4.11 contraste no-textual sobre ink-1 */
+  --ring-accent:    rgba(232, 117, 89, 0.55);  /* coral — foco visible sobre azul-tinta */
   --motion-fast:    150ms;
   --motion-base:    200ms;
   --motion-slow:    400ms;
   --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* ── Compat layer (eliminar al cerrar Bloque B) ──────────────────────
-     Variables CSS que componentes legacy del rebrand v1 (landing-v2/*,
-     auth, onboarding, dashboard) referencian via var(--np-*) y similares.
-     Todas redirigen al sistema Carbon Workshop. */
-  --pri:               #FF6A2C;
-  --pri-dim:           #E55A1F;
-  --pri-soft:          rgba(255, 106, 44, 0.12);
-  --ai:                #FF6A2C;
-  --ai-dim:            #E55A1F;
-  --ai-soft:           rgba(255, 106, 44, 0.14);
-  /* Ink scale como CSS vars (algunos componentes usan var(--ink-N)) */
-  --ink-0:             #0A0B09;
-  --ink-1:             #0E0F0D;
-  --ink-2:             #151714;
-  --ink-3:             #1E211D;
-  --ink-4:             #2A2D29;
-  --ink-5:             #3A3D38;
-  --ink-6:             #8A8980;  /* Subido de #6B6A64 para pasar WCAG AA contraste 4.5:1 */
-  --ink-7:             #A8A69E;
-  --ink-8:             #D6D3CC;
-  --ink-9:             #EDEAE3;
+  /* ── Ink & Rust como CSS vars (componentes que usan var(--ink-N)) ── */
+  --ink-0:             #08090E;
+  --ink-1:             #0B0E14;
+  --ink-2:             #12161F;
+  --ink-3:             #1A1F2B;
+  --ink-4:             #262D3B;
+  --ink-5:             #36404F;
+  --ink-6:             #757E8E;
+  --ink-7:             #A3ABBA;
+  --ink-8:             #C5CBD6;
+  --ink-9:             #EDEFF4;
   --ink-10:            #FFFFFF;
-  --np-success:        #7FA84E;
-  --np-success-soft:   rgba(127, 168, 78, 0.12);
-  --np-warning:        #E8A93B;
-  --np-warning-soft:   rgba(232, 169, 59, 0.12);
-  --np-error:          #D24545;
-  --np-error-soft:     rgba(210, 69, 69, 0.12);
-  --np-info:           #6B6A64;
-  --np-info-soft:      rgba(107, 106, 100, 0.18);
-  --np-shadow-sm:      0 1px 2px 0 rgba(10, 11, 9, 0.6);
-  --np-shadow-md:      0 4px 8px -2px rgba(10, 11, 9, 0.7), 0 2px 4px -2px rgba(10, 11, 9, 0.5);
-  --np-shadow-lg:      0 12px 24px -8px rgba(10, 11, 9, 0.75), 0 4px 8px -4px rgba(10, 11, 9, 0.5);
-  --np-glow-blue:      0 0 0 1px rgba(255, 106, 44, 0.0);
-  --np-glow-violet:    0 0 0 1px rgba(255, 106, 44, 0.0);
+
+  /* Acento coral + dorado como CSS vars */
+  --pri:               #E87559;
+  --pri-dim:           #D45F44;
+  --pri-soft:          rgba(232, 117, 89, 0.12);
+  --ai:                #E87559;
+  --ai-dim:            #D45F44;
+  --ai-soft:           rgba(232, 117, 89, 0.14);
+  --gold:              #E3B85C;
+  --gold-soft:         rgba(227, 184, 92, 0.12);
+
+  /* Semánticos como CSS vars (compat con componentes np-*) */
+  --np-success:        #4FB286;
+  --np-success-soft:   rgba(79, 178, 134, 0.12);
+  --np-warning:        #E3B85C;
+  --np-warning-soft:   rgba(227, 184, 92, 0.12);
+  --np-error:          #E2574A;
+  --np-error-soft:     rgba(226, 87, 74, 0.12);
+  --np-info:           #6E92C4;
+  --np-info-soft:      rgba(110, 146, 196, 0.14);
+  --np-shadow-sm:      0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --np-shadow-md:      0 4px 8px -2px rgba(0, 0, 0, 0.6), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+  --np-shadow-lg:      0 12px 24px -8px rgba(0, 0, 0, 0.7), 0 4px 8px -4px rgba(0, 0, 0, 0.4);
+  --np-glow-blue:      0 0 0 1px rgba(232, 117, 89, 0.0);
+  --np-glow-violet:    0 0 0 1px rgba(232, 117, 89, 0.0);
   --np-ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
   --np-ease-back:      cubic-bezier(0.34, 1.56, 0.64, 1);
   --np-font-sans:      var(--font-mona-sans);
   --np-font-mono:      var(--font-jetbrains-mono);
 
+  /* ══════════════════════════════════════════════════════════════════
+     SISTEMA "--ap-*" — DASHBOARD.
+     Estos tokens estaban REFERENCIADOS en 16 archivos del dashboard pero
+     NUNCA definidos (se renderizaba transparente/ilegible). Aquí los
+     DEFINIMOS apuntando a Ink & Rust dark, lo que arregla el dashboard
+     al instante sin reescribir los 16 archivos uno a uno.
+     paper→superficie oscura, ink→texto claro, stamp→coral.
+     ══════════════════════════════════════════════════════════════════ */
+  --ap-paper:    #0B0E14;   /* fondo base (era papel claro → ahora azul-tinta) */
+  --ap-paper-2:  #12161F;   /* card / superficie elevada */
+  --ap-ink:      #EDEFF4;   /* texto alto contraste (era tinta oscura → ahora claro) */
+  --ap-ink-2:    #C5CBD6;   /* texto medio-alto */
+  --ap-ink-3:    #A3ABBA;   /* texto medio */
+  --ap-ink-4:    #757E8E;   /* texto bajo / meta (4.5:1) */
+  --ap-rule:     #262D3B;
+  --ap-night:    #0B0E14;
+  --ap-night-2:  #12161F;
+  --ap-night-3:  #1A1F2B;
+  --ap-stamp:    #E87559;   /* acento coral (era tomate) */
+  --ap-stamp-2:  #D45F44;
+  --ap-olive:    #4FB286;   /* success jade (era oliva) */
+  --ap-mustard:  #E3B85C;   /* dorado */
+  --ap-line:     rgba(237, 239, 244, 0.08);
+  --ap-line-2:   rgba(237, 239, 244, 0.14);
+  --ap-r-sm: 6px; --ap-r-md: 10px; --ap-r-lg: 14px;
+  --ap-font-display: var(--font-mona-sans);
+  --ap-font-sans:    var(--font-mona-sans);
+  --ap-font-mono:    var(--font-jetbrains-mono);
+  --ap-ease: cubic-bezier(.22,.61,.36,1);
+  --ap-spring: cubic-bezier(.34,1.56,.64,1);
+
   color-scheme: dark;
 }
 
-/* ── Compat layer (eliminar al cerrar Bloque B) ────────────────────────
-   Clases del rebrand v1 redirigidas al sistema Carbon Workshop. */
+/* ── Clases del sistema editorial (.ap-*) DEFINIDAS por fin ──────────────
+   Antes no existían → headings sin estilo, mono sin estilo, botones sin
+   estilo. Las definimos con Ink & Rust + Mona Sans (NO serif italic). */
+.ap-root {
+  background: var(--ap-paper);
+  color: var(--ap-ink-2);
+  font-family: var(--font-mona-sans);
+  -webkit-font-smoothing: antialiased;
+}
+.ap-root :focus-visible {
+  outline: 2px solid var(--ap-stamp);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.ap-display {
+  /* Antes: Instrument Serif italic gigante. Ahora: Mona Sans semibold,
+     legible, sin italic decorativo. */
+  font-family: var(--font-mona-sans);
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: -0.02em;
+  color: var(--ap-ink);
+}
+.ap-mono {
+  font-family: var(--font-jetbrains-mono);
+  font-feature-settings: "tnum";
+  letter-spacing: 0.01em;
+}
+.ap-num {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-jetbrains-mono);
+}
+.ap-rule { border: none; border-top: 1px solid var(--ap-line-2); margin: 0; }
+.ap-stamp-chip {
+  display: inline-block; padding: 4px 10px;
+  border: 1px solid var(--ap-stamp); color: var(--ap-stamp);
+  font-family: var(--font-jetbrains-mono); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  border-radius: 9999px;
+}
+.ap-index {
+  font-family: var(--font-mona-sans);
+  font-size: 40px; font-style: normal; font-weight: 700;
+  color: var(--ap-stamp);
+}
+/* Botones editoriales → estilo Ink & Rust sólido, sin sombra dura */
+.ap-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-radius: 10px;
+  font-family: var(--font-mona-sans); font-weight: 500; font-size: 14px;
+  cursor: pointer; transition: all .15s var(--ap-ease);
+  background: var(--ap-stamp); color: #1A0E0A; border: 1px solid var(--ap-stamp);
+}
+.ap-btn:hover { background: #F08A70; border-color: #F08A70; }
+.ap-btn--ghost { background: transparent; color: var(--ap-ink); border-color: var(--ap-line-2); }
+.ap-btn--ghost:hover { background: var(--ap-night-3); border-color: var(--ap-ink-4); }
+.ap-btn--stamp { background: var(--ap-stamp); border-color: var(--ap-stamp); color: #1A0E0A; }
+.ap-btn--stamp:hover { background: #F08A70; border-color: #F08A70; }
+
+/* ── Compat layer · landing-v2 redirigida a Ink & Rust ─────────────────── */
 .np-root {
-  background: #0E0F0D;
-  color: #EDEAE3;
+  background: #0B0E14;
+  color: #EDEFF4;
 }
 .np-root :focus-visible {
-  outline: 2px solid #FF6A2C;
+  outline: 2px solid #E87559;
   outline-offset: 2px;
   border-radius: 6px;
 }
@@ -189,13 +280,13 @@
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #0E0F0D;
+  background: #0B0E14;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2A2D29;
+  background: #262D3B;
   border-radius: 9999px;
-  border: 2px solid #0E0F0D;
+  border: 2px solid #0B0E14;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3A3D38;
+  background: #36404F;
 }

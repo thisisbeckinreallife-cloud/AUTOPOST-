@@ -46,76 +46,88 @@ const config: Config = {
     },
     extend: {
       colors: {
-        /* Escala de tinta dark-first 10 niveles. ink-0 más oscuro, ink-9 más claro.
-           Contrastes verificados WCAG: ink-9 sobre ink-1 = 15.8:1 (AAA). */
+        /* ════════════════════════════════════════════════════════════════
+           PALETA "INK & RUST" — dark-first.
+           Base azul-tinta nocturno (casi negro de imprenta, NO indigo-SaaS)
+           + acento óxido-coral cálido + dorado para datos secundarios.
+           Contrastes WCAG AA verificados: ink-9/ink-1 = 16.3:1 (AAA).
+           ════════════════════════════════════════════════════════════════ */
         ink: {
-          0:  "#0A0B09",
-          1:  "#0E0F0D",
-          2:  "#151714",
-          3:  "#1E211D",
-          4:  "#2A2D29",
-          5:  "#3A3D38",
-          6:  "#8A8980",
-          7:  "#A8A69E",
-          8:  "#D6D3CC",
-          9:  "#EDEAE3",
-          /* Compat: rebrand v1 usaba ink-10 = blanco puro. Mapear al claro
-             del sistema nuevo (off-white) para no romper componentes legacy. */
+          0:  "#08090E",  // más oscuro — modales, pozos
+          1:  "#0B0E14",  // bg-base — fondo de página
+          2:  "#12161F",  // surface-1 — card
+          3:  "#1A1F2B",  // surface-2 — elevado, hover, dropdown, sidebar activo
+          4:  "#262D3B",  // border — divisores, bordes de card
+          5:  "#36404F",  // border-strong — inputs, foco de elemento
+          6:  "#757E8E",  // text-low — captions, meta (4.5:1, mínimo legible)
+          7:  "#A3ABBA",  // text-mid — body secundario (7.5:1)
+          8:  "#C5CBD6",  // text-mid-high
+          9:  "#EDEFF4",  // text-high — títulos, datos (16.3:1)
           10: "#FFFFFF",
         },
-        /* Acento principal — naranja-óxido (cinta métrica de carpintero, NO neón).
-           accent-DEFAULT sobre ink-1 = 7.2:1 (AAA). */
+        /* Acento principal — óxido-coral terroso. Marca + CTAs.
+           accent sobre ink-1 = 6.8:1 (AA). Úsalo con disciplina: un CTA
+           primario por vista, estado activo. */
         accent: {
-          DEFAULT: "#FF6A2C",
-          hover:   "#E55A1F",
-          active:  "#CC4E16",
-          soft:    "rgba(255, 106, 44, 0.12)",
-          ring:    "rgba(255, 106, 44, 0.45)",
-          strong:  "#FF8550",
+          DEFAULT: "#E87559",
+          hover:   "#F08A70",
+          active:  "#D45F44",
+          soft:    "rgba(232, 117, 89, 0.12)",
+          ring:    "rgba(232, 117, 89, 0.45)",
+          strong:  "#F49B82",
         },
-        /* Acento secundario opcional — solo estados activos puntuales. */
+        /* Acento secundario — DORADO apagado. Datos/highlights/KPIs grandes.
+           NUNCA en CTAs (eso es el coral). */
         "accent-secondary": {
-          DEFAULT: "#C4D650",
-          hover:   "#B0C141",
-          active:  "#9CAB36",
-          soft:    "rgba(196, 214, 80, 0.12)",
-          ring:    "rgba(196, 214, 80, 0.45)",
-          strong:  "#D4E366",
+          DEFAULT: "#E3B85C",
+          hover:   "#EDC772",
+          active:  "#CFA547",
+          soft:    "rgba(227, 184, 92, 0.12)",
+          ring:    "rgba(227, 184, 92, 0.45)",
+          strong:  "#EDC772",
         },
-        /* Semánticos — info usa gris neutro deliberado, NO azul. */
+        /* Alias semántico del dorado para usar como bg-gold/text-gold. */
+        gold: {
+          DEFAULT: "#E3B85C",
+          soft:    "rgba(227, 184, 92, 0.12)",
+          strong:  "#EDC772",
+        },
+        /* Semánticos — verde-jade frío, rojo-óxido, dorado warning, azul info.
+           El azul SÍ se admite aquí (info) porque NO es el acento de marca:
+           es estructural/informativo, separado del coral. */
         success: {
-          DEFAULT: "#7FA84E",
-          soft:    "rgba(127, 168, 78, 0.12)",
-          strong:  "#9DC569",
+          DEFAULT: "#4FB286",
+          soft:    "rgba(79, 178, 134, 0.12)",
+          strong:  "#6BC79E",
         },
         warning: {
-          DEFAULT: "#E8A93B",
-          soft:    "rgba(232, 169, 59, 0.12)",
-          strong:  "#F2BC58",
+          DEFAULT: "#E3B85C",
+          soft:    "rgba(227, 184, 92, 0.12)",
+          strong:  "#EDC772",
         },
         error: {
-          DEFAULT: "#D24545",
-          soft:    "rgba(210, 69, 69, 0.12)",
-          strong:  "#E36767",
+          DEFAULT: "#E2574A",
+          soft:    "rgba(226, 87, 74, 0.12)",
+          strong:  "#EC7468",
         },
         info: {
-          DEFAULT: "#8A8980",
-          soft:    "rgba(138, 137, 128, 0.18)",
-          strong:  "#A8A69E",
+          DEFAULT: "#6E92C4",
+          soft:    "rgba(110, 146, 196, 0.14)",
+          strong:  "#8DABD6",
         },
-        /* ── Compat layer (eliminar al cerrar Bloque B) ──────────────────
-           Mapea tokens del rebrand v1 (azul-violeta) al sistema nuevo para
-           que los componentes legacy de landing-v2 se vean con la paleta
-           Carbon Workshop sin tocar archivo a archivo. */
+        /* ── Compat layer ────────────────────────────────────────────────
+           Tokens legacy de landing-v2 (pri/ai) → ahora apuntan al coral
+           Ink & Rust. Se mantienen para no reescribir landing-v2 archivo
+           a archivo; migración progresiva. */
         pri: {
-          DEFAULT: "#FF6A2C",
-          dim:     "#E55A1F",
-          soft:    "rgba(255, 106, 44, 0.12)",
+          DEFAULT: "#E87559",
+          dim:     "#D45F44",
+          soft:    "rgba(232, 117, 89, 0.12)",
         },
         ai: {
-          DEFAULT: "#FF6A2C",
-          dim:     "#E55A1F",
-          soft:    "rgba(255, 106, 44, 0.14)",
+          DEFAULT: "#E87559",
+          dim:     "#D45F44",
+          soft:    "rgba(232, 117, 89, 0.14)",
         },
       },
       fontFamily: {

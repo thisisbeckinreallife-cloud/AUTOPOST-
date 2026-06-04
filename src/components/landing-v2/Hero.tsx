@@ -53,7 +53,7 @@ export function Hero() {
         className="absolute inset-0 z-0 pointer-events-none"
         style={{
           backgroundImage:
-            "linear-gradient(to right, rgba(255,106,44,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,106,44,0.04) 1px, transparent 1px)",
+            "linear-gradient(to right, rgba(232,117,89,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(232,117,89,0.04) 1px, transparent 1px)",
           backgroundSize: "64px 64px",
           maskImage: "radial-gradient(ellipse at center, black 30%, transparent 70%)",
           WebkitMaskImage: "radial-gradient(ellipse at center, black 30%, transparent 70%)",

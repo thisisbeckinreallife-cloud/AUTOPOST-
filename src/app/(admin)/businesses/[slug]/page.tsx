@@ -68,13 +68,13 @@ export default async function BusinessOverviewPage({
         <div
           style={{
             background: "var(--ap-paper-2)",
-            borderLeft: "3px solid #6B7A2E",
+            borderLeft: "3px solid var(--ap-olive)",
             padding: "12px 16px",
             display: "flex",
             alignItems: "center",
             gap: 10,
             fontSize: 14,
-            color: "#6B7A2E",
+            color: "var(--ap-olive)",
           }}
         >
           <CheckCircle className="h-4 w-4" />
@@ -102,7 +102,7 @@ export default async function BusinessOverviewPage({
           style={{
             fontSize: 11,
             color: "var(--ap-ink-4)",
-            letterSpacing: "0.18em",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
             margin: "0 0 14px",
           }}
@@ -139,7 +139,7 @@ export default async function BusinessOverviewPage({
           style={{
             fontSize: 11,
             color: "var(--ap-ink-4)",
-            letterSpacing: "0.18em",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
             margin: "0 0 14px",
           }}
@@ -192,7 +192,7 @@ export default async function BusinessOverviewPage({
               style={{
                 fontSize: 11,
                 color: "var(--ap-ink-4)",
-                letterSpacing: "0.18em",
+                letterSpacing: "0.08em",
                 textTransform: "uppercase",
                 margin: 0,
               }}
@@ -316,7 +316,7 @@ function QuickAction({
           style={{
             margin: 0,
             fontSize: 16,
-            fontStyle: "italic",
+            fontStyle: "normal",
             lineHeight: 1.1,
           }}
         >
@@ -368,7 +368,7 @@ function Kpi({
         style={{
           fontSize: 10,
           color: stamp ? "var(--ap-stamp)" : "var(--ap-ink-4)",
-          letterSpacing: "0.16em",
+          letterSpacing: "0.08em",
           textTransform: "uppercase",
           margin: "0 0 8px",
         }}
@@ -379,7 +379,7 @@ function Kpi({
         className="ap-display"
         style={{
           fontSize: 36,
-          fontStyle: "italic",
+          fontStyle: "normal",
           lineHeight: 1,
           margin: 0,
           color,

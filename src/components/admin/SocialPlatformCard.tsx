@@ -82,7 +82,7 @@ export function SocialPlatformCard({ businessId, config, connection }: Props) {
       style={{
         background: "var(--ap-paper-2)",
         border: isConnected
-          ? "1px solid #6B7A2E"
+          ? "1px solid var(--ap-olive)"
           : tokenExpired
             ? "1px solid #D4A627"
             : hasError
@@ -129,7 +129,7 @@ export function SocialPlatformCard({ businessId, config, connection }: Props) {
             margin: "2px 0 0",
             fontSize: 10,
             color: isConnected
-              ? "#6B7A2E"
+              ? "var(--ap-olive)"
               : tokenExpired
                 ? "#D4A627"
                 : hasError
@@ -156,7 +156,7 @@ export function SocialPlatformCard({ businessId, config, connection }: Props) {
               margin: "4px 0 0",
               fontSize: 11,
               color: "var(--ap-ink-3)",
-              fontStyle: "italic",
+              fontStyle: "normal",
               lineHeight: 1.4,
             }}
           >
@@ -178,7 +178,7 @@ export function SocialPlatformCard({ businessId, config, connection }: Props) {
             color: "var(--ap-ink-3)",
             padding: "6px 12px",
             fontSize: 9,
-            letterSpacing: "0.16em",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
             cursor: disconnecting ? "wait" : "pointer",
             opacity: disconnecting ? 0.5 : 1,
@@ -193,7 +193,7 @@ export function SocialPlatformCard({ businessId, config, connection }: Props) {
           style={{
             fontSize: 9,
             color: "var(--ap-ink-4)",
-            letterSpacing: "0.16em",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
             whiteSpace: "nowrap",
           }}
