@@ -20,7 +20,7 @@ export function CopyIdButton({ value, label }: { value: string; label?: string }
       type="button"
       onClick={handleCopy}
       title={copied ? "¡Copiado!" : `Copiar ${label ?? "ID"} completo`}
-      className="inline-flex items-center gap-1 font-mono text-[11px] text-zinc-500 hover:text-zinc-900 transition-colors group"
+      className="inline-flex items-center gap-1 font-mono text-[11px] text-ink-6 hover:text-ink-9 transition-colors group"
     >
       <span className="truncate max-w-[8ch]">{value.slice(0, 8)}</span>
       {copied ? (

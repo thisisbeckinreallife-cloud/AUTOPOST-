@@ -110,7 +110,7 @@ export default async function BusinessesPage({
     if (daysLeft < 7) {
       return (
         <span
-          className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-800 font-semibold border border-red-300"
+          className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-error-soft text-error font-semibold border border-red-300"
           title={`El token expira en ${daysLeft} ${daysLeft === 1 ? "día" : "días"}`}
         >
           Token: {daysLeft}d
@@ -120,7 +120,7 @@ export default async function BusinessesPage({
     if (daysLeft < 30) {
       return (
         <span
-          className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold border border-amber-300"
+          className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-warning-soft text-warning font-semibold border border-amber-300"
           title={`El token expira en ${daysLeft} días`}
         >
           Token: {daysLeft}d
@@ -129,7 +129,7 @@ export default async function BusinessesPage({
     }
     return (
       <span
-        className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700 font-medium border border-zinc-300"
+        className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-ink-3 text-ink-8 font-medium border border-ink-4"
         title={`Token válido ${daysLeft} días más`}
       >
         Token: {daysLeft > 90 ? "90d+" : `${daysLeft}d`}
@@ -148,14 +148,14 @@ export default async function BusinessesPage({
     }
     if (status === "TOKEN_EXPIRED" || status === "ERROR") {
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-800 font-semibold border border-red-300">
+        <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-error-soft text-error font-semibold border border-red-300">
           <XCircle className="h-2.5 w-2.5" />
           Token expirado
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold border border-amber-300">
+      <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-warning-soft text-warning font-semibold border border-amber-300">
         <AlertCircle className="h-2.5 w-2.5" />
         Sin conectar
       </span>
@@ -182,11 +182,11 @@ export default async function BusinessesPage({
     <div className="space-y-5 max-w-3xl">
       <div className="flex items-center justify-between animate-fade-up">
         <div>
-          <h1 className="font-display text-2xl font-bold text-zinc-900 tracking-tight">Mis cuentas</h1>
-          <p className="text-zinc-600 mt-1 text-sm">
+          <h1 className="font-display text-2xl font-bold text-ink-9 tracking-tight">Mis cuentas</h1>
+          <p className="text-ink-7 mt-1 text-sm">
             {hasFilters ? (
               <>
-                <span className="text-zinc-900 font-semibold">{showCount}</span> de {totalCount} cuenta{totalCount !== 1 ? "s" : ""}
+                <span className="text-ink-9 font-semibold">{showCount}</span> de {totalCount} cuenta{totalCount !== 1 ? "s" : ""}
               </>
             ) : (
               <>{totalCount} cuenta{totalCount !== 1 ? "s" : ""} gestionadas</>
@@ -195,7 +195,7 @@ export default async function BusinessesPage({
         </div>
         <Link
           href="/businesses/new"
-          className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:-translate-y-px hover:shadow-lg"
+          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-ink-0 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:-translate-y-px hover:shadow-lg"
         >
           <Plus className="h-4 w-4" />
           Añadir cuenta
@@ -206,23 +206,23 @@ export default async function BusinessesPage({
       {totalCount > 0 && (
         <div className="space-y-3 animate-fade-up">
           <form action="/businesses" method="get" className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-6 pointer-events-none" />
             <input
               type="search"
               name="q"
               defaultValue={q}
               placeholder="Buscar por nombre, slug o @handle..."
-              className="w-full pl-9 pr-9 py-2 rounded-lg bg-white border border-zinc-200 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-200"
+              className="w-full pl-9 pr-9 py-2 rounded-lg bg-ink-2 border border-ink-4 text-sm text-ink-9 placeholder-zinc-400 focus:outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-200"
             />
             {filter !== "all" && <input type="hidden" name="filter" value={filter} />}
             {sort !== "recent" && <input type="hidden" name="sort" value={sort} />}
             {q && (
               <Link
                 href={urlWith({ q: "" })}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-zinc-100"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-ink-3"
                 title="Limpiar búsqueda"
               >
-                <X className="h-3.5 w-3.5 text-zinc-500" />
+                <X className="h-3.5 w-3.5 text-ink-6" />
               </Link>
             )}
           </form>
@@ -240,8 +240,8 @@ export default async function BusinessesPage({
                   href={urlWith({ filter: f.key })}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
                     filter === f.key
-                      ? "bg-zinc-900 text-white border-zinc-900"
-                      : "bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
+                      ? "bg-ink-3 text-ink-9 border-ink-5"
+                      : "bg-ink-2 text-ink-8 border-ink-4 hover:border-ink-4 hover:bg-ink-2"
                   }`}
                   aria-pressed={filter === f.key}
                 >
@@ -251,10 +251,10 @@ export default async function BusinessesPage({
             </div>
 
             <div className="flex items-center gap-2">
-              <label htmlFor="sort" className="text-xs text-zinc-600 font-medium">
+              <label htmlFor="sort" className="text-xs text-ink-7 font-medium">
                 Ordenar
               </label>
-              <div className="flex gap-1 bg-white border border-zinc-200 rounded-lg p-1">
+              <div className="flex gap-1 bg-ink-2 border border-ink-4 rounded-lg p-1">
                 {([
                   { key: "recent" as const, label: "Añadido" },
                   { key: "name" as const, label: "Nombre" },
@@ -265,7 +265,7 @@ export default async function BusinessesPage({
                     key={s.key}
                     href={urlWith({ sort: s.key })}
                     className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${
-                      sort === s.key ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900"
+                      sort === s.key ? "bg-ink-3 text-ink-9" : "text-ink-7 hover:text-ink-9"
                     }`}
                     aria-pressed={sort === s.key}
                   >
@@ -279,31 +279,31 @@ export default async function BusinessesPage({
       )}
 
       {sorted.length === 0 && totalCount > 0 ? (
-        <div className="text-center py-16 border border-dashed border-zinc-300 bg-white rounded-2xl">
-          <Search className="h-7 w-7 text-zinc-400 mx-auto mb-3" />
-          <p className="text-sm font-semibold text-zinc-900 mb-1">Nada coincide con tus filtros</p>
-          <p className="text-xs text-zinc-600 mb-3">
+        <div className="text-center py-16 border border-dashed border-ink-4 bg-ink-2 rounded-2xl">
+          <Search className="h-7 w-7 text-ink-6 mx-auto mb-3" />
+          <p className="text-sm font-semibold text-ink-9 mb-1">Nada coincide con tus filtros</p>
+          <p className="text-xs text-ink-7 mb-3">
             Prueba limpiando la búsqueda o cambiando el filtro
           </p>
           <Link
             href="/businesses"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-zinc-900 hover:underline"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-ink-9 hover:underline"
           >
             Resetear filtros
           </Link>
         </div>
       ) : enriched.length === 0 ? (
-        <div className="text-center py-20 border border-dashed border-zinc-300 bg-white rounded-2xl animate-fade-up stagger-1">
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 border border-zinc-200 flex items-center justify-center mx-auto mb-4">
-            <Instagram className="h-7 w-7 text-zinc-700" />
+        <div className="text-center py-20 border border-dashed border-ink-4 bg-ink-2 rounded-2xl animate-fade-up stagger-1">
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 border border-ink-4 flex items-center justify-center mx-auto mb-4">
+            <Instagram className="h-7 w-7 text-ink-8" />
           </div>
-          <h3 className="font-display text-lg font-bold text-zinc-900 mb-1.5">Tu lista de cuentas está vacía</h3>
-          <p className="text-zinc-600 text-sm mb-6 max-w-xs mx-auto">
+          <h3 className="font-display text-lg font-bold text-ink-9 mb-1.5">Tu lista de cuentas está vacía</h3>
+          <p className="text-ink-7 text-sm mb-6 max-w-xs mx-auto">
             Conecta tu primera cuenta de Instagram y empieza a programar publicaciones
           </p>
           <Link
             href="/businesses/new"
-            className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-all"
+            className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-ink-0 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all"
           >
             <Plus className="h-4 w-4" />
             Añadir cuenta
@@ -316,33 +316,33 @@ export default async function BusinessesPage({
             return (
               <div
                 key={biz.id}
-                className={`rounded-xl border bg-white overflow-hidden transition-all card-interactive animate-fade-up ${
-                  needsConnect ? "border-amber-300" : "border-zinc-200 hover:border-zinc-300 hover:shadow-md"
+                className={`rounded-xl border bg-ink-2 overflow-hidden transition-all card-interactive animate-fade-up ${
+                  needsConnect ? "border-amber-300" : "border-ink-4 hover:border-ink-4 hover:shadow-md"
                 }`}
                 style={{ animationDelay: `${i * 0.07}s` }}
               >
                 {/* Main row */}
                 <Link href={`/businesses/${biz.slug}/chat`} className="flex items-center gap-4 px-5 py-4">
                   {/* Avatar */}
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-zinc-100 to-zinc-200 border border-zinc-200 flex items-center justify-center shrink-0">
-                    <span className="text-zinc-900 font-display font-bold text-base uppercase">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-zinc-100 to-zinc-200 border border-ink-4 flex items-center justify-center shrink-0">
+                    <span className="text-ink-9 font-display font-bold text-base uppercase">
                       {biz.name[0]}
                     </span>
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-semibold text-zinc-900">{biz.name}</p>
+                      <p className="font-semibold text-ink-9">{biz.name}</p>
                       {connectionBadge(biz.connectionStatus)}
                       {biz.connectionStatus === "ACTIVE" && tokenBadge(biz.tokenDaysLeft)}
                     </div>
                     {biz.igUsername ? (
-                      <p className="text-sm text-zinc-600 flex items-center gap-1.5 mt-0.5">
+                      <p className="text-sm text-ink-7 flex items-center gap-1.5 mt-0.5">
                         <Instagram className="h-3 w-3" />
                         @{biz.igUsername}
                       </p>
                     ) : (
-                      <p className="text-sm text-zinc-500 mt-0.5">Sin cuenta Instagram vinculada</p>
+                      <p className="text-sm text-ink-6 mt-0.5">Sin cuenta Instagram vinculada</p>
                     )}
                   </div>
 
@@ -350,29 +350,29 @@ export default async function BusinessesPage({
                   <div className="hidden sm:flex items-center gap-5 shrink-0 text-center">
                     <div title="Publicados este mes">
                       <p className="text-base font-display font-bold text-green-700 tabular-nums">{biz.publishedThisMonth}</p>
-                      <p className="text-[10px] text-zinc-500 uppercase tracking-wider">este mes</p>
+                      <p className="text-[10px] text-ink-6 uppercase tracking-wider">este mes</p>
                     </div>
                     <div title="Programados futuros">
                       <p className="text-base font-display font-bold text-blue-700 tabular-nums">{biz.scheduled}</p>
-                      <p className="text-[10px] text-zinc-500 uppercase tracking-wider">prog.</p>
+                      <p className="text-[10px] text-ink-6 uppercase tracking-wider">prog.</p>
                     </div>
                     {biz.failed > 0 && (
                       <div title="Con error">
-                        <p className="text-base font-display font-bold text-red-700 tabular-nums">{biz.failed}</p>
-                        <p className="text-[10px] text-zinc-500 uppercase tracking-wider">errores</p>
+                        <p className="text-base font-display font-bold text-error tabular-nums">{biz.failed}</p>
+                        <p className="text-[10px] text-ink-6 uppercase tracking-wider">errores</p>
                       </div>
                     )}
                   </div>
 
-                  <ChevronRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-700 shrink-0" />
+                  <ChevronRight className="h-4 w-4 text-ink-6 group-hover:text-ink-8 shrink-0" />
                 </Link>
 
                 {/* Quick actions row */}
-                <div className="flex items-center gap-1 px-5 py-2.5 border-t border-zinc-100 bg-zinc-50">
+                <div className="flex items-center gap-1 px-5 py-2.5 border-t border-ink-3 bg-ink-2">
                   {needsConnect ? (
                     <Link
                       href={`/businesses/${biz.slug}/connect`}
-                      className="flex items-center gap-1.5 text-xs font-semibold text-amber-800 hover:text-amber-900 px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-colors"
+                      className="flex items-center gap-1.5 text-xs font-semibold text-warning hover:text-amber-900 px-3 py-1.5 rounded-lg hover:bg-warning-soft transition-colors"
                     >
                       <Instagram className="h-3.5 w-3.5" />
                       {biz.connectionStatus === "TOKEN_EXPIRED" ? "Reconectar Instagram" : "Conectar Instagram"}
@@ -380,7 +380,7 @@ export default async function BusinessesPage({
                   ) : (
                     <Link
                       href={`/businesses/${biz.slug}/chat`}
-                      className="flex items-center gap-1.5 text-xs font-semibold text-zinc-900 hover:text-black px-3 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors"
+                      className="flex items-center gap-1.5 text-xs font-semibold text-ink-9 hover:text-black px-3 py-1.5 rounded-lg hover:bg-ink-3 transition-colors"
                     >
                       <Upload className="h-3.5 w-3.5" />
                       Subir con IA
@@ -388,14 +388,14 @@ export default async function BusinessesPage({
                   )}
                   <Link
                     href={`/businesses/${biz.slug}/batches`}
-                    className="flex items-center gap-1.5 text-xs font-medium text-zinc-600 hover:text-zinc-900 px-3 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors"
+                    className="flex items-center gap-1.5 text-xs font-medium text-ink-7 hover:text-ink-9 px-3 py-1.5 rounded-lg hover:bg-ink-3 transition-colors"
                   >
                     <FileText className="h-3.5 w-3.5" />
                     Subidas
                   </Link>
                   <Link
                     href={`/businesses/${biz.slug}/posts`}
-                    className="flex items-center gap-1.5 text-xs font-medium text-zinc-600 hover:text-zinc-900 px-3 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors"
+                    className="flex items-center gap-1.5 text-xs font-medium text-ink-7 hover:text-ink-9 px-3 py-1.5 rounded-lg hover:bg-ink-3 transition-colors"
                   >
                     <Calendar className="h-3.5 w-3.5" />
                     Posts ({biz.total})

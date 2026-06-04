@@ -13,25 +13,25 @@ interface TourStep {
 
 const steps: TourStep[] = [
   {
-    icon: <Zap className="h-6 w-6 text-brand-400" />,
+    icon: <Zap className="h-6 w-6 text-accent" />,
     title: "Bienvenido a Aluminum Studio",
     description:
       "Programa un mes entero de posts en Instagram en menos de 2 minutos. Te guiamos paso a paso para que estés publicando hoy mismo.",
   },
   {
-    icon: <Instagram className="h-6 w-6 text-brand-400" />,
+    icon: <Instagram className="h-6 w-6 text-accent" />,
     title: "Conecta tu Instagram",
     description:
       "Ve a «Mis cuentas» y añade tu cuenta. Solo necesitas una cuenta profesional (empresa o creador) y una página de Facebook vinculada.",
   },
   {
-    icon: <Upload className="h-6 w-6 text-brand-400" />,
+    icon: <Upload className="h-6 w-6 text-accent" />,
     title: "Sube tu primera carpeta",
     description:
       "Desde la cuenta conectada, haz clic en «Subir contenido». Arrastra un ZIP con tus imágenes, vídeos y captions — Aluminum Studio lo organiza todo solo.",
   },
   {
-    icon: <CheckCircle className="h-6 w-6 text-brand-400" />,
+    icon: <CheckCircle className="h-6 w-6 text-accent" />,
     title: "Revisa y activa",
     description:
       "Confirma los posts detectados y actívalos con un clic. Aluminum Studio se encargará de publicarlos en el momento exacto que hayas configurado.",
@@ -94,11 +94,11 @@ export function OnboardingTour() {
         aria-label={`Tour paso ${step + 1} de ${steps.length}`}
         className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-sm animate-scale-in"
       >
-        <div className="rounded-2xl border border-white/[0.08] bg-surface-card shadow-elevated overflow-hidden">
+        <div className="rounded-2xl border border-ink-4 bg-ink-2 shadow-elevated overflow-hidden">
           {/* Progress bar */}
-          <div className="h-0.5 bg-white/[0.06]">
+          <div className="h-0.5 bg-ink-2/[0.06]">
             <div
-              className="h-full bg-gradient-to-r from-brand-500 to-accent-orange transition-all duration-400"
+              className="h-full bg-gradient-to-r from-accent to-accent-orange transition-all duration-400"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -106,13 +106,13 @@ export function OnboardingTour() {
           <div className="p-6 space-y-4">
             {/* Header */}
             <div className="flex items-start justify-between gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500/15 to-accent-orange/10 border border-brand-500/15 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-soft to-accent-orange/10 border border-accent/20 flex items-center justify-center shrink-0">
                 {current.icon}
               </div>
               <button
                 type="button"
                 onClick={dismiss}
-                className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-white/[0.04] transition-colors"
+                className="p-1.5 rounded-lg text-ink-7 hover:text-ink-7 hover:bg-ink-2/[0.04] transition-colors"
                 aria-label="Omitir tour"
               >
                 <X className="h-4 w-4" />
@@ -121,13 +121,13 @@ export function OnboardingTour() {
 
             {/* Content */}
             <div className="space-y-1.5">
-              <p className="text-xs text-brand-400 font-semibold">
+              <p className="text-xs text-accent font-semibold">
                 Paso {step + 1} de {steps.length}
               </p>
               <h2 className="font-display font-bold text-white text-lg leading-tight">
                 {current.title}
               </h2>
-              <p className="text-sm text-zinc-400 leading-relaxed">
+              <p className="text-sm text-ink-6 leading-relaxed">
                 {current.description}
               </p>
             </div>
@@ -139,10 +139,10 @@ export function OnboardingTour() {
                   key={i}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
                     i === step
-                      ? "w-4 bg-brand-400"
+                      ? "w-4 bg-accent"
                       : i < step
-                      ? "w-1.5 bg-brand-500/40"
-                      : "w-1.5 bg-white/[0.06]"
+                      ? "w-1.5 bg-accent-soft"
+                      : "w-1.5 bg-ink-2/[0.06]"
                   }`}
                 />
               ))}
@@ -153,14 +153,14 @@ export function OnboardingTour() {
               <button
                 type="button"
                 onClick={dismiss}
-                className="text-sm text-zinc-600 hover:text-zinc-400 transition-colors px-3 py-2"
+                className="text-sm text-ink-7 hover:text-ink-6 transition-colors px-3 py-2"
               >
                 Omitir
               </button>
               <button
                 type="button"
                 onClick={next}
-                className="flex-1 flex items-center justify-center gap-2 bg-gradient-brand-vivid text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:shadow-glow hover:-translate-y-px"
+                className="flex-1 flex items-center justify-center gap-2 bg-accent text-ink-0 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:-translate-y-px"
               >
                 {isLast ? "¡Empezar!" : "Siguiente"}
                 <ArrowRight className="h-4 w-4" />

@@ -25,14 +25,14 @@ export interface PostItem {
 const CANCELLABLE = new Set(["DRAFT", "VALIDATED", "READY", "SCHEDULED"]);
 
 const POST_TYPE_ICON = (t: string) => {
-  if (t === "IMAGE") return <ImageIcon className="h-3.5 w-3.5 text-emerald-700" />;
+  if (t === "IMAGE") return <ImageIcon className="h-3.5 w-3.5 text-success" />;
   if (t === "CAROUSEL") return <Layers className="h-3.5 w-3.5 text-blue-700" />;
   if (t === "REEL") return <Film className="h-3.5 w-3.5 text-purple-700" />;
   return null;
 };
 
 const POST_TYPE_BG: Record<string, string> = {
-  IMAGE: "bg-emerald-100",
+  IMAGE: "bg-success-soft",
   CAROUSEL: "bg-blue-100",
   REEL: "bg-purple-100",
 };
@@ -196,11 +196,11 @@ export function PostsListClient({
             <button
               type="button"
               onClick={toggleAllVisible}
-              className="inline-flex items-center gap-2 text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
+              className="inline-flex items-center gap-2 text-xs font-medium text-ink-7 hover:text-ink-9 transition-colors"
               disabled={visibleActionableCount === 0}
             >
               {allSelected ? (
-                <CheckSquare className="h-4 w-4 text-zinc-900" />
+                <CheckSquare className="h-4 w-4 text-ink-9" />
               ) : (
                 <Square className="h-4 w-4" />
               )}
@@ -212,7 +212,7 @@ export function PostsListClient({
               <button
                 type="button"
                 onClick={clearSelection}
-                className="text-xs text-zinc-600 hover:text-zinc-900 inline-flex items-center gap-1"
+                className="text-xs text-ink-7 hover:text-ink-9 inline-flex items-center gap-1"
               >
                 Limpiar
                 <XIcon className="h-3.5 w-3.5" />
@@ -227,10 +227,10 @@ export function PostsListClient({
               return (
                 <div
                   key={post.id}
-                  className={`group block rounded-xl border bg-white px-3.5 py-3 transition-all ${
+                  className={`group block rounded-xl border bg-ink-2 px-3.5 py-3 transition-all ${
                     isSel
-                      ? "border-zinc-900 ring-2 ring-zinc-900/10 shadow-sm"
-                      : "border-zinc-200 hover:border-zinc-300 hover:shadow-sm"
+                      ? "border-ink-5 ring-2 ring-accent/20 shadow-sm"
+                      : "border-ink-4 hover:border-ink-4 hover:shadow-sm"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -242,10 +242,10 @@ export function PostsListClient({
                       aria-label={isSel ? "Deseleccionar post" : "Seleccionar post"}
                       className={`shrink-0 flex h-5 w-5 items-center justify-center rounded border transition-colors ${
                         !canSelect
-                          ? "border-zinc-200 bg-zinc-50 opacity-40 cursor-not-allowed"
+                          ? "border-ink-4 bg-ink-2 opacity-40 cursor-not-allowed"
                           : isSel
-                          ? "border-zinc-900 bg-zinc-900 text-white"
-                          : "border-zinc-300 bg-white hover:border-zinc-500"
+                          ? "border-ink-5 bg-ink-3 text-white"
+                          : "border-ink-4 bg-ink-2 hover:border-ink-5"
                       }`}
                       title={canSelect ? undefined : `No seleccionable en estado ${post.status}`}
                     >
@@ -257,7 +257,7 @@ export function PostsListClient({
                       className="flex-1 flex items-center gap-3.5 min-w-0"
                     >
                       {/* Thumbnail */}
-                      <div className="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden border border-zinc-200 bg-zinc-100">
+                      <div className="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden border border-ink-4 bg-ink-3">
                         {post.firstMedia?.mimeType.startsWith("image/") && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -284,7 +284,7 @@ export function PostsListClient({
                           </>
                         )}
                         {!post.firstMedia && (
-                          <div className={`absolute inset-0 flex items-center justify-center ${POST_TYPE_BG[post.postType] ?? "bg-zinc-100"}`}>
+                          <div className={`absolute inset-0 flex items-center justify-center ${POST_TYPE_BG[post.postType] ?? "bg-ink-3"}`}>
                             {POST_TYPE_ICON(post.postType)}
                           </div>
                         )}
@@ -298,19 +298,19 @@ export function PostsListClient({
                       {/* Main */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold font-mono ${POST_TYPE_BG[post.postType] ?? "bg-zinc-100"} text-zinc-700`}>
+                          <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold font-mono ${POST_TYPE_BG[post.postType] ?? "bg-ink-3"} text-ink-8`}>
                             {POST_TYPE_ICON(post.postType)}
                             {post.postType}
                           </span>
-                          <p className="text-xs text-zinc-500 truncate font-mono">
+                          <p className="text-xs text-ink-6 truncate font-mono">
                             {post.sourceFolderName}
                           </p>
                         </div>
-                        <p className="text-sm text-zinc-900 truncate leading-snug">
+                        <p className="text-sm text-ink-9 truncate leading-snug">
                           {post.caption.slice(0, 90)}
                           {post.caption.length > 90 ? "…" : ""}
                         </p>
-                        <p className="text-xs text-zinc-500 mt-0.5 tabular-nums flex items-center gap-1">
+                        <p className="text-xs text-ink-6 mt-0.5 tabular-nums flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {formatDateInTz(new Date(post.publishAt), timezone)}
                         </p>
@@ -339,8 +339,8 @@ export function PostsListClient({
           <div
             className={`flex items-center gap-3 rounded-xl px-4 py-3 shadow-xl border ${
               toast.kind === "success"
-                ? "bg-emerald-700 border-emerald-800 text-white"
-                : "bg-zinc-900 border-zinc-800 text-white"
+                ? "bg-success border-success/40 text-white"
+                : "bg-ink-3 border-ink-4 text-white"
             }`}
           >
             {toast.kind === "success" ? (
@@ -354,7 +354,7 @@ export function PostsListClient({
                 type="button"
                 onClick={executeUndo}
                 disabled={undoing}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/15 hover:bg-white/25 text-xs font-bold disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-ink-2/15 hover:bg-ink-2/25 text-xs font-bold disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                 aria-label="Deshacer la acción"
               >
                 <Undo2 className="h-3 w-3" />
@@ -364,7 +364,7 @@ export function PostsListClient({
             <button
               type="button"
               onClick={() => setToast(null)}
-              className="p-1 rounded hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              className="p-1 rounded hover:bg-ink-2/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
               aria-label="Cerrar notificación"
             >
               <XIcon className="h-3.5 w-3.5" />
@@ -376,7 +376,7 @@ export function PostsListClient({
       {/* Sticky bulk action toolbar */}
       {selected.size > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-lg px-4">
-          <div className="rounded-2xl bg-zinc-900 text-white shadow-xl border border-zinc-800 overflow-hidden">
+          <div className="rounded-2xl bg-ink-3 text-white shadow-xl border border-ink-4 overflow-hidden">
             {/* Top: selection summary + actions */}
             <div className="flex items-center gap-2 px-4 py-3">
               <span className="text-sm font-semibold flex-1">
@@ -387,8 +387,8 @@ export function PostsListClient({
                 onClick={() => { setAction("reschedule_relative"); setError(null); }}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   action === "reschedule_relative" || action === "reschedule"
-                    ? "bg-white text-zinc-900"
-                    : "bg-zinc-800 hover:bg-zinc-700 text-white"
+                    ? "bg-ink-2 text-ink-9"
+                    : "bg-ink-3 hover:bg-ink-4 text-white"
                 }`}
               >
                 <CalendarIcon className="h-3.5 w-3.5" />
@@ -399,8 +399,8 @@ export function PostsListClient({
                 onClick={() => { setAction("cancel"); setError(null); }}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   action === "cancel"
-                    ? "bg-red-500 text-white"
-                    : "bg-zinc-800 hover:bg-red-500/90 hover:text-white text-zinc-200"
+                    ? "bg-error text-white"
+                    : "bg-ink-3 hover:bg-error/90 hover:text-white text-ink-8"
                 }`}
               >
                 <XCircle className="h-3.5 w-3.5" />
@@ -409,7 +409,7 @@ export function PostsListClient({
               <button
                 type="button"
                 onClick={clearSelection}
-                className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white"
+                className="p-1.5 rounded-lg hover:bg-ink-3 text-ink-6 hover:text-white"
                 aria-label="Cerrar"
               >
                 <XIcon className="h-4 w-4" />
@@ -418,34 +418,34 @@ export function PostsListClient({
 
             {/* Detail panel */}
             {action === "cancel" && (
-              <div className="px-4 pb-3 border-t border-zinc-800 pt-3 flex items-center gap-3">
-                <p className="text-xs text-zinc-300 flex-1">
+              <div className="px-4 pb-3 border-t border-ink-4 pt-3 flex items-center gap-3">
+                <p className="text-xs text-ink-7 flex-1">
                   Cancelar {selected.size} post{selected.size !== 1 ? "s" : ""}. Los que estén PUBLISHING o PUBLISHED se ignorarán.
                 </p>
                 <button
                   type="button"
                   onClick={executeAction}
                   disabled={pending}
-                  className="px-3 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-bold disabled:opacity-50"
+                  className="px-3 py-1.5 rounded-lg bg-error hover:bg-red-600 text-white text-xs font-bold disabled:opacity-50"
                 >
                   {pending ? "…" : "Confirmar"}
                 </button>
               </div>
             )}
             {(action === "reschedule_relative" || action === "reschedule") && (
-              <div className="px-4 pb-3 border-t border-zinc-800 pt-3 space-y-2">
-                <div className="flex gap-1 bg-zinc-800 rounded-lg p-1">
+              <div className="px-4 pb-3 border-t border-ink-4 pt-3 space-y-2">
+                <div className="flex gap-1 bg-ink-3 rounded-lg p-1">
                   <button
                     type="button"
                     onClick={() => setAction("reschedule_relative")}
-                    className={`flex-1 px-2 py-1 rounded-md text-[11px] font-semibold ${action === "reschedule_relative" ? "bg-white text-zinc-900" : "text-zinc-300 hover:text-white"}`}
+                    className={`flex-1 px-2 py-1 rounded-md text-[11px] font-semibold ${action === "reschedule_relative" ? "bg-ink-2 text-ink-9" : "text-ink-7 hover:text-white"}`}
                   >
                     Desplazar horas
                   </button>
                   <button
                     type="button"
                     onClick={() => setAction("reschedule")}
-                    className={`flex-1 px-2 py-1 rounded-md text-[11px] font-semibold ${action === "reschedule" ? "bg-white text-zinc-900" : "text-zinc-300 hover:text-white"}`}
+                    className={`flex-1 px-2 py-1 rounded-md text-[11px] font-semibold ${action === "reschedule" ? "bg-ink-2 text-ink-9" : "text-ink-7 hover:text-white"}`}
                   >
                     Nueva fecha
                   </button>
@@ -456,17 +456,17 @@ export function PostsListClient({
                       type="number"
                       value={offsetHours}
                       onChange={(e) => setOffsetHours(parseInt(e.target.value || "0", 10))}
-                      className="w-20 bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1.5 text-sm text-white focus:outline-none focus:border-zinc-500"
+                      className="w-20 bg-ink-3 border border-ink-4 rounded-md px-2 py-1.5 text-sm text-white focus:outline-none focus:border-accent"
                       aria-label="Horas a desplazar"
                     />
-                    <p className="text-xs text-zinc-300 flex-1">
+                    <p className="text-xs text-ink-7 flex-1">
                       horas ({offsetHours >= 0 ? "adelantar" : "retrasar"}) todos los seleccionados
                     </p>
                     <button
                       type="button"
                       onClick={executeAction}
                       disabled={pending || offsetHours === 0}
-                      className="px-3 py-1.5 rounded-lg bg-white text-zinc-900 text-xs font-bold disabled:opacity-50"
+                      className="px-3 py-1.5 rounded-lg bg-ink-2 text-ink-9 text-xs font-bold disabled:opacity-50"
                     >
                       {pending ? "…" : "Aplicar"}
                     </button>
@@ -477,13 +477,13 @@ export function PostsListClient({
                       type="datetime-local"
                       value={publishAt}
                       onChange={(e) => setPublishAt(e.target.value)}
-                      className="flex-1 bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1.5 text-sm text-white focus:outline-none focus:border-zinc-500"
+                      className="flex-1 bg-ink-3 border border-ink-4 rounded-md px-2 py-1.5 text-sm text-white focus:outline-none focus:border-accent"
                     />
                     <button
                       type="button"
                       onClick={executeAction}
                       disabled={pending || !publishAt}
-                      className="px-3 py-1.5 rounded-lg bg-white text-zinc-900 text-xs font-bold disabled:opacity-50"
+                      className="px-3 py-1.5 rounded-lg bg-ink-2 text-ink-9 text-xs font-bold disabled:opacity-50"
                     >
                       {pending ? "…" : "Aplicar"}
                     </button>

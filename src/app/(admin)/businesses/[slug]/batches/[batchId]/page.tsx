@@ -92,7 +92,7 @@ export default function BatchDetailPage() {
     return <BatchDetailSkeleton />;
   }
   if (!batch) {
-    return <div className="text-zinc-500">No se encontro este contenido.</div>;
+    return <div className="text-ink-6">No se encontro este contenido.</div>;
   }
 
   const canConfirm = ["PARSED", "VALIDATION_FAILED"].includes(batch.status);
@@ -110,8 +110,8 @@ export default function BatchDetailPage() {
       ]} />
 
       <div>
-        <h1 className="font-display text-xl font-bold text-zinc-900 truncate">{batch.originalFilename}</h1>
-        <p className="text-zinc-500 text-sm mt-0.5">{batch.business.name}</p>
+        <h1 className="font-display text-xl font-bold text-ink-9 truncate">{batch.originalFilename}</h1>
+        <p className="text-ink-6 text-sm mt-0.5">{batch.business.name}</p>
       </div>
 
       {/* Processing */}
@@ -129,27 +129,27 @@ export default function BatchDetailPage() {
       {batch.totalPosts !== null && !isParsing && (
         <div className="grid grid-cols-3 gap-3">
           <Card className="p-4 text-center">
-            <p className="text-2xl font-display font-bold text-zinc-900 tabular-nums">{batch.totalPosts}</p>
-            <p className="text-xs text-zinc-500 mt-1">Encontrados</p>
+            <p className="text-2xl font-display font-bold text-ink-9 tabular-nums">{batch.totalPosts}</p>
+            <p className="text-xs text-ink-6 mt-1">Encontrados</p>
           </Card>
-          <Card className="p-4 text-center border-emerald-200">
-            <p className="text-2xl font-display font-bold text-emerald-700 tabular-nums">{batch.validPosts ?? 0}</p>
-            <p className="text-xs text-zinc-500 mt-1">Listos</p>
+          <Card className="p-4 text-center border-success/30">
+            <p className="text-2xl font-display font-bold text-success tabular-nums">{batch.validPosts ?? 0}</p>
+            <p className="text-xs text-ink-6 mt-1">Listos</p>
           </Card>
           <Card className={`p-4 text-center ${(batch.failedPosts ?? 0) > 0 ? "border-red-500/10" : ""}`}>
-            <p className={`text-2xl font-display font-bold tabular-nums ${(batch.failedPosts ?? 0) > 0 ? "text-red-700" : "text-zinc-900"}`}>{batch.failedPosts ?? 0}</p>
-            <p className="text-xs text-zinc-500 mt-1">Con problemas</p>
+            <p className={`text-2xl font-display font-bold tabular-nums ${(batch.failedPosts ?? 0) > 0 ? "text-error" : "text-ink-9"}`}>{batch.failedPosts ?? 0}</p>
+            <p className="text-xs text-ink-6 mt-1">Con problemas</p>
           </Card>
         </div>
       )}
 
       {/* Confirm */}
       {canConfirm && (batch.validPosts ?? 0) > 0 && !confirmResult && (
-        <Card className="p-5 border-emerald-200 bg-emerald-50">
+        <Card className="p-5 border-success/30 bg-success-soft">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="font-semibold text-zinc-900">Todo listo? Activa las publicaciones</p>
-              <p className="text-sm text-zinc-500 mt-0.5">{batch.validPosts} posts seran programados</p>
+              <p className="font-semibold text-ink-9">Todo listo? Activa las publicaciones</p>
+              <p className="text-sm text-ink-6 mt-0.5">{batch.validPosts} posts seran programados</p>
             </div>
             <Button onClick={handleConfirm} loading={confirming} className="shrink-0">
               Activar {batch.validPosts} posts
@@ -159,7 +159,7 @@ export default function BatchDetailPage() {
       )}
 
       {confirmResult && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 text-sm text-emerald-700 flex items-center gap-2 animate-fade-in">
+        <div className="bg-success-soft border border-success/30 rounded-xl px-4 py-3 text-sm text-success flex items-center gap-2 animate-fade-in">
           <CheckCircle className="h-4 w-4" />
           {confirmResult.scheduled} publicaciones programadas correctamente
           {confirmResult.failed > 0 && ` · ${confirmResult.failed} fallaron`}
@@ -167,42 +167,42 @@ export default function BatchDetailPage() {
       )}
 
       {error && (
-        <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>
+        <div className="rounded-xl bg-error-soft border border-error/30 px-4 py-3 text-sm text-error">{error}</div>
       )}
 
       {/* Errors */}
       {hasErrors && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
-          <p className="font-semibold text-red-700 flex items-center gap-2 text-sm">
+        <div className="bg-error-soft border border-error/30 rounded-xl p-4 space-y-3">
+          <p className="font-semibold text-error flex items-center gap-2 text-sm">
             <AlertTriangle className="h-4 w-4" />
             {batch.parseErrors!.length} problema{batch.parseErrors!.length !== 1 ? "s" : ""} que debes corregir
           </p>
           <div className="space-y-1.5">
             {batch.parseErrors!.map((e, i) => (
-              <div key={i} className="flex items-start gap-2 bg-white rounded-lg px-3 py-2 border border-red-200">
-                <span className="text-red-700 mt-0.5 shrink-0 text-xs">•</span>
+              <div key={i} className="flex items-start gap-2 bg-ink-2 rounded-lg px-3 py-2 border border-error/30">
+                <span className="text-error mt-0.5 shrink-0 text-xs">•</span>
                 <div>
-                  <p className="text-[11px] font-mono text-zinc-500">{e.folder}</p>
-                  <p className="text-sm text-zinc-900">{friendlyError(e.message)}</p>
+                  <p className="text-[11px] font-mono text-ink-6">{e.folder}</p>
+                  <p className="text-sm text-ink-9">{friendlyError(e.message)}</p>
                 </div>
               </div>
             ))}
           </div>
-          <p className="text-xs text-red-700/60">Corrige estos problemas y vuelve a subir el ZIP</p>
+          <p className="text-xs text-error/60">Corrige estos problemas y vuelve a subir el ZIP</p>
         </div>
       )}
 
       {/* Warnings */}
       {hasWarnings && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
-          <p className="font-semibold text-amber-800 flex items-center gap-2 text-sm">
+        <div className="bg-warning-soft border border-warning/30 rounded-xl p-4 space-y-2">
+          <p className="font-semibold text-warning flex items-center gap-2 text-sm">
             <AlertTriangle className="h-4 w-4" />
             {batch.parseWarnings!.length} aviso{batch.parseWarnings!.length !== 1 ? "s" : ""}
           </p>
           {batch.parseWarnings!.map((w, i) => (
             <div key={i} className="text-sm flex items-start gap-2">
-              <span className="text-amber-800/60 shrink-0">•</span>
-              <span className="text-zinc-500">{friendlyError(w.message)} <span className="text-xs text-zinc-500">({w.folder})</span></span>
+              <span className="text-warning/60 shrink-0">•</span>
+              <span className="text-ink-6">{friendlyError(w.message)} <span className="text-xs text-ink-6">({w.folder})</span></span>
             </div>
           ))}
         </div>
@@ -212,14 +212,14 @@ export default function BatchDetailPage() {
       {batch.postDrafts.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-zinc-900">
+            <h2 className="text-sm font-semibold text-ink-9">
               Tus posts ({batch.postDrafts.length})
             </h2>
-            <div className="flex items-center gap-1 bg-white border border-zinc-200 rounded-lg p-0.5">
+            <div className="flex items-center gap-1 bg-ink-2 border border-ink-4 rounded-lg p-0.5">
               <button
                 type="button"
                 onClick={() => setView("list")}
-                className={`p-1.5 rounded-md transition-colors ${view === "list" ? "bg-zinc-200 text-zinc-900" : "text-zinc-500 hover:text-zinc-500"}`}
+                className={`p-1.5 rounded-md transition-colors ${view === "list" ? "bg-ink-3 text-ink-9" : "text-ink-6 hover:text-ink-6"}`}
                 title="Vista lista"
               >
                 <List className="h-3.5 w-3.5" />
@@ -227,7 +227,7 @@ export default function BatchDetailPage() {
               <button
                 type="button"
                 onClick={() => setView("grid")}
-                className={`p-1.5 rounded-md transition-colors ${view === "grid" ? "bg-zinc-200 text-zinc-900" : "text-zinc-500 hover:text-zinc-500"}`}
+                className={`p-1.5 rounded-md transition-colors ${view === "grid" ? "bg-ink-3 text-ink-9" : "text-ink-6 hover:text-ink-6"}`}
                 title="Vista del feed"
               >
                 <LayoutGrid className="h-3.5 w-3.5" />
@@ -255,24 +255,24 @@ export default function BatchDetailPage() {
               <a
                 key={post.id}
                 href={`/businesses/${slug}/posts/${post.id}`}
-                className="flex items-center gap-3 bg-white border border-zinc-200 rounded-lg px-4 py-3 hover:border-zinc-300 transition-all"
+                className="flex items-center gap-3 bg-ink-2 border border-ink-4 rounded-lg px-4 py-3 hover:border-ink-4 transition-all"
               >
                 <div className="shrink-0">
                   {post.postType === "REEL" ? <Film className="h-4 w-4 text-purple-700" />
                     : post.postType === "CAROUSEL" ? <Layers className="h-4 w-4 text-blue-700" />
-                    : <Image className="h-4 w-4 text-emerald-700" />}
+                    : <Image className="h-4 w-4 text-success" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-zinc-900 truncate">{post.sourceFolderName}</p>
-                  <p className="text-xs text-zinc-500 truncate">{post.caption.slice(0, 80)}{post.caption.length > 80 ? "..." : ""}</p>
+                  <p className="text-sm font-medium text-ink-9 truncate">{post.sourceFolderName}</p>
+                  <p className="text-xs text-ink-6 truncate">{post.caption.slice(0, 80)}{post.caption.length > 80 ? "..." : ""}</p>
                 </div>
-                <div className="text-xs text-zinc-500 shrink-0 flex items-center gap-1">
+                <div className="text-xs text-ink-6 shrink-0 flex items-center gap-1">
                   <Clock className="h-3 w-3" />
                   {formatDateInTz(post.publishAt, batch.business.timezone)}
                 </div>
                 <PostStatusPill status={post.status} />
                 <ApprovalPill approvalStatus={post.approvalStatus} postId={post.id} onUpdate={fetchBatch} />
-                <ChevronRight className="h-4 w-4 text-zinc-400 shrink-0" />
+                <ChevronRight className="h-4 w-4 text-ink-6 shrink-0" />
               </a>
             ))}
           </div>
@@ -285,15 +285,15 @@ export default function BatchDetailPage() {
 
 function PostStatusPill({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
-    SCHEDULED:  { label: "Programado",  cls: "bg-blue-500/10 text-blue-700" },
-    PUBLISHED:  { label: "Publicado",   cls: "bg-green-500/10 text-emerald-700" },
-    FAILED:     { label: "Error",       cls: "bg-red-100 text-red-700" },
-    DRAFT:      { label: "Borrador",    cls: "bg-zinc-100 text-zinc-500" },
-    VALIDATED:  { label: "Revisado",    cls: "bg-zinc-100 text-zinc-500" },
-    READY:      { label: "Listo",       cls: "bg-green-500/10 text-emerald-700" },
-    CANCELLED:  { label: "Cancelado",   cls: "bg-zinc-100 text-zinc-500" },
+    SCHEDULED:  { label: "Programado",  cls: "bg-info/10 text-blue-700" },
+    PUBLISHED:  { label: "Publicado",   cls: "bg-green-500/10 text-success" },
+    FAILED:     { label: "Error",       cls: "bg-error-soft text-error" },
+    DRAFT:      { label: "Borrador",    cls: "bg-ink-3 text-ink-6" },
+    VALIDATED:  { label: "Revisado",    cls: "bg-ink-3 text-ink-6" },
+    READY:      { label: "Listo",       cls: "bg-green-500/10 text-success" },
+    CANCELLED:  { label: "Cancelado",   cls: "bg-ink-3 text-ink-6" },
   };
-  const s = map[status] ?? { label: status, cls: "bg-zinc-100 text-zinc-500" };
+  const s = map[status] ?? { label: status, cls: "bg-ink-3 text-ink-6" };
   return <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${s.cls}`}>{s.label}</span>;
 }
 
@@ -320,7 +320,7 @@ function ApprovalPill({
 
   if (approvalStatus === "APPROVED") {
     return (
-      <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-900 font-medium shrink-0 border border-zinc-200">
+      <span className="text-[10px] px-2 py-0.5 rounded-full bg-ink-3 text-ink-9 font-medium shrink-0 border border-ink-4">
         Aprobado
       </span>
     );
@@ -331,7 +331,7 @@ function ApprovalPill({
         type="button"
         onClick={(e) => { e.preventDefault(); act("approve"); }}
         disabled={loading}
-        className="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-medium shrink-0 border border-red-500/10 hover:bg-zinc-100 hover:text-zinc-900 hover:border-zinc-200 transition-colors"
+        className="text-[10px] px-2 py-0.5 rounded-full bg-error-soft text-error font-medium shrink-0 border border-red-500/10 hover:bg-ink-3 hover:text-ink-9 hover:border-ink-4 transition-colors"
         title="Rechazado — clic para aprobar"
       >
         Rechazado
@@ -345,7 +345,7 @@ function ApprovalPill({
         type="button"
         onClick={() => act("approve")}
         disabled={loading}
-        className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-800 border border-amber-500/10 hover:bg-zinc-100 hover:text-zinc-900 hover:border-zinc-200 font-medium transition-colors"
+        className="text-[10px] px-2 py-0.5 rounded-full bg-warning-soft0/10 text-warning border border-amber-500/10 hover:bg-ink-3 hover:text-ink-9 hover:border-ink-4 font-medium transition-colors"
         title="Aprobar"
       >
         ✓ Aprobar

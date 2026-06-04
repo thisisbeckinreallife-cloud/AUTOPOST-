@@ -79,14 +79,14 @@ export default function NewBusinessPage() {
     <div className="max-w-lg">
       <div className="mb-6 animate-fade-up">
         <h1 className="font-display text-xl font-bold text-white">Nueva cuenta</h1>
-        <p className="text-zinc-500 mt-1">Anade una nueva cuenta de Instagram</p>
+        <p className="text-ink-6 mt-1">Anade una nueva cuenta de Instagram</p>
       </div>
 
       <Card>
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">
+              <label className="block text-sm font-medium text-ink-7 mb-1">
                 Nombre *
               </label>
               <Input
@@ -99,11 +99,11 @@ export default function NewBusinessPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">
+              <label className="block text-sm font-medium text-ink-7 mb-1">
                 Slug *
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-zinc-500 text-sm">/</span>
+                <span className="text-ink-6 text-sm">/</span>
                 <Input
                   type="text"
                   required
@@ -117,13 +117,13 @@ export default function NewBusinessPage() {
                   placeholder="mi-marca"
                 />
               </div>
-              <p className="text-xs text-zinc-500 mt-1">
+              <p className="text-xs text-ink-6 mt-1">
                 Minusculas, alfanumerico y guiones
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">
+              <label className="block text-sm font-medium text-ink-7 mb-1">
                 Zona horaria *
               </label>
               <select
@@ -132,7 +132,7 @@ export default function NewBusinessPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, timezone: e.target.value }))
                 }
-                className="w-full rounded-lg border border-white/[0.08] bg-surface-secondary px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-transparent transition-all"
+                className="w-full rounded-lg border border-ink-4 bg-ink-3 px-3 py-2.5 text-sm text-ink-9 focus:outline-none focus:ring-2 focus:ring-accent-ring focus:border-transparent transition-all"
               >
                 {COMMON_TIMEZONES.map((tz) => (
                   <option key={tz} value={tz}>
@@ -143,7 +143,7 @@ export default function NewBusinessPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">
+              <label className="block text-sm font-medium text-ink-7 mb-1">
                 Descripcion
               </label>
               <textarea
@@ -152,13 +152,13 @@ export default function NewBusinessPage() {
                   setForm((f) => ({ ...f, description: e.target.value }))
                 }
                 rows={3}
-                className="w-full rounded-lg border border-white/[0.08] bg-surface-secondary px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-transparent transition-all"
+                className="w-full rounded-lg border border-ink-4 bg-ink-3 px-3 py-2.5 text-sm text-ink-9 placeholder:text-ink-7 focus:outline-none focus:ring-2 focus:ring-accent-ring focus:border-transparent transition-all"
                 placeholder="Descripcion opcional"
               />
             </div>
 
             {error && (
-              <div className="rounded-xl bg-red-500/8 border border-red-500/15 px-4 py-3 text-sm text-red-400">
+              <div className="rounded-xl bg-error/8 border border-red-500/15 px-4 py-3 text-sm text-error">
                 {error}
               </div>
             )}

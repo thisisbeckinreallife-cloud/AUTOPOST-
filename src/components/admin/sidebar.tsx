@@ -192,7 +192,7 @@ export function Sidebar({
       >
         <button
           onClick={toggleLocale}
-          className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-white/[0.04]"
+          className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-ink-2/[0.04]"
           style={{ color: "#A3ABBA" }}
           title={locale === "es" ? "Switch to English" : "Cambiar a Espanol"}
         >
@@ -203,7 +203,7 @@ export function Sidebar({
           href="https://help.instagram.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-white/[0.04]"
+          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-ink-2/[0.04]"
           style={{ color: "#A3ABBA" }}
         >
           <HelpCircle className="h-[18px] w-[18px]" />
@@ -211,7 +211,7 @@ export function Sidebar({
         </a>
         <button
           onClick={handleLogout}
-          className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-red-500/[0.08] hover:text-red-400"
+          className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-error/[0.08] hover:text-error"
           style={{ color: "#A3ABBA" }}
         >
           <LogOut className="h-[18px] w-[18px]" />
@@ -226,7 +226,7 @@ export function Sidebar({
       {/* Mobile hamburger */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="fixed top-3.5 left-4 z-50 md:hidden flex h-10 w-10 items-center justify-center rounded-lg border border-white/[0.06] bg-surface-card text-zinc-400 hover:text-white transition-all"
+        className="fixed top-3.5 left-4 z-50 md:hidden flex h-10 w-10 items-center justify-center rounded-lg border border-ink-4 bg-ink-2 text-ink-6 hover:text-white transition-all"
         aria-label={mobileOpen ? "Cerrar menu" : "Abrir menu"}
         aria-expanded={mobileOpen}
         aria-controls="mobile-sidebar"
