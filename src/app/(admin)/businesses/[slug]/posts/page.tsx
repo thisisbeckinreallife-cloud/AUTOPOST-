@@ -67,8 +67,14 @@ export default async function PostsPage({
     const { year, month } = parseMonth(searchParams.month);
     const rangeStart = new Date(year, month - 1, 20);
     const rangeEnd = new Date(year, month + 2, 10);
+    // Por defecto el calendario NO muestra CANCELLED ni FAILED — son posts
+    // muertos que ensucian la vista (el usuario los canceló o fallaron).
+    // Solo aparecen si filtra explícitamente por ese status.
+    const calendarWhere: Prisma.PostDraftWhereInput = statusFilter
+      ? where
+      : { ...where, status: { notIn: ["CANCELLED", "FAILED"] } };
     const rows = await db.postDraft.findMany({
-      where: { ...where, publishAt: { gte: rangeStart, lt: rangeEnd } },
+      where: { ...calendarWhere, publishAt: { gte: rangeStart, lt: rangeEnd } },
       orderBy: { publishAt: "asc" },
       include: {
         _count: { select: { mediaAssets: true } },
