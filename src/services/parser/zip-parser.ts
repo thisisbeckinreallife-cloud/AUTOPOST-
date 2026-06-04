@@ -406,16 +406,42 @@ async function parseBucket(
     return { error: "No valid media files found after filtering" };
   }
 
-  // ── Parse optional caption.txt o caption.md ──────────────────────────────
-  // Aceptamos ambas extensiones. .md se trata como texto plano (Markdown
-  // ligero es OK en Instagram, los símbolos se ven raw pero no rompen).
+  // ── Parse caption desde varios nombres comunes ───────────────────────────
+  // Aceptamos: caption.txt, caption.md, descripcion.txt, descripcion.md,
+  // description.txt, description.md, texto.txt, copy.txt. Case-insensitive
+  // (las keys del Map ya están en lowercase).
+  // Si no hay match, fallback: usar EL ÚNICO .txt/.md que haya en la carpeta
+  // (si hay más de uno, no asumimos cuál es y dejamos warning).
 
   let caption = "";
-  const captionEntry = files.get("caption.txt") ?? files.get("caption.md");
+  const CAPTION_NAMES = [
+    "caption.txt", "caption.md",
+    "descripcion.txt", "descripcion.md",
+    "description.txt", "description.md",
+    "texto.txt", "copy.txt",
+  ];
+  let captionEntry: JSZip.JSZipObject | undefined;
+  for (const name of CAPTION_NAMES) {
+    captionEntry = files.get(name);
+    if (captionEntry) break;
+  }
+  // Fallback: único .txt o .md en la carpeta (siempre que no sea README)
+  if (!captionEntry) {
+    const textCandidates = Array.from(files.entries()).filter(([n]) => {
+      const lower = n.toLowerCase();
+      if (!lower.endsWith(".txt") && !lower.endsWith(".md")) return false;
+      if (lower.startsWith("readme")) return false;
+      return true;
+    });
+    if (textCandidates.length === 1) {
+      captionEntry = textCandidates[0][1];
+    }
+  }
+
   if (captionEntry) {
     caption = (await captionEntry.async("string")).trim();
   } else {
-    warnings.push("No caption.txt/caption.md found – caption left empty");
+    warnings.push("Sin caption — caption.txt, caption.md o descripcion.txt no encontrado, caption queda vacío");
   }
 
   // ── Parse optional meta.json or generate defaults ────────────────────────
