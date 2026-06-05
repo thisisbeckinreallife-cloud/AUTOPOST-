@@ -22,9 +22,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: [
-          "bg-accent text-ink-0",
-          "hover:bg-accent-hover hover:-translate-y-px",
-          "active:bg-accent-active active:translate-y-0",
+          "bg-primary text-primary-fg",
+          "hover:bg-primary-hover hover:-translate-y-px",
+          "active:bg-primary-active active:translate-y-0",
         ],
         destructive: [
           "bg-error text-ink-9",
@@ -51,9 +51,9 @@ const buttonVariants = cva(
         ],
         // Alias legacy: gradient se comporta como default (sin gradient)
         gradient: [
-          "bg-accent text-ink-0",
-          "hover:bg-accent-hover hover:-translate-y-px",
-          "active:bg-accent-active active:translate-y-0",
+          "bg-primary text-primary-fg",
+          "hover:bg-primary-hover hover:-translate-y-px",
+          "active:bg-primary-active active:translate-y-0",
         ],
       },
       size: {

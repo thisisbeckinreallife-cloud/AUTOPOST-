@@ -195,7 +195,7 @@ export default async function BusinessesPage({
         </div>
         <Link
           href="/businesses/new"
-          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-ink-0 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:-translate-y-px hover:shadow-lg"
+          className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-primary-fg px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:-translate-y-px hover:shadow-lg"
         >
           <Plus className="h-4 w-4" />
           Añadir cuenta
@@ -303,7 +303,7 @@ export default async function BusinessesPage({
           </p>
           <Link
             href="/businesses/new"
-            className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-ink-0 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all"
+            className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-primary-fg px-5 py-2.5 rounded-lg text-sm font-semibold transition-all"
           >
             <Plus className="h-4 w-4" />
             Añadir cuenta

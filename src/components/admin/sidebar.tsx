@@ -129,7 +129,7 @@ export function Sidebar({
             fontFamily: "var(--font-mona-sans)",
           }}
         >
-          autopost<span style={{ color: "#C2410C" }}>.</span>
+          autopost<span style={{ color: "#2563EB" }}>.</span>
         </span>
       </div>
 
@@ -153,7 +153,7 @@ export function Sidebar({
             >
               <Icon
                 className="h-[18px] w-[18px] transition-colors"
-                style={{ color: isActive ? "#C2410C" : "#8A8A8A" }}
+                style={{ color: isActive ? "#2563EB" : "#8A8A8A" }}
                 aria-hidden="true"
               />
               <span className="flex-1">{label}</span>
@@ -174,7 +174,7 @@ export function Sidebar({
                 <div
                   className="h-1.5 w-1.5 rounded-full"
                   style={{
-                    background: "#C2410C",
+                    background: "#2563EB",
                   }}
                   aria-hidden="true"
                 />

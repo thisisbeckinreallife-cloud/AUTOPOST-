@@ -181,7 +181,7 @@ export default async function DashboardPage() {
           </Link>
           <Link
             href={ctaHref}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-accent text-ink-0 font-medium text-sm shadow-md hover:bg-accent-hover transition-all"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-primary-fg font-medium text-sm shadow-md hover:bg-primary-hover transition-all"
           >
             <Upload className="h-4 w-4" aria-hidden="true" />
             {ctaLabel}

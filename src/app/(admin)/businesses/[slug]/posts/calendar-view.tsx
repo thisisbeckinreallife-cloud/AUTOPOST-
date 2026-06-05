@@ -691,7 +691,7 @@ function EditPostModal({
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center justify-center h-10 px-4 rounded-md bg-accent text-white font-medium text-sm hover:bg-accent disabled:opacity-50"
+            className="inline-flex items-center justify-center h-10 px-4 rounded-md bg-primary text-primary-fg font-medium text-sm hover:bg-primary-hover disabled:opacity-50"
           >
             {saving ? "Guardando…" : "Guardar fecha"}
           </button>

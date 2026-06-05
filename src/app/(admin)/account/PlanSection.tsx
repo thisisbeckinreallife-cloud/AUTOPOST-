@@ -147,14 +147,14 @@ export function PlanSection({ plan }: { plan: PlanData }) {
             type="button"
             onClick={openPortal}
             disabled={openingPortal}
-            className="inline-flex items-center justify-center h-11 px-4 rounded-md bg-accent text-ink-0 font-medium text-sm shadow-md hover:bg-accent-hover transition-all disabled:opacity-50"
+            className="inline-flex items-center justify-center h-11 px-4 rounded-md bg-primary text-primary-fg font-medium text-sm shadow-md hover:bg-primary-hover transition-all disabled:opacity-50"
           >
             {openingPortal ? "Abriendo…" : "Gestionar plan en Stripe"}
           </button>
         ) : (
           <Link
             href="/#pricing"
-            className="inline-flex items-center justify-center h-11 px-4 rounded-md bg-accent text-ink-0 font-medium text-sm shadow-md hover:bg-accent-hover transition-all"
+            className="inline-flex items-center justify-center h-11 px-4 rounded-md bg-primary text-primary-fg font-medium text-sm shadow-md hover:bg-primary-hover transition-all"
           >
             Ver planes y empezar 7 días gratis
           </Link>

@@ -75,7 +75,7 @@ export function PreferencesSection({
                 type="button"
                 onClick={() => onLanguageChange("es")}
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                  language === "es" ? "bg-accent text-ink-0" : "text-ink-7 hover:text-ink-9"
+                  language === "es" ? "bg-primary text-primary-fg" : "text-ink-7 hover:text-ink-9"
                 }`}
               >
                 Español
@@ -84,7 +84,7 @@ export function PreferencesSection({
                 type="button"
                 onClick={() => onLanguageChange("en")}
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                  language === "en" ? "bg-accent text-ink-0" : "text-ink-7 hover:text-ink-9"
+                  language === "en" ? "bg-primary text-primary-fg" : "text-ink-7 hover:text-ink-9"
                 }`}
               >
                 English
