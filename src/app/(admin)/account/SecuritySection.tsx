@@ -113,7 +113,7 @@ export function SecuritySection({ profile }: { profile: Profile }) {
             <button
               type="submit"
               disabled={saving || !currentPw || !newPw || !confirmPw}
-              className="inline-flex items-center justify-center h-11 px-4 rounded-md bg-accent text-ink-0 font-medium text-sm shadow-md hover:bg-accent-hover transition-all disabled:opacity-50 disabled:pointer-events-none"
+              className="inline-flex items-center justify-center h-11 px-4 rounded-md bg-primary text-primary-fg font-medium text-sm shadow-md hover:bg-primary-hover transition-all disabled:opacity-50 disabled:pointer-events-none"
             >
               {saving ? "Cambiando…" : "Cambiar contraseña"}
             </button>

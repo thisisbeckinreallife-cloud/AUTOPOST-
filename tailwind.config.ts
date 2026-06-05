@@ -75,6 +75,15 @@ const config: Config = {
           ring:    "rgb(var(--accent) / 0.45)",
           strong:  "rgb(var(--accent-strong) / <alpha-value>)",
         },
+        /* Color de ACCIÓN PRIMARIA (rellenos de botón). Separado del acento:
+           en la landing = coral de marca; en el dashboard light = negro
+           (monocromo premium). primary-fg = texto sobre el relleno. */
+        primary: {
+          DEFAULT: "rgb(var(--primary) / <alpha-value>)",
+          hover:   "rgb(var(--primary-hover) / <alpha-value>)",
+          active:  "rgb(var(--primary-active) / <alpha-value>)",
+          fg:      "rgb(var(--primary-fg) / <alpha-value>)",
+        },
         "accent-secondary": {
           DEFAULT: "rgb(var(--gold) / <alpha-value>)",
           hover:   "rgb(var(--gold-strong) / <alpha-value>)",

@@ -48,7 +48,7 @@ export default async function BatchesPage({
         </div>
         <Link
           href={`/businesses/${params.slug}/chat`}
-          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-ink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:-translate-y-px hover:shadow-lg"
+          className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-primary-fg px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:-translate-y-px hover:shadow-lg"
         >
           <Plus className="h-4 w-4" />
           Subir con IA
@@ -64,7 +64,7 @@ export default async function BatchesPage({
           <p className="text-ink-7 text-sm mb-6 max-w-xs mx-auto">Sube tu contenido en el chat — la IA agrupa carruseles, propone calendario y publica</p>
           <Link
             href={`/businesses/${params.slug}/chat`}
-            className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-ink-0 px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:-translate-y-px hover:shadow-lg"
+            className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-primary-fg px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:-translate-y-px hover:shadow-lg"
           >
             <Plus className="h-4 w-4" />
             Subir con IA

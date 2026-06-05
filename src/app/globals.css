@@ -43,6 +43,11 @@
   --accent-hover:   240 138 112;
   --accent-active:  212 95 68;
   --accent-strong:  244 155 130;
+  /* Acción primaria (botones) — landing = coral de marca */
+  --primary:        232 117 89;
+  --primary-hover:  240 138 112;
+  --primary-active: 212 95 68;
+  --primary-fg:     26 14 10;
   --gold:           227 184 92;
   --gold-strong:    237 199 114;
   --success:        79 178 134;
@@ -137,11 +142,17 @@
   --ink-9:   26 26 26;     /* #1A1A1A — texto alto / títulos */
   --ink-10:  26 26 26;
 
-  --accent:         232 117 89;  /* #E87559 — coral de marca: rellenos, puntos */
-  --accent-hover:   212 95 68;   /* #D45F44 */
-  --accent-active:  194 65 12;   /* #C2410C */
-  --accent-strong:  194 65 12;   /* #C2410C — coral AA para texto sobre blanco */
-  --gold:           180 83 9;    /* #B45309 — ámbar legible (datos/KPI) */
+  /* ACENTO (uso mínimo: links, estado activo, foco, selección) → azul frío */
+  --accent:         37 99 235;   /* #2563EB */
+  --accent-hover:   29 78 216;   /* #1D4ED8 */
+  --accent-active:  30 64 175;   /* #1E40AF */
+  --accent-strong:  29 78 216;   /* #1D4ED8 — azul AA para texto sobre blanco */
+  /* ACCIÓN PRIMARIA (botones) → negro grafito (monocromo premium) */
+  --primary:        26 26 26;    /* #1A1A1A */
+  --primary-hover:  55 55 55;    /* #373737 */
+  --primary-active: 0 0 0;       /* #000 */
+  --primary-fg:     255 255 255; /* texto blanco sobre el negro */
+  --gold:           100 116 139; /* #64748B — gris-azulado neutro (datos), sin color de más */
   --gold-strong:    146 64 14;   /* #92400E */
   --success:        6 118 71;    /* #067647 */
   --success-strong: 4 120 87;    /* #047857 */
@@ -163,16 +174,30 @@
   --ap-night:    #FFFFFF;
   --ap-night-2:  #FAFAFA;
   --ap-night-3:  #F2F4F7;
-  --ap-stamp:    #C2410C;   /* coral AA: legible como texto y como relleno sobre blanco */
-  --ap-stamp-2:  #9A3412;
+  --ap-stamp:    #1D4ED8;   /* acento azul AA (links, bordes, labels del sistema ap-*) */
+  --ap-stamp-2:  #1E40AF;
   --ap-olive:    #067647;
-  --ap-mustard:  #B45309;
+  --ap-mustard:  #64748B;
   --ap-line:     #EBEBEB;
   --ap-line-2:   #E1E1E1;
 
   color-scheme: light;
   background: #FFFFFF;
   color: #404040;
+}
+
+/* Botones de acción del sistema editorial ap-* → negro primario en el
+   dashboard light (el azul queda reservado para acentos/links). */
+[data-theme="light"] .ap-btn,
+[data-theme="light"] .ap-btn--stamp {
+  background: #1A1A1A;
+  border-color: #1A1A1A;
+  color: #FFFFFF;
+}
+[data-theme="light"] .ap-btn:hover,
+[data-theme="light"] .ap-btn--stamp:hover {
+  background: #373737;
+  border-color: #373737;
 }
 
 /* ── Clases del sistema editorial (.ap-*) DEFINIDAS por fin ──────────────

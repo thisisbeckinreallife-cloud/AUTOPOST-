@@ -60,7 +60,7 @@ export function ProfileSection({ profile }: { profile: Profile }) {
       </header>
 
       <div className="flex items-center gap-4 mb-6 pb-6 border-b border-ink-3">
-        <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-2xl font-semibold text-ink-0 shrink-0 overflow-hidden">
+        <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-2xl font-semibold text-primary-fg shrink-0 overflow-hidden">
           {profile.avatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={profile.avatar} alt="" className="w-full h-full object-cover" />
@@ -122,7 +122,7 @@ export function ProfileSection({ profile }: { profile: Profile }) {
           <button
             type="submit"
             disabled={!isDirty || saving}
-            className="inline-flex items-center justify-center h-11 px-4 rounded-md bg-accent text-ink-0 font-medium text-sm shadow-md hover:bg-accent-hover transition-all disabled:opacity-50 disabled:pointer-events-none"
+            className="inline-flex items-center justify-center h-11 px-4 rounded-md bg-primary text-primary-fg font-medium text-sm shadow-md hover:bg-primary-hover transition-all disabled:opacity-50 disabled:pointer-events-none"
           >
             {saving ? "Guardando…" : "Guardar cambios"}
           </button>

@@ -91,7 +91,7 @@ export default async function AdminLayout({
       {/* Skip link for keyboard users (WCAG AA) */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-accent focus:text-ink-0 focus:font-semibold focus:text-sm focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-accent-ring"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-fg focus:font-semibold focus:text-sm focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-accent-ring"
       >
         Saltar al contenido principal
       </a>

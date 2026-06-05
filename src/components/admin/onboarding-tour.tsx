@@ -160,7 +160,7 @@ export function OnboardingTour() {
               <button
                 type="button"
                 onClick={next}
-                className="flex-1 flex items-center justify-center gap-2 bg-accent text-ink-0 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:-translate-y-px"
+                className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-fg px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:-translate-y-px"
               >
                 {isLast ? "¡Empezar!" : "Siguiente"}
                 <ArrowRight className="h-4 w-4" />
