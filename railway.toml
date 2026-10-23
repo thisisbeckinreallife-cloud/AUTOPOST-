@@ -1,9 +1,10 @@
 [build]
-# Builder actual: Nixpacks. Para migrar a Dockerfile multi-stage:
-#   builder = "DOCKERFILE"
-#   dockerfilePath = "Dockerfile"
-# Probar antes con: docker build -t autopost:test .
-builder = "NIXPACKS"
+# Builder: Dockerfile multi-stage (antes Nixpacks). La imagen base fija la
+# version exacta de Node (node:22.23.4-slim, parche CVE-2026-111497 del
+# 21 oct 2026); Nixpacks ancla nodejs_22 a 22.14.0 y no la respetaria.
+# Probar en local con: docker build -t autopost:test .
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 preDeployCommand = ["npm run db:migrate"]
